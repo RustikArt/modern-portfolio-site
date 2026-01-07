@@ -122,6 +122,35 @@ export const DataProvider = ({ children }) => {
     });
     useEffect(() => localStorage.setItem('portfolio_promoCodes', JSON.stringify(promoCodes)), [promoCodes]);
 
+    // Phase 5: Email Templates
+    const initialTemplates = [
+        {
+            id: 1,
+            name: 'Confirmation Commande',
+            subject: 'Votre commande #{order_id} - Artisanat Digital',
+            body: `Bonjour {customer_name} !
+Votre commande a été effectuée avec succès !
+
+Un artiste rentrera très vite en contact avec vous pour plus d'informations sur la commande et vous envoyer le(s) résultat(s) final(aux) une fois terminé.
+
+Si vous avez des questions ou voulez nous contacter :
+- Évitez de nous dm sur Instagram ou X (Twitter), nous risquons de ne pas répondre.
+- Répondez à ce mail si la question concerne la commande. Sinon, écrivez nous un nouveau mail à contact@rustikop.com (ou Rustikop@proton.me).
+- Vous pouvez aussi rejoindre notre serveur Discord et ouvrir un ticket.
+
+Bonne journée à vous !
+Alex de Rustikop`
+        }
+    ];
+
+    const [emailTemplates, setEmailTemplates] = useState(() => {
+        const saved = localStorage.getItem('portfolio_emailTemplates');
+        return saved ? JSON.parse(saved) : initialTemplates;
+    });
+
+    useEffect(() => localStorage.setItem('portfolio_emailTemplates', JSON.stringify(emailTemplates)), [emailTemplates]);
+
+
     // --- ACTIONS ---
 
     // Admin / Data
@@ -265,6 +294,12 @@ export const DataProvider = ({ children }) => {
         setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
     };
 
+    // Templates
+    const addTemplate = (tpl) => setEmailTemplates([...emailTemplates, { ...tpl, id: Date.now() }]);
+    const deleteTemplate = (id) => setEmailTemplates(emailTemplates.filter(t => t.id !== id));
+    const updateTemplate = (id, newTpl) => setEmailTemplates(emailTemplates.map(t => t.id === id ? { ...t, ...newTpl } : t));
+
+
     return (
         <DataContext.Provider value={{
             // Data
@@ -282,7 +317,10 @@ export const DataProvider = ({ children }) => {
             orders, placeOrder, updateOrderStatus,
 
             // Promo Codes
-            promoCodes, addPromoCode, deletePromoCode
+            promoCodes, addPromoCode, deletePromoCode,
+
+            // Email Templates
+            emailTemplates, addTemplate, deleteTemplate, updateTemplate
         }}>
             {children}
         </DataContext.Provider>
