@@ -93,7 +93,23 @@ export const DataProvider = ({ children }) => {
 
     const [orders, setOrders] = useState(() => {
         const saved = localStorage.getItem('portfolio_orders');
-        return saved ? JSON.parse(saved) : [];
+        let initialOrders = saved ? JSON.parse(saved) : [];
+
+        // Add test order if it doesn't exist
+        const testEmail = 'simon.b@lilo.org';
+        if (!initialOrders.find(o => o.email === testEmail)) {
+            initialOrders.push({
+                id: 'TEST-' + Date.now(),
+                userId: null,
+                customerName: 'Simon',
+                email: testEmail,
+                items: [{ name: 'Test Product', price: 0, qty: 1 }],
+                total: 0,
+                status: 'En attente',
+                date: new Date().toLocaleDateString()
+            });
+        }
+        return initialOrders;
     });
 
     // --- SYNC EFFECTS ---
