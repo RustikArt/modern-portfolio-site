@@ -12,9 +12,9 @@ const Footer = () => {
                 </div>
                 <div className="footer-right">
                     <Link to="/admin" className="social-link" style={{ fontSize: '0.8rem', opacity: 0.5 }}>Admin</Link>
-                    <a href="#" className="social-link">Instagram</a>
-                    <a href="#" className="social-link">Twitter</a>
-                    <a href="#" className="social-link">LinkedIn</a>
+                    <a href="https://www.instagram.com/rustikop.art/" className="social-link">Instagram</a>
+                    <a href="https://x.com/rustikop" className="social-link">Twitter</a>
+                    <a href="#" className="social-link">A venir...</a>
                 </div>
             </div>
         </footer>
