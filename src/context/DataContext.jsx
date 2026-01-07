@@ -141,10 +141,11 @@ export const DataProvider = ({ children }) => {
     // User Auth
     const register = (email, password, name) => {
         const cleanEmail = email.trim().toLowerCase();
+        const cleanPassword = password.trim();
         const exists = users.find(u => u.email === cleanEmail);
         if (exists) return { success: false, message: 'Email déjà utilisé.' };
 
-        const newUser = { id: Date.now(), email: cleanEmail, password, name, role: 'client' };
+        const newUser = { id: Date.now(), email: cleanEmail, password: cleanPassword, name, role: 'client' };
         setUsers([...users, newUser]);
         setCurrentUser(newUser);
         return { success: true };
