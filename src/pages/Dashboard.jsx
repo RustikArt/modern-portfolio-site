@@ -153,9 +153,12 @@ const Dashboard = () => {
             alert("Erreur : Pas d'email client associé à cette commande.");
             return;
         }
-        const mailtoLink = `mailto:${order.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        // window.open is more reliable for external protocols/apps without navigating the current page away
-        window.open(mailtoLink, '_blank');
+
+        // Proton Mail Compose URL
+        // Note: This assumes the user is logged into Proton Mail in their browser.
+        const protonLink = `https://mail.proton.me/u/0/compose?to=${order.email}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        window.open(protonLink, '_blank');
         setEmailModal({ isOpen: false, order: null, subject: '', body: '' });
     };
 
