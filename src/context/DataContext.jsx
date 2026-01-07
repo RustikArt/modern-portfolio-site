@@ -144,11 +144,11 @@ Alex de Rustikop`
     ];
 
     const [emailTemplates, setEmailTemplates] = useState(() => {
-        const saved = localStorage.getItem('portfolio_emailTemplates');
+        const saved = localStorage.getItem('portfolio_emailTemplates_v1');
         return saved ? JSON.parse(saved) : initialTemplates;
     });
 
-    useEffect(() => localStorage.setItem('portfolio_emailTemplates', JSON.stringify(emailTemplates)), [emailTemplates]);
+    useEffect(() => localStorage.setItem('portfolio_emailTemplates_v1', JSON.stringify(emailTemplates)), [emailTemplates]);
 
 
     // --- ACTIONS ---
