@@ -154,12 +154,17 @@ const Dashboard = () => {
             return;
         }
 
-        // Proton Mail Compose URL
-        // Note: This assumes the user is logged into Proton Mail in their browser.
-        const protonLink = `https://mail.proton.me/u/0/compose?to=${order.email}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-        window.open(protonLink, '_blank');
+        // Revert to known working mailto
+        const mailtoLink = `mailto:${order.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.open(mailtoLink, '_self');
         setEmailModal({ isOpen: false, order: null, subject: '', body: '' });
+    };
+
+    const handleCopyEmail = () => {
+        const { body } = emailModal;
+        navigator.clipboard.writeText(body).then(() => {
+            alert('Message copié dans le presse-papier !');
+        });
     };
 
     // --- PROMO & PROJECT ---
@@ -473,7 +478,8 @@ const Dashboard = () => {
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                 <button onClick={() => setEmailModal({ isOpen: false, order: null, subject: '', body: '' })} className="btn">Annuler</button>
-                                <button onClick={handleSendEmail} className="btn btn-primary">Ouvrir le Mail</button>
+                                <button onClick={handleCopyEmail} className="btn" style={{ background: '#333' }}>📋 Copier le texte</button>
+                                <button onClick={handleSendEmail} className="btn btn-primary">Ouvrir le Client Mail</button>
                             </div>
                         </div>
                     </div>
