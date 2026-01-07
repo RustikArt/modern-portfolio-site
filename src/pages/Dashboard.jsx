@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
+import BlockEditor from '../components/BlockEditor';
 
 const Dashboard = () => {
     const {
         projects, products, orders, users, promoCodes,
-        addProject, deleteProject,
+        addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
         updateOrderStatus, addPromoCode, deletePromoCode
     } = useData();
@@ -14,7 +15,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     // --- FORMS STATES ---
-    const [projectForm, setProjectForm] = useState({ title: '', category: '', image: '', content: '' });
+    const [projectForm, setProjectForm] = useState({ editId: null, title: '', category: '', image: '', content: '', blocks: [] });
 
     // Enhanced Product Form
     const [productForm, setProductForm] = useState({
@@ -164,8 +165,36 @@ const Dashboard = () => {
     const handleProjectSubmit = (e) => {
         e.preventDefault();
         if (!projectForm.title) return;
-        addProject({ ...projectForm, image: projectForm.image || 'https://placehold.co/600x400/333?text=Project' });
-        setProjectForm({ title: '', category: '', image: '', content: '' });
+
+        const projectData = {
+            title: projectForm.title,
+            category: projectForm.category,
+            image: projectForm.image || 'https://placehold.co/600x400/333?text=Project',
+            content: projectForm.content, // Legacy support
+            blocks: projectForm.blocks // New blocks
+        };
+
+        if (projectForm.editId) {
+            updateProject(projectForm.editId, projectData);
+        } else {
+            addProject(projectData);
+        }
+
+        setProjectForm({ editId: null, title: '', category: '', image: '', content: '', blocks: [] });
+    };
+
+    const handleEditProject = (project) => {
+        setProjectForm({
+            editId: project.id,
+            title: project.title,
+            category: project.category,
+            image: project.image,
+            content: project.content || '',
+            blocks: project.blocks || [] // Load blocks or empty
+        });
+        // Switch to tab if not active (though button is in tab)
+        setActiveTab('projects');
+        window.scrollTo(0, 0);
     };
 
     return (
@@ -375,15 +404,32 @@ const Dashboard = () => {
                 {activeTab === 'projects' && (
                     <div className="animate-in">
                         <div style={{ background: '#111', padding: '1.5rem', borderRadius: '4px', marginBottom: '2rem', border: '1px solid #333' }}>
-                            <h3 style={{ marginBottom: '1rem' }}>+ Nouveau Projet</h3>
+                            <h3 style={{ marginBottom: '1rem' }}>{projectForm.editId ? 'Modifier le Projet' : '+ Nouveau Projet'}</h3>
                             <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1rem' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <input type="text" placeholder="Titre" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} />
                                     <input type="text" placeholder="Catégorie" value={projectForm.category} onChange={e => setProjectForm({ ...projectForm, category: e.target.value })} style={inputStyle} />
                                 </div>
                                 <input type="text" placeholder="URL Image" value={projectForm.image} onChange={e => setProjectForm({ ...projectForm, image: e.target.value })} style={inputStyle} />
-                                <textarea rows="4" placeholder="Description HTML..." value={projectForm.content} onChange={e => setProjectForm({ ...projectForm, content: e.target.value })} style={{ ...inputStyle, fontFamily: 'monospace' }} />
-                                <button type="submit" className="btn btn-primary">Publier</button>
+
+                                {/* BLOCK EDITOR */}
+                                <div style={{ border: '1px solid #333', padding: '1rem', borderRadius: '4px', background: '#0e0e0e' }}>
+                                    <h4 style={{ marginBottom: '1rem', color: '#888' }}>Contenu du Projet</h4>
+                                    <BlockEditor
+                                        blocks={projectForm.blocks}
+                                        onChange={newBlocks => setProjectForm({ ...projectForm, blocks: newBlocks })}
+                                    />
+                                </div>
+
+                                {/* Legacy Content Fallback (Hidden or Optional) */}
+                                {(!projectForm.blocks || projectForm.blocks.length === 0) && (
+                                    <textarea rows="4" placeholder="Description HTML (Legacy)..." value={projectForm.content} onChange={e => setProjectForm({ ...projectForm, content: e.target.value })} style={{ ...inputStyle, fontFamily: 'monospace', display: 'none' }} />
+                                )}
+
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <button type="submit" className="btn btn-primary">{projectForm.editId ? 'Mettre à jour' : 'Publier'}</button>
+                                    {projectForm.editId && <button type="button" className="btn" onClick={() => setProjectForm({ editId: null, title: '', category: '', image: '', content: '', blocks: [] })}>Annuler</button>}
+                                </div>
                             </form>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
@@ -393,7 +439,10 @@ const Dashboard = () => {
                                     <div style={{ padding: '1rem' }}>
                                         <h4>{p.title}</h4>
                                         <span style={{ fontSize: '0.8rem', color: '#888' }}>{p.category}</span>
-                                        <button onClick={() => deleteProject(p.id)} style={{ display: 'block', marginTop: '1rem', color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>Supprimer</button>
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                                            <button onClick={() => handleEditProject(p)} style={{ flex: 1, padding: '0.3rem', background: '#333', color: 'white', border: 'none', cursor: 'pointer' }}>Modifier</button>
+                                            <button onClick={() => deleteProject(p.id)} style={{ flex: 1, padding: '0.3rem', color: 'red', background: 'none', border: '1px solid #333', cursor: 'pointer' }}>Supprimer</button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}

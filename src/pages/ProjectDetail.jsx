@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import BlockRenderer from '../components/BlockRenderer';
 
 const ProjectDetail = () => {
     const { id } = useParams();
@@ -18,9 +19,15 @@ const ProjectDetail = () => {
 
                 <img src={project.image} alt={project.title} style={{ width: '100%', height: '600px', objectFit: 'cover', margin: '3rem 0' }} />
 
-                <div className="project-content" style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.2rem', lineHeight: '1.8' }}>
-                    {/* Basic HTML rendering for content */}
-                    <div dangerouslySetInnerHTML={{ __html: project.content || '<p>Aucun contenu supplémentaire.</p>' }} />
+                <div className="project-content" style={{ maxWidth: '100%', margin: '0 auto', fontSize: '1.2rem', lineHeight: '1.8' }}>
+
+                    {/* Render Blocks if available, else Legacy HTML */}
+                    {project.blocks && project.blocks.length > 0 ? (
+                        <BlockRenderer blocks={project.blocks} />
+                    ) : (
+                        <div dangerouslySetInnerHTML={{ __html: project.content || '<p>Aucun contenu supplémentaire.</p>' }} style={{ maxWidth: '800px', margin: '0 auto' }} />
+                    )}
+
                 </div>
             </div>
         </div>

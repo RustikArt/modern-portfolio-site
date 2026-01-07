@@ -127,6 +127,9 @@ export const DataProvider = ({ children }) => {
     // Admin / Data
     const addProject = (project) => setProjects([...projects, { ...project, id: Date.now() }]);
     const deleteProject = (id) => setProjects(projects.filter(p => p.id !== id));
+    const updateProject = (id, updatedProject) => {
+        setProjects(projects.map(p => p.id === id ? { ...p, ...updatedProject } : p));
+    };
 
     // Updated addProduct to support Phase 3 fields
     const addProduct = (product) => setProducts([...products, { ...product, id: Date.now() }]);
@@ -265,7 +268,7 @@ export const DataProvider = ({ children }) => {
         <DataContext.Provider value={{
             // Data
             projects, products,
-            addProject, deleteProject,
+            addProject, deleteProject, updateProject,
             addProduct, deleteProduct, updateProduct,
 
             // Auth
