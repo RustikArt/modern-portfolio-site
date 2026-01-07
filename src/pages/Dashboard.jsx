@@ -149,8 +149,13 @@ const Dashboard = () => {
 
     const handleSendEmail = () => {
         const { order, subject, body } = emailModal;
+        if (!order || !order.email) {
+            alert("Erreur : Pas d'email client associé à cette commande.");
+            return;
+        }
         const mailtoLink = `mailto:${order.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.location.href = mailtoLink;
+        // window.open is more reliable for external protocols/apps without navigating the current page away
+        window.open(mailtoLink, '_blank');
         setEmailModal({ isOpen: false, order: null, subject: '', body: '' });
     };
 
