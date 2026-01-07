@@ -1,0 +1,67 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding-top: 1.5rem;
+    /* Added top space as requested */
+    padding-bottom: 1rem;
+    transition: all 0.3s ease;
+    background: rgba(5, 5, 5, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.navbar.scrolled {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    background: rgba(5, 5, 5, 0.95);
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Allow wrapping if translation expands text */
+    gap: 1rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-actions {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.action-link {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color var(--transition-fast);
+    white-space: nowrap;
+    /* Prevent breaking mid-word */
+}
+
+.action-link:hover {
+    color: var(--color-accent);
+}
+
+.cart-badge {
+    display: inline-block;
+    margin-left: 0.3rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .nav-actions {
+        display: none;
+        /* Just for mobile simplicity currently */
+    }
+}

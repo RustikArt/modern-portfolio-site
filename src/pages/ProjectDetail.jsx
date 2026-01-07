@@ -1,0 +1,30 @@
+import { useParams, useNavigate } from 'react-router-dom';
+import { useData } from '../context/DataContext';
+
+const ProjectDetail = () => {
+    const { id } = useParams();
+    const { projects } = useData();
+    const project = projects.find(p => p.id === parseInt(id));
+    const navigate = useNavigate();
+
+    if (!project) return <div className="container" style={{ paddingTop: '100px' }}>Projet introuvable</div>;
+
+    return (
+        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh' }}>
+            <div className="container">
+                <button onClick={() => navigate('/projects')} className="btn" style={{ marginBottom: '2rem' }}>← Retour aux projets</button>
+                <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>{project.title}</h1>
+                <span style={{ color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{project.category}</span>
+
+                <img src={project.image} alt={project.title} style={{ width: '100%', height: '600px', objectFit: 'cover', margin: '3rem 0' }} />
+
+                <div className="project-content" style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.2rem', lineHeight: '1.8' }}>
+                    {/* Basic HTML rendering for content */}
+                    <div dangerouslySetInnerHTML={{ __html: project.content || '<p>Aucun contenu supplémentaire.</p>' }} />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ProjectDetail;
