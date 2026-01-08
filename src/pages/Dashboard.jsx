@@ -5,11 +5,10 @@ import BlockEditor from '../components/BlockEditor';
 
 const Dashboard = () => {
     const {
-        projects, products, orders, users, promoCodes, emailTemplates,
+        projects, products, orders, users, promoCodes,
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
-        updateOrderStatus, addPromoCode, deletePromoCode,
-        addTemplate, deleteTemplate, updateTemplate
+        updateOrderStatus, addPromoCode, deletePromoCode
     } = useData();
 
     const [activeTab, setActiveTab] = useState('orders');
@@ -31,12 +30,6 @@ const Dashboard = () => {
 
     // Promo Form
     const [promoForm, setPromoForm] = useState({ code: '', type: 'percent', value: '' });
-
-    // Template Form
-    const [templateForm, setTemplateForm] = useState({ name: '', subject: '', body: '' });
-
-    // Email Modal State
-    const [emailModal, setEmailModal] = useState({ isOpen: false, order: null, subject: '', body: '' });
 
     const handleLogout = () => {
         localStorage.removeItem('isAdmin');
@@ -141,39 +134,7 @@ const Dashboard = () => {
         });
     };
 
-    // --- EMAIL ACTIONS ---
-    const openEmailModal = (order) => {
-        setEmailModal({
-            isOpen: true,
-            order: order,
-            subject: `Votre commande #${order.id.slice(-6)} - Artisanat Digital`,
-            body: `Bonjour ${order.customerName} !
-Votre commande a été effectuée avec succès !
 
-Un artiste rentrera très vite en contact avec vous pour plus d'informations sur la commande et vous envoyer le(s) résultat(s) final(aux) une fois terminé.
-
-Si vous avez des questions ou voulez nous contacter :
-- Évitez de nous dm sur Instagram ou X (Twitter), nous risquons de ne pas répondre.
-- Répondez à ce mail si la question concerne la commande. Sinon, écrivez nous un nouveau mail à contact@rustikop.com (ou Rustikop@proton.me).
-- Vous pouvez aussi rejoindre notre serveur Discord et ouvrir un ticket.
-
-Bonne journée à vous !
-Alex de Rustikop`
-        });
-    };
-
-    const handleSendEmail = () => {
-        const { order, subject, body } = emailModal;
-        if (!order || !order.email) {
-            alert("Erreur : Pas d'email client associé à cette commande.");
-            return;
-        }
-
-        // Standard mailto
-        const mailtoLink = `mailto:${order.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.location.href = mailtoLink;
-        setEmailModal({ isOpen: false, order: null, subject: '', body: '' });
-    };
 
     // --- PROMO & PROJECT ---
     const handlePromoSubmit = (e) => {
@@ -183,12 +144,7 @@ Alex de Rustikop`
         setPromoForm({ code: '', type: 'percent', value: '' });
     };
 
-    const handleTemplateSubmit = (e) => {
-        e.preventDefault();
-        if (!templateForm.name) return;
-        addTemplate(templateForm);
-        setTemplateForm({ name: '', subject: '', body: '' });
-    };
+
 
     const handleProjectSubmit = (e) => {
         e.preventDefault();
@@ -242,7 +198,6 @@ Alex de Rustikop`
                     <button className={`btn ${activeTab === 'promos' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('promos')}>Codes Promo</button>
                     <button className={`btn ${activeTab === 'clients' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('clients')}>Clients CRM</button>
                     <button className={`btn ${activeTab === 'projects' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('projects')}>Projets</button>
-                    <button className={`btn ${activeTab === 'templates' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('templates')}>Modèles Mails</button>
                 </div>
 
                 {/* --- ORDERS TAB --- */}
@@ -268,7 +223,6 @@ Alex de Rustikop`
                                             <option value="Expédié">Expédié</option>
                                             <option value="Terminé">Terminé</option>
                                         </select>
-                                        <button className="btn" onClick={() => openEmailModal(order)}>✉️ Contacter le client</button>
                                     </div>
                                 </div>
                             ))}
@@ -479,74 +433,7 @@ Alex de Rustikop`
                     </div>
                 )}
 
-                {/* --- MAIL TEMPLATES TAB --- */}
-                {activeTab === 'templates' && (
-                    <div className="animate-in">
-                        <h3>Modèles d'Emails</h3>
-                        <div style={{ background: '#111', padding: '1.5rem', borderRadius: '4px', marginBottom: '2rem', border: '1px solid #333' }}>
-                            <h3 style={{ marginBottom: '1rem' }}>Nouveau Modèle</h3>
-                            <form onSubmit={handleTemplateSubmit} style={{ display: 'grid', gap: '1rem' }}>
-                                <input type="text" placeholder="Nom du modèle" value={templateForm.name} onChange={e => setTemplateForm({ ...templateForm, name: e.target.value })} style={inputStyle} />
-                                <input type="text" placeholder="Objet (utiliser {order_id})" value={templateForm.subject} onChange={e => setTemplateForm({ ...templateForm, subject: e.target.value })} style={inputStyle} />
-                                <textarea rows="6" placeholder="Corps du message (utiliser {customer_name}, {order_id})" value={templateForm.body} onChange={e => setTemplateForm({ ...templateForm, body: e.target.value })} style={inputStyle} />
-                                <button type="submit" className="btn btn-primary">Enregistrer le modèle</button>
-                            </form>
-                        </div>
 
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {emailTemplates && emailTemplates.map(t => (
-                                <div key={t.id} style={{ background: 'var(--color-surface)', padding: '1rem', borderRadius: '4px', border: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <h4 style={{ marginBottom: '0.5rem' }}>{t.name}</h4>
-                                        <p style={{ fontSize: '0.9rem', color: '#888' }}>{t.subject}</p>
-                                    </div>
-                                    <button onClick={() => deleteTemplate(t.id)} style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>Supprimer</button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* EMAIL MODAL */}
-                {emailModal.isOpen && (
-                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                        <div style={{ background: '#111', padding: '2rem', width: '600px', borderRadius: '8px', border: '1px solid #333' }}>
-                            <h3 style={{ marginBottom: '1rem' }}>Contacter {emailModal.order.customerName}</h3>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#888' }}>Modèle</label>
-                                <select
-                                    style={inputStyle}
-                                    onChange={(e) => {
-                                        const tpl = emailTemplates.find(t => t.id === parseInt(e.target.value));
-                                        if (tpl) {
-                                            const subject = tpl.subject.replace('{order_id}', emailModal.order.id.slice(-6));
-                                            const body = tpl.body.replace('{customer_name}', emailModal.order.customerName)
-                                                .replace('{order_id}', emailModal.order.id.slice(-6));
-                                            setEmailModal(prev => ({ ...prev, subject, body }));
-                                        }
-                                    }}
-                                >
-                                    <option value="">Sélectionner un modèle...</option>
-                                    {emailTemplates && emailTemplates.map(t => (
-                                        <option key={t.id} value={t.id}>{t.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#888' }}>Sujet</label>
-                                <input type="text" value={emailModal.subject} onChange={e => setEmailModal({ ...emailModal, subject: e.target.value })} style={inputStyle} />
-                            </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#888' }}>Message</label>
-                                <textarea rows="8" value={emailModal.body} onChange={e => setEmailModal({ ...emailModal, body: e.target.value })} style={inputStyle} />
-                            </div>
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                                <button onClick={() => setEmailModal({ isOpen: false, order: null, subject: '', body: '' })} className="btn">Annuler</button>
-                                <button onClick={handleSendEmail} className="btn btn-primary">Ouvrir le Mail</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
             </div>
         </div>

@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
 
 const DataContext = createContext();
 
@@ -138,33 +139,7 @@ export const DataProvider = ({ children }) => {
     });
     useEffect(() => localStorage.setItem('portfolio_promoCodes', JSON.stringify(promoCodes)), [promoCodes]);
 
-    // Phase 5: Email Templates
-    const initialTemplates = [
-        {
-            id: 1,
-            name: 'Confirmation Commande',
-            subject: 'Votre commande #{order_id} - Artisanat Digital',
-            body: `Bonjour {customer_name} !
-Votre commande a été effectuée avec succès !
 
-Un artiste rentrera très vite en contact avec vous pour plus d'informations sur la commande et vous envoyer le(s) résultat(s) final(aux) une fois terminé.
-
-Si vous avez des questions ou voulez nous contacter :
-- Évitez de nous dm sur Instagram ou X (Twitter), nous risquons de ne pas répondre.
-- Répondez à ce mail si la question concerne la commande. Sinon, écrivez nous un nouveau mail à contact@rustikop.com (ou Rustikop@proton.me).
-- Vous pouvez aussi rejoindre notre serveur Discord et ouvrir un ticket.
-
-Bonne journée à vous !
-Alex de Rustikop`
-        }
-    ];
-
-    const [emailTemplates, setEmailTemplates] = useState(() => {
-        const saved = localStorage.getItem('portfolio_emailTemplates_v1');
-        return saved ? JSON.parse(saved) : initialTemplates;
-    });
-
-    useEffect(() => localStorage.setItem('portfolio_emailTemplates_v1', JSON.stringify(emailTemplates)), [emailTemplates]);
 
 
     // --- ACTIONS ---
@@ -303,17 +278,44 @@ Alex de Rustikop`
         };
         setOrders([newOrder, ...orders]);
         clearCart();
+
+        // Automatic EmailJS Trigger
+        sendOrderConfirmation(newOrder);
+
         return newOrder;
+    };
+
+    const sendOrderConfirmation = (order) => {
+        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+        const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+        if (!serviceId || serviceId === 'YOUR_SERVICE_ID') {
+            console.warn("EmailJS not configured. Skipping automatic email.");
+            return;
+        }
+
+        const templateParams = {
+            order_id: order.id.slice(-6),
+            name: order.customerName, // User template uses {{name}}
+            title: order.items.map(i => `${i.name} x${i.quantity}`).join(', '), // User template uses {{title}}
+            customer_email: order.email,
+            order_total: order.total
+        };
+
+        emailjs.send(serviceId, templateId, templateParams, publicKey)
+            .then((response) => {
+                console.log('Email sent successfully!', response.status, response.text);
+            }, (err) => {
+                console.error('Failed to send email:', err);
+            });
     };
 
     const updateOrderStatus = (orderId, status) => {
         setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
     };
 
-    // Templates
-    const addTemplate = (tpl) => setEmailTemplates([...emailTemplates, { ...tpl, id: Date.now() }]);
-    const deleteTemplate = (id) => setEmailTemplates(emailTemplates.filter(t => t.id !== id));
-    const updateTemplate = (id, newTpl) => setEmailTemplates(emailTemplates.map(t => t.id === id ? { ...t, ...newTpl } : t));
+
 
 
     return (
@@ -335,8 +337,7 @@ Alex de Rustikop`
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode,
 
-            // Email Templates
-            emailTemplates, addTemplate, deleteTemplate, updateTemplate
+
         }}>
             {children}
         </DataContext.Provider>
