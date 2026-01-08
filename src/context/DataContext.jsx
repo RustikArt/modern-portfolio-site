@@ -290,15 +290,16 @@ export const DataProvider = ({ children }) => {
         const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
         const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-        if (!serviceId || serviceId === 'YOUR_SERVICE_ID') {
-            console.warn("EmailJS not configured. Skipping automatic email.");
+        const itemsSummary = order.items.map(i => `${i.name} x${i.quantity}`).join(', ');
+
+        if (!serviceId || serviceId === 'YOUR_SERVICE_ID' || serviceId.includes('YOUR')) {
             return;
         }
 
         const templateParams = {
             order_id: order.id.slice(-6),
             name: order.customerName, // User template uses {{name}}
-            title: order.items.map(i => `${i.name} x${i.quantity}`).join(', '), // User template uses {{title}}
+            title: itemsSummary, // User template uses {{title}}
             customer_email: order.email,
             order_total: order.total
         };

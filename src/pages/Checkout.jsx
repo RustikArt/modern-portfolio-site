@@ -3,8 +3,6 @@ import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 const Checkout = () => {
     const { cart, currentUser, placeOrder, getCartTotal, promoCodes } = useData();
     const navigate = useNavigate();
@@ -70,9 +68,16 @@ const Checkout = () => {
     }
 
     const handleStripeCheckout = async () => {
+        const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
+        if (!publishableKey || publishableKey.includes('YOUR_KEY')) {
+            alert("Erreur : La clé Stripe n'est pas configurée dans le fichier .env.");
+            return;
+        }
+
         setIsProcessing(true);
         try {
-            const stripe = await stripePromise;
+            const stripe = await loadStripe(publishableKey);
 
             // 1. Create Checkout Session via our API
             const response = await fetch('/api/create-checkout-session', {
@@ -99,12 +104,14 @@ const Checkout = () => {
             }
 
             // 2. Redirect to Stripe Checkout
-            const result = await stripe.redirectToCheckout({
-                sessionId: session.id,
-            });
+            if (stripe) {
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id,
+                });
 
-            if (result.error) {
-                alert(result.error.message);
+                if (result.error) {
+                    alert(result.error.message);
+                }
             }
         } catch (err) {
             console.error(err);
@@ -222,6 +229,7 @@ const Checkout = () => {
                             >
                                 {isProcessing ? 'Chargement...' : 'Payer par Carte Bancaire (Stripe)'}
                             </button>
+
                             <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666', textAlign: 'center' }}>
                                 Paiement 100% sécurisé via Stripe. Aucune donnée bancaire n'est stockée sur nos serveurs.
                             </p>
