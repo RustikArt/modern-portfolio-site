@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -102,11 +102,10 @@ const Checkout = () => {
             const session = await response.json();
             console.log("Session Stripe créée :", session.id);
 
-            if (!session.url) {
-                throw new Error("L'URL de redirection Stripe est manquante.");
-            }
+            // 2. Save shipping info to localStorage before redirect
+            localStorage.setItem('last_shipping', JSON.stringify(shipping));
 
-            // 2. Redirect to Stripe (Modern Way)
+            // 3. Redirect to Stripe (Modern Way)
             console.log("Redirection vers Stripe...");
             window.location.href = session.url;
 
@@ -118,16 +117,22 @@ const Checkout = () => {
         }
     };
 
-    // Handle Success Return
-    const query = new URLSearchParams(window.location.search);
-    if (query.get('success') && !showSuccessModal) {
-        // In a real app, you would verify the session ID with Stripe here
-        // For this static repo, we'll finalize the order
-        placeOrder(shipping, { id: 'STRIPE_SUCCESS', status: 'COMPLETED' });
-        setShowSuccessModal(true);
-        // Clear query params to prevent re-triggering
-        window.history.replaceState({}, '', '/checkout');
-    }
+    // Handle Success Return from Stripe
+    useEffect(() => {
+        const query = new URLSearchParams(window.location.search);
+        if (query.get('success') && !showSuccessModal) {
+            // Retrieve shipping details from storage if they were saved before redirect
+            const savedShipping = localStorage.getItem('last_shipping');
+            const finalShipping = savedShipping ? JSON.parse(savedShipping) : shipping;
+
+            placeOrder(finalShipping, { id: 'STRIPE_SUCCESS', status: 'COMPLETED' });
+            setShowSuccessModal(true);
+
+            // Clean up
+            window.history.replaceState({}, '', '/checkout');
+            localStorage.removeItem('last_shipping');
+        }
+    }, []); // Run once on mount
 
     const handleCloseModal = () => {
         setShowSuccessModal(false);
@@ -237,18 +242,70 @@ const Checkout = () => {
             </div>
 
             {showSuccessModal && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
-                    <div className="animate-in" style={{ background: '#111', padding: '3rem', width: '90%', maxWidth: '500px', borderRadius: '8px', border: '1px solid var(--color-accent)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
-                        <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Paiement Validé !</h2>
-                        <p style={{ fontSize: '1.1rem', marginBottom: '2rem', lineHeight: '1.6' }}>
-                            Merci pour votre commande.<br /><br />
-                            <strong style={{ color: 'var(--color-accent)' }}>IMPORTANT :</strong><br />
-                            Un artiste adapté viendra vite vers vous par email.<br />
-                            La conversation se passera exclusivement par ce canal.<br /><br />
-                            <span style={{ textDecoration: 'underline', color: 'gold' }}>SURVEILLEZ VOS SPAMS !</span>
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(0,0,0,0.8)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 9999,
+                    backdropFilter: 'blur(5px)'
+                }}>
+                    <div className="glass animate-in" style={{
+                        padding: '3rem',
+                        width: '90%',
+                        maxWidth: '600px',
+                        borderRadius: '20px',
+                        textAlign: 'center',
+                        animation: 'popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                    }}>
+                        <div style={{
+                            width: '80px',
+                            height: '80px',
+                            background: 'var(--color-accent)',
+                            borderRadius: '50%',
+                            margin: '0 auto 2rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '2.5rem',
+                            color: 'black',
+                            boxShadow: '0 0 30px var(--color-accent-glow)'
+                        }}>
+                            ✓
+                        </div>
+
+                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem', letterSpacing: '-1px' }}>Merci pour votre confiance</h2>
+                        <p style={{ color: '#aaa', marginBottom: '2rem' }}>Votre projet commence maintenant.</p>
+
+                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', textAlign: 'left', marginBottom: '2rem' }}>
+                            <p style={{ fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '1rem' }}>Récapitulatif</p>
+                            {cart.map((item, id) => (
+                                <div key={id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                    <span style={{ color: '#eee' }}>{item.name} x{item.quantity}</span>
+                                    <span style={{ fontWeight: 'bold' }}>{item.price * item.quantity}€</span>
+                                </div>
+                            ))}
+                            <div style={{ borderTop: '1px solid #333', marginTop: '1rem', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                                <span>Total Payé</span>
+                                <span style={{ color: 'var(--color-accent)' }}>{calculateTotal()}€</span>
+                            </div>
+                        </div>
+
+                        <p style={{ fontSize: '1rem', marginBottom: '2rem', lineHeight: '1.6', color: '#ccc' }}>
+                            <strong style={{ color: 'var(--color-accent)' }}>PROCHAINE ÉTAPE :</strong><br />
+                            Un créatif va analyser votre demande. <br />
+                            Tout se passera désormais par email.<br />
+                            <span style={{ color: '#d4af37', fontWeight: 'bold' }}>⚠️ Vérifiez vos SPAMS d'ici quelques heures.</span>
                         </p>
-                        <button onClick={handleCloseModal} className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>J'ai compris, voir ma commande</button>
+
+                        <button onClick={handleCloseModal} className="btn btn-primary" style={{ width: '100%', borderRadius: '40px', py: '1.5rem' }}>
+                            Accéder à mon espace client
+                        </button>
                     </div>
                 </div>
             )}

@@ -8,7 +8,7 @@ const Dashboard = () => {
         projects, products, orders, users, promoCodes,
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
-        updateOrderStatus, addPromoCode, deletePromoCode
+        updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode
     } = useData();
 
     const [activeTab, setActiveTab] = useState('orders');
@@ -203,30 +203,161 @@ const Dashboard = () => {
                 {/* --- ORDERS TAB --- */}
                 {activeTab === 'orders' && (
                     <div className="animate-in">
-                        <h3>Gestion des Commandes</h3>
-                        <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
-                            {orders.map(order => (
-                                <div key={order.id} style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: '4px', border: '1px solid #333' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <strong>Commande #{order.id.slice(-6)}</strong>
-                                        <div style={{ fontWeight: 'bold' }}>{order.total}€</div>
-                                    </div>
-                                    <p style={{ color: '#ccc' }}>Client: {order.customerName} ({order.email})</p>
-                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                                        <select
-                                            value={order.status}
-                                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                            style={{ padding: '0.5rem', background: '#222', color: 'white', border: '1px solid #444' }}
-                                        >
-                                            <option value="En attente">En attente</option>
-                                            <option value="Payé">Payé</option>
-                                            <option value="Expédié">Expédié</option>
-                                            <option value="Terminé">Terminé</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            ))}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ margin: 0 }}>Gestion des Commandes</h3>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <span className="badge" style={{ background: '#222' }}>Total: {orders.length}</span>
+                                <span className="badge" style={{ background: 'var(--color-accent)' }}>Actives: {orders.filter(o => o.status !== 'Terminé').length}</span>
+                            </div>
                         </div>
+
+                        {/* Order Categories */}
+                        {['Réception', 'En cours', 'Terminé'].map(cat => (
+                            <div key={cat} style={{ marginBottom: '3rem' }}>
+                                <h4 style={{
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    fontSize: '0.9rem',
+                                    color: cat === 'Terminé' ? '#666' : 'var(--color-accent)',
+                                    marginBottom: '1rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}>
+                                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: cat === 'Réception' ? '#ff4d4d' : cat === 'En cours' ? '#ffd700' : '#4caf50' }}></span>
+                                    {cat === 'Terminé' ? 'Archives / Finalisées' : cat}
+                                </h4>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
+                                    {orders.filter(o => (cat === 'Réception' ? o.status === 'Réception' || o.status === 'En attente' : o.status === cat)).map(order => (
+                                        <div key={order.id} style={{
+                                            background: '#111',
+                                            padding: '1.5rem',
+                                            borderRadius: '8px',
+                                            border: '1px solid #333',
+                                            transition: 'all 0.3s ease',
+                                            position: 'relative',
+                                            overflow: 'hidden'
+                                        }}>
+                                            {/* Status Header */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                <div>
+                                                    <span style={{ color: '#888', fontSize: '0.8rem' }}>COMMANDE #{order.id.slice(-6)}</span>
+                                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{order.customerName}</div>
+                                                </div>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <div style={{ fontSize: '1.1rem', color: 'var(--color-accent)' }}>{order.total}€</div>
+                                                    <div style={{ fontSize: '0.7rem', color: '#666' }}>{new Date(order.date).toLocaleDateString()}</div>
+                                                </div>
+                                            </div>
+
+                                            {/* Items Summary */}
+                                            <div style={{ background: '#181818', padding: '0.8rem', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                                                {order.items.map((item, id) => (
+                                                    <div key={id} style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc' }}>
+                                                        <span>{item.name} x{item.quantity}</span>
+                                                        <span>{(item.price * item.quantity).toFixed(2)}€</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* Checklist System */}
+                                            {order.checklist && (
+                                                <div style={{ marginBottom: '1.5rem' }}>
+                                                    <p style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Production Checklist</p>
+                                                    <div style={{ display: 'grid', gap: '0.5rem' }}>
+                                                        {order.checklist.map(item => (
+                                                            <div
+                                                                key={item.id}
+                                                                onClick={() => toggleChecklistItem(order.id, item.id)}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '0.8rem',
+                                                                    cursor: 'pointer',
+                                                                    padding: '0.4rem',
+                                                                    borderRadius: '4px',
+                                                                    background: item.completed ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
+                                                                    border: `1px solid ${item.completed ? 'rgba(76, 175, 80, 0.3)' : '#222'}`
+                                                                }}
+                                                            >
+                                                                <div style={{
+                                                                    width: '16px',
+                                                                    height: '16px',
+                                                                    border: '2px solid #555',
+                                                                    borderRadius: '2px',
+                                                                    background: item.completed ? '#4caf50' : 'transparent',
+                                                                    borderColor: item.completed ? '#4caf50' : '#555',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    color: 'white',
+                                                                    fontSize: '10px'
+                                                                }}>
+                                                                    {item.completed && '✓'}
+                                                                </div>
+                                                                <span style={{ fontSize: '0.85rem', color: item.completed ? '#888' : '#eee', textDecoration: item.completed ? 'line-through' : 'none' }}>
+                                                                    {item.label}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Notes System */}
+                                            <div style={{ marginBottom: '1.5rem' }}>
+                                                <p style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Notes Administrateur</p>
+                                                <textarea
+                                                    value={order.notes || ''}
+                                                    onChange={(e) => updateOrderNotes(order.id, e.target.value)}
+                                                    placeholder="Ajouter une note interne..."
+                                                    style={{
+                                                        width: '100%',
+                                                        background: '#0a0a0a',
+                                                        color: '#ccc',
+                                                        border: '1px solid #222',
+                                                        borderRadius: '4px',
+                                                        padding: '0.5rem',
+                                                        fontSize: '0.85rem',
+                                                        minHeight: '60px',
+                                                        resize: 'vertical'
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', borderTop: '1px solid #222', paddingTop: '1rem' }}>
+                                                {order.status === 'Réception' && (
+                                                    <button onClick={() => updateOrderStatus(order.id, 'En cours')} className="btn btn-primary" style={{ flex: 1, fontSize: '0.8rem' }}>Marquer "En cours"</button>
+                                                )}
+                                                {order.status === 'En cours' && (
+                                                    <button onClick={() => updateOrderStatus(order.id, 'Terminé')} className="btn" style={{ flex: 1, fontSize: '0.8rem', background: '#4caf50', color: 'white' }}>Finaliser la commande</button>
+                                                )}
+                                                {order.status === 'Terminé' && (
+                                                    <button onClick={() => updateOrderStatus(order.id, 'En cours')} className="btn" style={{ flex: 1, fontSize: '0.8rem', opacity: 0.5 }}>Réactiver</button>
+                                                )}
+                                                <div style={{ flex: 1 }}>
+                                                    <select
+                                                        value={order.status}
+                                                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                        style={{ width: '100%', padding: '0.5rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '4px', fontSize: '0.8rem' }}
+                                                    >
+                                                        <option value="Réception">Réception</option>
+                                                        <option value="En cours">En cours</option>
+                                                        <option value="Terminé">Finalisée / Archive</option>
+                                                        <option value="En attente">En attente (Problème)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {orders.filter(o => (cat === 'Réception' ? o.status === 'Réception' || o.status === 'En attente' : o.status === cat)).length === 0 && (
+                                        <div style={{ color: '#444', fontStyle: 'italic', fontSize: '0.9rem' }}>Aucune commande dans cette section.</div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
 

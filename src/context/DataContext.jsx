@@ -271,10 +271,17 @@ export const DataProvider = ({ children }) => {
             email: currentUser.email,
             items: [...cart],
             total: getCartTotal(),
-            status: 'Payé', // Phase 3: Orders are now created AFTER payment success
+            status: 'Réception',
+            checklist: [
+                { id: 1, label: 'Brief client reçu', completed: false },
+                { id: 2, label: 'Concept design validé', completed: false },
+                { id: 3, label: 'Production / Création', completed: false },
+                { id: 4, label: 'Envoi finalisé', completed: false }
+            ],
             date: new Date().toISOString(),
             shipping: shippingDetails,
-            paymentId: paymentDetails ? paymentDetails.id : 'MANUAL_TEST'
+            paymentId: paymentDetails ? paymentDetails.id : 'MANUAL_TEST',
+            notes: ''
         };
         setOrders([newOrder, ...orders]);
         clearCart();
@@ -297,23 +304,39 @@ export const DataProvider = ({ children }) => {
         }
 
         const templateParams = {
-            order_id: order.id.slice(-6),
-            name: order.customerName, // User template uses {{name}}
-            title: itemsSummary, // User template uses {{title}}
-            customer_email: order.email,
-            order_total: order.total
+            order_id: String(order.id).slice(-6),
+            name: String(order.customerName),
+            title: String(itemsSummary),
+            customer_email: String(order.email),
+            order_total: String(order.total)
         };
 
         emailjs.send(serviceId, templateId, templateParams, publicKey)
             .then((response) => {
-                console.log('Email sent successfully!', response.status, response.text);
+                console.log('Email successfully sent to EmailJS API!', response.status, response.text);
             }, (err) => {
-                console.error('Failed to send email:', err);
+                console.error('EmailJS Error - Code 400 usually means invalid keys or missing parameters:', err);
             });
     };
 
     const updateOrderStatus = (orderId, status) => {
         setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
+    };
+
+    const toggleChecklistItem = (orderId, itemId) => {
+        setOrders(orders.map(o => {
+            if (o.id === orderId) {
+                const newChecklist = o.checklist.map(item =>
+                    item.id === itemId ? { ...item, completed: !item.completed } : item
+                );
+                return { ...o, checklist: newChecklist };
+            }
+            return o;
+        }));
+    };
+
+    const updateOrderNotes = (orderId, notes) => {
+        setOrders(orders.map(o => o.id === orderId ? { ...o, notes } : o));
     };
 
 
@@ -333,7 +356,7 @@ export const DataProvider = ({ children }) => {
             cart, addToCart, removeFromCart, clearCart, getCartTotal,
 
             // Orders
-            orders, placeOrder, updateOrderStatus,
+            orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes,
 
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode,
