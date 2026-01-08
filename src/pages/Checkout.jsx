@@ -71,53 +71,62 @@ const Checkout = () => {
         const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
         if (!publishableKey || publishableKey.includes('YOUR_KEY')) {
-            alert("Erreur : La clé Stripe n'est pas configurée dans le fichier .env.");
+            alert("Erreur Configuration : La clé Stripe (VITE_STRIPE_PUBLISHABLE_KEY) est absente dans vos paramètres Vercel ou votre fichier .env.");
             return;
         }
 
         setIsProcessing(true);
         try {
-            const stripe = await loadStripe(publishableKey);
+            console.log("Démarrage du paiement Stripe...");
 
-            // 1. Create Checkout Session via our API
+            // 1. Create Checkout Session
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     cart: cart.map(item => ({
-                        ...item,
-                        // Apply promo to items proportionally or handle it at session level
-                        // For simplicity here, we inject a mock discount item if applied
-                        price: appliedPromo ? (item.price * (1 - (appliedPromo.type === 'percent' ? appliedPromo.value / 100 : 0))).toFixed(2) : item.price
+                        name: item.name,
+                        price: appliedPromo ? (item.price * (1 - (appliedPromo.type === 'percent' ? appliedPromo.value / 100 : 0))).toFixed(2) : item.price,
+                        quantity: item.quantity,
+                        image: item.image // Server will sanitize this
                     })),
                     success_url: window.location.origin + '/checkout?success=true',
                     cancel_url: window.location.origin + '/checkout?canceled=true',
                 }),
             });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Erreur Serveur (${response.status})`);
+            }
+
             const session = await response.json();
+            console.log("Session Stripe créée :", session.id);
 
-            if (session.error) {
-                alert("Erreur Stripe : " + session.error);
-                setIsProcessing(false);
-                return;
+            if (!session.id) {
+                throw new Error("L'identifiant de session Stripe est manquant.");
             }
 
-            // 2. Redirect to Stripe Checkout
-            if (stripe) {
-                const result = await stripe.redirectToCheckout({
-                    sessionId: session.id,
-                });
-
-                if (result.error) {
-                    alert(result.error.message);
-                }
+            // 2. Redirect to Stripe
+            const stripe = await loadStripe(publishableKey);
+            if (!stripe) {
+                throw new Error("Impossible de charger le module Stripe. Vérifiez votre connexion.");
             }
+
+            const result = await stripe.redirectToCheckout({
+                sessionId: session.id,
+            });
+
+            if (result.error) {
+                throw new Error(result.error.message);
+            }
+
         } catch (err) {
-            console.error(err);
-            alert("Une erreur est survenue lors de l'initialisation du paiement.");
+            console.error("Détails de l'erreur Stripe:", err);
+            alert(`Échec du paiement : ${err.message}\n\nConseil : Si vous êtes sur Vercel, vérifiez que vous avez bien ajouté 'STRIPE_SECRET_KEY' dans les paramètres du projet ET redéployé.`);
+        } finally {
+            setIsProcessing(false);
         }
-        setIsProcessing(false);
     };
 
     // Handle Success Return
