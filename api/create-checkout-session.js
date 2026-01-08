@@ -7,17 +7,25 @@ export default async function handler(req, res) {
         try {
             const { cart, success_url, cancel_url } = req.body;
 
-            const line_items = cart.map(item => ({
-                price_data: {
-                    currency: 'eur',
-                    product_data: {
-                        name: item.name,
-                        images: [item.image],
+            const line_items = cart.map(item => {
+                const product_data = {
+                    name: item.name,
+                };
+
+                // Only add image if it looks like an absolute URL
+                if (item.image && (item.image.startsWith('http') || item.image.startsWith('https'))) {
+                    product_data.images = [item.image];
+                }
+
+                return {
+                    price_data: {
+                        currency: 'eur',
+                        product_data: product_data,
+                        unit_amount: Math.round(Number(item.price) * 100),
                     },
-                    unit_amount: Math.round(item.price * 100), // Stripe uses cents
-                },
-                quantity: item.quantity,
-            }));
+                    quantity: item.quantity,
+                };
+            });
 
             const session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],
