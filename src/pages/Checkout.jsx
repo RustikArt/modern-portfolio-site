@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
 
 const Checkout = () => {
     const { cart, currentUser, placeOrder, getCartTotal, promoCodes } = useData();
@@ -103,27 +102,17 @@ const Checkout = () => {
             const session = await response.json();
             console.log("Session Stripe créée :", session.id);
 
-            if (!session.id) {
-                throw new Error("L'identifiant de session Stripe est manquant.");
+            if (!session.url) {
+                throw new Error("L'URL de redirection Stripe est manquante.");
             }
 
-            // 2. Redirect to Stripe
-            const stripe = await loadStripe(publishableKey);
-            if (!stripe) {
-                throw new Error("Impossible de charger le module Stripe. Vérifiez votre connexion.");
-            }
-
-            const result = await stripe.redirectToCheckout({
-                sessionId: session.id,
-            });
-
-            if (result.error) {
-                throw new Error(result.error.message);
-            }
+            // 2. Redirect to Stripe (Modern Way)
+            console.log("Redirection vers Stripe...");
+            window.location.href = session.url;
 
         } catch (err) {
             console.error("Détails de l'erreur Stripe:", err);
-            alert(`Échec du paiement : ${err.message}\n\nConseil : Si vous êtes sur Vercel, vérifiez que vous avez bien ajouté 'STRIPE_SECRET_KEY' dans les paramètres du projet ET redéployé.`);
+            alert(`Échec du paiement : ${err.message}\n\nConseil : Vérifiez vos clés secrètes dans les paramètres Vercel.`);
         } finally {
             setIsProcessing(false);
         }
