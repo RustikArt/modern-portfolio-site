@@ -1,8 +1,14 @@
 import { useState } from 'react';
+import { useData } from '../context/DataContext';
 import './Contact.css';
 
 const Contact = () => {
-    const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+    const { currentUser } = useData();
+    const [formData, setFormData] = useState({
+        name: currentUser ? currentUser.name : '',
+        email: currentUser ? currentUser.email : '',
+        message: ''
+    });
     const [status, setStatus] = useState('idle'); // idle, sending, success, error
 
     const handleSubmit = async (e) => {
@@ -25,32 +31,42 @@ const Contact = () => {
                 return;
             }
 
-            const templateParams = {
+            // 1. Send NOTIFICATION to ADMIN
+            const adminParams = {
                 name: `${formData.name} <${formData.email}>`,
-                title: String(formData.message), // Message in title for visibility
-                customer_email: 'rustikop@outlook.fr', // Send TO admin mailbox
+                title: 'Nouveau message reçu - Contact',
+                customer_email: 'rustikop@outlook.fr',
                 to_email: 'rustikop@outlook.fr',
                 email: 'rustikop@outlook.fr',
-                message: String(formData.message)
+                message: `Vous avez reçu un nouveau message de ${formData.name}.\n\nCONTENU :\n"${formData.message}"`
             };
 
-            const response = await fetch('/api/send-email', {
+            const adminRes = await fetch('/api/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    serviceId,
-                    templateId,
-                    templateParams,
-                    publicKey
-                })
+                body: JSON.stringify({ serviceId, templateId, templateParams: adminParams, publicKey })
             });
 
-            if (response.ok) {
+            // 2. Send CONFIRMATION to CLIENT
+            const clientParams = {
+                name: String(formData.name),
+                title: 'Accusé de réception - Artisanat Digital',
+                customer_email: String(formData.email),
+                to_email: String(formData.email),
+                email: String(formData.email),
+                message: `Bonjour ${formData.name},\n\nNous avons bien reçu votre message concernant votre projet. Notre équipe l'étudie avec attention et nous reviendrons vers vous dans les plus brefs délais.\n\nMerci de votre confiance,\nL'équipe Artisanat Digital.`
+            };
+
+            await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ serviceId, templateId, templateParams: clientParams, publicKey })
+            });
+
+            if (adminRes.ok) {
                 setStatus('success');
-                setFormData({ name: '', email: '', message: '' });
+                setFormData({ ...formData, message: '' }); // Only clear message, keep name/email
             } else {
-                const error = await response.json();
-                console.error("EmailJS Contact API Error:", error.error);
                 setStatus('error');
             }
 
@@ -101,6 +117,8 @@ const Contact = () => {
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                     required
+                                    disabled={!!currentUser}
+                                    style={currentUser ? { background: '#0a0a0a', color: '#555', cursor: 'not-allowed' } : {}}
                                 />
                             </div>
                             <div className="form-group">

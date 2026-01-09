@@ -122,10 +122,15 @@ const Checkout = () => {
                 body: JSON.stringify({
                     cart: cart.map(item => ({
                         name: item.name,
-                        price: appliedPromo ? (item.price * (1 - (appliedPromo.type === 'percent' ? appliedPromo.value / 100 : 0))).toFixed(2) : item.price,
+                        price: item.price,
                         quantity: item.quantity,
                         image: item.image
                     })),
+                    promo: appliedPromo ? {
+                        code: appliedPromo.code,
+                        type: appliedPromo.type,
+                        value: appliedPromo.value
+                    } : null,
                     success_url: window.location.origin + '/checkout?success=true',
                     cancel_url: window.location.origin + '/checkout?canceled=true',
                 }),

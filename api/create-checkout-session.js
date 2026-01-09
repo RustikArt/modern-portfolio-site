@@ -5,14 +5,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export default async function handler(req, res) {
     if (req.method === 'POST') {
         try {
-            const { cart, success_url, cancel_url } = req.body;
+            const { cart, promo, success_url, cancel_url } = req.body;
 
             const line_items = cart.map(item => {
                 const product_data = {
                     name: item.name,
                 };
 
-                // Only add image if it looks like an absolute URL
                 if (item.image && (item.image.startsWith('http') || item.image.startsWith('https'))) {
                     product_data.images = [item.image];
                 }
@@ -26,6 +25,34 @@ export default async function handler(req, res) {
                     quantity: item.quantity,
                 };
             });
+
+            // Add discount line item if promo exists
+            if (promo) {
+                let discount_amount = 0;
+                const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+                if (promo.type === 'percent') {
+                    discount_amount = subtotal * (promo.value / 100);
+                } else if (promo.type === 'fixed') {
+                    discount_amount = promo.value;
+                }
+
+                // Ensure discount doesn't exceed subtotal
+                discount_amount = Math.min(discount_amount, subtotal);
+
+                if (discount_amount > 0) {
+                    line_items.push({
+                        price_data: {
+                            currency: 'eur',
+                            product_data: {
+                                name: `Remise Coupon: ${promo.code}`,
+                            },
+                            unit_amount: -Math.round(discount_amount * 100),
+                        },
+                        quantity: 1,
+                    });
+                }
+            }
 
             const session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],

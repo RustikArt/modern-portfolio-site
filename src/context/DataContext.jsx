@@ -336,11 +336,12 @@ export const DataProvider = ({ children }) => {
         const templateParams = {
             order_id: String(order.id).slice(-6),
             name: String(order.customerName),
-            title: String(itemsSummary),
+            title: `Confirmation de commande #${String(order.id).slice(-6)}`,
             customer_email: String(order.email),
-            to_email: String(order.email), // Alias for some templates
-            email: String(order.email),    // Alias for some templates
-            order_total: String(order.total)
+            to_email: String(order.email),
+            email: String(order.email),
+            order_total: String(order.total),
+            message: `Bonjour ${order.customerName},\n\nNous avons le plaisir de vous confirmer la bonne réception de votre commande #${String(order.id).slice(-6)}.\n\nPRODUITS : ${itemsSummary}\nTOTAL : ${order.total}€\n\nNotre équipe commence dès maintenant la préparation de votre projet. Vous pouvez suivre l'avancement en temps réel sur votre espace client : https://artisanat-digital.vercel.app/profile\n\nMerci de votre confiance,\nL'équipe Artisanat Digital.`
         };
 
         try {
@@ -387,9 +388,12 @@ export const DataProvider = ({ children }) => {
     };
 
     const secureFullReset = (password) => {
-        if (password === 'admin123') { // Match initialAdmin.password
-            localStorage.clear();
-            window.location.href = '/';
+        if (password === 'admin123') {
+            // Selective Wipe
+            setOrders([]);
+            setUsers(users.filter(u => u.role === 'admin')); // Keep only admins
+            // We usually keep products and promoCodes as they are hard to rebuild
+            alert("Données réinitialisées (Commandes et clients supprimés).");
             return true;
         }
         return false;
