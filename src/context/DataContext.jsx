@@ -97,6 +97,15 @@ export const DataProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : [];
     });
 
+    // Phase 4: Promo Codes State
+    const [promoCodes, setPromoCodes] = useState(() => {
+        const saved = localStorage.getItem('portfolio_promoCodes');
+        return saved ? JSON.parse(saved) : [
+            { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
+            { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
+        ];
+    });
+
     // Announcement Banner State
     const [announcement, setAnnouncement] = useState(() => {
         const saved = localStorage.getItem('portfolio_announcement');
