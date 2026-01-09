@@ -12,30 +12,35 @@ export default async function handler(req, res) {
     }
 
     try {
+        // Using the official REST API format for EmailJS
+        // https://www.emailjs.com/docs/rest-api/send/
+        const payload = {
+            service_id: serviceId,
+            template_id: templateId,
+            user_id: publicKey,
+            accessToken: privateKey, // Required for secure/non-browser environments
+            template_params: templateParams,
+        };
+
         const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                // In REST API mode, we usually don't need Origin/Referer headers that a browser would send
             },
-            body: JSON.stringify({
-                service_id: serviceId,
-                template_id: templateId,
-                user_id: publicKey,
-                accessToken: privateKey,
-                template_params: templateParams,
-            }),
+            body: JSON.stringify(payload),
         });
 
         const data = await response.text();
 
         if (!response.ok) {
-            console.error("EmailJS API Error:", data);
+            console.error("EmailJS REST API Error:", data);
             return res.status(response.status).json({ error: data });
         }
 
-        return res.status(200).json({ message: "Email sent successfully" });
+        return res.status(200).json({ message: "Email envoyé avec succès via API REST" });
     } catch (error) {
-        console.error("Serverless Email Error:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        console.error("Serverless REST Email Error:", error);
+        return res.status(500).json({ error: "L'envoi de l'email a échoué côté serveur." });
     }
 }

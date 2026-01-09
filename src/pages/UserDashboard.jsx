@@ -18,108 +18,142 @@ const UserDashboard = () => {
         navigate('/');
     };
 
-    const getStatusColor = (status) => {
+    // Client-friendly status mapping
+    const getClientStatus = (status) => {
         switch (status) {
-            case 'Réception': return '#ff4d4d';
-            case 'En cours': return '#ffd700';
-            case 'Terminé': return '#4caf50';
-            default: return 'var(--color-accent)';
+            case 'Réception':
+            case 'Payé':
+                return { label: 'Commande Validée', color: '#ff4d4d', icon: '💎' };
+            case 'En cours':
+                return { label: 'En Production', color: '#ffd700', icon: '⚡' };
+            case 'Terminé':
+                return { label: 'Projet Finalisé', color: '#4caf50', icon: '🚀' };
+            case 'En attente':
+                return { label: 'Besoin d\'infos', color: '#ff8c00', icon: '📝' };
+            default:
+                return { label: status, color: 'var(--color-accent)', icon: '📦' };
         }
     };
 
-    return (
-        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#080808' }}>
-            <div className="container" style={{ maxWidth: '900px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid #222', paddingBottom: '1.5rem' }}>
-                    <div>
-                        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.2rem', letterSpacing: '-1px' }}>Espace Client</h1>
-                        <p style={{ color: '#888' }}>Ravi de vous revoir, <strong style={{ color: 'white' }}>{currentUser.name}</strong></p>
-                    </div>
-                    <button onClick={handleLogout} className="btn" style={{ fontSize: '0.9rem' }}>Déconnexion</button>
-                </div>
+    // Client-friendly checklist labels
+    const getClientLabel = (label) => {
+        const mapping = {
+            'Brief client reçu': 'Analyse de votre brief',
+            'Concept design validé': 'Validation du concept',
+            'Production / Création': 'Phase de création active',
+            'Envoi finalisé': 'Livraison des fichiers'
+        };
+        return mapping[label] || label;
+    };
 
-                <div style={{ marginBottom: '2rem' }}>
-                    <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>📦</span> Mes Commandes
-                    </h3>
+    return (
+        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#050505' }}>
+            <div className="container" style={{ maxWidth: '1000px' }}>
+                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem', paddingBottom: '2rem', borderBottom: '1px solid #111' }}>
+                    <div>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-2px', textTransform: 'uppercase' }}>Mon Espace <span style={{ color: 'var(--color-accent)' }}>Privé</span></h1>
+                        <p style={{ color: '#444', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.7rem' }}>Bienvenue {currentUser.name}</p>
+                    </div>
+                    <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #333', color: '#666', borderRadius: '30px', padding: '0.6rem 1.5rem', cursor: 'pointer', transition: 'all 0.3s' }}>
+                        Se déconnecter
+                    </button>
+                </header>
+
+                <div style={{ marginBottom: '3rem' }}>
+                    <h3 style={{ fontSize: '1rem', color: '#888', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '2rem' }}>Historique de vos projets</h3>
 
                     {myOrders.length === 0 ? (
-                        <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '12px' }}>
-                            <p style={{ color: '#666', marginBottom: '1.5rem' }}>Vous n'avez pas encore passé de commande.</p>
-                            <button className="btn btn-primary" onClick={() => navigate('/shop')}>Visiter la boutique</button>
+                        <div style={{ padding: '6rem 2rem', textAlign: 'center', background: '#0a0a0a', border: '1px dashed #222', borderRadius: '24px' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>📭</div>
+                            <p style={{ color: '#555', fontSize: '1.1rem', marginBottom: '2rem' }}>Aucune commande en cours pour le moment.</p>
+                            <button className="btn btn-primary" onClick={() => navigate('/shop')} style={{ borderRadius: '40px', padding: '1rem 2rem' }}>Découvrir la boutique</button>
                         </div>
                     ) : (
-                        <div style={{ display: 'grid', gap: '2rem' }}>
-                            {myOrders.map(order => (
-                                <div key={order.id} className="glass" style={{
-                                    padding: '2rem',
-                                    borderRadius: '16px',
-                                    border: '1px solid rgba(255,255,255,0.05)',
-                                    transition: 'transform 0.3s ease'
-                                }}>
-                                    {/* Order Header */}
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-                                        <div>
-                                            <span style={{ color: '#666', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Commande #{order.id.slice(-6)}</span>
-                                            <div style={{ fontSize: '0.9rem', color: '#888', marginTop: '0.2rem' }}>
-                                                Passée le {new Date(order.date).toLocaleDateString()}
+                        <div style={{ display: 'grid', gap: '3rem' }}>
+                            {myOrders.map(order => {
+                                const statusInfo = getClientStatus(order.status);
+                                return (
+                                    <div key={order.id} style={{
+                                        background: 'rgba(255,255,255,0.02)',
+                                        borderRadius: '24px',
+                                        padding: '2.5rem',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
+                                    }}>
+                                        {/* Row 1: ID & Badge */}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
+                                            <div>
+                                                <div style={{ color: '#333', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>ID Projet: {order.id.slice(-8).toUpperCase()}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#666' }}>Posté le {new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
                                             </div>
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
                                             <div style={{
-                                                background: getStatusColor(order.status),
-                                                color: 'black',
-                                                padding: '0.4rem 1rem',
-                                                borderRadius: '20px',
-                                                fontSize: '0.75rem',
-                                                fontWeight: 'bold',
-                                                textTransform: 'uppercase'
+                                                display: 'flex', alignItems: 'center', gap: '0.8rem',
+                                                background: 'rgba(255,255,255,0.03)', padding: '0.6rem 1.2rem',
+                                                borderRadius: '50px', border: `1px solid ${statusInfo.color}33`
                                             }}>
-                                                {order.status}
+                                                <span style={{ fontSize: '1.2rem' }}>{statusInfo.icon}</span>
+                                                <span style={{ color: statusInfo.color, fontWeight: 'bold', fontSize: '0.8rem', textTransform: 'uppercase' }}>{statusInfo.label}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Row 2: Progress Tracker */}
+                                        <div style={{ marginBottom: '3rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+                                                {(order.checklist || []).map((step, idx) => (
+                                                    <div key={idx} style={{
+                                                        flex: 1, height: '4px',
+                                                        background: step.completed ? 'var(--color-accent)' : '#222',
+                                                        borderRadius: '2px',
+                                                        transition: 'all 0.5s ease',
+                                                        boxShadow: step.completed ? '0 0 10px var(--color-accent-glow)' : 'none'
+                                                    }}></div>
+                                                ))}
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
+                                                {(order.checklist || []).map((step, idx) => (
+                                                    <div key={idx} style={{
+                                                        display: 'flex', flexDirection: 'column', gap: '0.8rem',
+                                                        opacity: step.completed ? 1 : 0.2,
+                                                        transition: 'opacity 0.3s'
+                                                    }}>
+                                                        <div style={{ fontSize: '0.7rem', color: '#555', fontWeight: 'bold' }}>ÉTAPE 0{idx + 1}</div>
+                                                        <div style={{ fontSize: '0.9rem', color: step.completed ? 'white' : '#888', fontWeight: step.completed ? 'bold' : 'normal' }}>
+                                                            {getClientLabel(step.label)}
+                                                        </div>
+                                                        {step.completed && <div style={{ color: 'var(--color-accent)', fontSize: '0.8rem' }}>Complété ✓</div>}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Row 3: Items & Action */}
+                                        <div style={{
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            paddingTop: '2rem', borderTop: '1px solid #111'
+                                        }}>
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                                {order.items.map((it, idx) => (
+                                                    <div key={idx} style={{ background: '#0a0a0a', padding: '0.4rem 1rem', borderRadius: '8px', border: '1px solid #111', fontSize: '0.8rem', color: '#999' }}>
+                                                        {it.name} <span style={{ color: '#333', marginLeft: '0.5rem' }}>x{it.quantity}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '0.7rem', color: '#444', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Total Investi</div>
+                                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'white', letterSpacing: '-1px' }}>{order.total}€</div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Checklist Progress for Client */}
-                                    <div style={{ marginBottom: '2rem', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <p style={{ fontSize: '0.8rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '1.2rem' }}>Suivi de production</p>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-                                            {(order.checklist || []).map((step, idx) => (
-                                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', opacity: step.completed ? 1 : 0.4 }}>
-                                                    <div style={{
-                                                        width: '24px',
-                                                        height: '24px',
-                                                        borderRadius: '50%',
-                                                        background: step.completed ? '#4caf50' : '#222',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        fontSize: '12px',
-                                                        color: 'white'
-                                                    }}>
-                                                        {step.completed ? '✓' : idx + 1}
-                                                    </div>
-                                                    <span style={{ fontSize: '0.85rem', color: step.completed ? '#eee' : '#666' }}>{step.label}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Items & Total */}
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
-                                        <div style={{ fontSize: '0.9rem', color: '#aaa' }}>
-                                            {order.items.length} produit(s)
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <span style={{ color: '#666', fontSize: '0.8rem', marginRight: '0.5rem' }}>Total payé:</span>
-                                            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-accent)' }}>{order.total}€</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>
+
+                <footer style={{ marginTop: '6rem', padding: '3rem', background: 'rgba(255,255,255,0.01)', borderRadius: '24px', textAlign: 'center', border: '1px solid #111' }}>
+                    <p style={{ color: '#555', fontSize: '0.9rem' }}>Besoin d'aide sur une commande ? <br /> Contactez-nous à <strong style={{ color: 'var(--color-accent)' }}>rustikop@outlook.fr</strong></p>
+                </footer>
             </div>
         </div>
     );

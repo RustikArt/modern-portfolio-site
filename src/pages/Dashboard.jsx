@@ -9,7 +9,7 @@ const Dashboard = () => {
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
         updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode,
-        secureFullReset
+        secureFullReset, logout
     } = useData();
 
     const [activeTab, setActiveTab] = useState('orders');
@@ -18,7 +18,6 @@ const Dashboard = () => {
     // --- FORMS STATES ---
     const [projectForm, setProjectForm] = useState({ editId: null, title: '', category: '', image: '', content: '', blocks: [] });
 
-    // Enhanced Product Form
     const [productForm, setProductForm] = useState({
         editId: null,
         name: '', price: '', discountType: 'none', discountValue: '',
@@ -30,7 +29,7 @@ const Dashboard = () => {
     const [promoForm, setPromoForm] = useState({ code: '', type: 'percent', value: '' });
 
     const handleLogout = () => {
-        localStorage.removeItem('isAdmin');
+        logout();
         navigate('/login');
     };
 
@@ -79,7 +78,7 @@ const Dashboard = () => {
             discountValue: dValue,
             image: product.image,
             category: product.category,
-            tags: product.tags.join(', '),
+            tags: product.tags ? product.tags.join(', ') : '',
             isFeatured: product.isFeatured || false,
             options: product.options || []
         });
@@ -179,91 +178,222 @@ const Dashboard = () => {
 
     const inputStyle = {
         padding: '0.8rem',
-        background: '#1a1a1a',
-        border: '1px solid #333',
+        background: '#121212',
+        border: '1px solid #222',
         color: 'white',
-        borderRadius: '4px',
-        width: '100%'
+        borderRadius: '8px',
+        width: '100%',
+        transition: 'border-color 0.3s'
+    };
+
+    const cardStyle = {
+        background: 'rgba(20, 20, 20, 0.6)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        borderRadius: '16px',
+        padding: '1.5rem',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+    };
+
+    const btnModern = {
+        padding: '0.6rem 1.2rem',
+        borderRadius: '8px',
+        border: '1px solid #333',
+        background: 'linear-gradient(135deg, #1a1a1a, #080808)',
+        color: '#ccc',
+        cursor: 'pointer',
+        fontSize: '0.85rem',
+        transition: 'all 0.3s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        textAlign: 'left'
+    };
+
+    const btnPrimaryModern = {
+        ...btnModern,
+        background: 'linear-gradient(135deg, var(--color-accent), #8a2be2)',
+        borderColor: 'transparent',
+        color: 'white',
+        fontWeight: 'bold'
     };
 
     return (
-        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#050505' }}>
-            <div className="container" style={{ maxWidth: '1200px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #222', paddingBottom: '1rem' }}>
-                    <h1 style={{ fontSize: '2.5rem', letterSpacing: '-1px' }}>Dashboard <span style={{ color: 'var(--color-accent)', fontSize: '0.8rem', verticalAlign: 'middle' }}>V2.0</span></h1>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <button onClick={handleFullReset} className="btn" style={{ fontSize: '0.7rem', color: '#ff4d4d', borderColor: '#441111' }}>RÉINITIALISATION TOTALE</button>
-                        <div style={{ padding: '0.5rem 1rem', background: '#111', borderRadius: '4px', border: '1px solid #333' }}>
-                            <span style={{ color: '#888', marginRight: '0.5rem' }}>Session:</span><strong>Admin</strong>
-                        </div>
-                        <button onClick={handleLogout} className="btn" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>Déconnexion</button>
+        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#050505', color: '#eee' }}>
+            <div className="container" style={{ maxWidth: '1400px' }}>
+                {/* Header V2.2 */}
+                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid #222', paddingBottom: '1.5rem' }}>
+                    <div>
+                        <h1 style={{ fontSize: '2.5rem', margin: 0, fontWeight: '900', letterSpacing: '-2px', textTransform: 'uppercase' }}>
+                            Admin <span style={{ color: 'var(--color-accent)' }}>Panel</span>
+                        </h1>
+                        <p style={{ color: '#555', margin: '5px 0 0', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.7rem' }}>Version 2.2 Secure Bridge</p>
                     </div>
-                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '2rem' }}>
-                    <aside style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div className="glass" style={{ padding: '1rem', borderRadius: '8px' }}>
-                            <p style={{ color: '#666', fontSize: '0.7rem', textTransform: 'uppercase' }}>Revenus</p>
-                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>{stats.totalRevenue}€</h3>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <button onClick={handleFullReset} style={{ background: 'transparent', border: '1px solid #441111', color: '#ff4d4d', borderRadius: '4px', padding: '0.4rem 0.8rem', fontSize: '0.7rem', cursor: 'pointer' }}>
+                            WIPE DATA
+                        </button>
+                        <div style={{ padding: '0.5rem 1rem', background: '#111', borderRadius: '30px', border: '1px solid #333', fontSize: '0.85rem' }}>
+                            <span style={{ color: '#666' }}>root@</span><strong>rustikop</strong>
                         </div>
-                        <div className="glass" style={{ padding: '1rem', borderRadius: '8px' }}>
-                            <p style={{ color: '#666', fontSize: '0.7rem', textTransform: 'uppercase' }}>Actives</p>
-                            <h3 style={{ margin: 0 }}>{stats.activeOrders}</h3>
+                        <button onClick={handleLogout} className="btn btn-primary" style={{ padding: '0.5rem 1.2rem', borderRadius: '30px' }}>Logout</button>
+                    </div>
+                </header>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '3rem' }}>
+                    {/* SIDE PANEL */}
+                    <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                            <div style={{ ...cardStyle, padding: '1rem', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.65rem', color: '#666', textTransform: 'uppercase' }}>Revenue</div>
+                                <div style={{ fontSize: '1.2rem', color: 'var(--color-accent)', fontWeight: 'bold' }}>{stats.totalRevenue}€</div>
+                            </div>
+                            <div style={{ ...cardStyle, padding: '1rem', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.65rem', color: '#666', textTransform: 'uppercase' }}>Orders</div>
+                                <div style={{ fontSize: '1.2rem', color: 'white', fontWeight: 'bold' }}>{stats.activeOrders}</div>
+                            </div>
                         </div>
-                        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-                            <button className={`btn ${activeTab === 'orders' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('orders')} style={{ textAlign: 'left' }}>📦 Commandes</button>
-                            <button className={`btn ${activeTab === 'products' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('products')} style={{ textAlign: 'left' }}>🛍️ Boutique</button>
-                            <button className={`btn ${activeTab === 'promos' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('promos')} style={{ textAlign: 'left' }}>🎟️ Codes Promo</button>
-                            <button className={`btn ${activeTab === 'clients' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('clients')} style={{ textAlign: 'left' }}>👥 Clients</button>
-                            <button className={`btn ${activeTab === 'projects' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('projects')} style={{ textAlign: 'left' }}>🎨 Portfolio</button>
+
+                        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                            <button
+                                onClick={() => setActiveTab('orders')}
+                                style={activeTab === 'orders' ? btnPrimaryModern : btnModern}
+                            >
+                                <span style={{ fontSize: '1.2rem' }}>📦</span> Commandes
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('products')}
+                                style={activeTab === 'products' ? btnPrimaryModern : btnModern}
+                            >
+                                <span style={{ fontSize: '1.2rem' }}>🛍️</span> Boutique
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('promos')}
+                                style={activeTab === 'promos' ? btnPrimaryModern : btnModern}
+                            >
+                                <span style={{ fontSize: '1.2rem' }}>🎟️</span> Coupons
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('clients')}
+                                style={activeTab === 'clients' ? btnPrimaryModern : btnModern}
+                            >
+                                <span style={{ fontSize: '1.2rem' }}>👥</span> CRM Clients
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('projects')}
+                                style={activeTab === 'projects' ? btnPrimaryModern : btnModern}
+                            >
+                                <span style={{ fontSize: '1.2rem' }}>🎨</span> Portfolio
+                            </button>
                         </nav>
+
+                        <div style={{ marginTop: 'auto', padding: '1.5rem', background: '#0a0a0a', borderRadius: '12px', border: '1px solid #111', fontSize: '0.8rem', color: '#444' }}>
+                            <strong>Système Artisan</strong><br />
+                            Status: <span style={{ color: '#4caf50' }}>En ligne</span><br />
+                            Bridge: <span style={{ color: '#4caf50' }}>Actif</span>
+                        </div>
                     </aside>
 
+                    {/* MAIN CONTENT */}
                     <main>
+                        {/* --- ORDERS TAB --- */}
                         {activeTab === 'orders' && (
                             <div className="animate-in">
                                 {['Réception', 'En cours', 'Terminé'].map(cat => (
-                                    <div key={cat} style={{ marginBottom: '2rem' }}>
-                                        <h4 style={{ color: 'var(--color-accent)', marginBottom: '1rem', textTransform: 'uppercase' }}>{cat === 'Terminé' ? 'Archives' : cat}</h4>
-                                        <div style={{ display: 'grid', gap: '1rem' }}>
-                                            {orders.filter(o => (cat === 'Réception' ? o.status === 'Réception' || o.status === 'En attente' : o.status === cat)).map(order => (
-                                                <div key={order.id} style={{ background: '#111', padding: '1.5rem', borderRadius: '8px', border: '1px solid #333' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                    <div key={cat} style={{ marginBottom: '3rem' }}>
+                                        <h3 style={{
+                                            marginBottom: '1.5rem',
+                                            fontSize: '0.9rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '2px',
+                                            color: cat === 'Terminé' ? '#444' : 'var(--color-accent)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.8rem'
+                                        }}>
+                                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: cat === 'Réception' ? '#ff4d4d' : cat === 'En cours' ? '#ffd700' : '#4caf50' }}></span>
+                                            {cat === 'Terminé' ? 'Completed Tasks' : cat}
+                                        </h3>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
+                                            {orders.filter(o => {
+                                                if (cat === 'Réception') return o.status === 'Réception' || o.status === 'En attente' || o.status === 'Payé';
+                                                return o.status === cat;
+                                            }).map(order => (
+                                                <div key={order.id} style={cardStyle}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                                                         <div>
-                                                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{order.customerName}</div>
-                                                            <span style={{ color: '#666', fontSize: '0.8rem' }}>#{order.id.slice(-6)}</span>
+                                                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>{order.customerName}</div>
+                                                            <span style={{ color: '#555', fontSize: '0.75rem' }}>ID {order.id.slice(-8).toUpperCase()}</span>
                                                         </div>
                                                         <div style={{ textAlign: 'right' }}>
-                                                            <div style={{ color: 'var(--color-accent)' }}>{order.total}€</div>
+                                                            <div style={{ color: 'var(--color-accent)', fontSize: '1.2rem', fontWeight: 'bold' }}>{order.total}€</div>
                                                             <div style={{ fontSize: '0.7rem', color: '#444' }}>{new Date(order.date).toLocaleDateString()}</div>
                                                         </div>
                                                     </div>
 
+                                                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                                                        {order.items.map((it, idx) => (
+                                                            <div key={idx} style={{ fontSize: '0.85rem', color: '#999', display: 'flex', justifyContent: 'space-between' }}>
+                                                                <span>{it.name} x{it.quantity}</span>
+                                                                <span>{it.price}€</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
                                                     {order.checklist && (
-                                                        <div style={{ marginBottom: '1rem' }}>
+                                                        <div style={{ marginBottom: '1.5rem' }}>
                                                             {order.checklist.map(item => (
-                                                                <div key={item.id} onClick={() => toggleChecklistItem(order.id, item.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.3rem 0' }}>
-                                                                    <div style={{ width: '14px', height: '14px', border: '1px solid #555', background: item.completed ? '#4caf50' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>{item.completed && '✓'}</div>
-                                                                    <span style={{ fontSize: '0.85rem', color: item.completed ? '#555' : '#ccc' }}>{item.label}</span>
+                                                                <div
+                                                                    key={item.id}
+                                                                    onClick={() => toggleChecklistItem(order.id, item.id)}
+                                                                    style={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '0.8rem',
+                                                                        cursor: 'pointer',
+                                                                        padding: '0.5rem',
+                                                                        borderRadius: '6px',
+                                                                        background: item.completed ? 'rgba(76,175,80,0.05)' : 'transparent',
+                                                                        transition: 'all 0.2s'
+                                                                    }}>
+                                                                    <div style={{
+                                                                        width: '18px',
+                                                                        height: '18px',
+                                                                        border: '2px solid #333',
+                                                                        borderRadius: '4px',
+                                                                        background: item.completed ? '#4caf50' : 'transparent',
+                                                                        borderColor: item.completed ? '#4caf50' : '#333',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        color: 'white',
+                                                                        fontSize: '10px'
+                                                                    }}>{item.completed && '✓'}</div>
+                                                                    <span style={{ fontSize: '0.85rem', color: item.completed ? '#555' : '#ccc', textDecoration: item.completed ? 'line-through' : 'none' }}>{item.label}</span>
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     )}
 
-                                                    <textarea
-                                                        value={order.notes || ''}
-                                                        onChange={(e) => updateOrderNotes(order.id, e.target.value)}
-                                                        placeholder="Notes..."
-                                                        style={{ width: '100%', background: '#0a0a0a', border: '1px solid #222', color: '#888', padding: '0.5rem', fontSize: '0.8rem', borderRadius: '4px' }}
-                                                    />
-
-                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                                                        <select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value)} style={{ background: '#222', color: 'white', border: '1px solid #444', padding: '0.3rem', flex: 1 }}>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <select
+                                                            value={order.status}
+                                                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                            style={{ ...inputStyle, padding: '0.5rem', fontSize: '0.8rem', flex: 1 }}
+                                                        >
                                                             <option value="Réception">Réception</option>
                                                             <option value="En cours">En cours</option>
-                                                            <option value="Terminé">Terminé</option>
+                                                            <option value="Terminé">Terminé / Livré</option>
+                                                            <option value="En attente">En attente (Problème)</option>
                                                         </select>
-                                                        <button onClick={() => updateOrderStatus(order.id, order.status === 'Réception' ? 'En cours' : 'Terminé')} className="btn btn-primary" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>OK</button>
+                                                        <button
+                                                            onClick={() => updateOrderStatus(order.id, order.status === 'Réception' ? 'En cours' : 'Terminé')}
+                                                            style={{ ...btnPrimaryModern, padding: '0.5rem 1rem' }}
+                                                        >
+                                                            Update
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
@@ -273,78 +403,187 @@ const Dashboard = () => {
                             </div>
                         )}
 
+                        {/* --- PRODUCTS TAB --- */}
                         {activeTab === 'products' && (
                             <div className="animate-in">
-                                <form onSubmit={handleProductSubmit} style={{ background: '#111', padding: '1.5rem', borderRadius: '8px', border: '1px solid #333', marginBottom: '2rem' }}>
-                                    <input type="text" placeholder="Nom" value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })} style={{ ...inputStyle, marginBottom: '1rem' }} />
-                                    <input type="number" placeholder="Prix" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} style={{ ...inputStyle, marginBottom: '1rem' }} />
-                                    <button type="submit" className="btn btn-primary">{productForm.editId ? 'Mettre à jour' : 'Ajouter'}</button>
-                                </form>
-                                <div style={{ display: 'grid', gap: '1rem' }}>
-                                    {products.map(p => (
-                                        <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', background: '#111', padding: '1rem', border: '1px solid #333' }}>
-                                            <span>{p.name} - {p.price}€</span>
-                                            <button onClick={() => handleEditProduct(p)} style={{ background: 'none', color: 'var(--color-accent)' }}>Edit</button>
+                                <section style={{ ...cardStyle, marginBottom: '3rem' }}>
+                                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{productForm.editId ? 'Edit Product' : 'Add New Product'}</h2>
+                                    <form onSubmit={handleProductSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                                            <input type="text" placeholder="Product Name" value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })} style={inputStyle} required />
+                                            <input type="number" placeholder="Price €" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} style={inputStyle} required />
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
-                        {activeTab === 'promos' && (
-                            <div className="animate-in">
-                                <div style={{ background: '#111', padding: '1.5rem', borderRadius: '8px', border: '1px solid #333', marginBottom: '2rem' }}>
-                                    <h4 style={{ marginBottom: '1rem' }}>Créer un coupon</h4>
-                                    <form onSubmit={handlePromoSubmit} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                        <input type="text" placeholder="CODE" value={promoForm.code} onChange={e => setPromoForm({ ...promoForm, code: e.target.value })} style={{ ...inputStyle, flex: 1 }} />
-                                        <select value={promoForm.type} onChange={e => setPromoForm({ ...promoForm, type: e.target.value })} style={{ ...inputStyle, width: '100px' }}>
-                                            <option value="percent">%</option>
-                                            <option value="fixed">€</option>
-                                        </select>
-                                        <input type="number" placeholder="Val" value={promoForm.value} onChange={e => setPromoForm({ ...promoForm, value: e.target.value })} style={{ ...inputStyle, width: '80px' }} />
-                                        <button type="submit" className="btn btn-primary">Créer</button>
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px dashed #222' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Advanced Option Builder</p>
+
+                                            {/* Options List */}
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                                                {productForm.options.map(opt => (
+                                                    <div key={opt.id} style={{ padding: '0.5rem 1rem', background: '#181818', borderRadius: '30px', border: '1px solid #333', display: 'flex', alignItems: 'center', gap: '0.8rem', fontSize: '0.8rem' }}>
+                                                        <strong>{opt.name}</strong>
+                                                        <span style={{ color: '#555' }}>|</span>
+                                                        <span style={{ color: 'var(--color-accent)' }}>{opt.type === 'select' ? `${opt.values.length} choices` : 'Free Text'}</span>
+                                                        <button onClick={() => handleRemoveOption(opt.id)} style={{ border: 'none', background: 'none', color: '#ff4d4d', cursor: 'pointer', padding: 0 }}>✕</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'flex-end' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.7rem', color: '#555' }}>Option Name (ex: Taille)</label>
+                                                    <input type="text" value={optionBuilder.name} onChange={e => setOptionBuilder({ ...optionBuilder, name: e.target.value })} style={inputStyle} placeholder="Label" />
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.7rem', color: '#555' }}>Type</label>
+                                                    <select value={optionBuilder.type} onChange={e => setOptionBuilder({ ...optionBuilder, type: e.target.value })} style={inputStyle}>
+                                                        <option value="select">Dropdown (Select)</option>
+                                                        <option value="text">Text Input</option>
+                                                    </select>
+                                                </div>
+                                                <button type="button" onClick={handleAddOption} style={{ ...btnModern, padding: '0.8rem' }}>Add</button>
+                                            </div>
+                                            {optionBuilder.type === 'select' && (
+                                                <input
+                                                    type="text"
+                                                    placeholder="Values: Label:PriceModifier, Label (ex: S:0, XL:5, XXL:10)"
+                                                    value={optionBuilder.valuesInput}
+                                                    onChange={e => setOptionBuilder({ ...optionBuilder, valuesInput: e.target.value })}
+                                                    style={{ ...inputStyle, marginTop: '1rem' }}
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <input type="text" placeholder="Category" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} style={inputStyle} />
+                                            <input type="text" placeholder="Tags (comma separated)" value={productForm.tags} onChange={e => setProductForm({ ...productForm, tags: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        <input type="text" placeholder="Image URL" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} style={inputStyle} />
+
+                                        <button type="submit" style={btnPrimaryModern}>
+                                            {productForm.editId ? 'Save Changes' : 'Publish Product'}
+                                        </button>
                                     </form>
-                                </div>
-                                <div style={{ display: 'grid', gap: '1rem' }}>
-                                    {promoCodes.map(c => (
-                                        <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', background: '#111', padding: '1rem', border: '1px dashed var(--color-accent)' }}>
-                                            <span>{c.code} (-{c.value}{c.type === 'percent' ? '%' : '€'})</span>
-                                            <button onClick={() => deletePromoCode(c.id)} style={{ color: 'red' }}>Supprimer</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                                </section>
 
-                        {activeTab === 'clients' && (
-                            <div className="animate-in">
-                                <table style={{ width: '100%', color: '#ccc' }}>
-                                    <thead><tr style={{ textAlign: 'left', borderBottom: '1px solid #333' }}><th>Nom</th><th>Email</th></tr></thead>
-                                    <tbody>
-                                        {users.filter(u => u.role === 'client').map(u => (
-                                            <tr key={u.id} style={{ borderBottom: '1px solid #111' }}><td style={{ padding: '0.8rem 0' }}>{u.name}</td><td>{u.email}</td></tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-
-                        {activeTab === 'projects' && (
-                            <div className="animate-in">
-                                <form onSubmit={handleProjectSubmit} style={{ background: '#111', padding: '1.5rem', border: '1px solid #333', marginBottom: '2rem' }}>
-                                    <input type="text" placeholder="Titre" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} />
-                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Publier</button>
-                                </form>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                                    {projects.map(p => (
-                                        <div key={p.id} style={{ background: '#111', border: '1px solid #333' }}>
-                                            <img src={p.image} alt="" style={{ width: '100%', height: '120px', objectFit: 'cover' }} />
-                                            <div style={{ padding: '0.5rem' }}>
-                                                <strong>{p.title}</strong>
-                                                <button onClick={() => handleEditProject(p)} style={{ width: '100%', background: '#222', color: 'white', marginTop: '0.5rem' }}>Edit</button>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                    {products.map(p => (
+                                        <div key={p.id} style={cardStyle}>
+                                            <img src={p.image} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>
+                                                    <h4 style={{ margin: 0 }}>{p.name}</h4>
+                                                    <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>{p.price}€</span>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <button onClick={() => handleEditProduct(p)} style={{ ...btnModern, padding: '0.5rem' }}>Edit</button>
+                                                    <button onClick={() => deleteProduct(p.id)} style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }}>Delete</button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- PROJECTS TAB --- */}
+                        {activeTab === 'projects' && (
+                            <div className="animate-in">
+                                <section style={{ ...cardStyle, marginBottom: '3rem' }}>
+                                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{projectForm.editId ? 'Update Case Study' : 'New Project'}</h2>
+                                    <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                                            <input type="text" placeholder="Project Title" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} required />
+                                            <input type="text" placeholder="Category" value={projectForm.category} onChange={e => setProjectForm({ ...projectForm, category: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        <input type="text" placeholder="Main Cover URL" value={projectForm.image} onChange={e => setProjectForm({ ...projectForm, image: e.target.value })} style={inputStyle} />
+
+                                        <div style={{ background: '#0a0a0a', padding: '1.5rem', borderRadius: '12px', border: '1px solid #111' }}>
+                                            <h4 style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: '#555', textTransform: 'uppercase' }}>Advanced Block Editor</h4>
+                                            <BlockEditor
+                                                blocks={projectForm.blocks}
+                                                onChange={newBlocks => setProjectForm({ ...projectForm, blocks: newBlocks })}
+                                            />
+                                        </div>
+
+                                        <button type="submit" style={btnPrimaryModern}>
+                                            {projectForm.editId ? 'Update Project' : 'Publish Project'}
+                                        </button>
+                                    </form>
+                                </section>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                    {projects.map(p => (
+                                        <div key={p.id} style={cardStyle}>
+                                            <img src={p.image} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                            <h4 style={{ margin: '0 0 0.5rem' }}>{p.title}</h4>
+                                            <p style={{ fontSize: '0.75rem', color: '#555', textTransform: 'uppercase', marginBottom: '1.5rem' }}>{p.category}</p>
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                                <button onClick={() => handleEditProject(p)} style={{ ...btnModern, flex: 1, textAlign: 'center', justifyContent: 'center' }}>Edit Content</button>
+                                                <button onClick={() => deleteProject(p.id)} style={{ ...btnModern, color: '#ff4d4d' }}>✕</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- PROMOS TAB --- */}
+                        {activeTab === 'promos' && (
+                            <div className="animate-in" style={{ maxWidth: '600px' }}>
+                                <section style={{ ...cardStyle, marginBottom: '2rem' }}>
+                                    <h4 style={{ marginBottom: '1.5rem' }}>New Promo Code</h4>
+                                    <form onSubmit={handlePromoSubmit} style={{ display: 'grid', gap: '1rem' }}>
+                                        <input type="text" placeholder="CODE (ex: RUSTIK20)" value={promoForm.code} onChange={e => setPromoForm({ ...promoForm, code: e.target.value })} style={inputStyle} required />
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <select value={promoForm.type} onChange={e => setPromoForm({ ...promoForm, type: e.target.value })} style={inputStyle}>
+                                                <option value="percent">Percentage (%)</option>
+                                                <option value="fixed">Fixed (€)</option>
+                                            </select>
+                                            <input type="number" placeholder="Value" value={promoForm.value} onChange={e => setPromoForm({ ...promoForm, value: e.target.value })} style={inputStyle} required />
+                                        </div>
+                                        <button type="submit" style={btnPrimaryModern}>Generate Coupon</button>
+                                    </form>
+                                </section>
+
+                                <div style={{ display: 'grid', gap: '1rem' }}>
+                                    {promoCodes.map(c => (
+                                        <div key={c.id} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderStyle: 'dashed' }}>
+                                            <div>
+                                                <strong style={{ fontSize: '1.2rem', color: 'var(--color-accent)' }}>{c.code}</strong>
+                                                <span style={{ marginLeft: '1rem', color: '#555' }}>-{c.value}{c.type === 'percent' ? '%' : '€'}</span>
+                                            </div>
+                                            <button onClick={() => deletePromoCode(c.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- CLIENTS TAB --- */}
+                        {activeTab === 'clients' && (
+                            <div className="animate-in">
+                                <div style={cardStyle}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '2px solid #222' }}>
+                                                <th style={{ padding: '1rem', color: '#666', fontSize: '0.7rem', textTransform: 'uppercase' }}>User Name</th>
+                                                <th style={{ padding: '1rem', color: '#666', fontSize: '0.7rem', textTransform: 'uppercase' }}>Email Address</th>
+                                                <th style={{ padding: '1rem', color: '#666', fontSize: '0.7rem', textTransform: 'uppercase' }}>Role</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {users.map(u => (
+                                                <tr key={u.id} style={{ borderBottom: '1px solid #111' }}>
+                                                    <td style={{ padding: '1rem' }}>{u.name}</td>
+                                                    <td style={{ padding: '1rem', color: '#999' }}>{u.email}</td>
+                                                    <td style={{ padding: '1rem' }}>
+                                                        <span style={{ background: u.role === 'admin' ? 'var(--color-accent)' : '#222', color: u.role === 'admin' ? 'black' : '#666', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 'bold' }}>{u.role}</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         )}

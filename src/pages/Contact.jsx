@@ -65,7 +65,7 @@ const Contact = () => {
                     <h1>Parlons de votre projet.</h1>
                     <p>Disponible pour des missions en freelance.<br />Transformons vos idées en expériences digitales.</p>
                     <div className="contact-details">
-                        <p style={{ color: 'var(--color-accent)' }}>rustiksbaz@gmail.com</p>
+                        <p style={{ color: 'var(--color-accent)' }}>rustikop@outlook.fr</p>
                     </div>
                 </div>
 
