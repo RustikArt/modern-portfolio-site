@@ -94,23 +94,7 @@ export const DataProvider = ({ children }) => {
 
     const [orders, setOrders] = useState(() => {
         const saved = localStorage.getItem('portfolio_orders');
-        let initialOrders = saved ? JSON.parse(saved) : [];
-
-        // Add test order if it doesn't exist
-        const testEmail = 'simon.b@lilo.org';
-        if (!initialOrders.find(o => o.email === testEmail)) {
-            initialOrders.push({
-                id: 'TEST-' + Date.now(),
-                userId: null,
-                customerName: 'Simon',
-                email: testEmail,
-                items: [{ name: 'Test Product', price: 0, qty: 1 }],
-                total: 0,
-                status: 'En attente',
-                date: new Date().toLocaleDateString()
-            });
-        }
-        return initialOrders;
+        return saved ? JSON.parse(saved) : [];
     });
 
     // Phase 4: Promo Codes State
@@ -334,20 +318,28 @@ export const DataProvider = ({ children }) => {
             return;
         }
 
+        const subtotal = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        const discountFactor = order.total < subtotal ? (order.total / subtotal) : 1;
+
         const templateParams = {
             order_id: String(order.id).slice(-6),
             name: String(order.customerName),
             email: String(order.email),
             to_email: String(order.email),
             cost: {
-                total: String(order.total)
+                total: String(order.total),
+                subtotal: String(subtotal.toFixed(2)),
+                discount: String((subtotal - order.total).toFixed(2))
             },
             ordres: order.items.map(item => ({
                 nom: item.name,
                 units: item.quantity,
-                price: item.price,
+                // If a discount was applied, show the price the client actually paid for that item
+                price: (item.price * discountFactor).toFixed(2),
+                original_price: item.price,
                 image_url: item.image
             })),
+            is_discounted: order.total < subtotal,
             // Keeping legacy fields for safety
             title: `Confirmation de commande #${String(order.id).slice(-6)}`,
             order_total: String(order.total)
