@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 const UserDashboard = () => {
     const { currentUser, orders, logout, sendOrderConfirmation } = useData();
     const navigate = useNavigate();
-    const [sentStatus, setSentStatus] = useState({}); // { orderId: 'idle' | 'sending' | 'sent' }
 
     if (!currentUser) {
         navigate('/login');
@@ -14,17 +13,6 @@ const UserDashboard = () => {
 
     // Filter orders for current user
     const myOrders = orders.filter(o => o.userId === currentUser.id);
-
-    const handleResendReceipt = async (order) => {
-        setSentStatus(prev => ({ ...prev, [order.id]: 'sending' }));
-        await sendOrderConfirmation(order);
-        setSentStatus(prev => ({ ...prev, [order.id]: 'sent' }));
-
-        // Modal / Alert for confirmation
-        setTimeout(() => {
-            alert(`✓ Reçu renvoyé avec succès à ${order.email}`);
-        }, 100);
-    };
 
     const handleLogout = () => {
         logout();
@@ -97,25 +85,7 @@ const UserDashboard = () => {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
                                             <div>
                                                 <div style={{ color: '#333', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>ID Projet: {order.id.slice(-8).toUpperCase()}</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>Posté le {new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-
-                                                <button
-                                                    onClick={() => handleResendReceipt(order)}
-                                                    style={{
-                                                        background: 'rgba(255,255,255,0.03)',
-                                                        border: '1px solid rgba(255,255,255,0.1)',
-                                                        color: sentStatus[order.id] === 'sent' ? 'var(--color-accent)' : '#888',
-                                                        fontSize: '0.7rem',
-                                                        padding: '0.4rem 1rem',
-                                                        borderRadius: '20px',
-                                                        cursor: 'pointer',
-                                                        textTransform: 'uppercase',
-                                                        letterSpacing: '1px'
-                                                    }}
-                                                    disabled={sentStatus[order.id] === 'sending'}
-                                                >
-                                                    {sentStatus[order.id] === 'sending' ? 'Envoi...' : (sentStatus[order.id] === 'sent' ? 'Renvoyer le reçu' : 'Envoyer le reçu')}
-                                                </button>
+                                                <div style={{ fontSize: '0.85rem', color: '#666' }}>Posté le {new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
                                             </div>
                                             <div style={{
                                                 display: 'flex', alignItems: 'center', gap: '0.8rem',

@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
+import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
 import BlockEditor from '../components/BlockEditor';
 
 const Dashboard = () => {
@@ -12,6 +12,7 @@ const Dashboard = () => {
         secureFullReset, logout
     } = useData();
 
+    const [showVersionDetails, setShowVersionDetails] = useState(false);
     const [activeTab, setActiveTab] = useState('orders');
     const [expandedOrders, setExpandedOrders] = useState({});
     const navigate = useNavigate();
@@ -252,7 +253,38 @@ const Dashboard = () => {
                         <h1 style={{ fontSize: '2.5rem', margin: 0, fontWeight: '900', letterSpacing: '-2px', textTransform: 'uppercase' }}>
                             Admin <span style={{ color: 'var(--color-accent)' }}>Panel</span>
                         </h1>
-                        <p style={{ color: '#444', margin: '5px 0 0', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.7rem' }}>Version 2.8 Ultimate Edition</p>
+                        <p
+                            onClick={() => setShowVersionDetails(!showVersionDetails)}
+                            style={{
+                                color: '#444',
+                                margin: '5px 0 0',
+                                textTransform: 'uppercase',
+                                letterSpacing: '2px',
+                                fontSize: '0.7rem',
+                                cursor: 'help',
+                                userSelect: 'none',
+                                transition: 'color 0.3s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
+                            onMouseLeave={(e) => e.target.style.color = '#444'}
+                        >
+                            {WEBSITE_VERSION} {showVersionDetails ? '▴' : '▾'}
+                        </p>
+                        {showVersionDetails && (
+                            <div className="animate-in" style={{
+                                marginTop: '10px',
+                                padding: '10px 15px',
+                                background: 'rgba(255,255,255,0.03)',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(255,255,255,0.05)',
+                                fontSize: '0.75rem',
+                                color: '#888',
+                                whiteSpace: 'pre-line',
+                                lineHeight: '1.6'
+                            }}>
+                                {VERSION_DETAILS}
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
