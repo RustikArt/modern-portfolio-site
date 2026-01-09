@@ -18,7 +18,12 @@ import {
     CheckCircle2,
     Clock,
     AlertCircle,
-    Check
+    Check,
+    Plus,
+    Trash2,
+    Edit,
+    Save,
+    FileCode
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -561,8 +566,8 @@ const Dashboard = () => {
                                         </div>
                                         <input type="text" placeholder="Image URL" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} style={inputStyle} />
 
-                                        <button type="submit" style={btnPrimaryModern}>
-                                            {productForm.editId ? 'Save Changes' : 'Publish Product'}
+                                        <button type="submit" style={{ ...btnPrimaryModern, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}>
+                                            {productForm.editId ? <><Save size={18} /> Save Changes</> : <><Plus size={18} /> Publish Product</>}
                                         </button>
                                     </form>
                                 </section>
@@ -577,8 +582,8 @@ const Dashboard = () => {
                                                     <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>{p.price}€</span>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                    <button onClick={() => handleEditProduct(p)} style={{ ...btnModern, padding: '0.5rem' }}>Edit</button>
-                                                    <button onClick={() => deleteProduct(p.id)} style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }}>Delete</button>
+                                                    <button onClick={() => handleEditProduct(p)} style={{ ...btnModern, padding: '0.5rem' }} title="Edit"><Edit size={14} /></button>
+                                                    <button onClick={() => deleteProduct(p.id)} style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }} title="Delete"><Trash2 size={14} /></button>
                                                 </div>
                                             </div>
                                         </div>
@@ -591,7 +596,9 @@ const Dashboard = () => {
                         {activeTab === 'projects' && (
                             <div className="animate-in">
                                 <section style={{ ...cardStyle, marginBottom: '3rem' }}>
-                                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{projectForm.editId ? 'Update Case Study' : 'New Project'}</h2>
+                                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <FileCode size={20} /> {projectForm.editId ? 'Update Case Study' : 'New Project'}
+                                    </h2>
                                     <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
                                             <input type="text" placeholder="Project Title" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} required />
@@ -607,8 +614,8 @@ const Dashboard = () => {
                                             />
                                         </div>
 
-                                        <button type="submit" style={btnPrimaryModern}>
-                                            {projectForm.editId ? 'Update Project' : 'Publish Project'}
+                                        <button type="submit" style={{ ...btnPrimaryModern, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}>
+                                            {projectForm.editId ? <><Save size={18} /> Update Project</> : <><Plus size={18} /> Publish Project</>}
                                         </button>
                                     </form>
                                 </section>
@@ -620,8 +627,12 @@ const Dashboard = () => {
                                             <h4 style={{ margin: '0 0 0.5rem' }}>{p.title}</h4>
                                             <p style={{ fontSize: '0.75rem', color: '#555', textTransform: 'uppercase', marginBottom: '1.5rem' }}>{p.category}</p>
                                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                                <button onClick={() => handleEditProject(p)} style={{ ...btnModern, flex: 1, textAlign: 'center', justifyContent: 'center' }}>Edit Content</button>
-                                                <button onClick={() => deleteProject(p.id)} style={{ ...btnModern, color: '#ff4d4d' }}>✕</button>
+                                                <button onClick={() => handleEditProject(p)} style={{ ...btnModern, flex: 1, textAlign: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                                    <Edit size={14} /> Edit Content
+                                                </button>
+                                                <button onClick={() => deleteProject(p.id)} style={{ ...btnModern, color: '#ff4d4d', padding: '0.5rem' }}>
+                                                    <Trash2 size={14} />
+                                                </button>
                                             </div>
                                         </div>
                                     ))}

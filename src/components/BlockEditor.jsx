@@ -1,24 +1,46 @@
 import React, { useState } from 'react';
+import {
+    Type,
+    Heading1,
+    Megaphone,
+    Image as ImageIcon,
+    FileImage,
+    Library,
+    Video,
+    Quote,
+    CheckSquare,
+    ExternalLink,
+    Calendar,
+    ListOrdered,
+    Columns,
+    Info,
+    Download,
+    Minus,
+    ArrowUp,
+    ArrowDown,
+    Trash2,
+    Plus
+} from 'lucide-react';
 
 // --- BLOCK CONFIG ---
 // Defines the structure and label for each block type
 const BLOCK_TYPES = [
-    { type: 'text', label: 'Texte / Paragraphe', icon: '📝' },
-    { type: 'title', label: 'Titre Fort', icon: 'H1' },
-    { type: 'statement', label: 'Statement (Gros Texte)', icon: '📢' },
-    { type: 'full-image', label: 'Image Plein Écran', icon: '🖼️' },
-    { type: 'image-caption', label: 'Image + Légende', icon: '🎑' },
-    { type: 'gallery', label: 'Galerie', icon: '📚' },
-    { type: 'video', label: 'Vidéo (Embed)', icon: '🎬' },
-    { type: 'quote', label: 'Citation', icon: '❝' },
-    { type: 'checklist', label: 'Checklist', icon: '✅' },
-    { type: 'link', label: 'Lien Externe', icon: '🔗' },
-    { type: 'timeline', label: 'Frise Chrono', icon: '📅' },
-    { type: 'steps', label: 'Étapes / Process', icon: '👣' },
-    { type: 'before-after', label: 'Avant / Après', icon: '🌗' },
-    { type: 'note', label: 'Note / Encadré', icon: '📝' },
-    { type: 'download', label: 'Fichier', icon: '💾' },
-    { type: 'separator', label: 'Séparateur', icon: '➖' },
+    { type: 'text', label: 'Texte / Paragraphe', icon: <Type size={16} /> },
+    { type: 'title', label: 'Titre Fort', icon: <Heading1 size={16} /> },
+    { type: 'statement', label: 'Statement (Gros Texte)', icon: <Megaphone size={16} /> },
+    { type: 'full-image', label: 'Image Plein Écran', icon: <ImageIcon size={16} /> },
+    { type: 'image-caption', label: 'Image + Légende', icon: <FileImage size={16} /> },
+    { type: 'gallery', label: 'Galerie', icon: <Library size={16} /> },
+    { type: 'video', label: 'Vidéo (Embed)', icon: <Video size={16} /> },
+    { type: 'quote', label: 'Citation', icon: <Quote size={16} /> },
+    { type: 'checklist', label: 'Checklist', icon: <CheckSquare size={16} /> },
+    { type: 'link', label: 'Lien Externe', icon: <ExternalLink size={16} /> },
+    { type: 'timeline', label: 'Frise Chrono', icon: <Calendar size={16} /> },
+    { type: 'steps', label: 'Étapes / Process', icon: <ListOrdered size={16} /> },
+    { type: 'before-after', label: 'Avant / Après', icon: <Columns size={16} /> },
+    { type: 'note', label: 'Note / Encadré', icon: <Info size={16} /> },
+    { type: 'download', label: 'Fichier', icon: <Download size={16} /> },
+    { type: 'separator', label: 'Séparateur', icon: <Minus size={16} /> },
 ];
 
 const BlockEditor = ({ blocks, onChange }) => {
@@ -67,9 +89,9 @@ const BlockEditor = ({ blocks, onChange }) => {
                                 {BLOCK_TYPES.find(t => t.type === block.type)?.label || block.type}
                             </span>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button type="button" onClick={() => moveBlock(index, 'up')} disabled={index === 0} style={actionBtnStyle}>⬆</button>
-                                <button type="button" onClick={() => moveBlock(index, 'down')} disabled={index === blocks.length - 1} style={actionBtnStyle}>⬇</button>
-                                <button type="button" onClick={() => removeBlock(block.id)} style={{ ...actionBtnStyle, color: 'red', borderColor: 'red' }}>🗑</button>
+                                <button type="button" onClick={() => moveBlock(index, 'up')} disabled={index === 0} style={actionBtnStyle}><ArrowUp size={14} /></button>
+                                <button type="button" onClick={() => moveBlock(index, 'down')} disabled={index === blocks.length - 1} style={actionBtnStyle}><ArrowDown size={14} /></button>
+                                <button type="button" onClick={() => removeBlock(block.id)} style={{ ...actionBtnStyle, color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.2)' }}><Trash2 size={14} /></button>
                             </div>
                         </div>
 

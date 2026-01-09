@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Check, ExternalLink, Download } from 'lucide-react';
 
 // STYLES
 const sectionStyle = {
@@ -93,7 +94,7 @@ const ChecklistBlock = ({ block }) => (
         <ul style={{ listStyle: 'none', padding: 0 }}>
             {block.content.items && block.content.items.map((item, i) => (
                 <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                    <span style={{ color: 'var(--color-accent)' }}>✓</span>
+                    <Check size={16} style={{ color: 'var(--color-accent)' }} />
                     <span style={{ color: item.done ? '#666' : '#fff', textDecoration: item.done ? 'line-through' : 'none' }}>{item.text}</span>
                 </li>
             ))}
@@ -104,7 +105,7 @@ const ChecklistBlock = ({ block }) => (
 const LinkBlock = ({ block }) => (
     <div style={sectionStyle}>
         <a href={block.content.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-            🔗 {block.content.text}
+            <ExternalLink size={16} /> {block.content.text}
         </a>
     </div>
 );
@@ -166,7 +167,7 @@ const NoteBlock = ({ block }) => (
 const DownloadBlock = ({ block }) => (
     <div style={sectionStyle}>
         <a href={block.content.url} download className="btn" style={{ background: '#222', border: '1px solid #444', display: 'inline-flex', alignItems: 'center', gap: '1rem', padding: '1rem 2rem' }}>
-            <span style={{ fontSize: '1.5rem' }}>⬇️</span>
+            <Download size={24} />
             <div style={{ textAlign: 'left' }}>
                 <span style={{ display: 'block', fontWeight: 'bold' }}>{block.content.label}</span>
                 <span style={{ fontSize: '0.8rem', color: '#888' }}>{block.content.info}</span>
