@@ -33,12 +33,16 @@ const Contact = () => {
 
             // 1. Send NOTIFICATION to ADMIN
             const adminParams = {
-                name: `${formData.name} <${formData.email}>`,
-                title: 'Nouveau message reçu - Contact',
+                name: String(formData.name),
+                message: String(formData.message),
+                time: new Date().toLocaleString('fr-FR', {
+                    day: 'numeric', month: 'long', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                }),
                 customer_email: 'rustikop@outlook.fr',
                 to_email: 'rustikop@outlook.fr',
                 email: 'rustikop@outlook.fr',
-                message: `Vous avez reçu un nouveau message de ${formData.name}.\n\nCONTENU :\n"${formData.message}"`
+                title: 'Nouveau message reçu - Contact'
             };
 
             const adminRes = await fetch('/api/send-email', {

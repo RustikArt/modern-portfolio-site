@@ -252,7 +252,7 @@ const Dashboard = () => {
                         <h1 style={{ fontSize: '2.5rem', margin: 0, fontWeight: '900', letterSpacing: '-2px', textTransform: 'uppercase' }}>
                             Admin <span style={{ color: 'var(--color-accent)' }}>Panel</span>
                         </h1>
-                        <p style={{ color: '#444', margin: '5px 0 0', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.7rem' }}>Version 2.4 Hybrid View</p>
+                        <p style={{ color: '#444', margin: '5px 0 0', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.7rem' }}>Version 2.7 Communication & Payment Pro</p>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>

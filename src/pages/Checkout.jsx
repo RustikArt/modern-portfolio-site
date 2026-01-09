@@ -3,7 +3,7 @@ import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
-    const { cart, currentUser, placeOrder, getCartTotal, promoCodes } = useData();
+    const { cart, currentUser, placeOrder, getCartTotal, promoCodes, sendOrderConfirmation } = useData();
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [shipping, setShipping] = useState({ address: '', city: '', zip: '', country: '' });
@@ -17,6 +17,8 @@ const Checkout = () => {
 
     // Success Popup State
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [lastCreatedOrder, setLastCreatedOrder] = useState(null);
+    const [receiptStatus, setReceiptStatus] = useState('idle'); // idle, sent
 
     // Handle Success Return from Stripe (Early in component to catch params)
     useEffect(() => {
@@ -46,7 +48,8 @@ const Checkout = () => {
             setShowSuccessModal(true);
 
             // Create order with DISCOUNTED total
-            placeOrder(finalShipping, { id: 'STRIPE_SUCCESS', status: 'COMPLETED' }, finalTotal);
+            const order = placeOrder(finalShipping, { id: 'STRIPE_SUCCESS', status: 'COMPLETED' }, finalTotal);
+            setLastCreatedOrder(order);
 
             // Clean up
             window.history.replaceState({}, '', '/checkout');
@@ -54,6 +57,13 @@ const Checkout = () => {
             localStorage.removeItem('last_promo');
         }
     }, [getCartTotal, placeOrder, shipping]);
+
+    const handleResendReceipt = async () => {
+        if (!lastCreatedOrder) return;
+        setReceiptStatus('sending');
+        await sendOrderConfirmation(lastCreatedOrder);
+        setReceiptStatus('sent');
+    };
 
     if (cart.length === 0 && !showSuccessModal && !hasProcessed.current) {
         return (
@@ -285,9 +295,32 @@ const Checkout = () => {
 
                         <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1rem', letterSpacing: '-1.5px' }}>PAIEMENT RÉUSSI</h2>
                         <p style={{ color: '#888', marginBottom: '1rem', fontSize: '1.1rem' }}>Votre commande a été enregistrée avec succès.</p>
-                        <p style={{ color: 'var(--color-accent)', marginBottom: '2.5rem', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                        <p style={{ color: 'var(--color-accent)', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 'bold' }}>
                             ⚠️ PENSEZ À VÉRIFIER VOS MAILS (ET VOS SPAMS)
                         </p>
+
+                        <div style={{ marginBottom: '2.5rem' }}>
+                            <button
+                                onClick={handleResendReceipt}
+                                className="btn"
+                                style={{
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '30px',
+                                    padding: '0.6rem 1.5rem',
+                                    fontSize: '0.8rem',
+                                    color: receiptStatus === 'sent' ? 'var(--color-accent)' : 'white'
+                                }}
+                                disabled={receiptStatus === 'sending'}
+                            >
+                                {receiptStatus === 'sending' ? 'Envoi...' : receiptStatus === 'sent' ? 'Renvoyer le reçu' : 'Envoyer le reçu'}
+                            </button>
+                            {receiptStatus === 'sent' && (
+                                <p style={{ color: '#4caf50', fontSize: '0.75rem', marginTop: '0.8rem' }}>
+                                    ✓ Le reçu a bien été envoyé à {lastCreatedOrder?.email}
+                                </p>
+                            )}
+                        </div>
 
                         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', textAlign: 'left', marginBottom: '3rem' }}>
                             <div style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '1.5px' }}>Confirmation</div>

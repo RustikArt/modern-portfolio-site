@@ -323,7 +323,8 @@ export const DataProvider = ({ children }) => {
 
     const sendOrderConfirmation = async (order) => {
         const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-        const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+        // Prioritize specific order template, fallback to general template
+        const templateId = import.meta.env.VITE_EMAILJS_ORDER_TEMPLATE_ID || 'template_ez20ag4';
         const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
         const itemsSummary = order.items.map(i => `${i.name} x${i.quantity}`).join(', ');
@@ -336,12 +337,20 @@ export const DataProvider = ({ children }) => {
         const templateParams = {
             order_id: String(order.id).slice(-6),
             name: String(order.customerName),
-            title: `Confirmation de commande #${String(order.id).slice(-6)}`,
-            customer_email: String(order.email),
-            to_email: String(order.email),
             email: String(order.email),
-            order_total: String(order.total),
-            message: `Bonjour ${order.customerName},\n\nNous avons le plaisir de vous confirmer la bonne réception de votre commande #${String(order.id).slice(-6)}.\n\nPRODUITS : ${itemsSummary}\nTOTAL : ${order.total}€\n\nNotre équipe commence dès maintenant la préparation de votre projet. Vous pouvez suivre l'avancement en temps réel sur votre espace client : https://artisanat-digital.vercel.app/profile\n\nMerci de votre confiance,\nL'équipe Artisanat Digital.`
+            to_email: String(order.email),
+            cost: {
+                total: String(order.total)
+            },
+            ordres: order.items.map(item => ({
+                nom: item.name,
+                units: item.quantity,
+                price: item.price,
+                image_url: item.image
+            })),
+            // Keeping legacy fields for safety
+            title: `Confirmation de commande #${String(order.id).slice(-6)}`,
+            order_total: String(order.total)
         };
 
         try {
@@ -415,6 +424,7 @@ export const DataProvider = ({ children }) => {
 
             // Orders
             orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes,
+            sendOrderConfirmation,
 
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode,
