@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import AnnouncementBanner from './components/AnnouncementBanner';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
 import Shop from './pages/Shop';
@@ -22,6 +23,7 @@ import ProjectDetail from './pages/ProjectDetail';
 function App() {
   return (
     <DataProvider>
+      <AnnouncementBanner />
       <Navbar />
       <main>
         <Routes>

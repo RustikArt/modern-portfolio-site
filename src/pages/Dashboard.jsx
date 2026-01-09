@@ -14,16 +14,18 @@ import {
     Globe,
     ChevronDown,
     ChevronUp,
-    MapPin,
-    CheckCircle2,
-    Clock,
-    AlertCircle,
-    Check,
     Plus,
     Trash2,
     Edit,
     Save,
-    FileCode
+    FileCode,
+    Bell,
+    Settings,
+    X,
+    Mail,
+    UserPlus,
+    ShoppingCart,
+    Timer
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -32,10 +34,13 @@ const Dashboard = () => {
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
         updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode,
-        secureFullReset, logout
+        secureFullReset, logout,
+        announcement, updateAnnouncement,
+        notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead
     } = useData();
 
     const [showVersionDetails, setShowVersionDetails] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const [activeTab, setActiveTab] = useState('orders');
     const [expandedOrders, setExpandedOrders] = useState({});
     const navigate = useNavigate();
@@ -66,6 +71,8 @@ const Dashboard = () => {
 
     const [optionBuilder, setOptionBuilder] = useState({ name: '', type: 'select', valuesInput: '' });
     const [promoForm, setPromoForm] = useState({ code: '', type: 'percent', value: '' });
+
+    const [announcementForm, setAnnouncementForm] = useState({ ...announcement });
 
     const handleLogout = () => {
         logout();
@@ -310,7 +317,100 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                        {/* Notification Bell */}
+                        <div style={{ position: 'relative' }}>
+                            <button
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: showNotifications ? 'var(--color-accent)' : '#888',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    transition: 'color 0.3s'
+                                }}
+                            >
+                                <Bell size={24} />
+                                {notifications.filter(n => !n.isRead).length > 0 && (
+                                    <span style={{
+                                        position: 'absolute',
+                                        top: '-5px',
+                                        right: '-5px',
+                                        background: '#ff4d4d',
+                                        color: 'white',
+                                        fontSize: '0.6rem',
+                                        padding: '2px 5px',
+                                        borderRadius: '10px',
+                                        fontWeight: 'bold',
+                                        border: '2px solid #050505'
+                                    }}>
+                                        {notifications.filter(n => !n.isRead).length}
+                                    </span>
+                                )}
+                            </button>
+
+                            {showNotifications && (
+                                <div className="glass animate-fade-in" style={{
+                                    position: 'absolute',
+                                    top: '40px',
+                                    right: 0,
+                                    width: '350px',
+                                    maxHeight: '500px',
+                                    zIndex: 1000,
+                                    padding: '1.5rem',
+                                    overflowY: 'auto'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #222', paddingBottom: '0.8rem' }}>
+                                        <h4 style={{ margin: 0, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Notifications</h4>
+                                        <button
+                                            onClick={markAllNotificationsAsRead}
+                                            style={{ background: 'none', border: 'none', color: 'var(--color-accent)', fontSize: '0.7rem', cursor: 'pointer' }}
+                                        >
+                                            Tout lire
+                                        </button>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                        {notifications.length === 0 ? (
+                                            <p style={{ textAlign: 'center', color: '#444', fontSize: '0.8rem', padding: '2rem 0' }}>Aucune notification</p>
+                                        ) : (
+                                            notifications.map(n => (
+                                                <div key={n.id} style={{
+                                                    background: n.isRead ? 'rgba(255,255,255,0.01)' : 'rgba(212,175,55,0.05)',
+                                                    padding: '1rem',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid',
+                                                    borderColor: n.isRead ? 'rgba(255,255,255,0.03)' : 'rgba(212,175,55,0.1)',
+                                                    display: 'flex',
+                                                    gap: '1rem',
+                                                    position: 'relative'
+                                                }}>
+                                                    <div style={{ color: n.isRead ? '#444' : 'var(--color-accent)' }}>
+                                                        {n.type === 'order' && <ShoppingCart size={18} />}
+                                                        {n.type === 'account' && <UserPlus size={18} />}
+                                                        {n.type === 'contact' && <Mail size={18} />}
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <p style={{ fontSize: '0.8rem', margin: '0 0 0.3rem', color: n.isRead ? '#888' : '#eee' }}>{n.message}</p>
+                                                        <span style={{ fontSize: '0.65rem', color: '#444' }}>{new Date(n.date).toLocaleString('fr-FR')}</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
+                                                        style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', padding: '5px' }}
+                                                        onMouseEnter={e => e.target.style.color = '#ff4d4d'}
+                                                        onMouseLeave={e => e.target.style.color = '#444'}
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <button onClick={handleFullReset} style={{ background: 'transparent', border: '1px solid #441111', color: '#ff4d4d', borderRadius: '4px', padding: '0.4rem 0.8rem', fontSize: '0.7rem', cursor: 'pointer' }}>
                             WIPE DATA
                         </button>
@@ -362,6 +462,15 @@ const Dashboard = () => {
                             style={{ ...sideBtnStyle('projects'), justifyContent: 'flex-start' }}
                         >
                             <Palette size={18} /> Portfolio
+                        </button>
+
+                        <div style={{ margin: '1rem 0', borderBottom: '1px solid #111' }}></div>
+
+                        <button
+                            onClick={() => setActiveTab('settings')}
+                            style={{ ...sideBtnStyle('settings'), justifyContent: 'flex-start' }}
+                        >
+                            <Settings size={18} /> Configuration
                         </button>
 
                         <div style={{ marginTop: 'auto', padding: '1.5rem', background: '#0a0a0a', borderRadius: '12px', border: '1px solid #111', fontSize: '0.8rem', color: '#444' }}>
@@ -697,6 +806,157 @@ const Dashboard = () => {
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* --- SETTINGS TAB --- */}
+                        {activeTab === 'settings' && (
+                            <div className="animate-in">
+                                <section style={cardStyle}>
+                                    <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <Globe size={24} /> Banderole d'annonce
+                                    </h2>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={announcementForm.isActive}
+                                                    onChange={e => setAnnouncementForm({ ...announcementForm, isActive: e.target.checked })}
+                                                    style={{ width: '20px', height: '20px' }}
+                                                />
+                                                <label>Activer la banderole</label>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Texte de l'annonce</label>
+                                                <textarea
+                                                    value={announcementForm.text}
+                                                    onChange={e => setAnnouncementForm({ ...announcementForm, text: e.target.value })}
+                                                    style={{ ...inputStyle, minHeight: '80px' }}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hyperlien (optionnel)</label>
+                                                <input
+                                                    type="text"
+                                                    value={announcementForm.link}
+                                                    onChange={e => setAnnouncementForm({ ...announcementForm, link: e.target.value })}
+                                                    style={inputStyle}
+                                                    placeholder="https://..."
+                                                />
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Fond (Hex)</label>
+                                                    <input
+                                                        type="color"
+                                                        value={announcementForm.bgColor}
+                                                        onChange={e => setAnnouncementForm({ ...announcementForm, bgColor: e.target.value })}
+                                                        style={{ ...inputStyle, height: '40px', padding: '2px' }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Texte (Hex)</label>
+                                                    <input
+                                                        type="color"
+                                                        value={announcementForm.textColor}
+                                                        onChange={e => setAnnouncementForm({ ...announcementForm, textColor: e.target.value })}
+                                                        style={{ ...inputStyle, height: '40px', padding: '2px' }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Style de police</label>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <button
+                                                            onClick={() => setAnnouncementForm({ ...announcementForm, fontWeight: announcementForm.fontWeight === 'bold' ? 'normal' : 'bold' })}
+                                                            style={{ ...btnModern, flex: 1, justifyContent: 'center', background: announcementForm.fontWeight === 'bold' ? 'white' : 'rgba(255,255,255,0.05)', color: announcementForm.fontWeight === 'bold' ? 'black' : '#888' }}
+                                                        >
+                                                            Gras
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setAnnouncementForm({ ...announcementForm, fontStyle: announcementForm.fontStyle === 'italic' ? 'normal' : 'italic' })}
+                                                            style={{ ...btnModern, flex: 1, justifyContent: 'center', background: announcementForm.fontStyle === 'italic' ? 'white' : 'rgba(255,255,255,0.05)', color: announcementForm.fontStyle === 'italic' ? 'black' : '#888' }}
+                                                        >
+                                                            Italique
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hauteur (ex: 40px)</label>
+                                                    <input
+                                                        type="text"
+                                                        value={announcementForm.height}
+                                                        onChange={e => setAnnouncementForm({ ...announcementForm, height: e.target.value })}
+                                                        style={inputStyle}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div style={{ marginTop: '2rem' }}>
+                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '1rem' }}>Aperçu du rendu :</label>
+                                                <div style={{
+                                                    background: announcementForm.bgColor,
+                                                    color: announcementForm.textColor,
+                                                    height: announcementForm.height,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    borderRadius: '8px',
+                                                    fontWeight: announcementForm.fontWeight,
+                                                    fontStyle: announcementForm.fontStyle,
+                                                    fontSize: '0.8rem',
+                                                    padding: '0 1rem',
+                                                    textAlign: 'center'
+                                                }}>
+                                                    {announcementForm.text || 'Texte de votre annonce...'}
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', paddingBottom: '0.8rem' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={announcementForm.showTimer}
+                                                        onChange={e => setAnnouncementForm({ ...announcementForm, showTimer: e.target.checked })}
+                                                        style={{ width: '18px', height: '18px' }}
+                                                    />
+                                                    <label style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <Timer size={16} /> Afficher un compte à rebours
+                                                    </label>
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Date de fin (Timer)</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={announcementForm.timerEnd}
+                                                        onChange={e => setAnnouncementForm({ ...announcementForm, timerEnd: e.target.value })}
+                                                        style={inputStyle}
+                                                        disabled={!announcementForm.showTimer}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                onClick={() => {
+                                                    updateAnnouncement(announcementForm);
+                                                    alert("Configuration de la banderole enregistrée.");
+                                                }}
+                                                style={{ ...btnPrimaryModern, marginTop: 'auto', width: '100%', justifyContent: 'center' }}
+                                            >
+                                                <Save size={18} /> Appliquer les changements
+                                            </button>
+                                        </div>
+                                    </div>
+                                </section>
                             </div>
                         )}
                     </main>

@@ -97,13 +97,27 @@ export const DataProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : [];
     });
 
-    // Phase 4: Promo Codes State
-    const [promoCodes, setPromoCodes] = useState(() => {
-        const saved = localStorage.getItem('portfolio_promoCodes');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, code: 'WELCOME10', type: 'percent', value: 10 }, // Example code
-            { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
-        ];
+    // Announcement Banner State
+    const [announcement, setAnnouncement] = useState(() => {
+        const saved = localStorage.getItem('portfolio_announcement');
+        return saved ? JSON.parse(saved) : {
+            text: 'Bienvenue sur Rustikop ! Découvrez nos nouveaux services.',
+            bgColor: '#d4af37',
+            textColor: '#000000',
+            height: '40px',
+            link: '',
+            isActive: false,
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            showTimer: false,
+            timerEnd: ''
+        };
+    });
+
+    // Admin Notifications State
+    const [notifications, setNotifications] = useState(() => {
+        const saved = localStorage.getItem('portfolio_notifications');
+        return saved ? JSON.parse(saved) : [];
     });
 
     // --- PERSISTENCE ---
@@ -152,6 +166,14 @@ export const DataProvider = ({ children }) => {
         localStorage.setItem('portfolio_promoCodes', JSON.stringify(promoCodes));
     }, [promoCodes]);
 
+    useEffect(() => {
+        localStorage.setItem('portfolio_announcement', JSON.stringify(announcement));
+    }, [announcement]);
+
+    useEffect(() => {
+        localStorage.setItem('portfolio_notifications', JSON.stringify(notifications));
+    }, [notifications]);
+
 
     // --- ACTIONS ---
 
@@ -179,6 +201,10 @@ export const DataProvider = ({ children }) => {
         const newUser = { id: Date.now(), email: cleanEmail, password: cleanPassword, name, role: 'client' };
         setUsers([...users, newUser]);
         setCurrentUser(newUser);
+
+        // Notify Admin
+        addNotification('account', `Nouveau compte créé : ${name} (${cleanEmail})`);
+
         return { success: true };
     };
 
@@ -299,6 +325,9 @@ export const DataProvider = ({ children }) => {
         setOrders([newOrder, ...orders]);
         clearCart();
 
+        // Notify Admin
+        addNotification('order', `Nouvelle commande de ${currentUser.name} (${newOrder.total}€)`);
+
         // Automatic EmailJS Trigger
         sendOrderConfirmation(newOrder);
 
@@ -392,12 +421,41 @@ export const DataProvider = ({ children }) => {
         if (password === 'admin123') {
             // Selective Wipe
             setOrders([]);
+            setNotifications([]); // Clear notifications on reset
             setUsers(users.filter(u => u.role === 'admin')); // Keep only admins
             // We usually keep products and promoCodes as they are hard to rebuild
             alert("Données réinitialisées (Commandes et clients supprimés).");
             return true;
         }
         return false;
+    };
+
+    // --- ANNOUNCEMENT & NOTIFICATIONS ACTIONS ---
+    const updateAnnouncement = (config) => {
+        setAnnouncement(prev => ({ ...prev, ...config }));
+    };
+
+    const addNotification = (type, message) => {
+        const newNotif = {
+            id: Date.now().toString(),
+            type, // 'order', 'account', 'contact'
+            message,
+            date: new Date().toISOString(),
+            isRead: false
+        };
+        setNotifications(prev => [newNotif, ...prev]);
+    };
+
+    const markNotificationAsRead = (id) => {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    };
+
+    const deleteNotification = (id) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+    };
+
+    const markAllNotificationsAsRead = () => {
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     };
 
 
@@ -421,10 +479,14 @@ export const DataProvider = ({ children }) => {
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode,
 
+            // Announcement
+            announcement, updateAnnouncement,
+
+            // Notifications
+            notifications, addNotification, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
+
             // Admin Actions
             secureFullReset
-
-
         }}>
             {children}
         </DataContext.Provider>

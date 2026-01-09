@@ -4,7 +4,7 @@ import './Contact.css';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 const Contact = () => {
-    const { currentUser } = useData();
+    const { currentUser, addNotification } = useData();
     const [formData, setFormData] = useState({
         name: currentUser ? currentUser.name : '',
         email: currentUser ? currentUser.email : '',
@@ -57,6 +57,9 @@ const Contact = () => {
             if (adminRes.ok) {
                 setStatus('success');
                 setFormData({ ...formData, message: '' });
+
+                // Notify Admin
+                addNotification('contact', `Nouveau message de ${formData.name}`);
             } else {
                 setStatus('error');
             }
