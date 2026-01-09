@@ -14,40 +14,502 @@ const initialProjects = [
 ];
 
 const initialProducts = [
+    // ==================== GRAPHISME ====================
     {
-        id: 1,
-        name: 'Pack Icones Minimal',
-        price: 29,
-        promoPrice: 19, // New Phase 3 field
-        isFeatured: true, // New Phase 3 field
-        image: 'https://placehold.co/400x400/222/FFF?text=Icones',
-        category: 'Design Assets',
-        tags: ['icones', 'svg', 'minimal'],
-        options: []
-    },
-    {
-        id: 2,
-        name: 'Template Notion',
-        price: 19,
-        promoPrice: null,
-        isFeatured: false,
-        image: 'https://placehold.co/400x400/252525/FFF?text=Notion',
-        category: 'Productivity',
-        tags: ['notion', 'template', 'organisation'],
-        options: [{ name: 'Style', values: ['Dark', 'Light'] }]
-    },
-    {
-        id: 3,
-        name: 'UI Kit Dark Mode',
-        price: 49,
+        id: 101,
+        name: 'Création de Logo',
+        price: 350,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/1a1a1a/FFF?text=UI+Kit',
-        category: 'Design Assets',
-        tags: ['figma', 'ui', 'darkmode'],
-        options: [{ name: 'Licence', values: ['Perso', 'Commercial'] }]
+        image: 'https://placehold.co/400x400/1a1a1a/d4af37?text=LOGO',
+        category: 'Graphisme',
+        tags: ['logo', 'branding', 'identité visuelle', 'entreprise', 'création'],
+        options: [
+            { name: 'Style', type: 'select', values: [{ label: 'Minimaliste', priceModifier: 0 }, { label: 'Illustratif', priceModifier: 150 }, { label: 'Typographique', priceModifier: 50 }] },
+            { name: 'Révisions', type: 'select', values: [{ label: '2 révisions', priceModifier: 0 }, { label: '5 révisions', priceModifier: 100 }, { label: 'Illimitées', priceModifier: 250 }] },
+            { name: 'Charte graphique', type: 'select', values: [{ label: 'Sans', priceModifier: 0 }, { label: 'Simplifiée', priceModifier: 150 }] }
+        ]
     },
+    {
+        id: 102,
+        name: 'Identité Visuelle Complète',
+        price: 1500,
+        promoPrice: 1350,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/0f0f0f/d4af37?text=BRANDING',
+        category: 'Graphisme',
+        tags: ['branding', 'identité visuelle', 'charte graphique', 'entreprise', 'design'],
+        options: [
+            { name: 'Pack', type: 'select', values: [{ label: 'Essentiel', priceModifier: 0 }, { label: 'Premium', priceModifier: 800 }, { label: 'Complet', priceModifier: 1500 }] },
+            { name: 'Cartes de visite', type: 'select', values: [{ label: 'Non incluses', priceModifier: 0 }, { label: 'Design inclus', priceModifier: 100 }] }
+        ]
+    },
+    {
+        id: 103,
+        name: 'Bannière / Header Web',
+        price: 75,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/151515/fff?text=BANNER',
+        category: 'Graphisme',
+        tags: ['bannière', 'header', 'webdesign', 'publicité', 'réseaux sociaux'],
+        options: [
+            { name: 'Format', type: 'select', values: [{ label: 'Statique', priceModifier: 0 }, { label: 'Animé GIF', priceModifier: 50 }] },
+            { name: 'Plateformes', type: 'select', values: [{ label: '1 plateforme', priceModifier: 0 }, { label: 'Multi-plateformes', priceModifier: 40 }] }
+        ]
+    },
+    {
+        id: 104,
+        name: 'Pack Réseaux Sociaux',
+        price: 250,
+        promoPrice: 199,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/1f1f1f/d4af37?text=SOCIAL',
+        category: 'Graphisme',
+        tags: ['réseaux sociaux', 'marketing digital', 'contenu', 'branding', 'instagram'],
+        options: [
+            { name: 'Nombre de visuels', type: 'select', values: [{ label: '5 visuels', priceModifier: 0 }, { label: '10 visuels', priceModifier: 150 }, { label: '20 visuels', priceModifier: 350 }] },
+            { name: 'Stories incluses', type: 'select', values: [{ label: 'Non', priceModifier: 0 }, { label: 'Oui (+5)', priceModifier: 80 }] }
+        ]
+    },
+    {
+        id: 105,
+        name: 'Carte de Visite',
+        price: 90,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/222/fff?text=CARTE',
+        category: 'Graphisme',
+        tags: ['carte de visite', 'papeterie', 'branding', 'professionnel', 'impression'],
+        options: [
+            { name: 'Face', type: 'select', values: [{ label: 'Recto seul', priceModifier: 0 }, { label: 'Recto/Verso', priceModifier: 40 }] },
+            { name: 'Finition', type: 'select', values: [{ label: 'Mat', priceModifier: 0 }, { label: 'Brillant', priceModifier: 15 }, { label: 'Soft-touch', priceModifier: 30 }] }
+        ]
+    },
+    {
+        id: 106,
+        name: 'Affiche / Poster Digital',
+        price: 65,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/181818/fff?text=AFFICHE',
+        category: 'Graphisme',
+        tags: ['affiche', 'poster', 'événement', 'publicité', 'décoration'],
+        options: [
+            { name: 'Format', type: 'select', values: [{ label: 'A4', priceModifier: 0 }, { label: 'A3', priceModifier: 20 }, { label: 'A2', priceModifier: 40 }] },
+            { name: 'Style', type: 'select', values: [{ label: 'Moderne', priceModifier: 0 }, { label: 'Vintage', priceModifier: 15 }, { label: 'Artistique', priceModifier: 25 }] }
+        ]
+    },
+    {
+        id: 107,
+        name: 'Infographie',
+        price: 280,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/141414/d4af37?text=INFOGRAPHIE',
+        category: 'Graphisme',
+        tags: ['infographie', 'données', 'éducation', 'marketing', 'information'],
+        options: [
+            { name: 'Complexité', type: 'select', values: [{ label: 'Simple', priceModifier: 0 }, { label: 'Moyenne', priceModifier: 100 }, { label: 'Complexe', priceModifier: 220 }] }
+        ]
+    },
+    {
+        id: 108,
+        name: 'Design Packaging',
+        price: 450,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1c1c1c/fff?text=PACKAGING',
+        category: 'Graphisme',
+        tags: ['packaging', 'produit', 'marque', 'design', 'étiquette'],
+        options: [
+            { name: 'Type', type: 'select', values: [{ label: 'Étiquette simple', priceModifier: 0 }, { label: 'Boîte complète', priceModifier: 350 }] },
+            { name: 'Maquette 3D', type: 'select', values: [{ label: 'Non', priceModifier: 0 }, { label: 'Oui', priceModifier: 100 }] }
+        ]
+    },
+    {
+        id: 109,
+        name: 'Template Présentation',
+        price: 180,
+        promoPrice: 149,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1e1e1e/fff?text=PPT',
+        category: 'Graphisme',
+        tags: ['présentation', 'business', 'modèle', 'powerpoint', 'slides'],
+        options: [
+            { name: 'Slides', type: 'select', values: [{ label: '10 slides', priceModifier: 0 }, { label: '20 slides', priceModifier: 100 }, { label: '40 slides', priceModifier: 250 }] },
+            { name: 'Format', type: 'select', values: [{ label: 'PowerPoint', priceModifier: 0 }, { label: 'Google Slides', priceModifier: 0 }, { label: 'Keynote', priceModifier: 20 }] }
+        ]
+    },
+
+    // ==================== ILLUSTRATION ====================
+    {
+        id: 201,
+        name: 'Portrait Illustré Personnalisé',
+        price: 85,
+        promoPrice: null,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/2a1a1a/d4af37?text=PORTRAIT',
+        category: 'Illustration',
+        tags: ['illustration', 'portrait', 'personnalisé', 'cadeau', 'famille'],
+        options: [
+            { name: 'Style', type: 'select', values: [{ label: 'Cartoon', priceModifier: 0 }, { label: 'Semi-réaliste', priceModifier: 30 }, { label: 'Réaliste', priceModifier: 65 }] },
+            { name: 'Sujets', type: 'select', values: [{ label: '1 personne', priceModifier: 0 }, { label: '2 personnes', priceModifier: 40 }, { label: 'Famille (+3)', priceModifier: 80 }] },
+            { name: 'Arrière-plan', type: 'select', values: [{ label: 'Simple', priceModifier: 0 }, { label: 'Détaillé', priceModifier: 35 }] }
+        ]
+    },
+    {
+        id: 202,
+        name: 'Illustration Éditoriale',
+        price: 350,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a2020/fff?text=EDITORIAL',
+        category: 'Illustration',
+        tags: ['illustration', 'éditorial', 'livre', 'article', 'média'],
+        options: [
+            { name: 'Complexité', type: 'select', values: [{ label: 'Scène simple', priceModifier: 0 }, { label: 'Scène détaillée', priceModifier: 200 }, { label: 'Multi-personnages', priceModifier: 400 }] },
+            { name: 'Droits', type: 'select', values: [{ label: 'Web uniquement', priceModifier: 0 }, { label: 'Print + Web', priceModifier: 150 }] }
+        ]
+    },
+    {
+        id: 203,
+        name: 'Pack Icônes Custom',
+        price: 55,
+        promoPrice: 45,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a1a2a/d4af37?text=ICONES',
+        category: 'Illustration',
+        tags: ['illustration', 'icônes', 'UI/UX', 'web', 'application'],
+        options: [
+            { name: 'Quantité', type: 'select', values: [{ label: '10 icônes', priceModifier: 0 }, { label: '25 icônes', priceModifier: 35 }, { label: '50 icônes', priceModifier: 70 }] },
+            { name: 'Style', type: 'select', values: [{ label: 'Flat', priceModifier: 0 }, { label: 'Line', priceModifier: 0 }, { label: '3D', priceModifier: 25 }] }
+        ]
+    },
+    {
+        id: 204,
+        name: 'Illustration T-shirt / Merch',
+        price: 120,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/202020/fff?text=MERCH',
+        category: 'Illustration',
+        tags: ['illustration', 't-shirt', 'merchandising', 'vêtements', 'design'],
+        options: [
+            { name: 'Complexité', type: 'select', values: [{ label: 'Simple', priceModifier: 0 }, { label: 'Détaillé', priceModifier: 80 }] },
+            { name: 'Licence', type: 'select', values: [{ label: 'Usage personnel', priceModifier: 0 }, { label: 'Commercial (100 pcs)', priceModifier: 100 }, { label: 'Commercial illimité', priceModifier: 250 }] }
+        ]
+    },
+    {
+        id: 205,
+        name: 'Design pour Tatouage',
+        price: 95,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/0a0a0a/fff?text=TATTOO',
+        category: 'Illustration',
+        tags: ['illustration', 'tatouage', 'art corporel', 'design', 'personnalisé'],
+        options: [
+            { name: 'Style', type: 'select', values: [{ label: 'Minimaliste', priceModifier: 0 }, { label: 'Traditionnel', priceModifier: 30 }, { label: 'Réaliste', priceModifier: 80 }, { label: 'Géométrique', priceModifier: 40 }] },
+            { name: 'Taille', type: 'select', values: [{ label: 'Petit (5-10cm)', priceModifier: 0 }, { label: 'Moyen (15-20cm)', priceModifier: 50 }, { label: 'Grand (30cm+)', priceModifier: 100 }] }
+        ]
+    },
+    {
+        id: 206,
+        name: 'Carte Postale Illustrée',
+        price: 40,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a1a1a/fff?text=POSTCARD',
+        category: 'Illustration',
+        tags: ['illustration', 'carte postale', 'voyage', 'fêtes', 'cadeau'],
+        options: [
+            { name: 'Thème', type: 'select', values: [{ label: 'Voyage', priceModifier: 0 }, { label: 'Anniversaire', priceModifier: 0 }, { label: 'Noël/Fêtes', priceModifier: 0 }, { label: 'Personnalisé', priceModifier: 20 }] }
+        ]
+    },
+
+    // ==================== PHOTOGRAPHIE ====================
+    {
+        id: 301,
+        name: "Tirage Photo Fine Art",
+        price: 120,
+        promoPrice: null,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/1a1a1a/d4af37?text=FINE+ART',
+        category: 'Photographie',
+        tags: ['photographie', 'art', 'tirage', 'décoration', 'paysage'],
+        options: [
+            { name: 'Format', type: 'select', values: [{ label: 'A4 (21x30cm)', priceModifier: 0 }, { label: 'A3 (30x42cm)', priceModifier: 60 }, { label: '50x70cm', priceModifier: 150 }, { label: '70x100cm', priceModifier: 280 }] },
+            { name: 'Papier', type: 'select', values: [{ label: 'Mat Hahnemühle', priceModifier: 0 }, { label: 'Brillant Pro', priceModifier: 20 }, { label: 'Texturé Aquarelle', priceModifier: 40 }] },
+            { name: 'Édition', type: 'select', values: [{ label: 'Ouverte', priceModifier: 0 }, { label: 'Limitée (30ex)', priceModifier: 100 }, { label: 'Limitée signée (10ex)', priceModifier: 200 }] }
+        ]
+    },
+    {
+        id: 302,
+        name: 'Licence Photo Stock',
+        price: 45,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/222/fff?text=STOCK',
+        category: 'Photographie',
+        tags: ['photographie', 'stock', 'licence', 'commercial', 'web'],
+        options: [
+            { name: 'Licence', type: 'select', values: [{ label: 'Standard (web)', priceModifier: 0 }, { label: 'Étendue (print)', priceModifier: 80 }, { label: 'Exclusive', priceModifier: 300 }] },
+            { name: 'Résolution', type: 'select', values: [{ label: 'Web (1920px)', priceModifier: 0 }, { label: 'HD (4000px)', priceModifier: 30 }, { label: 'RAW', priceModifier: 60 }] }
+        ]
+    },
+    {
+        id: 303,
+        name: 'Séance Photo Portrait',
+        price: 250,
+        promoPrice: null,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/151515/d4af37?text=PORTRAIT',
+        category: 'Photographie',
+        tags: ['photographie', 'portrait', 'service', 'professionnel', 'studio'],
+        options: [
+            { name: 'Durée', type: 'select', values: [{ label: '30 min', priceModifier: 0 }, { label: '1 heure', priceModifier: 150 }, { label: '2 heures', priceModifier: 350 }] },
+            { name: 'Photos livrées', type: 'select', values: [{ label: '5 photos retouchées', priceModifier: 0 }, { label: '15 photos retouchées', priceModifier: 100 }, { label: 'Toutes les photos', priceModifier: 200 }] },
+            { name: 'Lieu', type: 'select', values: [{ label: 'Studio', priceModifier: 0 }, { label: 'Extérieur (Paris)', priceModifier: 50 }] }
+        ]
+    },
+    {
+        id: 304,
+        name: 'Pack Photos Voyage',
+        price: 35,
+        promoPrice: 25,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a2a2a/fff?text=VOYAGE',
+        category: 'Photographie',
+        tags: ['photographie', 'voyage', 'paysage', 'nature', 'digital'],
+        options: [
+            { name: 'Nombre', type: 'select', values: [{ label: '5 photos', priceModifier: 0 }, { label: '10 photos', priceModifier: 25 }, { label: '20 photos', priceModifier: 55 }] }
+        ]
+    },
+
+    // ==================== VIDÉO & MUSIQUE ====================
+    {
+        id: 401,
+        name: 'Montage Vidéo Réels/TikTok',
+        price: 95,
+        promoPrice: null,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/1a1a2a/d4af37?text=REELS',
+        category: 'Vidéo & Musique',
+        tags: ['vidéo', 'réseaux sociaux', 'TikTok', 'Instagram', 'montage'],
+        options: [
+            { name: 'Durée', type: 'select', values: [{ label: '15 secondes', priceModifier: 0 }, { label: '30 secondes', priceModifier: 40 }, { label: '60 secondes', priceModifier: 80 }] },
+            { name: 'Sous-titres', type: 'select', values: [{ label: 'Sans', priceModifier: 0 }, { label: 'Avec animation', priceModifier: 30 }] },
+            { name: 'Révisions', type: 'select', values: [{ label: '1 révision', priceModifier: 0 }, { label: '3 révisions', priceModifier: 25 }] }
+        ]
+    },
+    {
+        id: 402,
+        name: 'Motion Design Animation',
+        price: 380,
+        promoPrice: null,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/2a1a2a/d4af37?text=MOTION',
+        category: 'Vidéo & Musique',
+        tags: ['vidéo', 'animation', 'motion design', 'explicatif', 'publicité'],
+        options: [
+            { name: 'Durée', type: 'select', values: [{ label: '15 secondes', priceModifier: 0 }, { label: '30 secondes', priceModifier: 200 }, { label: '60 secondes', priceModifier: 450 }] },
+            { name: 'Voix-off', type: 'select', values: [{ label: 'Sans', priceModifier: 0 }, { label: 'Voix française', priceModifier: 80 }, { label: 'Voix anglaise', priceModifier: 80 }] },
+            { name: 'Musique', type: 'select', values: [{ label: 'Libre de droits', priceModifier: 0 }, { label: 'Composition originale', priceModifier: 150 }] }
+        ]
+    },
+    {
+        id: 403,
+        name: 'Composition Musicale',
+        price: 350,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/0a0a1a/fff?text=MUSIC',
+        category: 'Vidéo & Musique',
+        tags: ['musique', 'composition', 'bande son', 'film', 'publicité'],
+        options: [
+            { name: 'Durée', type: 'select', values: [{ label: '30 secondes', priceModifier: 0 }, { label: '1 minute', priceModifier: 150 }, { label: '2-3 minutes', priceModifier: 400 }] },
+            { name: 'Style', type: 'select', values: [{ label: 'Ambiance/Cinématique', priceModifier: 0 }, { label: 'Électronique', priceModifier: 0 }, { label: 'Orchestral', priceModifier: 200 }] },
+            { name: 'Droits', type: 'select', values: [{ label: 'Personnel', priceModifier: 0 }, { label: 'Commercial', priceModifier: 200 }, { label: 'Exclusif', priceModifier: 500 }] }
+        ]
+    },
+    {
+        id: 404,
+        name: 'Jingle / Intro Podcast',
+        price: 120,
+        promoPrice: 99,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a1a1a/fff?text=JINGLE',
+        category: 'Vidéo & Musique',
+        tags: ['musique', 'audio', 'jingle', 'podcast', 'branding'],
+        options: [
+            { name: 'Durée', type: 'select', values: [{ label: '5 secondes', priceModifier: 0 }, { label: '10 secondes', priceModifier: 40 }, { label: '15 secondes', priceModifier: 70 }] },
+            { name: 'Voix-off', type: 'select', values: [{ label: 'Sans', priceModifier: 0 }, { label: 'Avec voix', priceModifier: 60 }] }
+        ]
+    },
+    {
+        id: 405,
+        name: 'Pack Beats / Samples',
+        price: 45,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a0a1a/fff?text=BEATS',
+        category: 'Vidéo & Musique',
+        tags: ['musique', 'production', 'samples', 'beats', 'instrumentaux'],
+        options: [
+            { name: 'Pack', type: 'select', values: [{ label: '5 samples', priceModifier: 0 }, { label: '15 samples', priceModifier: 50 }, { label: '30 samples', priceModifier: 100 }] },
+            { name: 'Genre', type: 'select', values: [{ label: 'Hip-Hop', priceModifier: 0 }, { label: 'Électro', priceModifier: 0 }, { label: 'Lo-Fi', priceModifier: 0 }] }
+        ]
+    },
+
+    // ==================== OBJETS & ÉDITIONS ====================
+    {
+        id: 501,
+        name: 'Objet Artisanal Céramique',
+        price: 65,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/2a2a1a/fff?text=CERAMIQUE',
+        category: 'Objets & Éditions',
+        tags: ['artisanat', 'fait main', 'céramique', 'décoration', 'unique'],
+        options: [
+            { name: 'Type', type: 'select', values: [{ label: 'Tasse', priceModifier: 0 }, { label: 'Vase petit', priceModifier: 30 }, { label: 'Vase moyen', priceModifier: 80 }, { label: 'Sculpture', priceModifier: 150 }] },
+            { name: 'Couleur', type: 'select', values: [{ label: 'Blanc naturel', priceModifier: 0 }, { label: 'Noir mat', priceModifier: 10 }, { label: 'Émaillé couleur', priceModifier: 25 }] }
+        ]
+    },
+    {
+        id: 502,
+        name: 'Faire-Part Personnalisé',
+        price: 8,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a1a1a/fff?text=FAIRE-PART',
+        category: 'Objets & Éditions',
+        tags: ['papeterie', 'mariage', 'anniversaire', 'personnalisé', 'impression'],
+        options: [
+            { name: 'Événement', type: 'select', values: [{ label: 'Mariage', priceModifier: 0 }, { label: 'Naissance', priceModifier: 0 }, { label: 'Anniversaire', priceModifier: 0 }] },
+            { name: 'Quantité', type: 'select', values: [{ label: '25 exemplaires', priceModifier: 0 }, { label: '50 exemplaires', priceModifier: 150 }, { label: '100 exemplaires', priceModifier: 350 }] },
+            { name: 'Finition', type: 'select', values: [{ label: 'Standard', priceModifier: 0 }, { label: 'Dorure à chaud', priceModifier: 80 }] }
+        ]
+    },
+    {
+        id: 503,
+        name: 'T-Shirt Artistique',
+        price: 35,
+        promoPrice: null,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/0f0f0f/d4af37?text=TSHIRT',
+        category: 'Objets & Éditions',
+        tags: ['vêtements', 'mode', 'personnalisé', 't-shirt', 'design'],
+        options: [
+            { name: 'Taille', type: 'select', values: [{ label: 'S', priceModifier: 0 }, { label: 'M', priceModifier: 0 }, { label: 'L', priceModifier: 0 }, { label: 'XL', priceModifier: 5 }, { label: 'XXL', priceModifier: 10 }] },
+            { name: 'Coupe', type: 'select', values: [{ label: 'Classique', priceModifier: 0 }, { label: 'Oversize', priceModifier: 8 }] },
+            { name: 'Couleur', type: 'select', values: [{ label: 'Noir', priceModifier: 0 }, { label: 'Blanc', priceModifier: 0 }, { label: 'Beige', priceModifier: 5 }] }
+        ]
+    },
+    {
+        id: 504,
+        name: 'Zine / Livre d\'Art',
+        price: 28,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a1a1a/fff?text=ZINE',
+        category: 'Objets & Éditions',
+        tags: ['livre d\'art', 'zine', 'édition', 'collection', 'photographie'],
+        options: [
+            { name: 'Édition', type: 'select', values: [{ label: 'Standard', priceModifier: 0 }, { label: 'Limitée numérotée', priceModifier: 25 }, { label: 'Signée + numérotée', priceModifier: 50 }] }
+        ]
+    },
+    {
+        id: 505,
+        name: 'Kit DIY Peinture',
+        price: 42,
+        promoPrice: 35,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/2a1a1a/fff?text=DIY',
+        category: 'Objets & Éditions',
+        tags: ['DIY', 'kit créatif', 'loisirs', 'peinture', 'cadeau'],
+        options: [
+            { name: 'Niveau', type: 'select', values: [{ label: 'Débutant', priceModifier: 0 }, { label: 'Intermédiaire', priceModifier: 15 }, { label: 'Avancé', priceModifier: 30 }] },
+            { name: 'Format', type: 'select', values: [{ label: 'Petit (20x20cm)', priceModifier: 0 }, { label: 'Moyen (30x40cm)', priceModifier: 18 }] }
+        ]
+    },
+
+    // ==================== ART NUMÉRIQUE ====================
+    {
+        id: 601,
+        name: 'NFT / Art Crypto',
+        price: 150,
+        promoPrice: null,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/0a0a1a/d4af37?text=NFT',
+        category: 'Art Numérique',
+        tags: ['NFT', 'crypto art', 'blockchain', 'digital', 'collection'],
+        options: [
+            { name: 'Édition', type: 'select', values: [{ label: 'Série (100 ex)', priceModifier: 0 }, { label: 'Limitée (10 ex)', priceModifier: 200 }, { label: 'Unique (1/1)', priceModifier: 850 }] },
+            { name: 'Accompagnement', type: 'select', values: [{ label: 'Œuvre seule', priceModifier: 0 }, { label: 'Aide mise en vente', priceModifier: 100 }] }
+        ]
+    },
+    {
+        id: 602,
+        name: 'Filtre AR Instagram',
+        price: 280,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a0a2a/fff?text=AR',
+        category: 'Art Numérique',
+        tags: ['AR', 'réalité augmentée', 'Instagram', 'Snapchat', 'filtre'],
+        options: [
+            { name: 'Complexité', type: 'select', values: [{ label: '2D simple', priceModifier: 0 }, { label: '3D basique', priceModifier: 250 }, { label: '3D interactif', priceModifier: 500 }] },
+            { name: 'Plateforme', type: 'select', values: [{ label: 'Instagram', priceModifier: 0 }, { label: 'Snapchat', priceModifier: 50 }, { label: 'Les deux', priceModifier: 150 }] }
+        ]
+    },
+    {
+        id: 603,
+        name: 'Modèle 3D Asset',
+        price: 85,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a1a2a/fff?text=3D',
+        category: 'Art Numérique',
+        tags: ['3D', 'modélisation', 'assets', 'jeu vidéo', 'animation'],
+        options: [
+            { name: 'Complexité', type: 'select', values: [{ label: 'Low-poly', priceModifier: 0 }, { label: 'Mid-poly', priceModifier: 80 }, { label: 'High-poly détaillé', priceModifier: 250 }] },
+            { name: 'Textures', type: 'select', values: [{ label: 'Sans', priceModifier: 0 }, { label: 'PBR incluses', priceModifier: 60 }] },
+            { name: 'Animation', type: 'select', values: [{ label: 'Statique', priceModifier: 0 }, { label: 'Animé', priceModifier: 150 }] }
+        ]
+    },
+    {
+        id: 604,
+        name: 'Art Génératif',
+        price: 120,
+        promoPrice: null,
+        isFeatured: true,
+        image: 'https://placehold.co/400x400/0f0a1a/d4af37?text=GENERATIF',
+        category: 'Art Numérique',
+        tags: ['art génératif', 'algorithmique', 'code', 'digital', 'abstrait'],
+        options: [
+            { name: 'Format', type: 'select', values: [{ label: 'Image HD', priceModifier: 0 }, { label: 'Image 4K', priceModifier: 40 }, { label: 'Vidéo loop', priceModifier: 150 }] },
+            { name: 'Personnalisation', type: 'select', values: [{ label: 'Aléatoire', priceModifier: 0 }, { label: 'Paramètres custom', priceModifier: 80 }] }
+        ]
+    },
+    {
+        id: 605,
+        name: 'Boucle Vidéo Art',
+        price: 180,
+        promoPrice: null,
+        isFeatured: false,
+        image: 'https://placehold.co/400x400/1a1a1a/fff?text=LOOP',
+        category: 'Art Numérique',
+        tags: ['vidéo', 'art vidéo', 'boucle', 'visuel', 'ambiance'],
+        options: [
+            { name: 'Résolution', type: 'select', values: [{ label: 'Full HD', priceModifier: 0 }, { label: '4K', priceModifier: 100 }] },
+            { name: 'Durée loop', type: 'select', values: [{ label: '10 secondes', priceModifier: 0 }, { label: '30 secondes', priceModifier: 80 }, { label: '1 minute', priceModifier: 150 }] },
+            { name: 'Audio', type: 'select', values: [{ label: 'Sans', priceModifier: 0 }, { label: 'Ambiance sonore', priceModifier: 60 }] }
+        ]
+    }
 ];
+
 
 // Initial Admin User (Auto-created if no users exist)
 const initialAdmin = {
