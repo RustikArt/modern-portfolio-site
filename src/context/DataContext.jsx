@@ -113,10 +113,28 @@ export const DataProvider = ({ children }) => {
         return initialOrders;
     });
 
-    // --- SYNC EFFECTS ---
-    useEffect(() => localStorage.setItem('portfolio_projects', JSON.stringify(projects)), [projects]);
-    useEffect(() => localStorage.setItem('portfolio_products', JSON.stringify(products)), [products]);
-    useEffect(() => localStorage.setItem('portfolio_users', JSON.stringify(users)), [users]);
+    // Phase 4: Promo Codes State
+    const [promoCodes, setPromoCodes] = useState(() => {
+        const saved = localStorage.getItem('portfolio_promoCodes');
+        return saved ? JSON.parse(saved) : [
+            { id: 1, code: 'WELCOME10', type: 'percent', value: 10 }, // Example code
+            { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
+        ];
+    });
+
+    // --- PERSISTENCE ---
+    useEffect(() => {
+        localStorage.setItem('portfolio_projects', JSON.stringify(projects));
+    }, [projects]);
+
+    useEffect(() => {
+        localStorage.setItem('portfolio_products', JSON.stringify(products));
+    }, [products]);
+
+    useEffect(() => {
+        localStorage.setItem('portfolio_users', JSON.stringify(users));
+    }, [users]);
+
     useEffect(() => {
         localStorage.setItem('portfolio_currentUser', JSON.stringify(currentUser));
         // Sync role to localStorage for ProtectedRoute
@@ -126,20 +144,29 @@ export const DataProvider = ({ children }) => {
             localStorage.removeItem('isAdmin');
         }
     }, [currentUser]);
-    useEffect(() => localStorage.setItem('portfolio_cart', JSON.stringify(cart)), [cart]);
-    useEffect(() => localStorage.setItem('portfolio_orders', JSON.stringify(orders)), [orders]);
 
-    // Phase 4: Promo Codes State
-    const [promoCodes, setPromoCodes] = useState(() => {
-        const saved = localStorage.getItem('portfolio_promoCodes');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, code: 'WELCOME10', type: 'percent', value: 10 }, // Example code
-            { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
-        ];
-    });
-    useEffect(() => localStorage.setItem('portfolio_promoCodes', JSON.stringify(promoCodes)), [promoCodes]);
+    useEffect(() => {
+        localStorage.setItem('portfolio_cart', JSON.stringify(cart));
+    }, [cart]);
 
+    useEffect(() => {
+        // Sanitize orders to ensure they have the new status names and checklist if missing
+        const sanitizedOrders = orders.map(order => ({
+            ...order,
+            status: order.status === 'Payé' || order.status === 'En attente' ? 'Réception' : order.status,
+            checklist: order.checklist || [
+                { id: 1, label: 'Brief client reçu', completed: false },
+                { id: 2, label: 'Concept design validé', completed: false },
+                { id: 3, label: 'Production / Création', completed: false },
+                { id: 4, label: 'Envoi finalisé', completed: false }
+            ]
+        }));
+        localStorage.setItem('portfolio_orders', JSON.stringify(sanitizedOrders));
+    }, [orders]);
 
+    useEffect(() => {
+        localStorage.setItem('portfolio_promoCodes', JSON.stringify(promoCodes));
+    }, [promoCodes]);
 
 
     // --- ACTIONS ---
@@ -292,7 +319,7 @@ export const DataProvider = ({ children }) => {
         return newOrder;
     };
 
-    const sendOrderConfirmation = (order) => {
+    const sendOrderConfirmation = async (order) => {
         const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
         const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
         const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
@@ -300,6 +327,7 @@ export const DataProvider = ({ children }) => {
         const itemsSummary = order.items.map(i => `${i.name} x${i.quantity}`).join(', ');
 
         if (!serviceId || serviceId === 'YOUR_SERVICE_ID' || serviceId.includes('YOUR')) {
+            console.warn("EmailJS configuration missing.");
             return;
         }
 
@@ -311,12 +339,27 @@ export const DataProvider = ({ children }) => {
             order_total: String(order.total)
         };
 
-        emailjs.send(serviceId, templateId, templateParams, publicKey)
-            .then((response) => {
-                console.log('Email successfully sent to EmailJS API!', response.status, response.text);
-            }, (err) => {
-                console.error('EmailJS Error - Code 400 usually means invalid keys or missing parameters:', err);
+        try {
+            const response = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    serviceId,
+                    templateId,
+                    templateParams,
+                    publicKey
+                })
             });
+
+            if (response.ok) {
+                console.log('Order confirmation email sent successfully via Serverless function.');
+            } else {
+                const error = await response.json();
+                console.error('Failed to send order confirmation:', error.error);
+            }
+        } catch (err) {
+            console.error('Error triggering order confirmation email:', err);
+        }
     };
 
     const updateOrderStatus = (orderId, status) => {
@@ -339,7 +382,14 @@ export const DataProvider = ({ children }) => {
         setOrders(orders.map(o => o.id === orderId ? { ...o, notes } : o));
     };
 
-
+    const secureFullReset = (password) => {
+        if (password === 'admin123') { // Match initialAdmin.password
+            localStorage.clear();
+            window.location.href = '/';
+            return true;
+        }
+        return false;
+    };
 
 
     return (
@@ -360,6 +410,9 @@ export const DataProvider = ({ children }) => {
 
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode,
+
+            // Admin Actions
+            secureFullReset
 
 
         }}>
