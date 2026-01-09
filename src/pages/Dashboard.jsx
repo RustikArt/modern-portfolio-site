@@ -184,6 +184,14 @@ const Dashboard = () => {
         }
     };
 
+    const sideBtnStyle = (tab) => ({
+        ...btnModern,
+        background: activeTab === tab ? 'white' : 'rgba(255,255,255,0.02)',
+        color: activeTab === tab ? 'black' : '#888',
+        border: activeTab === tab ? 'none' : '1px solid rgba(255,255,255,0.05)',
+        fontWeight: activeTab === tab ? 'bold' : 'normal'
+    });
+
     const stats = {
         totalRevenue: orders.reduce((acc, o) => acc + parseFloat(o.total || 0), 0).toFixed(2),
         totalOrders: orders.length,

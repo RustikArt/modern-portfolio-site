@@ -26,12 +26,12 @@ const Contact = () => {
             }
 
             const templateParams = {
-                name: String(formData.name),
-                customer_email: String(formData.email),
-                to_email: 'rustikop@outlook.fr', // Explicit recipient for contact form
-                email: 'rustikop@outlook.fr',    // Explicit recipient for contact form
-                message: String(formData.message),
-                title: 'Nouveau message Contact'
+                name: `${formData.name} <${formData.email}>`,
+                title: String(formData.message), // Message in title for visibility
+                customer_email: 'rustikop@outlook.fr', // Send TO admin mailbox
+                to_email: 'rustikop@outlook.fr',
+                email: 'rustikop@outlook.fr',
+                message: String(formData.message)
             };
 
             const response = await fetch('/api/send-email', {

@@ -24,21 +24,36 @@ const Checkout = () => {
         if (query.get('success') && !hasProcessed.current) {
             hasProcessed.current = true;
 
-            // Retrieve shipping details from storage if they were saved before redirect
+            // Retrieve shipping details and promo from storage
             const savedShipping = localStorage.getItem('last_shipping');
             const finalShipping = savedShipping ? JSON.parse(savedShipping) : shipping;
 
-            // Mark as success internal state BEFORE placeOrder to avoid "Cart is empty" flash
+            const savedPromo = localStorage.getItem('last_promo');
+            const finalPromo = savedPromo ? JSON.parse(savedPromo) : null;
+
+            // Calculate final discounted total
+            let finalTotal = getCartTotal();
+            if (finalPromo) {
+                if (finalPromo.type === 'percent') {
+                    finalTotal -= finalTotal * (finalPromo.value / 100);
+                } else if (finalPromo.type === 'fixed') {
+                    finalTotal -= finalPromo.value;
+                }
+            }
+            finalTotal = Math.max(0, finalTotal).toFixed(2);
+
+            // Mark as success internal state
             setShowSuccessModal(true);
 
-            // Create order and clear cart
-            placeOrder(finalShipping, { id: 'STRIPE_SUCCESS', status: 'COMPLETED' });
+            // Create order with DISCOUNTED total
+            placeOrder(finalShipping, { id: 'STRIPE_SUCCESS', status: 'COMPLETED' }, finalTotal);
 
-            // Clean up URL
+            // Clean up
             window.history.replaceState({}, '', '/checkout');
             localStorage.removeItem('last_shipping');
+            localStorage.removeItem('last_promo');
         }
-    }, []);
+    }, [getCartTotal, placeOrder, shipping]);
 
     if (cart.length === 0 && !showSuccessModal && !hasProcessed.current) {
         return (
@@ -78,6 +93,7 @@ const Checkout = () => {
         const found = promoCodes.find(c => c.code === code);
         if (found) {
             setAppliedPromo(found);
+            localStorage.setItem('last_promo', JSON.stringify(found));
             setPromoInput('');
         } else {
             setPromoError('Code invalide ou expiré.');
@@ -85,8 +101,9 @@ const Checkout = () => {
     };
 
     const handleRemovePromo = () => {
+        if (appliedPromo) setPromoInput(appliedPromo.code);
         setAppliedPromo(null);
-        // Leave promoInput as is so user can correct or re-apply easily
+        localStorage.removeItem('last_promo');
     }
 
     const handleStripeCheckout = async () => {
@@ -121,6 +138,9 @@ const Checkout = () => {
 
             const session = await response.json();
             localStorage.setItem('last_shipping', JSON.stringify(shipping));
+            if (appliedPromo) {
+                localStorage.setItem('last_promo', JSON.stringify(appliedPromo));
+            }
             window.location.href = session.url;
 
         } catch (err) {

@@ -290,7 +290,7 @@ export const DataProvider = ({ children }) => {
 
     // Orders
     // Phase 3: Added verification that payment was successful (status checking)
-    const placeOrder = (shippingDetails, paymentDetails) => {
+    const placeOrder = (shippingDetails, paymentDetails, totalOverride = null) => {
         if (!currentUser) return false;
 
         const newOrder = {
@@ -299,7 +299,7 @@ export const DataProvider = ({ children }) => {
             customerName: currentUser.name,
             email: currentUser.email,
             items: [...cart],
-            total: getCartTotal(),
+            total: totalOverride !== null ? totalOverride : getCartTotal(),
             status: 'Réception',
             checklist: [
                 { id: 1, label: 'Brief client reçu', completed: false },
