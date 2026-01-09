@@ -34,11 +34,13 @@ const Contact = () => {
             // 1. Send NOTIFICATION to ADMIN
             const adminParams = {
                 name: String(formData.name),
+                initial: String(formData.name).charAt(0).toUpperCase(), // Added for the avatar
                 message: String(formData.message),
                 time: new Date().toLocaleString('fr-FR', {
                     day: 'numeric', month: 'long', year: 'numeric',
                     hour: '2-digit', minute: '2-digit'
                 }),
+                reply_to: String(formData.email), // CRITICAL: This allows replying directly to the client
                 customer_email: 'rustikop@outlook.fr',
                 to_email: 'rustikop@outlook.fr',
                 email: 'rustikop@outlook.fr',
@@ -51,25 +53,9 @@ const Contact = () => {
                 body: JSON.stringify({ serviceId, templateId, templateParams: adminParams, publicKey })
             });
 
-            // 2. Send CONFIRMATION to CLIENT
-            const clientParams = {
-                name: String(formData.name),
-                title: 'Accusé de réception - Artisanat Digital',
-                customer_email: String(formData.email),
-                to_email: String(formData.email),
-                email: String(formData.email),
-                message: `Bonjour ${formData.name},\n\nNous avons bien reçu votre message concernant votre projet. Notre équipe l'étudie avec attention et nous reviendrons vers vous dans les plus brefs délais.\n\nMerci de votre confiance,\nL'équipe Artisanat Digital.`
-            };
-
-            await fetch('/api/send-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ serviceId, templateId, templateParams: clientParams, publicKey })
-            });
-
             if (adminRes.ok) {
                 setStatus('success');
-                setFormData({ ...formData, message: '' }); // Only clear message, keep name/email
+                setFormData({ ...formData, message: '' });
             } else {
                 setStatus('error');
             }
