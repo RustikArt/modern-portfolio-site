@@ -1,2 +1,2 @@
-export const WEBSITE_VERSION = "Version 2.8 Ultimate Edition";
-export const VERSION_DETAILS = "Ultimate Edition, Communication & Payment Pro, Bugs fixed | Black screen fixed";
+export const WEBSITE_VERSION = "Version 3.0 Platinum Edition";
+export const VERSION_DETAILS = "Platinum Edition | Branding Rustikop | Lucide Icons Integration | Enhanced Glassmorphism | UX Refinement";

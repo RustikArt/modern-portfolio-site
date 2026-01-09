@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
+import {
+    Diamond,
+    Zap,
+    Rocket,
+    FileText,
+    Inbox,
+    Package,
+    Check,
+    Mail,
+    ExternalLink
+} from 'lucide-react';
 
 const UserDashboard = () => {
     const { currentUser, orders, logout, sendOrderConfirmation } = useData();
@@ -24,15 +35,15 @@ const UserDashboard = () => {
         switch (status) {
             case 'Réception':
             case 'Payé':
-                return { label: 'Commande Validée', color: '#ff4d4d', icon: '💎' };
+                return { label: 'Commande Validée', color: '#ff4d4d', icon: <Diamond size={18} /> };
             case 'En cours':
-                return { label: 'En Production', color: '#ffd700', icon: '⚡' };
+                return { label: 'En Production', color: '#ffd700', icon: <Zap size={18} /> };
             case 'Terminé':
-                return { label: 'Projet Finalisé', color: '#4caf50', icon: '🚀' };
+                return { label: 'Projet Finalisé', color: '#4caf50', icon: <Rocket size={18} /> };
             case 'En attente':
-                return { label: 'Besoin d\'infos', color: '#ff8c00', icon: '📝' };
+                return { label: 'Besoin d\'infos', color: '#ff8c00', icon: <FileText size={18} /> };
             default:
-                return { label: status, color: 'var(--color-accent)', icon: '📦' };
+                return { label: status, color: 'var(--color-accent)', icon: <Package size={18} /> };
         }
     };
 
@@ -64,8 +75,10 @@ const UserDashboard = () => {
                     <h3 style={{ fontSize: '1rem', color: '#888', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '2rem' }}>Historique de vos projets</h3>
 
                     {myOrders.length === 0 ? (
-                        <div style={{ padding: '6rem 2rem', textAlign: 'center', background: '#0a0a0a', border: '1px dashed #222', borderRadius: '24px' }}>
-                            <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>📭</div>
+                        <div style={{ padding: '6rem 2rem', textAlign: 'center', background: '#0a0a0a', border: '1px dashed #222', borderRadius: '24px' }} className="glass">
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', color: '#333' }}>
+                                <Inbox size={64} />
+                            </div>
                             <p style={{ color: '#555', fontSize: '1.1rem', marginBottom: '2rem' }}>Aucune commande en cours pour le moment.</p>
                             <button className="btn btn-primary" onClick={() => navigate('/shop')} style={{ borderRadius: '40px', padding: '1rem 2rem' }}>Découvrir la boutique</button>
                         </div>
@@ -74,12 +87,10 @@ const UserDashboard = () => {
                             {myOrders.map(order => {
                                 const statusInfo = getClientStatus(order.status);
                                 return (
-                                    <div key={order.id} style={{
-                                        background: 'rgba(255,255,255,0.02)',
+                                    <div key={order.id} className="glass" style={{
                                         borderRadius: '24px',
                                         padding: '2.5rem',
-                                        border: '1px solid rgba(255,255,255,0.05)',
-                                        boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
+                                        marginBottom: '2rem'
                                     }}>
                                         {/* Row 1: ID & Badge */}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
@@ -122,7 +133,7 @@ const UserDashboard = () => {
                                                         <div style={{ fontSize: '0.9rem', color: step.completed ? 'white' : '#888', fontWeight: step.completed ? 'bold' : 'normal' }}>
                                                             {getClientLabel(step.label)}
                                                         </div>
-                                                        {step.completed && <div style={{ color: 'var(--color-accent)', fontSize: '0.8rem' }}>Complété ✓</div>}
+                                                        {step.completed && <div style={{ color: 'var(--color-accent)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>Complété <Check size={12} /></div>}
                                                     </div>
                                                 ))}
                                             </div>
@@ -152,8 +163,13 @@ const UserDashboard = () => {
                     )}
                 </div>
 
-                <footer style={{ marginTop: '6rem', padding: '3rem', background: 'rgba(255,255,255,0.01)', borderRadius: '24px', textAlign: 'center', border: '1px solid #111' }}>
-                    <p style={{ color: '#555', fontSize: '0.9rem' }}>Besoin d'aide sur une commande ? <br /> Contactez-nous à <strong style={{ color: 'var(--color-accent)' }}>rustikop@outlook.fr</strong></p>
+                <footer className="glass" style={{ marginTop: '6rem', padding: '3rem', borderRadius: '24px', textAlign: 'center' }}>
+                    <p style={{ color: '#555', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
+                        <span>Besoin d'aide sur une commande ?</span>
+                        <a href="mailto:rustikop@outlook.fr" style={{ color: 'var(--color-accent)', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Mail size={18} /> rustikop@outlook.fr
+                        </a>
+                    </p>
                 </footer>
             </div>
         </div>

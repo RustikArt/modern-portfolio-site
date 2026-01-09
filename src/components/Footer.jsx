@@ -8,7 +8,7 @@ const Footer = () => {
         <footer className="footer">
             <div className="container footer-content">
                 <div className="footer-left">
-                    <p>&copy; {year} Portfolio.</p>
+                    <p>&copy; {year} Rustikop.</p>
                 </div>
                 <div className="footer-right">
                     <Link to="/admin" className="social-link" style={{ fontSize: '0.8rem', opacity: 0.5 }}>Admin</Link>

@@ -6,7 +6,7 @@ const Home = () => {
             <section className="hero">
                 <div className="container">
                     <h1 className="hero-title">
-                        <span className="block-reveal">Toutes les faces de l'art</span>
+                        <span className="block-reveal">Toutes les faces de l'art,</span>
                         <br />
                         <span className="block-reveal">réunies.</span>
                     </h1>

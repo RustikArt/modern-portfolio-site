@@ -3,6 +3,23 @@ import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
 import BlockEditor from '../components/BlockEditor';
+import {
+    Package,
+    FolderArchive,
+    ShoppingBag,
+    Ticket,
+    Users,
+    Palette,
+    LogOut,
+    Globe,
+    ChevronDown,
+    ChevronUp,
+    MapPin,
+    CheckCircle2,
+    Clock,
+    AlertCircle,
+    Check
+} from 'lucide-react';
 
 const Dashboard = () => {
     const {
@@ -306,13 +323,13 @@ const Dashboard = () => {
                             onClick={() => setActiveTab('orders')}
                             style={{ ...sideBtnStyle('orders'), justifyContent: 'flex-start' }}
                         >
-                            <span style={{ fontSize: '1.2rem' }}>📦</span> Commandes
+                            <Package size={18} /> Commandes
                         </button>
                         <button
                             onClick={() => setActiveTab('archives')}
                             style={{ ...sideBtnStyle('archives'), justifyContent: 'flex-start' }}
                         >
-                            <span style={{ fontSize: '1.2rem' }}>📂</span> Archives
+                            <FolderArchive size={18} /> Archives
                         </button>
 
                         <div style={{ margin: '1rem 0', borderBottom: '1px solid #111' }}></div>
@@ -321,25 +338,25 @@ const Dashboard = () => {
                             onClick={() => setActiveTab('products')}
                             style={{ ...sideBtnStyle('products'), justifyContent: 'flex-start' }}
                         >
-                            <span style={{ fontSize: '1.2rem' }}>🛍️</span> Boutique
+                            <ShoppingBag size={18} /> Boutique
                         </button>
                         <button
                             onClick={() => setActiveTab('promos')}
                             style={{ ...sideBtnStyle('promos'), justifyContent: 'flex-start' }}
                         >
-                            <span style={{ fontSize: '1.2rem' }}>🎟️</span> Coupons
+                            <Ticket size={18} /> Coupons
                         </button>
                         <button
                             onClick={() => setActiveTab('clients')}
                             style={{ ...sideBtnStyle('clients'), justifyContent: 'flex-start' }}
                         >
-                            <span style={{ fontSize: '1.2rem' }}>👥</span> CRM Clients
+                            <Users size={18} /> CRM Clients
                         </button>
                         <button
                             onClick={() => setActiveTab('projects')}
                             style={{ ...sideBtnStyle('projects'), justifyContent: 'flex-start' }}
                         >
-                            <span style={{ fontSize: '1.2rem' }}>🎨</span> Portfolio
+                            <Palette size={18} /> Portfolio
                         </button>
 
                         <div style={{ marginTop: 'auto', padding: '1.5rem', background: '#0a0a0a', borderRadius: '12px', border: '1px solid #111', fontSize: '0.8rem', color: '#444' }}>
@@ -407,8 +424,8 @@ const Dashboard = () => {
                                                                                 <div style={{ color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>Contact & Livraison</div>
                                                                                 <div style={{ color: '#ccc', fontSize: '0.9rem' }}>{order.email}</div>
                                                                                 {order.shipping && (
-                                                                                    <div style={{ color: '#666', fontSize: '0.8rem', marginTop: '0.8rem', background: 'rgba(255,100,100,0.03)', padding: '0.8rem', borderRadius: '8px' }}>
-                                                                                        📍 {order.shipping.address}, {order.shipping.city} ({order.shipping.zip})
+                                                                                    <div style={{ color: '#666', fontSize: '0.8rem', marginTop: '0.8rem', background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                                        <MapPin size={14} /> {order.shipping.address}, {order.shipping.city} ({order.shipping.zip})
                                                                                     </div>
                                                                                 )}
                                                                             </div>
@@ -460,8 +477,8 @@ const Dashboard = () => {
                                                                                         <div style={{
                                                                                             width: '20px', height: '20px', border: '2px solid #333', borderRadius: '6px',
                                                                                             background: item.completed ? '#4caf50' : 'transparent', borderColor: item.completed ? '#4caf50' : '#333',
-                                                                                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px'
-                                                                                        }}>{item.completed && '✓'}</div>
+                                                                                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                                                                                        }}>{item.completed && <Check size={12} strokeWidth={4} />}</div>
                                                                                         <span style={{ fontSize: '0.85rem', color: item.completed ? '#666' : '#ccc', textDecoration: item.completed ? 'line-through' : 'none' }}>{item.label}</span>
                                                                                     </div>
                                                                                 ))}

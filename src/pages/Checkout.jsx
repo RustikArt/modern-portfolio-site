@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
+import {
+    CheckCircle2,
+    AlertCircle,
+    CreditCard,
+    Truck,
+    ShoppingBag,
+    Tag,
+    ArrowRight,
+    Loader2
+} from 'lucide-react';
 
 const Checkout = () => {
     const { cart, currentUser, placeOrder, getCartTotal, promoCodes } = useData();
@@ -112,7 +122,7 @@ const Checkout = () => {
         const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
         if (!publishableKey || publishableKey.includes('YOUR_KEY')) {
-            alert("Erreur Configuration : La clé Stripe est absente.");
+            alert("Le système de paiement est actuellement en maintenance. Veuillez réessayer plus tard.");
             return;
         }
 
@@ -152,7 +162,7 @@ const Checkout = () => {
 
         } catch (err) {
             console.error("Stripe Error:", err);
-            alert(`Échec : ${err.message}`);
+            alert(`Une erreur est survenue lors du paiement : ${err.message}. Veuillez vérifier vos informations.`);
         } finally {
             setIsProcessing(false);
         }
@@ -169,8 +179,12 @@ const Checkout = () => {
                 <h1 className="page-title">Finalisation de commande</h1>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
-                    <span style={{ color: step >= 1 ? 'var(--color-accent)' : '#555' }}>1. Livraison</span>
-                    <span style={{ color: step >= 2 ? 'var(--color-accent)' : '#555' }}>2. Paiement</span>
+                    <span style={{ color: step >= 1 ? 'var(--color-accent)' : '#555', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Truck size={18} /> 1. Livraison
+                    </span>
+                    <span style={{ color: step >= 2 ? 'var(--color-accent)' : '#555', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <CreditCard size={18} /> 2. Paiement
+                    </span>
                 </div>
 
                 {step === 1 && !showSuccessModal && (
@@ -193,10 +207,10 @@ const Checkout = () => {
                         <button
                             className="btn btn-primary"
                             onClick={() => setStep(2)}
-                            style={{ marginTop: '2rem', width: '100%', borderRadius: '30px' }}
+                            style={{ marginTop: '2rem', width: '100%', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}
                             disabled={!shipping.address || !shipping.city}
                         >
-                            Suivant
+                            Suivant <ArrowRight size={18} />
                         </button>
                     </div>
                 )}
@@ -251,10 +265,18 @@ const Checkout = () => {
                                 <button
                                     onClick={handleStripeCheckout}
                                     className="btn btn-primary"
-                                    style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem', borderRadius: '40px' }}
+                                    style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem', borderRadius: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}
                                     disabled={isProcessing}
                                 >
-                                    {isProcessing ? 'Connexion à Stripe...' : 'Payer avec Stripe'}
+                                    {isProcessing ? (
+                                        <>
+                                            <Loader2 className="animate-spin" size={20} /> Connexion à Stripe...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CreditCard size={20} /> Payer avec Stripe
+                                        </>
+                                    )}
                                 </button>
                                 <p style={{ marginTop: '1.5rem', fontSize: '0.75rem', color: '#444', textAlign: 'center', lineHeight: '1.4' }}>
                                     SSL Sécurisé. Règlement par carte bancaire. <br />
@@ -281,9 +303,11 @@ const Checkout = () => {
                         <div style={{
                             width: '100px', height: '100px', background: 'var(--color-accent)',
                             borderRadius: '50%', margin: '0 auto 2.5rem', display: 'flex',
-                            alignItems: 'center', justifyContent: 'center', fontSize: '3rem',
+                            alignItems: 'center', justifyContent: 'center',
                             color: 'black', boxShadow: '0 0 40px rgba(var(--color-accent-rgb), 0.4)'
-                        }}>✓</div>
+                        }}>
+                            <CheckCircle2 size={64} />
+                        </div>
 
                         <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1rem', letterSpacing: '-1.5px' }}>PAIEMENT RÉUSSI</h2>
                         <p style={{ color: '#888', marginBottom: '1rem', fontSize: '1.1rem' }}>Votre commande a été enregistrée avec succès.</p>

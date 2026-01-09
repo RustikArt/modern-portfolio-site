@@ -4,20 +4,19 @@
     left: 0;
     width: 100%;
     z-index: 1000;
-    padding-top: 1.5rem;
-    /* Added top space as requested */
-    padding-bottom: 1rem;
-    transition: all 0.3s ease;
-    background: rgba(5, 5, 5, 0.8);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    background: transparent;
 }
 
 .navbar.scrolled {
     padding-top: 1rem;
     padding-bottom: 1rem;
-    background: rgba(5, 5, 5, 0.95);
+    background: rgba(5, 5, 5, 0.8);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .navbar-content {

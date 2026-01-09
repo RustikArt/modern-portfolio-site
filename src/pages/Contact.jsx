@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import './Contact.css';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 const Contact = () => {
     const { currentUser } = useData();
@@ -80,7 +81,9 @@ const Contact = () => {
                 <div className="glass" style={{ padding: '2rem', borderRadius: '12px' }}>
                     {status === 'success' ? (
                         <div style={{ textAlign: 'center', padding: '2rem' }}>
-                            <div style={{ fontSize: '3rem', color: '#4caf50', marginBottom: '1rem' }}>✓</div>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', color: '#4caf50' }}>
+                                <CheckCircle2 size={64} />
+                            </div>
                             <h3>Message envoyé !</h3>
                             <p style={{ color: '#888' }}>Je vous répondrai dans les plus brefs délais.</p>
                             <button onClick={() => setStatus('idle')} className="btn" style={{ marginTop: '1rem' }}>Envoyer un autre message</button>
@@ -126,9 +129,21 @@ const Contact = () => {
                                 {status === 'sending' ? 'Envoi en cours...' : 'Envoyer le message'}
                             </button>
                             {status === 'error' && (
-                                <p style={{ color: '#ff4d4d', marginTop: '1rem', fontSize: '0.9rem' }}>
-                                    Erreur technique. Vérifiez vos clés EmailJS sur Vercel.
-                                </p>
+                                <div style={{
+                                    color: '#ff4d4d',
+                                    marginTop: '1.5rem',
+                                    padding: '1rem',
+                                    background: 'rgba(255, 77, 77, 0.1)',
+                                    borderRadius: '8px',
+                                    fontSize: '0.9rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.8rem',
+                                    border: '1px solid rgba(255, 77, 77, 0.2)'
+                                }}>
+                                    <AlertCircle size={18} />
+                                    Une erreur est survenue lors de l'envoi. Veuillez réessayer ou nous contacter par mail.
+                                </div>
                             )}
                         </form>
                     )}
