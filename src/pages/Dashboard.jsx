@@ -187,35 +187,37 @@ const Dashboard = () => {
     };
 
     const cardStyle = {
-        background: 'rgba(20, 20, 20, 0.6)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        borderRadius: '16px',
-        padding: '1.5rem',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+        background: 'rgba(255, 255, 255, 0.03)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '24px',
+        padding: '2rem',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
     };
 
     const btnModern = {
-        padding: '0.6rem 1.2rem',
-        borderRadius: '8px',
-        border: '1px solid #333',
-        background: 'linear-gradient(135deg, #1a1a1a, #080808)',
-        color: '#ccc',
+        padding: '0.8rem 1.5rem',
+        borderRadius: '12px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        background: 'rgba(255,255,255,0.02)',
+        color: '#888',
         cursor: 'pointer',
         fontSize: '0.85rem',
         transition: 'all 0.3s ease',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.5rem',
+        gap: '0.8rem',
         textAlign: 'left'
     };
 
     const btnPrimaryModern = {
         ...btnModern,
-        background: 'linear-gradient(135deg, var(--color-accent), #8a2be2)',
+        background: 'rgba(255,255,255,0.9)',
         borderColor: 'transparent',
-        color: 'white',
-        fontWeight: 'bold'
+        color: '#000',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        letterSpacing: '1px'
     };
 
     return (
@@ -227,7 +229,7 @@ const Dashboard = () => {
                         <h1 style={{ fontSize: '2.5rem', margin: 0, fontWeight: '900', letterSpacing: '-2px', textTransform: 'uppercase' }}>
                             Admin <span style={{ color: 'var(--color-accent)' }}>Panel</span>
                         </h1>
-                        <p style={{ color: '#555', margin: '5px 0 0', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.7rem' }}>Version 2.2 Secure Bridge</p>
+                        <p style={{ color: '#444', margin: '5px 0 0', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.7rem' }}>Version 2.3 Premium Glass</p>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -300,32 +302,38 @@ const Dashboard = () => {
                         {/* --- ORDERS TAB --- */}
                         {activeTab === 'orders' && (
                             <div className="animate-in">
-                                {['Réception', 'En cours', 'Terminé'].map(cat => (
+                                {['Réception', 'En cours', 'Terminé', 'En attente'].map(cat => (
                                     <div key={cat} style={{ marginBottom: '3rem' }}>
                                         <h3 style={{
                                             marginBottom: '1.5rem',
                                             fontSize: '0.9rem',
                                             textTransform: 'uppercase',
                                             letterSpacing: '2px',
-                                            color: cat === 'Terminé' ? '#444' : 'var(--color-accent)',
+                                            color: cat === 'Terminé' ? '#444' : cat === 'En attente' ? '#ff8c00' : 'var(--color-accent)',
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '0.8rem'
                                         }}>
-                                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: cat === 'Réception' ? '#ff4d4d' : cat === 'En cours' ? '#ffd700' : '#4caf50' }}></span>
-                                            {cat === 'Terminé' ? 'Completed Tasks' : cat}
+                                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: cat === 'Réception' ? '#ff4d4d' : cat === 'En cours' ? '#ffd700' : cat === 'Terminé' ? '#4caf50' : '#ff8c00' }}></span>
+                                            {cat === 'Terminé' ? 'Completed Tasks' : cat === 'En attente' ? 'Problèmes / En attente' : cat}
                                         </h3>
 
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
                                             {orders.filter(o => {
-                                                if (cat === 'Réception') return o.status === 'Réception' || o.status === 'En attente' || o.status === 'Payé';
+                                                if (cat === 'Réception') return o.status === 'Réception' || o.status === 'Payé';
                                                 return o.status === cat;
                                             }).map(order => (
                                                 <div key={order.id} style={cardStyle}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                                                         <div>
                                                             <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>{order.customerName}</div>
-                                                            <span style={{ color: '#555', fontSize: '0.75rem' }}>ID {order.id.slice(-8).toUpperCase()}</span>
+                                                            <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.2rem' }}>{order.email}</div>
+                                                            <div style={{ color: '#555', fontSize: '0.75rem', marginTop: '0.5rem' }}>ID {order.id.slice(-8).toUpperCase()}</div>
+                                                            {order.shipping && (
+                                                                <div style={{ color: '#444', fontSize: '0.7rem', marginTop: '0.5rem', background: 'rgba(255,100,100,0.05)', padding: '0.4rem', borderRadius: '4px' }}>
+                                                                    📍 {order.shipping.address}, {order.shipping.city} ({order.shipping.zip})
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div style={{ textAlign: 'right' }}>
                                                             <div style={{ color: 'var(--color-accent)', fontSize: '1.2rem', fontWeight: 'bold' }}>{order.total}€</div>
@@ -333,11 +341,22 @@ const Dashboard = () => {
                                                         </div>
                                                     </div>
 
-                                                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                                                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
                                                         {order.items.map((it, idx) => (
-                                                            <div key={idx} style={{ fontSize: '0.85rem', color: '#999', display: 'flex', justifyContent: 'space-between' }}>
-                                                                <span>{it.name} x{it.quantity}</span>
-                                                                <span>{it.price}€</span>
+                                                            <div key={idx} style={{ marginBottom: '1rem', borderBottom: idx === order.items.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.8rem' }}>
+                                                                <div style={{ fontSize: '0.9rem', color: 'white', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                                                                    <span>{it.name} x{it.quantity}</span>
+                                                                    <span>{it.price}€</span>
+                                                                </div>
+                                                                {it.selectedOptions && it.selectedOptions.length > 0 && (
+                                                                    <div style={{ marginTop: '0.5rem', paddingLeft: '0.5rem', borderLeft: '2px solid var(--color-accent)' }}>
+                                                                        {it.selectedOptions.map((opt, oIdx) => (
+                                                                            <div key={oIdx} style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                                                <strong style={{ color: '#aaa' }}>{opt.name}:</strong> {opt.value}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         ))}
                                                     </div>

@@ -214,7 +214,9 @@ export const DataProvider = ({ children }) => {
 
     const logout = () => {
         setCurrentUser(null);
+        setCart([]);
         localStorage.removeItem('isAdmin');
+        localStorage.removeItem('portfolio_cart');
     };
 
     // Promo Codes

@@ -86,7 +86,7 @@ const Checkout = () => {
 
     const handleRemovePromo = () => {
         setAppliedPromo(null);
-        setPromoInput('');
+        // Leave promoInput as is so user can correct or re-apply easily
     }
 
     const handleStripeCheckout = async () => {
@@ -259,7 +259,10 @@ const Checkout = () => {
                         }}>✓</div>
 
                         <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1rem', letterSpacing: '-1.5px' }}>PAIEMENT RÉUSSI</h2>
-                        <p style={{ color: '#888', marginBottom: '3rem', fontSize: '1.1rem' }}>Votre commande a été enregistrée avec succès.</p>
+                        <p style={{ color: '#888', marginBottom: '1rem', fontSize: '1.1rem' }}>Votre commande a été enregistrée avec succès.</p>
+                        <p style={{ color: 'var(--color-accent)', marginBottom: '2.5rem', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                            ⚠️ PENSEZ À VÉRIFIER VOS MAILS (ET VOS SPAMS)
+                        </p>
 
                         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', textAlign: 'left', marginBottom: '3rem' }}>
                             <div style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '1.5px' }}>Confirmation</div>
