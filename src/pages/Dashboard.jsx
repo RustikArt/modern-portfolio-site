@@ -26,7 +26,9 @@ import {
     UserPlus,
     ShoppingCart,
     Timer,
-    RotateCcw
+    RotateCcw,
+    Percent,
+    Search
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -88,6 +90,9 @@ const Dashboard = () => {
 
     const [optionBuilder, setOptionBuilder] = useState({ name: '', type: 'select', valuesInput: '' });
     const [promoForm, setPromoForm] = useState({ code: '', type: 'percent', value: '' });
+
+    // Product Filters
+    const [productFilter, setProductFilter] = useState({ category: 'all', promoOnly: false, search: '' });
 
     const [announcementForm, setAnnouncementForm] = useState({ ...announcement });
 
@@ -698,22 +703,91 @@ const Dashboard = () => {
                                     </form>
                                 </section>
 
+                                {/* Product Filters */}
+                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <div style={{ position: 'relative', flex: '1', minWidth: '200px' }}>
+                                        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#555' }} />
+                                        <input
+                                            type="text"
+                                            placeholder="Rechercher..."
+                                            value={productFilter.search}
+                                            onChange={e => setProductFilter({ ...productFilter, search: e.target.value })}
+                                            style={{ ...inputStyle, paddingLeft: '40px' }}
+                                        />
+                                    </div>
+                                    <select
+                                        value={productFilter.category}
+                                        onChange={e => setProductFilter({ ...productFilter, category: e.target.value })}
+                                        style={{ ...inputStyle, width: 'auto', minWidth: '180px' }}
+                                    >
+                                        <option value="all">Toutes les catégories</option>
+                                        {[...new Set(products.map(p => p.category))].map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={() => setProductFilter({ ...productFilter, promoOnly: !productFilter.promoOnly })}
+                                        style={{
+                                            ...btnModern,
+                                            background: productFilter.promoOnly ? 'var(--color-accent)' : 'rgba(255,255,255,0.02)',
+                                            color: productFilter.promoOnly ? 'black' : '#888',
+                                            border: productFilter.promoOnly ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            fontWeight: productFilter.promoOnly ? 'bold' : 'normal'
+                                        }}
+                                    >
+                                        <Percent size={16} /> En Promo
+                                    </button>
+                                    <span style={{ fontSize: '0.8rem', color: '#555' }}>
+                                        {products.filter(p => {
+                                            const matchCategory = productFilter.category === 'all' || p.category === productFilter.category;
+                                            const matchPromo = !productFilter.promoOnly || p.promoPrice;
+                                            const matchSearch = !productFilter.search || p.name.toLowerCase().includes(productFilter.search.toLowerCase()) || p.tags?.some(t => t.toLowerCase().includes(productFilter.search.toLowerCase()));
+                                            return matchCategory && matchPromo && matchSearch;
+                                        }).length} produit(s)
+                                    </span>
+                                </div>
+
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                    {products.map(p => (
-                                        <div key={p.id} style={cardStyle}>
-                                            <img src={p.image} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                    <h4 style={{ margin: 0 }}>{p.name}</h4>
-                                                    <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>{p.price}€</span>
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                    <button onClick={() => handleEditProduct(p)} style={{ ...btnModern, padding: '0.5rem' }} title="Edit"><Edit size={14} /></button>
-                                                    <button onClick={() => deleteProduct(p.id)} style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }} title="Delete"><Trash2 size={14} /></button>
+                                    {products
+                                        .filter(p => {
+                                            const matchCategory = productFilter.category === 'all' || p.category === productFilter.category;
+                                            const matchPromo = !productFilter.promoOnly || p.promoPrice;
+                                            const matchSearch = !productFilter.search || p.name.toLowerCase().includes(productFilter.search.toLowerCase()) || p.tags?.some(t => t.toLowerCase().includes(productFilter.search.toLowerCase()));
+                                            return matchCategory && matchPromo && matchSearch;
+                                        })
+                                        .map(p => (
+                                            <div key={p.id} style={{ ...cardStyle, position: 'relative' }}>
+                                                {p.promoPrice && (
+                                                    <span style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--color-accent)', color: 'black', padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                                        PROMO
+                                                    </span>
+                                                )}
+                                                <img src={p.image} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{p.name}</h4>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                            {p.promoPrice ? (
+                                                                <>
+                                                                    <span style={{ color: '#555', textDecoration: 'line-through', fontSize: '0.85rem' }}>{p.price}€</span>
+                                                                    <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>{p.promoPrice}€</span>
+                                                                </>
+                                                            ) : (
+                                                                <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>{p.price}€</span>
+                                                            )}
+                                                        </div>
+                                                        <span style={{ fontSize: '0.7rem', color: '#444' }}>{p.category}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <button onClick={() => handleEditProduct(p)} style={{ ...btnModern, padding: '0.5rem' }} title="Edit"><Edit size={14} /></button>
+                                                        <button onClick={() => deleteProduct(p.id)} style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }} title="Delete"><Trash2 size={14} /></button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
                                 </div>
                             </div>
                         )}
