@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
@@ -25,7 +25,8 @@ import {
     Mail,
     UserPlus,
     ShoppingCart,
-    Timer
+    Timer,
+    RotateCcw
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -44,6 +45,22 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('orders');
     const [expandedOrders, setExpandedOrders] = useState({});
     const navigate = useNavigate();
+    const notificationRef = React.useRef(null);
+
+    // Click outside to close notifications
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+        };
+        if (showNotifications) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showNotifications]);
 
     const toggleOrderExpansion = (orderId) => {
         setExpandedOrders(prev => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -319,7 +336,7 @@ const Dashboard = () => {
 
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         {/* Notification Bell */}
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'relative' }} ref={notificationRef}>
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
                                 style={{
@@ -847,6 +864,7 @@ const Dashboard = () => {
                                                     style={inputStyle}
                                                     placeholder="https://..."
                                                 />
+                                                <p style={{ fontSize: '0.7rem', color: '#555', marginTop: '0.5rem' }}>Utilisez <code style={{ background: '#222', padding: '2px 5px', borderRadius: '3px' }}>[lien]</code> dans le texte pour placer le lien. Ex: "Voir notre [lien] ici !"</p>
                                             </div>
 
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -869,6 +887,30 @@ const Dashboard = () => {
                                                     />
                                                 </div>
                                             </div>
+
+                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'end' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hauteur (ex: 40px)</label>
+                                                    <input
+                                                        type="text"
+                                                        value={announcementForm.height}
+                                                        onChange={e => setAnnouncementForm({ ...announcementForm, height: e.target.value })}
+                                                        style={inputStyle}
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => setAnnouncementForm({
+                                                        ...announcementForm,
+                                                        bgColor: '#d4af37',
+                                                        textColor: '#000000',
+                                                        height: '40px'
+                                                    })}
+                                                    style={{ ...btnModern, padding: '0.8rem', marginBottom: '0' }}
+                                                    title="Réinitialiser couleurs et taille"
+                                                >
+                                                    <RotateCcw size={16} />
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -890,16 +932,8 @@ const Dashboard = () => {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hauteur (ex: 40px)</label>
-                                                    <input
-                                                        type="text"
-                                                        value={announcementForm.height}
-                                                        onChange={e => setAnnouncementForm({ ...announcementForm, height: e.target.value })}
-                                                        style={inputStyle}
-                                                    />
-                                                </div>
                                             </div>
+
 
                                             <div style={{ marginTop: '2rem' }}>
                                                 <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '1rem' }}>Aperçu du rendu :</label>

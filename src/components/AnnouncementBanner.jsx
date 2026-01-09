@@ -4,8 +4,29 @@ import { X } from 'lucide-react';
 
 const AnnouncementBanner = () => {
     const { announcement } = useData();
-    const [isVisible, setIsVisible] = useState(true);
+
+    // Generate a unique key based on announcement text to track dismissal
+    const getDismissalKey = () => {
+        if (!announcement?.text) return null;
+        return `banner_dismissed_${btoa(encodeURIComponent(announcement.text)).slice(0, 16)}`;
+    };
+
+    const [isVisible, setIsVisible] = useState(() => {
+        const key = getDismissalKey();
+        if (key) {
+            return localStorage.getItem(key) !== 'true';
+        }
+        return true;
+    });
     const [timeLeft, setTimeLeft] = useState('');
+
+    const handleClose = () => {
+        const key = getDismissalKey();
+        if (key) {
+            localStorage.setItem(key, 'true');
+        }
+        setIsVisible(false);
+    };
 
     useEffect(() => {
         const height = (announcement && announcement.isActive && isVisible) ? (announcement.height || '40px') : '0px';
@@ -36,6 +57,14 @@ const AnnouncementBanner = () => {
         setTimeLeft(calculateTimeLeft());
         return () => clearInterval(timer);
     }, [announcement, isVisible]);
+
+    // Reset visibility when announcement text changes
+    useEffect(() => {
+        const key = getDismissalKey();
+        if (key && localStorage.getItem(key) !== 'true') {
+            setIsVisible(true);
+        }
+    }, [announcement?.text]);
 
     if (!announcement || !announcement.isActive || !isVisible) return null;
 
@@ -74,40 +103,53 @@ const AnnouncementBanner = () => {
         transition: 'opacity 0.2s'
     };
 
-    const content = announcement.link ? (
-        <a href={announcement.link} style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ textDecoration: 'underline' }}>{announcement.text}</span>
-            {announcement.showTimer && timeLeft !== 'EXPIRE' && (
-                <span style={{ background: 'rgba(0,0,0,0.1)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                    {timeLeft}
+    // Render text with embedded link using [lien] placeholder
+    const renderTextWithLink = () => {
+        const text = announcement.text || '';
+        const link = announcement.link || '';
+
+        if (link && text.includes('[lien]')) {
+            const parts = text.split('[lien]');
+            return (
+                <span>
+                    {parts[0]}
+                    <a href={link} style={{ color: 'inherit', textDecoration: 'underline' }}>lien</a>
+                    {parts[1] || ''}
                 </span>
-            )}
-        </a>
-    ) : (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span>{announcement.text}</span>
-            {announcement.showTimer && timeLeft !== 'EXPIRE' && (
-                <span style={{ background: 'rgba(0,0,0,0.1)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                    {timeLeft}
-                </span>
-            )}
-        </div>
-    );
+            );
+        } else if (link) {
+            // If link exists but no placeholder, make entire text clickable
+            return (
+                <a href={link} style={{ color: 'inherit', textDecoration: 'underline' }}>
+                    {text}
+                </a>
+            );
+        }
+        return <span>{text}</span>;
+    };
 
     return (
         <div style={bannerStyle} className="announcement-banner">
             <button
-                onClick={() => setIsVisible(false)}
+                onClick={handleClose}
                 style={closeButtonStyle}
-                onMouseEnter={(e) => e.target.style.opacity = 1}
-                onMouseLeave={(e) => e.target.style.opacity = 0.7}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}
                 aria-label="Fermer"
             >
                 <X size={16} />
             </button>
-            {content}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {renderTextWithLink()}
+                {announcement.showTimer && timeLeft !== 'EXPIRE' && (
+                    <span style={{ background: 'rgba(0,0,0,0.1)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                        {timeLeft}
+                    </span>
+                )}
+            </div>
         </div>
     );
 };
 
 export default AnnouncementBanner;
+
