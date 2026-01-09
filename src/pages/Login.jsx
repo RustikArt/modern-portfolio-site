@@ -20,20 +20,14 @@ const Login = () => {
         if (isLogin) {
             const result = login(email, password);
             if (result.success) {
-                if (result.isAdmin) {
-                    navigate('/admin');
-                } else {
-                    // Redirect to Checkout if coming from Cart/Checkout, else Profile
-                    // For now simpler logic:
-                    navigate('/profile');
-                }
+                navigate('/');
             } else {
                 setError(result.message);
             }
         } else {
             const result = register(email, password, name);
             if (result.success) {
-                navigate('/profile');
+                navigate('/');
             } else {
                 setError(result.message);
             }

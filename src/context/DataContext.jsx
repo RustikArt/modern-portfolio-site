@@ -338,6 +338,8 @@ export const DataProvider = ({ children }) => {
             name: String(order.customerName),
             title: String(itemsSummary),
             customer_email: String(order.email),
+            to_email: String(order.email), // Alias for some templates
+            email: String(order.email),    // Alias for some templates
             order_total: String(order.total)
         };
 

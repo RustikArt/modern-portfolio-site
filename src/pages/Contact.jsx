@@ -28,6 +28,8 @@ const Contact = () => {
             const templateParams = {
                 name: String(formData.name),
                 customer_email: String(formData.email),
+                to_email: 'rustikop@outlook.fr', // Explicit recipient for contact form
+                email: 'rustikop@outlook.fr',    // Explicit recipient for contact form
                 message: String(formData.message),
                 title: 'Nouveau message Contact'
             };
