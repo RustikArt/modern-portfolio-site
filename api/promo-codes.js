@@ -37,10 +37,11 @@ export default async function handler(req, res) {
     } else if (req.method === 'PUT') {
         try {
             const { id, ...updatedPromoCode } = req.body;
+            const numId = Number(id);
             const { data, error } = await supabase
                 .from('portfolio_promo_codes')
                 .update(updatedPromoCode)
-                .eq('id', id)
+                .eq('id', numId)
                 .select();
             if (error) throw error;
             // Return all promo codes
@@ -57,10 +58,11 @@ export default async function handler(req, res) {
     } else if (req.method === 'DELETE') {
         try {
             const { id } = req.body;
+            const numId = Number(id);
             const { data, error } = await supabase
                 .from('portfolio_promo_codes')
                 .delete()
-                .eq('id', id);
+                .eq('id', numId);
             if (error) throw error;
             // Return all promo codes
             const { data: allPromoCodes, error: fetchError } = await supabase

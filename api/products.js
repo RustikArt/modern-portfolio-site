@@ -37,10 +37,11 @@ export default async function handler(req, res) {
     } else if (req.method === 'PUT') {
         try {
             const { id, ...updatedProduct } = req.body;
+            const numId = Number(id);
             const { data, error } = await supabase
                 .from('portfolio_products')
                 .update(updatedProduct)
-                .eq('id', id)
+                .eq('id', numId)
                 .select();
             if (error) throw error;
             // Return all products
@@ -57,10 +58,11 @@ export default async function handler(req, res) {
     } else if (req.method === 'DELETE') {
         try {
             const { id } = req.body;
+            const numId = Number(id);
             const { data, error } = await supabase
                 .from('portfolio_products')
                 .delete()
-                .eq('id', id);
+                .eq('id', numId);
             if (error) throw error;
             // Return all products
             const { data: allProducts, error: fetchError } = await supabase
