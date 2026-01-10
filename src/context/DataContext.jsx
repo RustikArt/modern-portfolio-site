@@ -750,10 +750,16 @@ export const DataProvider = ({ children }) => {
     // Admin / Data
     const addProject = async (project) => {
         try {
+            // Convert camelCase to snake_case for Supabase compatibility
+            const projectData = {
+                ...project,
+                blocks: project.blocks || []
+            };
+
             const res = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(project)
+                body: JSON.stringify(projectData)
             });
             if (res.ok) {
                 const updatedProjects = await res.json();
@@ -790,10 +796,16 @@ export const DataProvider = ({ children }) => {
     };
     const updateProject = async (id, updatedProject) => {
         try {
+            // Convert camelCase to snake_case for Supabase compatibility
+            const projectData = {
+                ...updatedProject,
+                blocks: updatedProject.blocks || []
+            };
+
             const res = await fetch('/api/projects', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, ...updatedProject })
+                body: JSON.stringify({ id, ...projectData })
             });
             if (res.ok) {
                 const updatedProjects = await res.json();
@@ -812,13 +824,15 @@ export const DataProvider = ({ children }) => {
     // Updated addProduct to support Phase 3 fields
     const addProduct = async (product) => {
         try {
-            // Convert promoPrice to promo_price for Supabase compatibility
+            // Convert camelCase to snake_case for Supabase compatibility
             const productData = {
                 ...product,
                 promo_price: product.promoPrice,
+                is_featured: product.isFeatured,
                 tags: product.tags || []
             };
             delete productData.promoPrice; // Remove the frontend field
+            delete productData.isFeatured; // Remove the frontend field
 
             console.log('Sending product data to API:', productData);
 
@@ -872,12 +886,14 @@ export const DataProvider = ({ children }) => {
     };
     const updateProduct = async (id, updatedProduct) => {
         try {
-            // Convert promoPrice to promo_price for Supabase compatibility
+            // Convert camelCase to snake_case for Supabase compatibility
             const productData = {
                 ...updatedProduct,
-                promo_price: updatedProduct.promoPrice
+                promo_price: updatedProduct.promoPrice,
+                is_featured: updatedProduct.isFeatured
             };
             delete productData.promoPrice; // Remove the frontend field
+            delete productData.isFeatured; // Remove the frontend field
 
             const res = await fetch('/api/products', {
                 method: 'PUT',
@@ -887,6 +903,10 @@ export const DataProvider = ({ children }) => {
             if (res.ok) {
                 const updatedProducts = await res.json();
                 setProducts(updatedProducts);
+            } else {
+                const errorText = await res.text();
+                console.error('Failed to update product, response:', errorText);
+                throw new Error(`Update failed: ${errorText}`);
             }
         } catch (error) {
             console.error('Failed to update product, error:', error);
@@ -935,10 +955,16 @@ export const DataProvider = ({ children }) => {
     // Promo Codes
     const addPromoCode = async (code) => {
         try {
+            // Convert camelCase to snake_case for Supabase compatibility
+            const promoData = {
+                ...code,
+                value: code.value || 0
+            };
+
             const res = await fetch('/api/promo-codes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(code)
+                body: JSON.stringify(promoData)
             });
             if (res.ok) {
                 const updatedPromoCodes = await res.json();
