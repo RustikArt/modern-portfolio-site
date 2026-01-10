@@ -84,7 +84,7 @@ const Dashboard = () => {
     const [productForm, setProductForm] = useState({
         editId: null,
         name: '', price: '', discountType: 'none', discountValue: '',
-        image: '', category: '', tags: '', isFeatured: false,
+        image: '', category: '', tags: '', is_featured: false,
         options: []
     });
 
@@ -147,7 +147,7 @@ const Dashboard = () => {
             image: product.image,
             category: product.category,
             tags: product.tags ? product.tags.join(', ') : '',
-            isFeatured: product.isFeatured || false,
+            is_featured: product.is_featured || false,
             options: product.options || []
         });
         window.scrollTo(0, 0);
@@ -174,7 +174,7 @@ const Dashboard = () => {
             image: productForm.image || 'https://placehold.co/400x400/333?text=Product',
             category: productForm.category,
             tags: tagsArray,
-            isFeatured: productForm.isFeatured || false,
+            is_featured: productForm.is_featured || false,
             options: productForm.options || []
         };
         if (productForm.editId) {
@@ -184,7 +184,7 @@ const Dashboard = () => {
         }
         setProductForm({
             editId: null, name: '', price: '', discountType: 'none', discountValue: '',
-            image: '', category: '', tags: '', isFeatured: false, options: []
+            image: '', category: '', tags: '', is_featured: false, options: []
         });
     };
 
