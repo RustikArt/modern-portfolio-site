@@ -21,7 +21,7 @@ const initialProducts = [
         price: 350,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/1a1a1a/d4af37?text=LOGO',
+        image: 'https://cdn-icons-png.flaticon.com/512/1005/1005141.png',
         category: 'Graphisme',
         tags: ['logo', 'branding', 'identité visuelle', 'entreprise', 'création'],
         options: [
@@ -36,7 +36,7 @@ const initialProducts = [
         price: 1500,
         promoPrice: 1350,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/0f0f0f/d4af37?text=BRANDING',
+        image: 'https://cdn-icons-png.flaticon.com/512/2620/2620552.png',
         category: 'Graphisme',
         tags: ['branding', 'identité visuelle', 'charte graphique', 'entreprise', 'design'],
         options: [
@@ -50,7 +50,7 @@ const initialProducts = [
         price: 75,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/151515/fff?text=BANNER',
+        image: 'https://cdn-icons-png.flaticon.com/512/1055/1055646.png',
         category: 'Graphisme',
         tags: ['bannière', 'header', 'webdesign', 'publicité', 'réseaux sociaux'],
         options: [
@@ -64,7 +64,7 @@ const initialProducts = [
         price: 250,
         promoPrice: 199,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/1f1f1f/d4af37?text=SOCIAL',
+        image: 'https://cdn-icons-png.flaticon.com/512/3955/3955024.png',
         category: 'Graphisme',
         tags: ['réseaux sociaux', 'marketing digital', 'contenu', 'branding', 'instagram'],
         options: [
@@ -78,7 +78,7 @@ const initialProducts = [
         price: 90,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/222/fff?text=CARTE',
+        image: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
         category: 'Graphisme',
         tags: ['carte de visite', 'papeterie', 'branding', 'professionnel', 'impression'],
         options: [
@@ -92,7 +92,7 @@ const initialProducts = [
         price: 65,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/181818/fff?text=AFFICHE',
+        image: 'https://cdn-icons-png.flaticon.com/512/3304/3304590.png',
         category: 'Graphisme',
         tags: ['affiche', 'poster', 'événement', 'publicité', 'décoration'],
         options: [
@@ -106,7 +106,7 @@ const initialProducts = [
         price: 280,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/141414/d4af37?text=INFOGRAPHIE',
+        image: 'https://cdn-icons-png.flaticon.com/512/2329/2329087.png',
         category: 'Graphisme',
         tags: ['infographie', 'données', 'éducation', 'marketing', 'information'],
         options: [
@@ -119,7 +119,7 @@ const initialProducts = [
         price: 450,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1c1c1c/fff?text=PACKAGING',
+        image: 'https://cdn-icons-png.flaticon.com/512/685/685388.png',
         category: 'Graphisme',
         tags: ['packaging', 'produit', 'marque', 'design', 'étiquette'],
         options: [
@@ -133,7 +133,7 @@ const initialProducts = [
         price: 180,
         promoPrice: 149,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1e1e1e/fff?text=PPT',
+        image: 'https://cdn-icons-png.flaticon.com/512/732/732076.png',
         category: 'Graphisme',
         tags: ['présentation', 'business', 'modèle', 'powerpoint', 'slides'],
         options: [
@@ -149,7 +149,7 @@ const initialProducts = [
         price: 85,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/2a1a1a/d4af37?text=PORTRAIT',
+        image: 'https://cdn-icons-png.flaticon.com/512/3141/3141036.png',
         category: 'Illustration',
         tags: ['illustration', 'portrait', 'personnalisé', 'cadeau', 'famille'],
         options: [
@@ -164,7 +164,7 @@ const initialProducts = [
         price: 350,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a2020/fff?text=EDITORIAL',
+        image: 'https://cdn-icons-png.flaticon.com/512/3655/3655580.png',
         category: 'Illustration',
         tags: ['illustration', 'éditorial', 'livre', 'article', 'média'],
         options: [
@@ -178,7 +178,7 @@ const initialProducts = [
         price: 55,
         promoPrice: 45,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a1a2a/d4af37?text=ICONES',
+        image: 'https://cdn-icons-png.flaticon.com/512/2621/2621341.png',
         category: 'Illustration',
         tags: ['illustration', 'icônes', 'UI/UX', 'web', 'application'],
         options: [
@@ -192,7 +192,7 @@ const initialProducts = [
         price: 120,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/202020/fff?text=MERCH',
+        image: 'https://cdn-icons-png.flaticon.com/512/892/892458.png',
         category: 'Illustration',
         tags: ['illustration', 't-shirt', 'merchandising', 'vêtements', 'design'],
         options: [
@@ -206,7 +206,7 @@ const initialProducts = [
         price: 95,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/0a0a0a/fff?text=TATTOO',
+        image: 'https://cdn-icons-png.flaticon.com/512/3225/3225270.png',
         category: 'Illustration',
         tags: ['illustration', 'tatouage', 'art corporel', 'design', 'personnalisé'],
         options: [
@@ -220,7 +220,7 @@ const initialProducts = [
         price: 40,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a1a1a/fff?text=POSTCARD',
+        image: 'https://cdn-icons-png.flaticon.com/512/3082/3082060.png',
         category: 'Illustration',
         tags: ['illustration', 'carte postale', 'voyage', 'fêtes', 'cadeau'],
         options: [
@@ -235,7 +235,7 @@ const initialProducts = [
         price: 120,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/1a1a1a/d4af37?text=FINE+ART',
+        image: 'https://cdn-icons-png.flaticon.com/512/3004/3004613.png',
         category: 'Photographie',
         tags: ['photographie', 'art', 'tirage', 'décoration', 'paysage'],
         options: [
@@ -250,7 +250,7 @@ const initialProducts = [
         price: 45,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/222/fff?text=STOCK',
+        image: 'https://cdn-icons-png.flaticon.com/512/2659/2659360.png',
         category: 'Photographie',
         tags: ['photographie', 'stock', 'licence', 'commercial', 'web'],
         options: [
@@ -264,7 +264,7 @@ const initialProducts = [
         price: 250,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/151515/d4af37?text=PORTRAIT',
+        image: 'https://cdn-icons-png.flaticon.com/512/2956/2956744.png',
         category: 'Photographie',
         tags: ['photographie', 'portrait', 'service', 'professionnel', 'studio'],
         options: [
@@ -279,7 +279,7 @@ const initialProducts = [
         price: 35,
         promoPrice: 25,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a2a2a/fff?text=VOYAGE',
+        image: 'https://cdn-icons-png.flaticon.com/512/201/201623.png',
         category: 'Photographie',
         tags: ['photographie', 'voyage', 'paysage', 'nature', 'digital'],
         options: [
@@ -294,7 +294,7 @@ const initialProducts = [
         price: 95,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/1a1a2a/d4af37?text=REELS',
+        image: 'https://cdn-icons-png.flaticon.com/512/1179/1179120.png',
         category: 'Vidéo & Musique',
         tags: ['vidéo', 'réseaux sociaux', 'TikTok', 'Instagram', 'montage'],
         options: [
@@ -309,7 +309,7 @@ const initialProducts = [
         price: 380,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/2a1a2a/d4af37?text=MOTION',
+        image: 'https://cdn-icons-png.flaticon.com/512/2784/2784459.png',
         category: 'Vidéo & Musique',
         tags: ['vidéo', 'animation', 'motion design', 'explicatif', 'publicité'],
         options: [
@@ -324,7 +324,7 @@ const initialProducts = [
         price: 350,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/0a0a1a/fff?text=MUSIC',
+        image: 'https://cdn-icons-png.flaticon.com/512/3844/3844724.png',
         category: 'Vidéo & Musique',
         tags: ['musique', 'composition', 'bande son', 'film', 'publicité'],
         options: [
@@ -339,7 +339,7 @@ const initialProducts = [
         price: 120,
         promoPrice: 99,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a1a1a/fff?text=JINGLE',
+        image: 'https://cdn-icons-png.flaticon.com/512/3039/3039436.png',
         category: 'Vidéo & Musique',
         tags: ['musique', 'audio', 'jingle', 'podcast', 'branding'],
         options: [
@@ -353,7 +353,7 @@ const initialProducts = [
         price: 45,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a0a1a/fff?text=BEATS',
+        image: 'https://cdn-icons-png.flaticon.com/512/2995/2995101.png',
         category: 'Vidéo & Musique',
         tags: ['musique', 'production', 'samples', 'beats', 'instrumentaux'],
         options: [
@@ -369,7 +369,7 @@ const initialProducts = [
         price: 65,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/2a2a1a/fff?text=CERAMIQUE',
+        image: 'https://cdn-icons-png.flaticon.com/512/3081/3081559.png',
         category: 'Objets & Éditions',
         tags: ['artisanat', 'fait main', 'céramique', 'décoration', 'unique'],
         options: [
@@ -383,7 +383,7 @@ const initialProducts = [
         price: 8,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a1a1a/fff?text=FAIRE-PART',
+        image: 'https://cdn-icons-png.flaticon.com/512/3187/3187522.png',
         category: 'Objets & Éditions',
         tags: ['papeterie', 'mariage', 'anniversaire', 'personnalisé', 'impression'],
         options: [
@@ -398,7 +398,7 @@ const initialProducts = [
         price: 35,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/0f0f0f/d4af37?text=TSHIRT',
+        image: 'https://cdn-icons-png.flaticon.com/512/892/892458.png',
         category: 'Objets & Éditions',
         tags: ['vêtements', 'mode', 'personnalisé', 't-shirt', 'design'],
         options: [
@@ -413,7 +413,7 @@ const initialProducts = [
         price: 28,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a1a1a/fff?text=ZINE',
+        image: 'https://cdn-icons-png.flaticon.com/512/3165/3165065.png',
         category: 'Objets & Éditions',
         tags: ['livre d\'art', 'zine', 'édition', 'collection', 'photographie'],
         options: [
@@ -426,7 +426,7 @@ const initialProducts = [
         price: 42,
         promoPrice: 35,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/2a1a1a/fff?text=DIY',
+        image: 'https://cdn-icons-png.flaticon.com/512/1998/1998610.png',
         category: 'Objets & Éditions',
         tags: ['DIY', 'kit créatif', 'loisirs', 'peinture', 'cadeau'],
         options: [
@@ -442,7 +442,7 @@ const initialProducts = [
         price: 150,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/0a0a1a/d4af37?text=NFT',
+        image: 'https://cdn-icons-png.flaticon.com/512/6262/6262178.png',
         category: 'Art Numérique',
         tags: ['NFT', 'crypto art', 'blockchain', 'digital', 'collection'],
         options: [
@@ -456,7 +456,7 @@ const initialProducts = [
         price: 280,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a0a2a/fff?text=AR',
+        image: 'https://cdn-icons-png.flaticon.com/512/3081/3081330.png',
         category: 'Art Numérique',
         tags: ['AR', 'réalité augmentée', 'Instagram', 'Snapchat', 'filtre'],
         options: [
@@ -470,7 +470,7 @@ const initialProducts = [
         price: 85,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a1a2a/fff?text=3D',
+        image: 'https://cdn-icons-png.flaticon.com/512/3161/3161837.png',
         category: 'Art Numérique',
         tags: ['3D', 'modélisation', 'assets', 'jeu vidéo', 'animation'],
         options: [
@@ -485,7 +485,7 @@ const initialProducts = [
         price: 120,
         promoPrice: null,
         isFeatured: true,
-        image: 'https://placehold.co/400x400/0f0a1a/d4af37?text=GENERATIF',
+        image: 'https://cdn-icons-png.flaticon.com/512/2784/2784403.png',
         category: 'Art Numérique',
         tags: ['art génératif', 'algorithmique', 'code', 'digital', 'abstrait'],
         options: [
@@ -499,7 +499,7 @@ const initialProducts = [
         price: 180,
         promoPrice: null,
         isFeatured: false,
-        image: 'https://placehold.co/400x400/1a1a1a/fff?text=LOOP',
+        image: 'https://cdn-icons-png.flaticon.com/512/1179/1179069.png',
         category: 'Art Numérique',
         tags: ['vidéo', 'art vidéo', 'boucle', 'visuel', 'ambiance'],
         options: [

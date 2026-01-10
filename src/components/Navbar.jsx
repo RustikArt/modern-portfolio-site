@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
+import { ShoppingCart, User } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -32,13 +33,18 @@ const Navbar = () => {
           <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>Contact</Link>
         </div>
         <div className="nav-actions">
-          <Link to="/cart" className="action-link">
-            Panier <span className="cart-badge">{cartCount > 0 ? `(${cartCount})` : ''}</span>
+          <Link to="/cart" className="action-link icon-link" title="Panier">
+            <ShoppingCart size={20} />
+            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
           </Link>
           {currentUser ? (
-            <Link to="/profile" className="action-link">Mon Compte</Link>
+            <Link to="/profile" className="action-link icon-link" title="Mon Compte">
+              <User size={20} />
+            </Link>
           ) : (
-            <Link to="/login" className="action-link">Connexion</Link>
+            <Link to="/login" className="action-link icon-link" title="Connexion">
+              <User size={20} />
+            </Link>
           )}
         </div>
       </div>
@@ -47,3 +53,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
