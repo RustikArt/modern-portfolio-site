@@ -177,6 +177,8 @@ const Dashboard = () => {
             isFeatured: productForm.isFeatured || false,
             options: productForm.options || []
         };
+
+        console.log('Dashboard: Adding product with data:', productData);
         if (productForm.editId) {
             updateProduct(productForm.editId, productData);
         } else {
