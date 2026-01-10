@@ -91,7 +91,7 @@ const AnnouncementBanner = () => {
 
     const closeButtonStyle = {
         position: 'absolute',
-        left: '1rem',
+        right: '1rem',
         background: 'none',
         border: 'none',
         color: 'inherit',
