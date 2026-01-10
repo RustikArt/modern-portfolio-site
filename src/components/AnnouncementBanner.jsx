@@ -15,10 +15,8 @@ const AnnouncementBanner = () => {
         const key = getDismissalKey();
         if (key) {
             const dismissed = localStorage.getItem(key) === 'true';
-            console.log('AnnouncementBanner: dismissal key found:', key, 'dismissed:', dismissed);
             return !dismissed;
         }
-        console.log('AnnouncementBanner: no dismissal key, showing banner');
         return true;
     });
     const [timeLeft, setTimeLeft] = useState('');
@@ -32,7 +30,6 @@ const AnnouncementBanner = () => {
     };
 
     useEffect(() => {
-        console.log('AnnouncementBanner: announcement state changed:', announcement);
         const height = (announcement && announcement.isActive && isVisible) ? (announcement.height || '40px') : '0px';
         document.documentElement.style.setProperty('--banner-height', height);
     }, [announcement, isVisible]);
@@ -64,25 +61,16 @@ const AnnouncementBanner = () => {
 
     // Reset visibility when announcement text changes
     useEffect(() => {
-        console.log('AnnouncementBanner: text changed, resetting visibility');
         const key = getDismissalKey();
         if (key && localStorage.getItem(key) !== 'true') {
-            console.log('AnnouncementBanner: setting visible to true');
             setIsVisible(true);
         } else if (key) {
-            console.log('AnnouncementBanner: banner was dismissed, clearing dismissal and showing');
             localStorage.removeItem(key);
             setIsVisible(true);
         }
     }, [announcement?.text]);
 
-    console.log('AnnouncementBanner render:', { announcement, isVisible });
-
     if (!announcement || !announcement.isActive || !isVisible) {
-        console.log('AnnouncementBanner: not rendering - conditions not met');
-        console.log('AnnouncementBanner: announcement:', announcement);
-        console.log('AnnouncementBanner: isActive:', announcement?.isActive);
-        console.log('AnnouncementBanner: isVisible:', isVisible);
         return null;
     }
 

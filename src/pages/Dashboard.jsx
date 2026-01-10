@@ -177,8 +177,6 @@ const Dashboard = () => {
             isFeatured: productForm.isFeatured || false,
             options: productForm.options || []
         };
-
-        console.log('Dashboard: Adding product with data:', productData);
         if (productForm.editId) {
             updateProduct(productForm.editId, productData);
         } else {
@@ -785,10 +783,7 @@ const Dashboard = () => {
                                                     </div>
                                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                         <button onClick={() => handleEditProduct(p)} style={{ ...btnModern, padding: '0.5rem' }} title="Edit"><Edit size={14} /></button>
-                                                        <button onClick={() => {
-                                                            console.log('Delete product button clicked for ID:', p.id);
-                                                            deleteProduct(p.id);
-                                                        }} style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }} title="Delete"><Trash2 size={14} /></button>
+                                                        <button onClick={() => deleteProduct(p.id)} style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }} title="Delete"><Trash2 size={14} /></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -835,10 +830,7 @@ const Dashboard = () => {
                                                 <button onClick={() => handleEditProject(p)} style={{ ...btnModern, flex: 1, textAlign: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                                                     <Edit size={14} /> Edit Content
                                                 </button>
-                                                <button onClick={() => {
-                                                    console.log('Delete project button clicked for ID:', p.id);
-                                                    deleteProject(p.id);
-                                                }} style={{ ...btnModern, color: '#ff4d4d', padding: '0.5rem' }}>
+                                                <button onClick={() => deleteProject(p.id)} style={{ ...btnModern, color: '#ff4d4d', padding: '0.5rem' }}>
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
@@ -873,10 +865,7 @@ const Dashboard = () => {
                                                 <strong style={{ fontSize: '1.2rem', color: 'var(--color-accent)' }}>{c.code}</strong>
                                                 <span style={{ marginLeft: '1rem', color: '#555' }}>-{c.value}{c.type === 'percent' ? '%' : '€'}</span>
                                             </div>
-                                            <button onClick={() => {
-                                                console.log('Delete promo code button clicked for ID:', c.id);
-                                                deletePromoCode(c.id);
-                                            }} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                            <button onClick={() => deletePromoCode(c.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
                                         </div>
                                     ))}
                                 </div>
