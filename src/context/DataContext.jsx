@@ -836,6 +836,13 @@ export const DataProvider = ({ children }) => {
             } else {
                 const errorText = await res.text();
                 console.error('Failed to add product, response:', errorText);
+                // Try to parse JSON error for more details
+                try {
+                    const errorObj = JSON.parse(errorText);
+                    console.error('Detailed error:', errorObj);
+                } catch (e) {
+                    console.error('Error parsing JSON response');
+                }
                 throw new Error(`Add failed: ${errorText}`);
             }
         } catch (error) {
