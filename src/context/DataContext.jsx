@@ -5,15 +5,15 @@ const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
-// Expanded Initial Data with Phase 3 Schema
-const initialProjects = [
+// Fallback Initial Data
+const fallbackProjects = [
     { id: 1, title: 'Nebula', category: 'Web Design', image: 'https://placehold.co/600x400/1a1a1a/FFF?text=Nebula', content: '<p>Une exploration profonde de l\'espace numérique.</p>' },
     { id: 2, title: 'Quartz', category: 'Branding', image: 'https://placehold.co/600x400/2a2a2a/FFF?text=Quartz', content: '<p>Identité visuelle cristalline et intemporelle.</p>' },
     { id: 3, title: 'Echo', category: 'App Mobile', image: 'https://placehold.co/600x400/151515/FFF?text=Echo', content: '<p>Connecter les gens par la voix.</p>' },
     { id: 4, title: 'Horizon', category: 'Ecommerce', image: 'https://placehold.co/600x400/0f0f0f/FFF?text=Horizon', content: '<p>Le futur du commerce en ligne.</p>' },
 ];
 
-const initialProducts = [
+const fallbackProducts = [
     // ==================== GRAPHISME ====================
     {
         id: 101,
@@ -522,15 +522,8 @@ const initialAdmin = {
 
 export const DataProvider = ({ children }) => {
     // --- CORE DATA ---
-    const [projects, setProjects] = useState(() => {
-        const saved = localStorage.getItem('portfolio_projects');
-        return saved ? JSON.parse(saved) : initialProjects;
-    });
-
-    const [products, setProducts] = useState(() => {
-        const saved = localStorage.getItem('portfolio_products');
-        return saved ? JSON.parse(saved) : initialProducts;
-    });
+    const [projects, setProjects] = useState([]);
+    const [products, setProducts] = useState([]);
 
     // --- E-COMMERCE DATA ---
     const [users, setUsers] = useState(() => {
@@ -559,14 +552,8 @@ export const DataProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : [];
     });
 
-    // Phase 4: Promo Codes State
-    const [promoCodes, setPromoCodes] = useState(() => {
-        const saved = localStorage.getItem('portfolio_promoCodes');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
-            { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
-        ];
-    });
+    // Promo Codes State
+    const [promoCodes, setPromoCodes] = useState([]);
 
     // Announcement Banner State
     const [announcement, setAnnouncement] = useState(() => {
@@ -591,14 +578,53 @@ export const DataProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : [];
     });
 
-    // --- PERSISTENCE ---
+    // --- FETCH DATA ON MOUNT ---
     useEffect(() => {
-        localStorage.setItem('portfolio_projects', JSON.stringify(projects));
-    }, [projects]);
+        const fetchData = async () => {
+            try {
+                const [projectsRes, productsRes, promoRes] = await Promise.all([
+                    fetch('/api/projects'),
+                    fetch('/api/products'),
+                    fetch('/api/promo-codes')
+                ]);
+                if (projectsRes.ok) {
+                    const projectsData = await projectsRes.json();
+                    setProjects(projectsData.length > 0 ? projectsData : fallbackProjects);
+                } else {
+                    setProjects(fallbackProjects);
+                }
+                if (productsRes.ok) {
+                    const productsData = await productsRes.json();
+                    setProducts(productsData.length > 0 ? productsData : fallbackProducts);
+                } else {
+                    setProducts(fallbackProducts);
+                }
+                if (promoRes.ok) {
+                    const promoData = await promoRes.json();
+                    setPromoCodes(promoData.length > 0 ? promoData : [
+                        { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
+                        { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
+                    ]);
+                } else {
+                    setPromoCodes([
+                        { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
+                        { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
+                    ]);
+                }
+            } catch (error) {
+                console.error('Failed to fetch data from API, using fallbacks');
+                setProjects(fallbackProjects);
+                setProducts(fallbackProducts);
+                setPromoCodes([
+                    { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
+                    { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
+                ]);
+            }
+        };
+        fetchData();
+    }, []);
 
-    useEffect(() => {
-        localStorage.setItem('portfolio_products', JSON.stringify(products));
-    }, [products]);
+    // --- PERSISTENCE --- (Now handled by API)
 
     useEffect(() => {
         localStorage.setItem('portfolio_users', JSON.stringify(users));
@@ -633,9 +659,7 @@ export const DataProvider = ({ children }) => {
         localStorage.setItem('portfolio_orders', JSON.stringify(sanitizedOrders));
     }, [orders]);
 
-    useEffect(() => {
-        localStorage.setItem('portfolio_promoCodes', JSON.stringify(promoCodes));
-    }, [promoCodes]);
+    // Promo codes persisted via API
 
     useEffect(() => {
         localStorage.setItem('portfolio_announcement', JSON.stringify(announcement));
@@ -649,17 +673,97 @@ export const DataProvider = ({ children }) => {
     // --- ACTIONS ---
 
     // Admin / Data
-    const addProject = (project) => setProjects([...projects, { ...project, id: Date.now() }]);
-    const deleteProject = (id) => setProjects(projects.filter(p => p.id !== id));
-    const updateProject = (id, updatedProject) => {
-        setProjects(projects.map(p => p.id === id ? { ...p, ...updatedProject } : p));
+    const addProject = async (project) => {
+        try {
+            const res = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(project)
+            });
+            if (res.ok) {
+                const updatedProjects = await res.json();
+                setProjects(updatedProjects);
+            }
+        } catch (error) {
+            console.error('Failed to add project');
+        }
+    };
+    const deleteProject = async (id) => {
+        try {
+            const res = await fetch('/api/projects', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if (res.ok) {
+                const updatedProjects = await res.json();
+                setProjects(updatedProjects);
+            }
+        } catch (error) {
+            console.error('Failed to delete project');
+        }
+    };
+    const updateProject = async (id, updatedProject) => {
+        try {
+            const res = await fetch('/api/projects', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ...updatedProject })
+            });
+            if (res.ok) {
+                const updatedProjects = await res.json();
+                setProjects(updatedProjects);
+            }
+        } catch (error) {
+            console.error('Failed to update project');
+        }
     };
 
     // Updated addProduct to support Phase 3 fields
-    const addProduct = (product) => setProducts([...products, { ...product, id: Date.now() }]);
-    const deleteProduct = (id) => setProducts(products.filter(p => p.id !== id));
-    const updateProduct = (id, updatedProduct) => {
-        setProducts(products.map(p => p.id === id ? { ...p, ...updatedProduct } : p));
+    const addProduct = async (product) => {
+        try {
+            const res = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product)
+            });
+            if (res.ok) {
+                const updatedProducts = await res.json();
+                setProducts(updatedProducts);
+            }
+        } catch (error) {
+            console.error('Failed to add product');
+        }
+    };
+    const deleteProduct = async (id) => {
+        try {
+            const res = await fetch('/api/products', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if (res.ok) {
+                const updatedProducts = await res.json();
+                setProducts(updatedProducts);
+            }
+        } catch (error) {
+            console.error('Failed to delete product');
+        }
+    };
+    const updateProduct = async (id, updatedProduct) => {
+        try {
+            const res = await fetch('/api/products', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ...updatedProduct })
+            });
+            if (res.ok) {
+                const updatedProducts = await res.json();
+                setProducts(updatedProducts);
+            }
+        } catch (error) {
+            console.error('Failed to update product');
+        }
     };
 
     // User Auth
@@ -701,8 +805,36 @@ export const DataProvider = ({ children }) => {
     };
 
     // Promo Codes
-    const addPromoCode = (code) => setPromoCodes([...promoCodes, { ...code, id: Date.now() }]);
-    const deletePromoCode = (id) => setPromoCodes(promoCodes.filter(c => c.id !== id));
+    const addPromoCode = async (code) => {
+        try {
+            const res = await fetch('/api/promo-codes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(code)
+            });
+            if (res.ok) {
+                const updatedPromoCodes = await res.json();
+                setPromoCodes(updatedPromoCodes);
+            }
+        } catch (error) {
+            console.error('Failed to add promo code');
+        }
+    };
+    const deletePromoCode = async (id) => {
+        try {
+            const res = await fetch('/api/promo-codes', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if (res.ok) {
+                const updatedPromoCodes = await res.json();
+                setPromoCodes(updatedPromoCodes);
+            }
+        } catch (error) {
+            console.error('Failed to delete promo code');
+        }
+    };
 
     // Helper to calculate product dynamic price
     const calculateProductPrice = (product) => {

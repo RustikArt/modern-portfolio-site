@@ -765,7 +765,7 @@ const Dashboard = () => {
                                                         PROMO
                                                     </span>
                                                 )}
-                                                <img src={p.image} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                                <img src={`${p.image}?v=${WEBSITE_VERSION}`} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <div>
                                                         <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{p.name}</h4>
@@ -823,7 +823,7 @@ const Dashboard = () => {
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                                     {projects.map(p => (
                                         <div key={p.id} style={cardStyle}>
-                                            <img src={p.image} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                            <img src={`${p.image}?v=${WEBSITE_VERSION}`} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
                                             <h4 style={{ margin: '0 0 0.5rem' }}>{p.title}</h4>
                                             <p style={{ fontSize: '0.75rem', color: '#555', textTransform: 'uppercase', marginBottom: '1.5rem' }}>{p.category}</p>
                                             <div style={{ display: 'flex', gap: '1rem' }}>

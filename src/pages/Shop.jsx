@@ -1,6 +1,7 @@
 import { useData } from '../context/DataContext';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { WEBSITE_VERSION } from '../version';
 import './Shop.css';
 
 const Shop = () => {
@@ -50,7 +51,7 @@ const Shop = () => {
                             <div key={product.id} className="product-card">
                                 <Link to={`/shop/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <div className="product-image">
-                                        <img src={product.image} alt={product.name} />
+                                        <img src={`${product.image}?v=${WEBSITE_VERSION}`} alt={product.name} />
                                     </div>
                                 </Link>
                                 <div className="product-info">

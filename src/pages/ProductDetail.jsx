@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useState, useEffect } from 'react';
+import { WEBSITE_VERSION } from '../version';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -69,7 +70,7 @@ const ProductDetail = () => {
             <div className="container">
                 <button onClick={() => navigate('/shop')} className="btn" style={{ marginBottom: '2rem' }}>← Retour</button>
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '4rem' }}>
-                    <img src={product.image} alt={product.name} style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
+                    <img src={`${product.image}?v=${WEBSITE_VERSION}`} alt={product.name} style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
                     <div className="product-info-detail">
                         <span style={{ color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{product.category}</span>
                         <h1 style={{ fontSize: '3rem', margin: '1rem 0' }}>{product.name}</h1>
