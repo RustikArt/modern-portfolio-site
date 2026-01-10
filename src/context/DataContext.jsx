@@ -805,18 +805,26 @@ export const DataProvider = ({ children }) => {
 
     // Updated addProduct to support Phase 3 fields
     const addProduct = async (product) => {
+        console.log('DataContext: Adding product with data:', product);
         try {
             const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(product)
             });
+            console.log('Add product response status:', res.status);
             if (res.ok) {
                 const updatedProducts = await res.json();
+                console.log('Updated products after add:', updatedProducts);
                 setProducts(updatedProducts);
+            } else {
+                const errorText = await res.text();
+                console.error('Failed to add product, response:', errorText);
+                throw new Error(`Add failed: ${errorText}`);
             }
         } catch (error) {
-            console.error('Failed to add product');
+            console.error('Failed to add product, error:', error);
+            throw error;
         }
     };
     const deleteProduct = async (id) => {

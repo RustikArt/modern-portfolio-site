@@ -70,7 +70,9 @@ const AnnouncementBanner = () => {
             console.log('AnnouncementBanner: setting visible to true');
             setIsVisible(true);
         } else if (key) {
-            console.log('AnnouncementBanner: banner was dismissed, keeping invisible');
+            console.log('AnnouncementBanner: banner was dismissed, clearing dismissal and showing');
+            localStorage.removeItem(key);
+            setIsVisible(true);
         }
     }, [announcement?.text]);
 
