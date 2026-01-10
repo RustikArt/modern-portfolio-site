@@ -587,38 +587,77 @@ export const DataProvider = ({ children }) => {
                     fetch('/api/products'),
                     fetch('/api/promo-codes')
                 ]);
+
+                // Recovery mechanism: Check local storage first if API fails
                 if (projectsRes.ok) {
                     const projectsData = await projectsRes.json();
-                    setProjects(projectsData.length > 0 ? projectsData : fallbackProjects);
+                    setProjects(projectsData);
                 } else {
-                    setProjects(fallbackProjects);
+                    console.error('Projects API failed:', projectsRes.status, await projectsRes.text());
+                    // Try to recover from local storage
+                    const localProjects = localStorage.getItem('portfolio_projects');
+                    if (localProjects) {
+                        console.log('Recovering projects from local storage');
+                        setProjects(JSON.parse(localProjects));
+                    } else {
+                        console.log('No local projects found, using fallback');
+                        setProjects(fallbackProjects);
+                    }
                 }
+
                 if (productsRes.ok) {
                     const productsData = await productsRes.json();
-                    setProducts(productsData.length > 0 ? productsData : fallbackProducts);
+                    setProducts(productsData);
                 } else {
-                    setProducts(fallbackProducts);
+                    console.error('Products API failed:', productsRes.status, await productsRes.text());
+                    const localProducts = localStorage.getItem('portfolio_products');
+                    if (localProducts) {
+                        console.log('Recovering products from local storage');
+                        setProducts(JSON.parse(localProducts));
+                    } else {
+                        console.log('No local products found, using fallback');
+                        setProducts(fallbackProducts);
+                    }
                 }
+
                 if (promoRes.ok) {
                     const promoData = await promoRes.json();
-                    setPromoCodes(promoData.length > 0 ? promoData : [
-                        { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
-                        { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
-                    ]);
+                    setPromoCodes(promoData);
                 } else {
+                    console.error('Promo codes API failed:', promoRes.status, await promoRes.text());
+                    const localPromos = localStorage.getItem('portfolio_promo_codes');
+                    if (localPromos) {
+                        console.log('Recovering promo codes from local storage');
+                        setPromoCodes(JSON.parse(localPromos));
+                    } else {
+                        console.log('No local promo codes found, using fallback');
+                        setPromoCodes([
+                            { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
+                            { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
+                        ]);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch data from API:', error);
+                // Try to recover from local storage
+                const localProjects = localStorage.getItem('portfolio_projects');
+                const localProducts = localStorage.getItem('portfolio_products');
+                const localPromos = localStorage.getItem('portfolio_promo_codes');
+
+                if (localProjects) {
+                    console.log('Recovering all data from local storage');
+                    setProjects(JSON.parse(localProjects));
+                    setProducts(JSON.parse(localProducts || '[]'));
+                    setPromoCodes(JSON.parse(localPromos || '[]'));
+                } else {
+                    console.log('No local data found, using fallbacks');
+                    setProjects(fallbackProjects);
+                    setProducts(fallbackProducts);
                     setPromoCodes([
                         { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
                         { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
                     ]);
                 }
-            } catch (error) {
-                console.error('Failed to fetch data from API, using fallbacks');
-                setProjects(fallbackProjects);
-                setProducts(fallbackProducts);
-                setPromoCodes([
-                    { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
-                    { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
-                ]);
             }
         };
         fetchData();
@@ -659,7 +698,43 @@ export const DataProvider = ({ children }) => {
         localStorage.setItem('portfolio_orders', JSON.stringify(sanitizedOrders));
     }, [orders]);
 
-    // Promo codes persisted via API
+    // Sync local storage with API data to prevent data loss
+    useEffect(() => {
+        const syncLocalStorageWithAPI = async () => {
+            try {
+                // Sync projects
+                const projectsRes = await fetch('/api/projects');
+                if (projectsRes.ok) {
+                    const projectsData = await projectsRes.json();
+                    localStorage.setItem('portfolio_projects', JSON.stringify(projectsData));
+                }
+
+                // Sync products
+                const productsRes = await fetch('/api/products');
+                if (productsRes.ok) {
+                    const productsData = await productsRes.json();
+                    localStorage.setItem('portfolio_products', JSON.stringify(productsData));
+                }
+
+                // Sync promo codes
+                const promoRes = await fetch('/api/promo-codes');
+                if (promoRes.ok) {
+                    const promoData = await promoRes.json();
+                    localStorage.setItem('portfolio_promo_codes', JSON.stringify(promoData));
+                }
+            } catch (error) {
+                console.error('Failed to sync local storage with API:', error);
+            }
+        };
+
+        // Sync every 5 minutes
+        const syncInterval = setInterval(syncLocalStorageWithAPI, 5 * 60 * 1000);
+
+        // Initial sync
+        syncLocalStorageWithAPI();
+
+        return () => clearInterval(syncInterval);
+    }, []);
 
     useEffect(() => {
         localStorage.setItem('portfolio_announcement', JSON.stringify(announcement));
@@ -701,11 +776,15 @@ export const DataProvider = ({ children }) => {
                 const updatedProjects = await res.json();
                 console.log('Updated projects after delete:', updatedProjects);
                 setProjects(updatedProjects);
+                console.log('Project deletion successful, state updated');
             } else {
-                console.error('Failed to delete project, response:', await res.text());
+                const errorText = await res.text();
+                console.error('Failed to delete project, response:', errorText);
+                throw new Error(`Delete failed: ${errorText}`);
             }
         } catch (error) {
             console.error('Failed to delete project, error:', error);
+            throw error;
         }
     };
     const updateProject = async (id, updatedProject) => {
@@ -753,11 +832,15 @@ export const DataProvider = ({ children }) => {
                 const updatedProducts = await res.json();
                 console.log('Updated products after delete:', updatedProducts);
                 setProducts(updatedProducts);
+                console.log('Product deletion successful, state updated');
             } else {
-                console.error('Failed to delete product, response:', await res.text());
+                const errorText = await res.text();
+                console.error('Failed to delete product, response:', errorText);
+                throw new Error(`Delete failed: ${errorText}`);
             }
         } catch (error) {
             console.error('Failed to delete product, error:', error);
+            throw error;
         }
     };
     const updateProduct = async (id, updatedProduct) => {
@@ -843,11 +926,15 @@ export const DataProvider = ({ children }) => {
                 const updatedPromoCodes = await res.json();
                 console.log('Updated promo codes after delete:', updatedPromoCodes);
                 setPromoCodes(updatedPromoCodes);
+                console.log('Promo code deletion successful, state updated');
             } else {
-                console.error('Failed to delete promo code, response:', await res.text());
+                const errorText = await res.text();
+                console.error('Failed to delete promo code, response:', errorText);
+                throw new Error(`Delete failed: ${errorText}`);
             }
         } catch (error) {
             console.error('Failed to delete promo code, error:', error);
+            throw error;
         }
     };
 
