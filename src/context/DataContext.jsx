@@ -820,13 +820,18 @@ export const DataProvider = ({ children }) => {
             };
             delete productData.promoPrice; // Remove the frontend field
 
+            console.log('Sending product data to API:', productData);
+
             const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(productData)
             });
+            console.log('API response status:', res.status);
+
             if (res.ok) {
                 const updatedProducts = await res.json();
+                console.log('Product added successfully:', updatedProducts);
                 setProducts(updatedProducts);
             } else {
                 const errorText = await res.text();
