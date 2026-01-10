@@ -689,18 +689,23 @@ export const DataProvider = ({ children }) => {
         }
     };
     const deleteProject = async (id) => {
+        console.log('Attempting to delete project with id:', id);
         try {
             const res = await fetch('/api/projects', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id })
             });
+            console.log('Delete project response status:', res.status);
             if (res.ok) {
                 const updatedProjects = await res.json();
+                console.log('Updated projects after delete:', updatedProjects);
                 setProjects(updatedProjects);
+            } else {
+                console.error('Failed to delete project, response:', await res.text());
             }
         } catch (error) {
-            console.error('Failed to delete project');
+            console.error('Failed to delete project, error:', error);
         }
     };
     const updateProject = async (id, updatedProject) => {
@@ -736,18 +741,23 @@ export const DataProvider = ({ children }) => {
         }
     };
     const deleteProduct = async (id) => {
+        console.log('Attempting to delete product with id:', id);
         try {
             const res = await fetch('/api/products', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id })
             });
+            console.log('Delete product response status:', res.status);
             if (res.ok) {
                 const updatedProducts = await res.json();
+                console.log('Updated products after delete:', updatedProducts);
                 setProducts(updatedProducts);
+            } else {
+                console.error('Failed to delete product, response:', await res.text());
             }
         } catch (error) {
-            console.error('Failed to delete product');
+            console.error('Failed to delete product, error:', error);
         }
     };
     const updateProduct = async (id, updatedProduct) => {
@@ -821,18 +831,23 @@ export const DataProvider = ({ children }) => {
         }
     };
     const deletePromoCode = async (id) => {
+        console.log('Attempting to delete promo code with id:', id);
         try {
             const res = await fetch('/api/promo-codes', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id })
             });
+            console.log('Delete promo code response status:', res.status);
             if (res.ok) {
                 const updatedPromoCodes = await res.json();
+                console.log('Updated promo codes after delete:', updatedPromoCodes);
                 setPromoCodes(updatedPromoCodes);
+            } else {
+                console.error('Failed to delete promo code, response:', await res.text());
             }
         } catch (error) {
-            console.error('Failed to delete promo code');
+            console.error('Failed to delete promo code, error:', error);
         }
     };
 
