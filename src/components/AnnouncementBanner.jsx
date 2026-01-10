@@ -29,6 +29,7 @@ const AnnouncementBanner = () => {
     };
 
     useEffect(() => {
+        console.log('AnnouncementBanner: announcement state changed:', announcement);
         const height = (announcement && announcement.isActive && isVisible) ? (announcement.height || '40px') : '0px';
         document.documentElement.style.setProperty('--banner-height', height);
     }, [announcement, isVisible]);
@@ -60,13 +61,19 @@ const AnnouncementBanner = () => {
 
     // Reset visibility when announcement text changes
     useEffect(() => {
+        console.log('AnnouncementBanner: text changed, resetting visibility');
         const key = getDismissalKey();
         if (key && localStorage.getItem(key) !== 'true') {
             setIsVisible(true);
         }
     }, [announcement?.text]);
 
-    if (!announcement || !announcement.isActive || !isVisible) return null;
+    console.log('AnnouncementBanner render:', { announcement, isVisible });
+
+    if (!announcement || !announcement.isActive || !isVisible) {
+        console.log('AnnouncementBanner: not rendering - conditions not met');
+        return null;
+    }
 
     const bannerStyle = {
         backgroundColor: announcement.bgColor || '#d4af37',

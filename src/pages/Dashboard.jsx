@@ -174,8 +174,8 @@ const Dashboard = () => {
             image: productForm.image || 'https://placehold.co/400x400/333?text=Product',
             category: productForm.category,
             tags: tagsArray,
-            isFeatured: productForm.isFeatured,
-            options: productForm.options
+            isFeatured: productForm.isFeatured || false,
+            options: productForm.options || []
         };
         if (productForm.editId) {
             updateProduct(productForm.editId, productData);
@@ -202,8 +202,8 @@ const Dashboard = () => {
             title: projectForm.title,
             category: projectForm.category,
             image: projectForm.image || 'https://placehold.co/600x400/333?text=Project',
-            content: projectForm.content,
-            blocks: projectForm.blocks
+            content: projectForm.content || '',
+            blocks: projectForm.blocks || []
         };
         if (projectForm.editId) {
             updateProject(projectForm.editId, projectData);
