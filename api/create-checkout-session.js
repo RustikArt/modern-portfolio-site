@@ -1,13 +1,69 @@
 import Stripe from 'stripe';
+import {
+    setCorsHeaders,
+    handleCorsPreFlight,
+    validateCartItem,
+    validatePromoCode,
+    validateRedirectUrl,
+    checkRateLimit,
+    handleError
+} from './middleware.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export default async function handler(req, res) {
-    if (req.method === 'POST') {
-        try {
-            const { cart, promo, success_url, cancel_url } = req.body;
+const ALLOWED_ORIGINS = [
+    'https://rustikop.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
 
-            // 1. Calculate the total discount amount to apply
+export default async function handler(req, res) {
+    // Configurer les headers CORS
+    setCorsHeaders(res);
+    
+    // Gérer les requêtes OPTIONS
+    if (handleCorsPreFlight(req, res)) {
+        return;
+    }
+
+    if (req.method !== 'POST') {
+        res.setHeader('Allow', 'POST');
+        return res.status(405).json({ error: 'Method Not Allowed' });
+    }
+
+    try {
+        // Rate limiting
+        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        if (!checkRateLimit(clientIp, 20, 60000)) {
+            return res.status(429).json({ error: 'Trop de requêtes. Veuillez réessayer plus tard.' });
+        }
+
+        const { cart, promo, success_url, cancel_url } = req.body;
+
+        // Validation des données
+        if (!Array.isArray(cart) || cart.length === 0) {
+            return res.status(400).json({ error: 'Panier invalide' });
+        }
+
+        // Valider chaque article du panier
+        for (const item of cart) {
+            validateCartItem(item);
+        }
+
+        // Valider les URLs de redirection
+        if (!validateRedirectUrl(success_url, ALLOWED_ORIGINS)) {
+            return res.status(400).json({ error: 'URL de succès invalide' });
+        }
+        if (!validateRedirectUrl(cancel_url, ALLOWED_ORIGINS)) {
+            return res.status(400).json({ error: 'URL d\'annulation invalide' });
+        }
+
+        // Valider le code promo si fourni
+        if (promo) {
+            validatePromoCode(promo);
+        }
+
+            // Calculer la remise totale
             let totalDiscountCents = 0;
             const subtotalCents = cart.reduce((acc, item) => acc + (Math.round(item.price * 100) * item.quantity), 0);
 
@@ -19,12 +75,12 @@ export default async function handler(req, res) {
                 }
             }
 
-            // Ensure discount doesn't exceed total (keep at least 0.50€ or similar if needed, or 0)
+            // S'assurer que la remise ne dépasse pas le total
             totalDiscountCents = Math.min(totalDiscountCents, subtotalCents);
 
-            // 2. Prepare line items with adjusted prices
+            // Préparer les articles avec les prix ajustés
             let remainingDiscount = totalDiscountCents;
-            const line_items = cart.map((item, index) => {
+            const line_items = cart.map((item) => {
                 const product_data = {
                     name: item.name + (promo ? ' (Promo appliquée)' : ''),
                 };
@@ -35,15 +91,12 @@ export default async function handler(req, res) {
 
                 let itemTotalCents = Math.round(item.price * 100) * item.quantity;
 
-                // Deduct from this item's total
+                // Déduire la remise de cet article
                 const deduction = Math.min(remainingDiscount, itemTotalCents);
                 itemTotalCents -= deduction;
                 remainingDiscount -= deduction;
 
-                // Calculate the new unit_amount (must be an integer)
-                // If quantity > 1, we might have a remainder problem, let's simplify:
-                // We treat each quantity as a separate unit if needed, 
-                // but the easiest is to just adjust the unit price.
+                // Calculer le nouveau montant unitaire
                 const newUnitAmount = Math.max(0, Math.floor(itemTotalCents / item.quantity));
 
                 return {
@@ -56,23 +109,24 @@ export default async function handler(req, res) {
                 };
             });
 
-            // Prepare session configuration
-            const sessionConfig = {
-                payment_method_types: ['card'],
-                line_items,
-                mode: 'payment',
-                success_url: success_url,
-                cancel_url: cancel_url,
-            };
+        // Préparer la configuration de session
+        const sessionConfig = {
+            payment_method_types: ['card'],
+            line_items,
+            mode: 'payment',
+            success_url: success_url,
+            cancel_url: cancel_url,
+            // Ajouter des métadonnées pour le suivi
+            metadata: {
+                promo_code: promo?.code || 'none',
+                timestamp: new Date().toISOString()
+            }
+        };
 
-            const session = await stripe.checkout.sessions.create(sessionConfig);
-            res.status(200).json({ id: session.id, url: session.url });
-        } catch (err) {
-            console.error("Stripe Session Error:", err);
-            res.status(500).json({ error: err.message });
-        }
-    } else {
-        res.setHeader('Allow', 'POST');
-        res.status(405).end('Method Not Allowed');
+        const session = await stripe.checkout.sessions.create(sessionConfig);
+        res.status(200).json({ id: session.id, url: session.url });
+
+    } catch (err) {
+        handleError(res, err, 500);
     }
 }
