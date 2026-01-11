@@ -24,7 +24,7 @@ const Navbar = () => {
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="container navbar-content">
         <Link to="/" className="logo">
-          <img src="https://exceptional-moccasin-e73ebscmnj.edgeone.app/R.png" alt="Logo" className="logo-image" />
+          <img src="https://evident-beige-jrqipygpuv.edgeone.app/Orange.png" alt="Logo" className="logo-image" />
           RUSTIKOP<span className="dot">.</span>
         </Link>
         <div className="nav-links">
