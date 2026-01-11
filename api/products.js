@@ -1,9 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+// Utiliser la clé de service pour contourner les politiques RLS
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    console.error('CRITICAL: NEXT_PUBLIC_SUPABASE_URL missing in environment variables');
+}
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     console.error('CRITICAL: Supabase credentials missing in environment variables');
 }
 
