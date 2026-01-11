@@ -1,2 +1,2 @@
-export const WEBSITE_VERSION = "Version 3.3 Platinum Edition";
-export const VERSION_DETAILS = "Platinum Edition | Branding Rustikop | Lucide Icons Integration | Enhanced Glassmorphism | UX Refinement | Products Integration | Responsive Design | EmailJS Integration";
+export const WEBSITE_VERSION = "Version 4.0 BETA";
+export const VERSION_DETAILS = "SECURITY UPDATE | BUGS FIXED | boosted by ManusAI";
