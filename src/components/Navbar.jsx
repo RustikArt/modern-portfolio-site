@@ -6,7 +6,7 @@ import { ShoppingCart, User } from 'lucide-react';
 // --- Correction 1 : Importer l'image directement ---
 // Placez votre image (par exemple, Orange.png) dans le même dossier (ou un sous-dossier comme /assets)
 // et ajustez le chemin d'importation.
-import logoSrc from '../assets/Orange.png'; // Assurez-vous que ce chemin est correct
+import logoSrc from '../assets/Logos/Orange.png'; // Assurez-vous que ce chemin est correct
 
 import './Navbar.css';
 

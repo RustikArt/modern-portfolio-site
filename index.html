@@ -1,3 +1,4 @@
+<!-- Fichier : index.html (à la racine du projet) -->
 <!doctype html>
 <html lang="fr">
 
@@ -5,51 +6,49 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Balises Titre et Description (Les plus importantes pour le SEO) -->
   <title>Rustikop - Agence de Design Numérique & Expériences Immersives</title>
   <meta name="description"
     content="Rustikop est une agence de design numérique spécialisée dans la création d'expériences immersives, de sites web créatifs et de solutions digitales innovantes. Contactez-nous pour donner vie à vos projets." />
 
-  <!-- Favicon - Correction et Améliorations pour tous les appareils -->
-  <link rel="icon" href="https://evident-beige-jrqipygpuv.edgeone.app/OrangeNoir.png" type="image/png" />
-  <link rel="apple-touch-icon" href="https://evident-beige-jrqipygpuv.edgeone.app/OrangeNoir.png" />
+  <!-- === CORRECTION === 
+       Les chemins pointent vers le dossier /public. Ils doivent être absolus (commencer par /).
+  -->
+  <link rel="icon" href="/Logos/OrangeNoir.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/Logos/OrangeNoir.png" />
 
-  <!-- Métadonnées principales -->
   <meta name="author" content="Rustikop" />
   <meta name="theme-color" content="#050505" />
   <link rel="canonical" href="https://rustikop.vercel.app" />
 
-  <!-- Open Graph (pour le partage sur les réseaux sociaux comme Facebook, LinkedIn ) -->
+  <!-- === CORRECTION === -->
+  <meta property="og:image" content="/Logos/OrangeNoir.png" />
   <meta property="og:title" content="Rustikop - Design Numérique & Expériences Immersives" />
   <meta property="og:description"
     content="Agence de design numérique spécialisée dans les expériences immersives et les projets créatifs." />
-  <meta property="og:image" content="https://evident-beige-jrqipygpuv.edgeone.app/OrangeNoir.png" />
   <meta property="og:url" content="https://rustikop.vercel.app" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Rustikop" />
   <meta property="og:locale" content="fr_FR" />
 
-  <!-- Twitter Card (pour le partage sur Twitter ) -->
+  <!-- === CORRECTION === -->
+  <meta name="twitter:image" content="/Logos/OrangeNoir.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@VotreCompteTwitter" /> <!-- Ajoutez votre pseudo Twitter ici -->
+  <meta name="twitter:site" content="@VotreCompteTwitter" />
   <meta name="twitter:title" content="Rustikop - Design Numérique & Expériences Immersives" />
   <meta name="twitter:description"
     content="Agence de design numérique spécialisée dans les expériences immersives et les projets créatifs." />
-  <meta name="twitter:image" content="https://evident-beige-jrqipygpuv.edgeone.app/OrangeNoir.png" />
 
-  <!-- Robots et compatibilité -->
   <meta name="robots" content="index, follow" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-  <!-- Données Structurées JSON-LD (Très important pour le SEO moderne ) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "Rustikop",
-    "image": "https://evident-beige-jrqipygpuv.edgeone.app/OrangeNoir.png",
+    "image": "/Logos/OrangeNoir.png", // <!-- === CORRECTION === -->
     "url": "https://rustikop.vercel.app",
-    "telephone": "+33-XXX-XXX-XX", // Ajoutez votre numéro de téléphone
+    "telephone": "+33-XXX-XXX-XX",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Votre Adresse",
@@ -61,13 +60,7 @@
     "openingHoursSpecification": [
       {
         "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday"
-        ],
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         "opens": "09:00",
         "closes": "18:00"
       }
