@@ -40,20 +40,22 @@
 .logo {
     display: flex;
     align-items: center;
+    gap: 0.75rem;
+    /* --- MODIFIÉ : Remplacement de margin-right par gap pour une meilleure gestion de l'espacement --- */
     font-size: 1.5rem;
     font-weight: bold;
     color: #fff;
-    /* Couleur du texte pour la navbar */
     text-decoration: none;
 }
 
 .logo-image {
-    width: 40px;
-    /* Taille du logo */
     height: 40px;
-    /* Taille du logo */
-    margin-right: 12px;
-    /* Espacement entre le logo et le texte */
+    /* --- MODIFIÉ : Prioriser la hauteur pour garder le contrôle vertical --- */
+    width: auto;
+    /* --- MODIFIÉ : Laisser la largeur s'ajuster pour conserver les proportions de l'image --- */
+    display: block;
+    /* --- AJOUTÉ : Empêche les espaces indésirables et assure un rendu de type "boîte" propre --- */
+    /* L'ancien margin-right est maintenant géré par 'gap' sur le parent '.logo' */
 }
 
 .nav-links {
@@ -75,7 +77,6 @@
     letter-spacing: 0.05em;
     transition: color var(--transition-fast);
     white-space: nowrap;
-    /* Prevent breaking mid-word */
 }
 
 .action-link:hover {
