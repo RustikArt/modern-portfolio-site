@@ -12,6 +12,11 @@
     font-size: 0.875rem;
 }
 
+.footer-right {
+    display: flex;
+    align-items: center;
+}
+
 .social-link {
     margin-left: var(--spacing-md);
     transition: color var(--transition-fast);
@@ -21,6 +26,12 @@
     color: var(--color-text-primary);
 }
 
+/* 🔧 Espacement spécial pour l'icône admin */
+.admin-link {
+    margin-left: calc(var(--spacing-md) * 3);
+}
+
+/* 📱 Responsive */
 @media (max-width: 768px) {
     .footer-content {
         flex-direction: column;
@@ -29,5 +40,9 @@
 
     .social-link {
         margin: 0 var(--spacing-xs);
+    }
+
+    .admin-link {
+        margin-left: var(--spacing-md);
     }
 }
