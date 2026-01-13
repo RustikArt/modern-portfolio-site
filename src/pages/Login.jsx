@@ -13,7 +13,7 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const handleAuth = (e) => {
+    const handleAuth = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -25,7 +25,7 @@ const Login = () => {
                 setError(result.message);
             }
         } else {
-            const result = register(email, password, name);
+            const result = await register(email, password, name);
             if (result.success) {
                 navigate('/');
             } else {

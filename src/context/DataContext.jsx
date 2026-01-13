@@ -582,10 +582,12 @@ export const DataProvider = ({ children }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [projectsRes, productsRes, promoRes] = await Promise.all([
+                const [projectsRes, productsRes, promoRes, usersRes, ordersRes] = await Promise.all([
                     fetch('/api/projects'),
                     fetch('/api/products'),
-                    fetch('/api/promo-codes')
+                    fetch('/api/promo-codes'),
+                    fetch('/api/users'),
+                    fetch('/api/orders')
                 ]);
 
                 // Recovery mechanism: Check local storage first if API fails
@@ -624,18 +626,17 @@ export const DataProvider = ({ children }) => {
                     const promoData = await promoRes.json();
                     setPromoCodes(promoData);
                 } else {
-                    console.error('Promo codes API failed:', promoRes.status, await promoRes.text());
-                    const localPromos = localStorage.getItem('portfolio_promo_codes');
-                    if (localPromos) {
-                        console.log('Recovering promo codes from local storage');
-                        setPromoCodes(JSON.parse(localPromos));
-                    } else {
-                        console.log('No local promo codes found, using fallback');
-                        setPromoCodes([
-                            { id: 1, code: 'WELCOME10', type: 'percent', value: 10 },
-                            { id: 2, code: 'MINUS5', type: 'fixed', value: 5 }
-                        ]);
-                    }
+                    console.error('Promo codes API failed');
+                }
+
+                if (usersRes && usersRes.ok) {
+                    const usersData = await usersRes.json();
+                    if (usersData && usersData.length > 0) setUsers(usersData);
+                }
+
+                if (ordersRes && ordersRes.ok) {
+                    const ordersData = await ordersRes.json();
+                    if (ordersData && ordersData.length > 0) setOrders(ordersData);
                 }
             } catch (error) {
                 console.error('Failed to fetch data from API:', error);
@@ -915,20 +916,39 @@ export const DataProvider = ({ children }) => {
     };
 
     // User Auth
-    const register = (email, password, name) => {
+    const register = async (email, password, name) => {
         const cleanEmail = email.trim().toLowerCase();
         const cleanPassword = password.trim();
         const exists = users.find(u => u.email === cleanEmail);
         if (exists) return { success: false, message: 'Email déjà utilisé.' };
 
-        const newUser = { id: Date.now(), email: cleanEmail, password: cleanPassword, name, role: 'client' };
-        setUsers([...users, newUser]);
-        setCurrentUser(newUser);
+        const newUser = { email: cleanEmail, password: cleanPassword, name, role: 'client' };
 
-        // Notify Admin
-        addNotification('account', `Nouveau compte créé : ${name} (${cleanEmail})`);
+        try {
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser)
+            });
 
-        return { success: true };
+            if (res.ok) {
+                const updatedUsers = await res.json();
+                setUsers(updatedUsers);
+                const createdUser = updatedUsers.find(u => u.email === cleanEmail);
+                setCurrentUser(createdUser || newUser);
+                addNotification('account', `Nouveau compte créé : ${name} (${cleanEmail})`);
+                return { success: true };
+            } else {
+                throw new Error('Erreur lors de la création du compte sur le serveur');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            // Fallback to local
+            const localUser = { ...newUser, id: Date.now() };
+            setUsers([...users, localUser]);
+            setCurrentUser(localUser);
+            return { success: true, message: 'Compte créé localement (mode hors-ligne).' };
+        }
     };
 
     const login = (email, password) => {
@@ -1067,11 +1087,10 @@ export const DataProvider = ({ children }) => {
 
     // Orders
     // Phase 3: Added verification that payment was successful (status checking)
-    const placeOrder = (shippingDetails, paymentDetails, totalOverride = null) => {
+    const placeOrder = async (shippingDetails, paymentDetails, totalOverride = null) => {
         if (!currentUser) return false;
 
         const newOrder = {
-            id: Date.now().toString(),
             userId: currentUser.id,
             customerName: currentUser.name,
             email: currentUser.email,
@@ -1089,16 +1108,35 @@ export const DataProvider = ({ children }) => {
             paymentId: paymentDetails ? paymentDetails.id : 'MANUAL_TEST',
             notes: ''
         };
-        setOrders([newOrder, ...orders]);
-        clearCart();
 
-        // Notify Admin
-        addNotification('order', `Nouvelle commande de ${currentUser.name} (${newOrder.total}€)`);
+        try {
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newOrder)
+            });
 
-        // Automatic EmailJS Trigger
-        sendOrderConfirmation(newOrder);
-
-        return newOrder;
+            if (res.ok) {
+                const updatedOrders = await res.json();
+                setOrders(updatedOrders);
+                const createdOrder = updatedOrders[0]; // Assuming newest first
+                clearCart();
+                addNotification('order', `Nouvelle commande de ${currentUser.name} (${newOrder.total}€)`);
+                sendOrderConfirmation(createdOrder || newOrder);
+                return createdOrder || newOrder;
+            } else {
+                throw new Error('Erreur lors de la commande sur le serveur');
+            }
+        } catch (error) {
+            console.error('Order error:', error);
+            // Fallback to local
+            const localOrder = { ...newOrder, id: Date.now().toString() };
+            setOrders([localOrder, ...orders]);
+            clearCart();
+            addNotification('order', `Nouvelle commande de ${currentUser.name} (${newOrder.total}€)`);
+            sendOrderConfirmation(localOrder);
+            return localOrder;
+        }
     };
 
     const sendOrderConfirmation = async (order) => {
@@ -1164,24 +1202,46 @@ export const DataProvider = ({ children }) => {
         }
     };
 
+    const syncOrder = async (orderId, updatedFields) => {
+        try {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            const updatedOrder = { ...order, ...updatedFields };
+
+            const res = await fetch('/api/orders', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: orderId, ...updatedFields })
+            });
+
+            if (res.ok) {
+                const refreshedOrders = await res.json();
+                setOrders(refreshedOrders);
+            } else {
+                // local fallback if API fails
+                setOrders(orders.map(o => o.id === orderId ? updatedOrder : o));
+            }
+        } catch (error) {
+            console.error('Order sync error:', error);
+            setOrders(orders.map(o => o.id === orderId ? { ...o, ...updatedFields } : o));
+        }
+    };
+
     const updateOrderStatus = (orderId, status) => {
-        setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
+        syncOrder(orderId, { status });
     };
 
     const toggleChecklistItem = (orderId, itemId) => {
-        setOrders(orders.map(o => {
-            if (o.id === orderId) {
-                const newChecklist = o.checklist.map(item =>
-                    item.id === itemId ? { ...item, completed: !item.completed } : item
-                );
-                return { ...o, checklist: newChecklist };
-            }
-            return o;
-        }));
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return;
+        const newChecklist = order.checklist.map(item =>
+            item.id === itemId ? { ...item, completed: !item.completed } : item
+        );
+        syncOrder(orderId, { checklist: newChecklist });
     };
 
     const updateOrderNotes = (orderId, notes) => {
-        setOrders(orders.map(o => o.id === orderId ? { ...o, notes } : o));
+        syncOrder(orderId, { notes });
     };
 
     const secureFullReset = (password) => {

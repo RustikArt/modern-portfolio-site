@@ -28,7 +28,9 @@ import {
     Timer,
     RotateCcw,
     Percent,
-    Search
+    Search,
+    MapPin,
+    Check
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -544,7 +546,7 @@ const Dashboard = () => {
                                                                 >
                                                                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '1.5rem' }}>
                                                                         <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'white', minWidth: '150px' }}>{order.customerName}</div>
-                                                                        <div style={{ color: '#444', fontSize: '0.75rem', fontFamily: 'monospace' }}>#{order.id.slice(-8).toUpperCase()}</div>
+                                                                        <div style={{ color: '#444', fontSize: '0.75rem', fontFamily: 'monospace' }}>#{String(order.id).slice(-8).toUpperCase()}</div>
                                                                         <div style={{ color: '#666', fontSize: '0.8rem' }}>{new Date(order.date).toLocaleDateString()}</div>
                                                                     </div>
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
@@ -581,7 +583,7 @@ const Dashboard = () => {
                                                                         </div>
 
                                                                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '12px', marginBottom: '2rem' }}>
-                                                                            {order.items.map((it, idx) => (
+                                                                            {(order.items || []).map((it, idx) => (
                                                                                 <div key={idx} style={{ marginBottom: '1rem', borderBottom: idx === order.items.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.8rem' }}>
                                                                                     <div style={{ fontSize: '0.9rem', color: 'white', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                                                                                         <span>{it.name} x{it.quantity}</span>
@@ -589,7 +591,7 @@ const Dashboard = () => {
                                                                                     </div>
                                                                                     {it.selectedOptions && it.selectedOptions.length > 0 && (
                                                                                         <div style={{ marginTop: '0.5rem', paddingLeft: '0.5rem', borderLeft: '2px solid var(--color-accent)' }}>
-                                                                                            {it.selectedOptions.map((opt, oIdx) => (
+                                                                                            {(it.selectedOptions || []).map((opt, oIdx) => (
                                                                                                 <div key={oIdx} style={{ fontSize: '0.75rem', color: '#888' }}>
                                                                                                     <strong style={{ color: '#aaa' }}>{opt.name}:</strong> {opt.value}
                                                                                                 </div>
@@ -602,7 +604,7 @@ const Dashboard = () => {
 
                                                                         {order.checklist && (
                                                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.8rem', marginBottom: '2rem' }}>
-                                                                                {order.checklist.map(item => (
+                                                                                {(order.checklist || []).map(item => (
                                                                                     <div
                                                                                         key={item.id}
                                                                                         onClick={() => toggleChecklistItem(order.id, item.id)}

@@ -95,7 +95,7 @@ const UserDashboard = () => {
                                         {/* Row 1: ID & Badge */}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
                                             <div>
-                                                <div style={{ color: '#333', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>ID Projet: {order.id.slice(-8).toUpperCase()}</div>
+                                                <div style={{ color: '#333', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>ID Projet: {String(order.id).slice(-8).toUpperCase()}</div>
                                                 <div style={{ fontSize: '0.85rem', color: '#666' }}>Posté le {new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
                                             </div>
                                             <div style={{
@@ -145,7 +145,7 @@ const UserDashboard = () => {
                                             paddingTop: '2rem', borderTop: '1px solid #111'
                                         }}>
                                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                                {order.items.map((it, idx) => (
+                                                {(order.items || []).map((it, idx) => (
                                                     <div key={idx} style={{ background: '#0a0a0a', padding: '0.4rem 1rem', borderRadius: '8px', border: '1px solid #111', fontSize: '0.8rem', color: '#999' }}>
                                                         {it.name} <span style={{ color: '#333', marginLeft: '0.5rem' }}>x{it.quantity}</span>
                                                     </div>
