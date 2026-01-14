@@ -1,8 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
+import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+// Utiliser la clé de service pour contourner les politiques RLS
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    console.error('CRITICAL: NEXT_PUBLIC_SUPABASE_URL missing in environment variables');
+}
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.error('CRITICAL: Supabase credentials missing in environment variables');
+}
 
 export default async function handler(req, res) {
+    // Configurer les headers CORS
+    setCorsHeaders(res);
+
+    // Gérer les requêtes OPTIONS
+    if (handleCorsPreFlight(req, res)) {
+        return;
+    }
+
     if (req.method === 'GET') {
         try {
             const { data: promoCodes, error } = await supabase
@@ -13,7 +33,7 @@ export default async function handler(req, res) {
             res.status(200).json(promoCodes || []);
         } catch (error) {
             console.error('Fetch promo codes error:', error);
-            res.status(500).json({ error: 'Failed to fetch promo codes' });
+            handleError(res, error, 500);
         }
     } else if (req.method === 'POST') {
         try {
@@ -32,7 +52,7 @@ export default async function handler(req, res) {
             res.status(201).json(allPromoCodes);
         } catch (error) {
             console.error('Add promo code error:', error);
-            res.status(500).json({ error: 'Failed to add promo code' });
+            handleError(res, error, 500);
         }
     } else if (req.method === 'PUT') {
         try {
@@ -53,7 +73,7 @@ export default async function handler(req, res) {
             res.status(200).json(allPromoCodes);
         } catch (error) {
             console.error('Update promo code error:', error);
-            res.status(500).json({ error: 'Failed to update promo code' });
+            handleError(res, error, 500);
         }
     } else if (req.method === 'DELETE') {
         try {
@@ -73,7 +93,7 @@ export default async function handler(req, res) {
             res.status(200).json(allPromoCodes);
         } catch (error) {
             console.error('Delete promo code error:', error);
-            res.status(500).json({ error: 'Failed to delete promo code' });
+            handleError(res, error, 500);
         }
     } else {
         res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);

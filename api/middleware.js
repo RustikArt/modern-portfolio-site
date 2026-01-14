@@ -3,17 +3,31 @@
  */
 
 // Configuration CORS
-export function setCorsHeaders(res) {
-    res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGINS || 'https://rustikop.vercel.app');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export function setCorsHeaders(res, reqOrigin) {
+    const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://rustikop.vercel.app').split(',');
+
+    // Allow localhost and local IP patterns for testing
+    let originToAllow = allowedOrigins[0];
+    if (reqOrigin) {
+        if (allowedOrigins.includes(reqOrigin) ||
+            reqOrigin.includes('localhost') ||
+            reqOrigin.includes('127.0.0.1') ||
+            reqOrigin.includes('192.168.') ||
+            reqOrigin.endsWith('.vercel.app')) {
+            originToAllow = reqOrigin;
+        }
+    }
+
+    res.setHeader('Access-Control-Allow-Origin', originToAllow);
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
     res.setHeader('Access-Control-Max-Age', '86400');
 }
 
 // Gérer les requêtes OPTIONS (CORS preflight)
 export function handleCorsPreFlight(req, res) {
     if (req.method === 'OPTIONS') {
-        setCorsHeaders(res);
+        setCorsHeaders(res, req.headers.origin);
         res.status(200).end();
         return true;
     }
@@ -67,15 +81,15 @@ const requestCounts = new Map();
 export function checkRateLimit(identifier, maxRequests = 10, windowMs = 60000) {
     const now = Date.now();
     const key = `${identifier}-${Math.floor(now / windowMs)}`;
-    
+
     const count = requestCounts.get(key) || 0;
-    
+
     if (count >= maxRequests) {
         return false;
     }
-    
+
     requestCounts.set(key, count + 1);
-    
+
     // Nettoyer les anciennes entrées
     if (requestCounts.size > 10000) {
         const oldestKey = Math.min(...Array.from(requestCounts.keys()).map(k => parseInt(k.split('-')[1])));
@@ -85,7 +99,7 @@ export function checkRateLimit(identifier, maxRequests = 10, windowMs = 60000) {
             }
         }
     }
-    
+
     return true;
 }
 

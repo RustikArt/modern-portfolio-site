@@ -1,8 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
+import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+// Utiliser la clé de service pour contourner les politiques RLS
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    console.error('CRITICAL: NEXT_PUBLIC_SUPABASE_URL missing in environment variables');
+}
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.error('CRITICAL: Supabase credentials missing in environment variables');
+}
 
 export default async function handler(req, res) {
+    // Configurer les headers CORS
+    setCorsHeaders(res);
+
+    // Gérer les requêtes OPTIONS
+    if (handleCorsPreFlight(req, res)) {
+        return;
+    }
+
     if (req.method === 'GET') {
         try {
             const { data: projects, error } = await supabase
@@ -13,7 +33,7 @@ export default async function handler(req, res) {
             res.status(200).json(projects || []);
         } catch (error) {
             console.error('Fetch projects error:', error);
-            res.status(500).json({ error: 'Failed to fetch projects' });
+            handleError(res, error, 500);
         }
     } else if (req.method === 'POST') {
         try {
@@ -32,7 +52,7 @@ export default async function handler(req, res) {
             res.status(201).json(allProjects);
         } catch (error) {
             console.error('Add project error:', error);
-            res.status(500).json({ error: 'Failed to add project' });
+            handleError(res, error, 500);
         }
     } else if (req.method === 'PUT') {
         try {
@@ -53,7 +73,7 @@ export default async function handler(req, res) {
             res.status(200).json(allProjects);
         } catch (error) {
             console.error('Update project error:', error);
-            res.status(500).json({ error: 'Failed to update project' });
+            handleError(res, error, 500);
         }
     } else if (req.method === 'DELETE') {
         try {
@@ -73,7 +93,7 @@ export default async function handler(req, res) {
             res.status(200).json(allProjects);
         } catch (error) {
             console.error('Delete project error:', error);
-            res.status(500).json({ error: 'Failed to delete project' });
+            handleError(res, error, 500);
         }
     } else {
         res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
