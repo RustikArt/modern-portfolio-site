@@ -1,82 +1,93 @@
-/* Navbar.css */
 .navbar {
     position: fixed;
-    top: var(--banner-height, 0);
+    top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    transition: all 0.3s ease;
+    padding: 1.5rem 0;
     background: transparent;
-    transition:
-        top 0.3s ease,
-        padding 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-        background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-        border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    border-bottom: 1px solid transparent;
-    border-radius: 0;
 }
 
 .navbar.scrolled {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    background: rgba(5, 5, 5, 0.6);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(5, 5, 5, 0.95);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    padding: 1rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .navbar-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
 }
 
+/* LOGO */
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    /* --- MODIFIÉ : Remplacement de margin-right par gap pour une meilleure gestion de l'espacement --- */
+    gap: 0.8rem;
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 900;
     color: #fff;
     text-decoration: none;
+    letter-spacing: -1px;
 }
 
 .logo-image {
     height: 40px;
-    /* --- MODIFIÉ : Prioriser la hauteur pour garder le contrôle vertical --- */
     width: auto;
-    /* --- MODIFIÉ : Laisser la largeur s'ajuster pour conserver les proportions de l'image --- */
-    display: block;
-    /* --- AJOUTÉ : Empêche les espaces indésirables et assure un rendu de type "boîte" propre --- */
-    /* L'ancien margin-right est maintenant géré par 'gap' sur le parent '.logo' */
 }
 
+.dot {
+    color: var(--color-accent);
+}
+
+/* NAV LINKS (Desktop) */
 .nav-links {
     display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
 }
 
+.nav-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--color-accent);
+}
+
+/* ACTIONS (Cart, Profile, Search) */
 .nav-actions {
     display: flex;
-    gap: 1.5rem;
     align-items: center;
+    gap: 1.5rem;
 }
 
 .action-link {
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: color var(--transition-fast);
-    white-space: nowrap;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    position: relative;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .action-link:hover {
@@ -84,24 +95,22 @@
 }
 
 .icon-link {
-    display: flex;
-    align-items: center;
-    position: relative;
-}
-
-.icon-link:hover {
-    color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.05);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cart-count {
     position: absolute;
-    top: -8px;
-    right: -10px;
+    top: -5px;
+    right: -5px;
     background: var(--color-accent);
     color: #000;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: bold;
-    min-width: 18px;
+    width: 18px;
     height: 18px;
     border-radius: 50%;
     display: flex;
@@ -109,9 +118,112 @@
     justify-content: center;
 }
 
-@media (max-width: 768px) {
+/* MOBILE MENU BUTTON */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 1002;
+    padding: 0;
+    min-width: 44px;
+    /* Touch Target Compliance */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* SEARCH BAR */
+.search-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.search-toggle {
+    cursor: pointer;
+    border: none;
+}
+
+.search-input-wrapper {
+    position: absolute;
+    right: 50px;
+    /* Left of the search icon */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    background: #000;
+    border-radius: 20px;
+}
+
+.search-container.active .search-input-wrapper {
+    width: 200px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 900px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: #050505;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        border-radius: 0;
+        padding: 0;
+        transform: translateY(-100%);
+        transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+        z-index: 999;
+    }
+
+    .nav-links.mobile-open {
+        transform: translateY(0);
+    }
+
+    .nav-links a {
+        font-size: 1.5rem;
+        min-height: 44px;
+        /* Large touch target for mobile menu */
+        display: flex;
+        align-items: center;
+    }
+
+    /* Adjust navbar layout for mobile */
+    .navbar-content {
+        padding: 0 1rem;
+    }
+
+    /* Ensure logo stays visible/centered if needed, or adjust order */
+    .logo {
+        position: relative;
+        z-index: 1000;
+    }
+
     .nav-actions {
-        display: none;
-        /* Just for mobile simplicity currently */
+        z-index: 1000;
     }
 }

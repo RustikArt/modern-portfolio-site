@@ -30,8 +30,16 @@ import {
     Percent,
     Search,
     MapPin,
-    Check
+    Check,
+    Check,
+    Shield,
+    LayoutDashboard
 } from 'lucide-react';
+import AnalyticsChart from '../components/dashboard/AnalyticsChart';
+import GlobalSearch from '../components/dashboard/GlobalSearch';
+import ActivityLog from '../components/dashboard/ActivityLog';
+import { downloadCSV } from '../utils/export';
+import { sendShippingUpdate, sendVideoProof } from '../utils/emailService';
 
 const Dashboard = () => {
     const {
@@ -41,7 +49,11 @@ const Dashboard = () => {
         updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode,
         secureFullReset, logout,
         announcement, updateAnnouncement,
-        notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead
+        notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
+        homeContent, setHomeContent,
+
+        checkPermission, loginHistory, users: allUsers,
+        showToast
     } = useData();
 
     const [showVersionDetails, setShowVersionDetails] = useState(false);
@@ -91,7 +103,7 @@ const Dashboard = () => {
     });
 
     const [optionBuilder, setOptionBuilder] = useState({ name: '', type: 'select', valuesInput: '' });
-    const [promoForm, setPromoForm] = useState({ code: '', type: 'percent', value: '' });
+    const [promoForm, setPromoForm] = useState({ code: '', type: 'percent', value: '', minAmount: '', maxUses: '', expirationDate: '' });
 
     // Product Filters
     const [productFilter, setProductFilter] = useState({ category: 'all', promoOnly: false, search: '' });
@@ -193,8 +205,15 @@ const Dashboard = () => {
     const handlePromoSubmit = (e) => {
         e.preventDefault();
         if (!promoForm.code) return;
-        addPromoCode({ ...promoForm, code: promoForm.code.toUpperCase(), value: parseFloat(promoForm.value) });
-        setPromoForm({ code: '', type: 'percent', value: '' });
+        addPromoCode({
+            ...promoForm,
+            code: promoForm.code.toUpperCase(),
+            value: parseFloat(promoForm.value),
+            minAmount: promoForm.minAmount ? parseFloat(promoForm.minAmount) : null,
+            maxUses: promoForm.maxUses ? parseInt(promoForm.maxUses) : null,
+            expirationDate: promoForm.expirationDate || null
+        });
+        setPromoForm({ code: '', type: 'percent', value: '', minAmount: '', maxUses: '', expirationDate: '' });
     };
 
     const handleProjectSubmit = (e) => {
@@ -228,13 +247,40 @@ const Dashboard = () => {
         window.scrollTo(0, 0);
     };
 
+    const handleExportOrders = () => {
+        const dataToExport = orders.map(o => ({
+            ID: o.id,
+            Date: new Date(o.date).toLocaleDateString(),
+            Client: o.customerName,
+            Email: o.email,
+            Total: o.total,
+            Status: o.status,
+            Items: o.items.map(i => `${i.name} (x${i.quantity})`).join('; ')
+        }));
+        downloadCSV(dataToExport, `commandes_rustikop_${new Date().toISOString().split('T')[0]}.csv`);
+    };
+
+    const handleExportProducts = () => {
+        const dataToExport = products.map(p => ({
+            ID: p.id,
+            Name: p.name,
+            Category: p.category,
+            Price: p.price,
+            Promo_Price: p.promoPrice || '',
+            Stock: 'N/A'
+        }));
+        downloadCSV(dataToExport, `produits_rustikop_${new Date().toISOString().split('T')[0]}.csv`);
+    };
+
     const handleFullReset = () => {
         const pass = prompt("ENTREZ LE MOT DE PASSE ADMIN POUR RÉINITIALISER TOUTE LA PLATEFORME :");
         if (pass) {
-            if (secureFullReset(pass)) {
-                alert("Réinitialisation réussie. Redirection...");
-            } else {
-                alert("Mot de passe incorrect.");
+            if (pass) {
+                if (secureFullReset(pass)) {
+                    showToast("Réinitialisation réussie. Redirection...", 'success');
+                } else {
+                    showToast("Mot de passe incorrect.", 'error');
+                }
             }
         }
     };
@@ -253,6 +299,29 @@ const Dashboard = () => {
         activeOrders: orders.filter(o => o.status !== 'Terminé').length,
         totalUsers: users.length
     };
+
+    // --- CHART DATA PREP ---
+    const getChartData = () => {
+        // Group by Month (simple version)
+        const data = {};
+        orders.forEach(order => {
+            const date = new Date(order.date);
+            const month = date.toLocaleString('default', { month: 'short' });
+            data[month] = (data[month] || 0) + parseFloat(order.total || 0);
+        });
+        return Object.keys(data).map(key => ({ name: key, value: data[key] }));
+    };
+
+    const chartData = getChartData().length > 0 ? getChartData() : [{ name: 'Jan', value: 0 }, { name: 'Feb', value: 0 }];
+
+    // --- ACTIVITY LOGS (MOCK FROM NOTIFICATIONS FOR NOW) ---
+    // In a real app, this would be a separate 'logs' table
+    const recentActivity = notifications.slice(0, 10).map(n => ({
+        id: n.id,
+        type: n.type || 'system',
+        message: n.message,
+        date: n.date
+    }));
 
     const inputStyle = {
         padding: '0.8rem',
@@ -341,6 +410,7 @@ const Dashboard = () => {
                         )}
                     </div>
 
+                    <GlobalSearch data={{ products, orders, users }} />
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         {/* Notification Bell */}
                         <div style={{ position: 'relative' }} ref={notificationRef}>
@@ -449,6 +519,12 @@ const Dashboard = () => {
                     {/* SIDE PANEL */}
                     <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <button
+                            onClick={() => setActiveTab('overview')}
+                            style={{ ...sideBtnStyle('overview'), justifyContent: 'flex-start' }}
+                        >
+                            <LayoutDashboard size={18} /> Vue d'ensemble
+                        </button>
+                        <button
                             onClick={() => setActiveTab('orders')}
                             style={{ ...sideBtnStyle('orders'), justifyContent: 'flex-start' }}
                         >
@@ -491,6 +567,13 @@ const Dashboard = () => {
                         <div style={{ margin: '1rem 0', borderBottom: '1px solid #111' }}></div>
 
                         <button
+                            onClick={() => setActiveTab('homeEditor')}
+                            style={{ ...sideBtnStyle('homeEditor'), justifyContent: 'flex-start' }}
+                        >
+                            <Globe size={18} /> Home Editor
+                        </button>
+
+                        <button
                             onClick={() => setActiveTab('settings')}
                             style={{ ...sideBtnStyle('settings'), justifyContent: 'flex-start' }}
                         >
@@ -506,6 +589,38 @@ const Dashboard = () => {
 
                     {/* MAIN CONTENT */}
                     <main>
+                        {/* --- OVERVIEW TAB --- */}
+                        {activeTab === 'overview' && (
+                            <div className="animate-in">
+                                <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Vue d'ensemble</h2>
+
+                                {/* KPI CARDS */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+                                    <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)' }}>
+                                        <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Chiffre d'Affaires</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-accent)' }}>{stats.totalRevenue} €</div>
+                                    </div>
+                                    <div style={cardStyle}>
+                                        <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Commandes Totales</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalOrders}</div>
+                                    </div>
+                                    <div style={cardStyle}>
+                                        <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Utilisateurs</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalUsers}</div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+                                    <div style={cardStyle}>
+                                        <h3 style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>Revenus Mensuels</h3>
+                                        <AnalyticsChart data={chartData} />
+                                    </div>
+
+                                    <ActivityLog logs={recentActivity} />
+                                </div>
+                            </div>
+                        )}
+
                         {/* --- ORDERS & ARCHIVES TABS --- */}
                         {(activeTab === 'orders' || activeTab === 'archives') && (
                             <div className="animate-in">
@@ -524,10 +639,18 @@ const Dashboard = () => {
                                             <h3 style={{
                                                 marginBottom: '1.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px',
                                                 color: cat === 'Terminé' ? '#444' : cat === 'En attente' ? '#ff8c00' : 'var(--color-accent)',
-                                                display: 'flex', alignItems: 'center', gap: '0.8rem'
+                                                display: 'flex', alignItems: 'center', gap: '0.8rem',
+                                                justifyContent: 'space-between'
                                             }}>
-                                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: cat === 'Réception' ? '#ff4d4d' : cat === 'En cours' ? '#ffd700' : cat === 'Terminé' ? '#4caf50' : '#ff8c00' }}></span>
-                                                {cat === 'Terminé' ? 'Completed (Recent)' : cat === 'En attente' ? 'Problèmes / En attente' : cat === 'Archives' ? 'Archives (+7 jours)' : cat}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: cat === 'Réception' ? '#ff4d4d' : cat === 'En cours' ? '#ffd700' : cat === 'Terminé' ? '#4caf50' : '#ff8c00' }}></span>
+                                                    {cat === 'Terminé' ? 'Completed (Recent)' : cat === 'En attente' ? 'Problèmes / En attente' : cat === 'Archives' ? 'Archives (+7 jours)' : cat}
+                                                </div>
+                                                {cat === 'Réception' && (
+                                                    <button onClick={handleExportOrders} style={{ ...btnModern, fontSize: '0.75rem', padding: '0.4rem 0.8rem' }}>
+                                                        <FileCode size={14} /> Export CSV
+                                                    </button>
+                                                )}
                                             </h3>
 
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
@@ -750,6 +873,9 @@ const Dashboard = () => {
                                             return matchCategory && matchPromo && matchSearch;
                                         }).length} produit(s)
                                     </span>
+                                    <button onClick={handleExportProducts} style={{ ...btnModern, fontSize: '0.75rem', padding: '0.4rem 0.8rem', marginLeft: 'auto' }}>
+                                        <FileCode size={14} /> Export CSV
+                                    </button>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
@@ -848,13 +974,20 @@ const Dashboard = () => {
                                 <section style={{ ...cardStyle, marginBottom: '2rem' }}>
                                     <h4 style={{ marginBottom: '1.5rem' }}>New Promo Code</h4>
                                     <form onSubmit={handlePromoSubmit} style={{ display: 'grid', gap: '1rem' }}>
-                                        <input type="text" placeholder="CODE (ex: RUSTIK20)" value={promoForm.code} onChange={e => setPromoForm({ ...promoForm, code: e.target.value })} style={inputStyle} required />
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <select value={promoForm.type} onChange={e => setPromoForm({ ...promoForm, type: e.target.value })} style={inputStyle}>
-                                                <option value="percent">Percentage (%)</option>
-                                                <option value="fixed">Fixed (€)</option>
-                                            </select>
-                                            <input type="number" placeholder="Value" value={promoForm.value} onChange={e => setPromoForm({ ...promoForm, value: e.target.value })} style={inputStyle} required />
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <input type="text" placeholder="CODE (ex: RUSTIK20)" value={promoForm.code} onChange={e => setPromoForm({ ...promoForm, code: e.target.value })} style={inputStyle} required />
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <select value={promoForm.type} onChange={e => setPromoForm({ ...promoForm, type: e.target.value })} style={{ ...inputStyle, width: '120px' }}>
+                                                    <option value="percent">%</option>
+                                                    <option value="fixed">€</option>
+                                                </select>
+                                                <input type="number" placeholder="Value" value={promoForm.value} onChange={e => setPromoForm({ ...promoForm, value: e.target.value })} style={inputStyle} required />
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                                            <input type="number" placeholder="Min Amount (€)" value={promoForm.minAmount} onChange={e => setPromoForm({ ...promoForm, minAmount: e.target.value })} style={inputStyle} />
+                                            <input type="number" placeholder="Max Uses" value={promoForm.maxUses} onChange={e => setPromoForm({ ...promoForm, maxUses: e.target.value })} style={inputStyle} />
+                                            <input type="date" placeholder="Expiration" value={promoForm.expirationDate} onChange={e => setPromoForm({ ...promoForm, expirationDate: e.target.value })} style={inputStyle} />
                                         </div>
                                         <button type="submit" style={btnPrimaryModern}>Generate Coupon</button>
                                     </form>
@@ -864,8 +997,15 @@ const Dashboard = () => {
                                     {promoCodes.map(c => (
                                         <div key={c.id} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderStyle: 'dashed' }}>
                                             <div>
-                                                <strong style={{ fontSize: '1.2rem', color: 'var(--color-accent)' }}>{c.code}</strong>
-                                                <span style={{ marginLeft: '1rem', color: '#555' }}>-{c.value}{c.type === 'percent' ? '%' : '€'}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                    <strong style={{ fontSize: '1.2rem', color: 'var(--color-accent)' }}>{c.code}</strong>
+                                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>-{c.value}{c.type === 'percent' ? '%' : '€'}</span>
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', display: 'flex', gap: '1rem' }}>
+                                                    {c.minAmount && <span>Min: {c.minAmount}€</span>}
+                                                    {c.expirationDate && <span>Exp: {new Date(c.expirationDate).toLocaleDateString()}</span>}
+                                                    {c.maxUses && <span>Limit: {c.maxUses}</span>}
+                                                </div>
                                             </div>
                                             <button onClick={() => deletePromoCode(c.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
                                         </div>
@@ -898,6 +1038,177 @@ const Dashboard = () => {
                                             ))}
                                         </tbody>
                                     </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- HOME EDITOR TAB --- */}
+                        {activeTab === 'homeEditor' && homeContent && (
+                            <div className="animate-in">
+                                <section style={cardStyle}>
+                                    <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Home Page Configuration</h2>
+
+                                    {/* HERO SECTION */}
+                                    <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Hero Section</h3>
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <input type="text" placeholder="Title Line 1" value={homeContent.hero.titleLine1} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine1: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Title Line 2" value={homeContent.hero.titleLine2} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine2: e.target.value } })} style={inputStyle} />
+                                            </div>
+                                            <input type="text" placeholder="Subtitle" value={homeContent.hero.subtitle} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, subtitle: e.target.value } })} style={inputStyle} />
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <input type="text" placeholder="Button Text" value={homeContent.hero.buttonText} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonText: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Button Link" value={homeContent.hero.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonLink: e.target.value } })} style={inputStyle} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* FEATURED PROJECTS */}
+                                    <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Featured Projects</h3>
+                                        <input type="text" placeholder="Section Title" value={homeContent.featuredProjects.title} onChange={(e) => setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, title: e.target.value } })} style={{ ...inputStyle, marginBottom: '1rem' }} />
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
+                                            {projects.map(p => (
+                                                <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={homeContent.featuredProjects.ids.includes(p.id)}
+                                                        onChange={(e) => {
+                                                            let newIds = [...homeContent.featuredProjects.ids];
+                                                            if (e.target.checked) newIds.push(p.id);
+                                                            else newIds = newIds.filter(id => id !== p.id);
+                                                            setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, ids: newIds } });
+                                                        }}
+                                                    />
+                                                    {p.title}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* SERVICES */}
+                                    <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Services</h3>
+                                            <button onClick={() => setHomeContent({ ...homeContent, services: [...homeContent.services, { id: Date.now(), title: 'New Service', icon: 'Star', description: 'Description' }] })} style={btnModern}><Plus size={14} /> Add</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                            {homeContent.services.map((service, idx) => (
+                                                <div key={service.id} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
+                                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ fontSize: '0.7rem', color: '#666' }}>Icon (Lucide name)</label>
+                                                            <input type="text" value={service.icon} onChange={(e) => {
+                                                                const newServices = [...homeContent.services];
+                                                                newServices[idx].icon = e.target.value;
+                                                                setHomeContent({ ...homeContent, services: newServices });
+                                                            }} style={inputStyle} />
+                                                        </div>
+                                                        <div style={{ flex: 2 }}>
+                                                            <label style={{ fontSize: '0.7rem', color: '#666' }}>Title</label>
+                                                            <input type="text" value={service.title} onChange={(e) => {
+                                                                const newServices = [...homeContent.services];
+                                                                newServices[idx].title = e.target.value;
+                                                                setHomeContent({ ...homeContent, services: newServices });
+                                                            }} style={inputStyle} />
+                                                        </div>
+                                                        <button onClick={() => setHomeContent({ ...homeContent, services: homeContent.services.filter((_, i) => i !== idx) })} style={{ ...btnModern, color: '#ff4d4d', marginTop: 'auto' }}><Trash2 size={14} /></button>
+                                                    </div>
+                                                    <input type="text" placeholder="Description" value={service.description} onChange={(e) => {
+                                                        const newServices = [...homeContent.services];
+                                                        newServices[idx].description = e.target.value;
+                                                        setHomeContent({ ...homeContent, services: newServices });
+                                                    }} style={inputStyle} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* CTA */}
+                                    <div>
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Call to Action</h3>
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            <input type="text" placeholder="Title" value={homeContent.cta.title} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, title: e.target.value } })} style={inputStyle} />
+                                            <input type="text" placeholder="Text" value={homeContent.cta.text} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, text: e.target.value } })} style={inputStyle} />
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <input type="text" placeholder="Button Text" value={homeContent.cta.buttonText} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonText: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Button Link" value={homeContent.cta.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonLink: e.target.value } })} style={inputStyle} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </section>
+                            </div>
+                        )}
+
+                        {/* --- SECURITY TAB --- */}
+                        {activeTab === 'security' && (
+                            <div className="dashboard-section">
+                                <h2>Sécurité & Connexions</h2>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                    {/* Login History */}
+                                    <div className="card">
+                                        <h3>Historique de vos connexions</h3>
+                                        <div className="table-container">
+                                            <table className="data-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Appareil</th>
+                                                        <th>IP</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {loginHistory && loginHistory.length > 0 ? loginHistory.map((entry, idx) => (
+                                                        <tr key={idx}>
+                                                            <td>{new Date(entry.date).toLocaleString()}</td>
+                                                            <td>{entry.device} ({entry.browser})</td>
+                                                            <td>{entry.ip}</td>
+                                                        </tr>
+                                                    )) : (
+                                                        <tr><td colSpan="3">Aucun historique disponible.</td></tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    {/* Role Management (Super Admin Only) */}
+                                    {checkPermission('all') && (
+                                        <div className="card">
+                                            <h3>Gestion des Rôles (Super Admin)</h3>
+                                            <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1rem' }}>
+                                                Gérez les permissions des utilisateurs enregistrés.
+                                            </p>
+                                            <div className="table-container">
+                                                <table className="data-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Email</th>
+                                                            <th>Nom</th>
+                                                            <th>Rôle Actuel</th>
+                                                            {/* <th>Action</th> */}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {users.map(u => (
+                                                            <tr key={u.id || u.email}>
+                                                                <td>{u.email}</td>
+                                                                <td>{u.name || '-'}</td>
+                                                                <td>
+                                                                    <span className={`status-badge status-${u.role === 'admin' || u.role === 'super_admin' ? 'paid' : 'pending'}`}>
+                                                                        {u.role}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

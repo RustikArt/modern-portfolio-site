@@ -2,15 +2,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useState, useEffect } from 'react';
 import { WEBSITE_VERSION } from '../version';
+import Breadcrumbs from '../components/Breadcrumbs';
+import StarRating from '../components/StarRating';
+import ProductReviews from '../components/ProductReviews';
+import { Heart } from 'lucide-react';
 
 const ProductDetail = () => {
     const { id } = useParams();
-    const { products, addToCart } = useData();
+    const { products, addToCart, reviews, addReview, getProductRating, currentUser, toggleWishlist, isInWishlist } = useData();
     const product = products.find(p => p.id === parseInt(id));
     const navigate = useNavigate();
 
     const [selectedOptions, setSelectedOptions] = useState({});
     const [currentPrice, setCurrentPrice] = useState(0);
+
+    const productReviews = reviews[product?.id] || [];
+    const averageRating = getProductRating(product?.id);
 
     useEffect(() => {
         if (product) {
@@ -68,12 +75,43 @@ const ProductDetail = () => {
     return (
         <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#080808' }}>
             <div className="container">
-                <button onClick={() => navigate('/shop')} className="btn" style={{ marginBottom: '2rem' }}>← Retour</button>
+                <Breadcrumbs lastItemName={product.name} />
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '4rem' }}>
                     <img src={`${product.image}?v=${WEBSITE_VERSION}`} alt={product.name} style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
                     <div className="product-info-detail">
-                        <span style={{ color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{product.category}</span>
-                        <h1 style={{ fontSize: '3rem', margin: '1rem 0' }}>{product.name}</h1>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <span style={{ color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{product.category}</span>
+                            <span style={{
+                                background: product.stock !== 0 ? 'rgba(75, 181, 67, 0.2)' : 'rgba(255, 77, 77, 0.2)',
+                                color: product.stock !== 0 ? '#4bb543' : '#ff4d4d',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold'
+                            }}>
+                                {product.stock === 0 ? 'Rupture' : (product.stock < 5 ? `Dernières pièces (${product.stock})` : 'En Stock')}
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <h1 style={{ fontSize: '3rem', margin: '1rem 0' }}>{product.name}</h1>
+                            <button
+                                onClick={() => toggleWishlist(product.id)}
+                                style={{
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '50%',
+                                    width: '50px',
+                                    height: '50px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    marginTop: '1rem'
+                                }}
+                            >
+                                <Heart size={24} fill={isInWishlist(product.id) ? "var(--color-accent)" : "none"} color="var(--color-accent)" />
+                            </button>
+                        </div>
                         <div style={{ fontSize: '2rem', marginBottom: '2rem' }}>
                             {(product.promoPrice && product.promoPrice < product.price) ? (
                                 <span>
@@ -141,6 +179,14 @@ const ProductDetail = () => {
                                 ))}
                             </div>
                         )}
+
+                        {/* REVIEWS SECTION */}
+                        <ProductReviews
+                            reviews={productReviews}
+                            averageRating={averageRating}
+                            onAddReview={(review) => addReview(product.id, review)}
+                            currentUser={currentUser}
+                        />
                     </div>
                 </div>
             </div>

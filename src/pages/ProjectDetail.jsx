@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import BlockRenderer from '../components/BlockRenderer';
+import Breadcrumbs from '../components/Breadcrumbs';
+import DOMPurify from 'dompurify';
 
 const ProjectDetail = () => {
     const { id } = useParams();
@@ -13,7 +15,7 @@ const ProjectDetail = () => {
     return (
         <div className="page" style={{ paddingTop: '100px', minHeight: '100vh' }}>
             <div className="container">
-                <button onClick={() => navigate('/projects')} className="btn" style={{ marginBottom: '2rem' }}>← Retour aux projets</button>
+                <Breadcrumbs lastItemName={project.title} />
                 <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>{project.title}</h1>
                 <span style={{ color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{project.category}</span>
 
@@ -25,7 +27,7 @@ const ProjectDetail = () => {
                     {project.blocks && project.blocks.length > 0 ? (
                         <BlockRenderer blocks={project.blocks} />
                     ) : (
-                        <div dangerouslySetInnerHTML={{ __html: project.content || '<p>Aucun contenu supplémentaire.</p>' }} style={{ maxWidth: '800px', margin: '0 auto' }} />
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(project.content || '<p>Aucun contenu supplémentaire.</p>') }} style={{ maxWidth: '800px', margin: '0 auto' }} />
                     )}
 
                 </div>

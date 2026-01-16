@@ -1,0 +1,15 @@
+{
+    "name": "Rustikop Portfolio",
+    "short_name": "Rustikop",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#050505",
+    "theme_color": "#d4af37",
+    "icons": [
+        {
+            "src": "/vite.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        }
+    ]
+}

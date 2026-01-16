@@ -1,81 +1,184 @@
 import { useData } from '../context/DataContext';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import { WEBSITE_VERSION } from '../version';
+import { useState, useMemo } from 'react';
+import { Grid, List, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import ProductCard from '../components/ProductCard';
 import './Shop.css';
 
 const Shop = () => {
     const { products } = useData();
+
+    // State
     const [filterCategory, setFilterCategory] = useState('All');
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+    const [sortBy, setSortBy] = useState('popular'); // 'popular', 'priceAsc', 'priceDesc', 'new'
+    const [priceRange, setPriceRange] = useState([0, 2000]);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    // Extract unique categories
+    const itemsPerPage = 9;
+
+    // Derived Data
     const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
+    const maxPrice = Math.max(...products.map(p => p.price), 0);
 
-    const filteredProducts = filterCategory === 'All'
-        ? products
-        : products.filter(p => p.category === filterCategory);
+    // Filter & Sort Logic using useMemo for performance
+    const processedProducts = useMemo(() => {
+        let result = [...products];
+
+        // 1. Filter by Category
+        if (filterCategory !== 'All') {
+            result = result.filter(p => p.category === filterCategory);
+        }
+
+        // 2. Filter by Price Range
+        result = result.filter(p => {
+            const price = p.promoPrice || p.price;
+            return price >= priceRange[0] && price <= priceRange[1];
+        });
+
+        // 3. Sort
+        result.sort((a, b) => {
+            const priceA = a.promoPrice || a.price;
+            const priceB = b.promoPrice || b.price;
+
+            switch (sortBy) {
+                case 'priceAsc': return priceA - priceB;
+                case 'priceDesc': return priceB - priceA;
+                case 'new': return b.id - a.id; // Assuming higher ID = newer
+                default: return (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0); // Popular/Featured first
+            }
+        });
+
+        return result;
+    }, [products, filterCategory, priceRange, sortBy]);
+
+    // Pagination Logic
+    const totalPages = Math.ceil(processedProducts.length / itemsPerPage);
+    const paginatedProducts = processedProducts.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     return (
         <div className="page page-shop">
             <div className="container">
-                <h1 className="page-title">Shop</h1>
+                <div className="shop-header">
+                    <h1 className="page-title">Shop</h1>
+                    <div className="shop-controls">
+                        {/* Sort Dropdown */}
+                        <div className="control-group">
+                            <label>Trier par :</label>
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
+                                <option value="popular">Populaire</option>
+                                <option value="new">Nouveautés</option>
+                                <option value="priceAsc">Prix croissant</option>
+                                <option value="priceDesc">Prix décroissant</option>
+                            </select>
+                        </div>
 
-                <div className="shop-layout" style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '2rem' }}>
-                    {/* Sidebar Filter */}
-                    <div className="shop-sidebar">
-                        <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>Filtres</h3>
-                        <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-                            {categories.map(cat => (
-                                <li key={cat} style={{ marginBottom: '0.5rem' }}>
-                                    <button
-                                        onClick={() => setFilterCategory(cat)}
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            color: filterCategory === cat ? 'var(--color-accent)' : '#888',
-                                            cursor: 'pointer',
-                                            fontSize: '1rem',
-                                            textTransform: 'capitalize'
-                                        }}
-                                    >
-                                        {cat}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
+                        {/* View Toggle */}
+                        <div className="view-toggle">
+                            <button
+                                className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                                onClick={() => setViewMode('grid')}
+                                aria-label="Vue Grille"
+                            >
+                                <Grid size={20} />
+                            </button>
+                            <button
+                                className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                                onClick={() => setViewMode('list')}
+                                aria-label="Vue Liste"
+                            >
+                                <List size={20} />
+                            </button>
+                        </div>
                     </div>
+                </div>
 
-                    {/* Grid */}
-                    <div className="shop-grid">
-                        {filteredProducts.map((product) => (
-                            <div key={product.id} className="product-card">
-                                <Link to={`/shop/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    <div className="product-image">
-                                        <img src={`${product.image}?v=${WEBSITE_VERSION}`} alt={product.name} />
-                                    </div>
-                                </Link>
-                                <div className="product-info">
-                                    <h3>{product.name}</h3>
-                                    {product.promoPrice && product.promoPrice < product.price ? (
-                                        <div className="price">
-                                            <span style={{ textDecoration: 'line-through', color: '#666', fontSize: '0.9em', marginRight: '0.5rem' }}>{product.price}€</span>
-                                            <span style={{ color: 'var(--color-accent)' }}>{product.promoPrice}€</span>
-                                        </div>
-                                    ) : (
-                                        <span className="price">{product.price}€</span>
-                                    )}
+                <div className="shop-layout">
+                    {/* SIDEBAR */}
+                    <aside className="shop-sidebar">
+                        <div className="sidebar-section">
+                            <h3><Filter size={16} /> Catégories</h3>
+                            <ul>
+                                {categories.map(cat => (
+                                    <li key={cat}>
+                                        <button
+                                            className={filterCategory === cat ? 'active' : ''}
+                                            onClick={() => { setFilterCategory(cat); setCurrentPage(1); }}
+                                        >
+                                            {cat}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="sidebar-section">
+                            <h3>Prix</h3>
+                            <div className="price-slider">
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max={maxPrice}
+                                    value={priceRange[1]}
+                                    onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
+                                />
+                                <div className="price-labels">
+                                    <span>0€</span>
+                                    <span>{priceRange[1]}€</span>
                                 </div>
-                                {product.tags && product.tags.length > 0 && (
-                                    <div style={{ padding: '0 1rem 1rem', display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                                        {product.tags.map(tag => (
-                                            <span key={tag} style={{ fontSize: '0.7rem', color: '#666', background: '#111', padding: '2px 6px', borderRadius: '2px' }}>#{tag}</span>
-                                        ))}
-                                    </div>
-                                )}
-                                <Link to={`/shop/${product.id}`} className="btn-buy" style={{ display: 'block', textAlign: 'center' }}>Voir / Ajouter</Link>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    </aside>
+
+                    {/* MAIN GRID */}
+                    <main className="shop-main">
+                        <div className={`shop-products ${viewMode}`}>
+                            {paginatedProducts.length > 0 ? (
+                                paginatedProducts.map(product => (
+                                    <ProductCard key={product.id} product={product} viewMode={viewMode} />
+                                ))
+                            ) : (
+                                <div className="no-results">
+                                    <p>Aucun produit ne correspond à vos critères.</p>
+                                    <button onClick={() => { setFilterCategory('All'); setPriceRange([0, 2000]); }} className="btn-link">
+                                        Réinitialiser les filtres
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* PAGINATION */}
+                        {totalPages > 1 && (
+                            <div className="pagination">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="page-btn"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+
+                                <span className="page-info">Page {currentPage} sur {totalPages}</span>
+
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="page-btn"
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
+                            </div>
+                        )}
+                    </main>
                 </div>
             </div>
         </div>

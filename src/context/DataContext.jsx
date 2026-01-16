@@ -1,9 +1,30 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import Toast from '../components/Toast';
 import emailjs from '@emailjs/browser';
+import bcrypt from 'bcryptjs';
 
 const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
+
+// --- SECURITY CONSTANTS ---
+export const ROLES = {
+    SUPER_ADMIN: 'super_admin',
+    ADMIN: 'admin',
+    MODERATOR: 'moderator',
+    EDITOR: 'editor',
+    CLIENT: 'client'
+};
+
+const PERMISSIONS = {
+    [ROLES.SUPER_ADMIN]: ['all'],
+    [ROLES.ADMIN]: ['manage_orders', 'manage_products', 'manage_content', 'view_users', 'view_stats'],
+    [ROLES.MODERATOR]: ['manage_orders', 'view_users', 'view_stats'],
+    [ROLES.EDITOR]: ['manage_content', 'view_stats'],
+    [ROLES.CLIENT]: []
+};
+
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 // Fallback Initial Data
 const fallbackProjects = [
@@ -12,6 +33,42 @@ const fallbackProjects = [
     { id: 3, title: 'Echo', category: 'App Mobile', image: 'https://placehold.co/600x400/151515/FFF?text=Echo', content: '<p>Connecter les gens par la voix.</p>' },
     { id: 4, title: 'Horizon', category: 'Ecommerce', image: 'https://placehold.co/600x400/0f0f0f/FFF?text=Horizon', content: '<p>Le futur du commerce en ligne.</p>' },
 ];
+
+const defaultHomeContent = {
+    hero: {
+        titleLine1: "Toutes les faces de l'art,",
+        titleLine2: "réunies.",
+        subtitle: "Design numérique & Expériences immersives.",
+        buttonText: "Voir les projets",
+        buttonLink: "/projects"
+    },
+    featuredProjects: {
+        title: "Projets à la une",
+        ids: [1, 2, 3] // Default project IDs to show
+    },
+    services: [
+        { id: 1, title: "Design Graphique", icon: "Palette", description: "Identités visuelles marquantes et designs uniques." },
+        { id: 2, title: "Développement Web", icon: "Code", description: "Sites performants, réactifs et modernes." },
+        { id: 3, title: "Branding", icon: "Briefcase", description: "Stratégies de marque pour vous démarquer." },
+        { id: 4, title: "Marketing Digital", icon: "TrendingUp", description: "Campagnes ciblées pour accroître votre visibilité." }
+    ],
+    testimonials: [
+        { id: 1, name: "Sophie Martin", role: "CEO, TechFlow", quote: "Une équipe incroyable qui a su transformer notre vision en réalité.", image: "https://placehold.co/100x100/333/FFF?text=SM" },
+        { id: 2, name: "Thomas Dubois", role: "Directeur Artistique", quote: "Créativité et professionnalisme au rendez-vous. Je recommande !", image: "https://placehold.co/100x100/333/FFF?text=TD" }
+    ],
+    stats: [
+        { id: 1, label: "Projets Réalisés", value: "150+" },
+        { id: 2, label: "Clients Satisfaits", value: "80+" },
+        { id: 3, label: "Années d'Expérience", value: "5+" },
+        { id: 4, label: "Taux de Satisfaction", value: "98%" }
+    ],
+    cta: {
+        title: "Prêt à démarrer votre projet ?",
+        text: "Contactez-nous dès aujourd'hui pour discuter de vos besoins.",
+        buttonText: "Nous Contacter",
+        buttonLink: "/contact"
+    }
+};
 
 const fallbackProducts = [
     // ==================== GRAPHISME ====================
@@ -554,6 +611,26 @@ export const DataProvider = ({ children }) => {
 
     // Promo Codes State
     const [promoCodes, setPromoCodes] = useState([]);
+    const [activePromo, setActivePromo] = useState(() => {
+        const saved = localStorage.getItem('portfolio_active_promo');
+        return saved ? JSON.parse(saved) : null;
+    });
+
+    useEffect(() => {
+        localStorage.setItem('portfolio_active_promo', JSON.stringify(activePromo));
+    }, [activePromo]);
+
+    // Toast State
+    const [toasts, setToasts] = useState([]);
+
+    const showToast = (message, type = 'info') => {
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, message, type }]);
+    };
+
+    const removeToast = (id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+    };
 
     // Announcement Banner State
     const [announcement, setAnnouncement] = useState(() => {
@@ -576,6 +653,11 @@ export const DataProvider = ({ children }) => {
     const [notifications, setNotifications] = useState(() => {
         const saved = localStorage.getItem('portfolio_notifications');
         return saved ? JSON.parse(saved) : [];
+    });
+
+    const [homeContent, setHomeContent] = useState(() => {
+        const saved = localStorage.getItem('portfolio_home_content');
+        return saved ? JSON.parse(saved) : defaultHomeContent;
     });
 
     // --- FETCH DATA ON MOUNT ---
@@ -744,6 +826,10 @@ export const DataProvider = ({ children }) => {
     useEffect(() => {
         localStorage.setItem('portfolio_notifications', JSON.stringify(notifications));
     }, [notifications]);
+
+    useEffect(() => {
+        localStorage.setItem('portfolio_home_content', JSON.stringify(homeContent));
+    }, [homeContent]);
 
 
     // --- ACTIONS ---
@@ -955,14 +1041,58 @@ export const DataProvider = ({ children }) => {
         const cleanEmail = email.trim().toLowerCase();
         const cleanPassword = password.trim();
 
-        // Phase 3: No more hardcoded backdoor. Check against users array.
-        const user = users.find(u => u.email === cleanEmail && u.password === cleanPassword);
+        const user = users.find(u => u.email === cleanEmail);
 
         if (user) {
-            setCurrentUser(user);
-            return { success: true, isAdmin: user.role === 'admin' };
+            // VERIFY PASSWORD (HASH or PLAIN)
+            let isValid = false;
+
+            // Check if stored password is a hash (bcrypt starts with $2a$ or $2b$)
+            if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
+                try {
+                    isValid = bcrypt.compareSync(cleanPassword, user.password);
+                } catch (e) {
+                    console.error("Error comparing hash", e);
+                }
+            } else {
+                // Fallback for legacy plaintext
+                if (user.password === cleanPassword) {
+                    isValid = true;
+                }
+            }
+
+            if (isValid) {
+                // --- SECURITY: LOGIN HISTORY & ALERT ---
+                const mockIp = Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255);
+                const userAgent = navigator.userAgent;
+                const historyEntry = {
+                    date: new Date().toISOString(),
+                    ip: mockIp,
+                    device: userAgent.includes("Mobile") ? "Mobile" : "Desktop",
+                    browser: "Chrome (Simulated)"
+                };
+
+                // Check for new device (simple heuristic)
+                const isNewDevice = !user.loginHistory || !user.loginHistory.some(h => h.device === historyEntry.device);
+                if (isNewDevice && user.role !== 'client') {
+                    // Simulate Email Alert
+                    console.warn(`SECURITY ALERT: New device login for ${user.email}`);
+                    addNotification('security', `Nouvelle connexion détectée pour ${user.email} (${historyEntry.device})`);
+                }
+
+                // Update user history
+                const updatedUser = {
+                    ...user,
+                    loginHistory: [historyEntry, ...(user.loginHistory || [])].slice(0, 50) // Keep last 50
+                };
+
+                // Update global users state
+                setUsers(prev => prev.map(u => u.email === cleanEmail ? updatedUser : u));
+                setCurrentUser(updatedUser);
+                return { success: true, isAdmin: user.role === 'admin' };
+            }
         }
-        return { success: false, message: 'Identifiants incorrects.' };
+        return { success: false, message: 'Identifiants ou mot de passe incorrects.' };
     };
 
     const logout = () => {
@@ -973,6 +1103,34 @@ export const DataProvider = ({ children }) => {
     };
 
     // Promo Codes
+    const applyPromoCode = (code) => {
+        const promo = promoCodes.find(p => p.code === code);
+        if (promo) {
+            // 1. Check Expiration
+            if (promo.expirationDate && new Date(promo.expirationDate) < new Date()) {
+                alert("Ce code promo a expiré.");
+                return false;
+            }
+            // 2. Check Usage Limits
+            if (promo.maxUses && promo.uses >= promo.maxUses) {
+                alert("Ce code promo a atteint sa limite d'utilisation.");
+                return false;
+            }
+            // 3. Check Minimum Amount
+            const currentTotal = getCartTotal();
+            if (promo.minAmount && currentTotal < promo.minAmount) {
+                alert(`Ce code nécessite un minimum d'achat de ${promo.minAmount}€.`);
+                return false;
+            }
+
+            setActivePromo(promo);
+            return true;
+        }
+        setActivePromo(null);
+        alert("Code promo invalide");
+        return false;
+    };
+
     const addPromoCode = async (code) => {
         try {
             // Convert camelCase to snake_case for Supabase compatibility
@@ -1257,6 +1415,57 @@ export const DataProvider = ({ children }) => {
         return false;
     };
 
+    // --- WISHLIST ACTIONS ---
+    const [wishlist, setWishlist] = useState(() => {
+        const saved = localStorage.getItem('portfolio_wishlist');
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    useEffect(() => {
+        localStorage.setItem('portfolio_wishlist', JSON.stringify(wishlist));
+    }, [wishlist]);
+
+    const toggleWishlist = (productId) => {
+        setWishlist(prev => {
+            if (prev.includes(productId)) {
+                return prev.filter(id => id !== productId);
+            }
+            return [...prev, productId];
+        });
+    };
+
+    const isInWishlist = (productId) => wishlist.includes(productId);
+
+    // --- REVIEWS ACTIONS ---
+    const [reviews, setReviews] = useState(() => {
+        const saved = localStorage.getItem('portfolio_reviews');
+        return saved ? JSON.parse(saved) : {};
+    });
+
+    useEffect(() => {
+        localStorage.setItem('portfolio_reviews', JSON.stringify(reviews));
+    }, [reviews]);
+
+    const addReview = (productId, review) => {
+        // review: { user: string, rating: number, comment: string, date: string }
+        setReviews(prev => {
+            const productReviews = prev[productId] || [];
+            return {
+                ...prev,
+                [productId]: [review, ...productReviews]
+            };
+        });
+    };
+
+    const getProductReviews = (productId) => reviews[productId] || [];
+
+    const getProductRating = (productId) => {
+        const productReviews = reviews[productId] || [];
+        if (productReviews.length === 0) return 0;
+        const sum = productReviews.reduce((acc, r) => acc + r.rating, 0);
+        return sum / productReviews.length;
+    };
+
     // --- ANNOUNCEMENT & NOTIFICATIONS ACTIONS ---
     const updateAnnouncement = (config) => {
         setAnnouncement(prev => ({ ...prev, ...config }));
@@ -1304,7 +1513,7 @@ export const DataProvider = ({ children }) => {
             sendOrderConfirmation,
 
             // Promo Codes
-            promoCodes, addPromoCode, deletePromoCode,
+            promoCodes, addPromoCode, deletePromoCode, applyPromoCode, activePromo,
 
             // Announcement
             announcement, updateAnnouncement,
@@ -1312,10 +1521,35 @@ export const DataProvider = ({ children }) => {
             // Notifications
             notifications, addNotification, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
 
+            // Home Content
+            homeContent, setHomeContent,
+
+            // Wishlist
+            wishlist, toggleWishlist, isInWishlist,
+
+            // Reviews
+            reviews, addReview, getProductReviews, getProductRating,
+
             // Admin Actions
-            secureFullReset
+            secureFullReset,
+
+            // Toasts
+            showToast
         }}>
             {children}
+            <div style={{
+                position: 'fixed',
+                bottom: '20px',
+                right: '20px',
+                zIndex: 9999,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end'
+            }}>
+                {toasts.map(t => (
+                    <Toast key={t.id} {...t} onClose={removeToast} />
+                ))}
+            </div>
         </DataContext.Provider>
     );
 };

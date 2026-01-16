@@ -118,6 +118,16 @@ const Contact = () => {
                                 />
                             </div>
                             <div className="form-group">
+                                <label htmlFor="phone">Téléphone (Optionnel)</label>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    placeholder="06 12 34 56 78"
+                                    value={formData.phone || ''}
+                                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                />
+                            </div>
+                            <div className="form-group">
                                 <label htmlFor="message">Message</label>
                                 <textarea
                                     id="message"

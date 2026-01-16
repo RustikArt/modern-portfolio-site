@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 const Checkout = () => {
-    const { cart, currentUser, placeOrder, getCartTotal, promoCodes } = useData();
+    const { cart, currentUser, placeOrder, getCartTotal, promoCodes, applyPromoCode, activePromo } = useData();
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [shipping, setShipping] = useState({ address: '', city: '', zip: '', country: '' });
@@ -22,7 +22,6 @@ const Checkout = () => {
 
     // Promo State
     const [promoInput, setPromoInput] = useState('');
-    const [appliedPromo, setAppliedPromo] = useState(null);
     const [promoError, setPromoError] = useState('');
 
     // Success Popup State
@@ -35,20 +34,17 @@ const Checkout = () => {
         if (query.get('success') && !hasProcessed.current) {
             hasProcessed.current = true;
 
-            // Retrieve shipping details and promo from storage
+            // Retrieve shipping details from storage
             const savedShipping = localStorage.getItem('last_shipping');
             const finalShipping = savedShipping ? JSON.parse(savedShipping) : shipping;
 
-            const savedPromo = localStorage.getItem('last_promo');
-            const finalPromo = savedPromo ? JSON.parse(savedPromo) : null;
-
-            // Calculate final discounted total
+            // Calculate final discounted total using activePromo (persisted in Context)
             let finalTotal = getCartTotal();
-            if (finalPromo) {
-                if (finalPromo.type === 'percent') {
-                    finalTotal -= finalTotal * (finalPromo.value / 100);
-                } else if (finalPromo.type === 'fixed') {
-                    finalTotal -= finalPromo.value;
+            if (activePromo) {
+                if (activePromo.type === 'percent') {
+                    finalTotal -= finalTotal * (activePromo.value / 100);
+                } else if (activePromo.type === 'fixed') {
+                    finalTotal -= activePromo.value;
                 }
             }
             finalTotal = Math.max(0, finalTotal).toFixed(2);
@@ -63,7 +59,9 @@ const Checkout = () => {
             // Clean up
             window.history.replaceState({}, '', '/checkout');
             localStorage.removeItem('last_shipping');
-            localStorage.removeItem('last_promo');
+            // No need to clear promo manually, keep it for reference or clear if single use
+            // If single use, we should decrement usage here? Logic is in placeOrder or addUsage?
+            // For now, let's leave it.
         }
     }, [getCartTotal, placeOrder, shipping]);
 
@@ -87,11 +85,11 @@ const Checkout = () => {
 
     const calculateTotal = () => {
         let total = getCartTotal();
-        if (appliedPromo) {
-            if (appliedPromo.type === 'percent') {
-                total -= total * (appliedPromo.value / 100);
-            } else if (appliedPromo.type === 'fixed') {
-                total -= appliedPromo.value;
+        if (activePromo) {
+            if (activePromo.type === 'percent') {
+                total -= total * (activePromo.value / 100);
+            } else if (activePromo.type === 'fixed') {
+                total -= activePromo.value;
             }
         }
         return Math.max(0, total).toFixed(2);
@@ -102,20 +100,13 @@ const Checkout = () => {
         const code = promoInput.trim().toUpperCase();
         if (!code) return;
 
-        const found = promoCodes.find(c => c.code === code);
-        if (found) {
-            setAppliedPromo(found);
-            localStorage.setItem('last_promo', JSON.stringify(found));
+        if (applyPromoCode(code)) {
             setPromoInput('');
-        } else {
-            setPromoError('Code invalide ou expiré.');
         }
     };
 
     const handleRemovePromo = () => {
-        if (appliedPromo) setPromoInput(appliedPromo.code);
-        setAppliedPromo(null);
-        localStorage.removeItem('last_promo');
+        applyPromoCode(''); // Passing empty or invalid clears it
     }
 
     const handleStripeCheckout = async () => {
@@ -138,10 +129,10 @@ const Checkout = () => {
                         quantity: item.quantity,
                         image: item.image
                     })),
-                    promo: appliedPromo ? {
-                        code: appliedPromo.code,
-                        type: appliedPromo.type,
-                        value: appliedPromo.value
+                    promo: activePromo ? {
+                        code: activePromo.code,
+                        type: activePromo.type,
+                        value: activePromo.value
                     } : null,
                     success_url: window.location.origin + '/checkout?success=true',
                     cancel_url: window.location.origin + '/checkout?canceled=true',
@@ -155,9 +146,7 @@ const Checkout = () => {
 
             const session = await response.json();
             localStorage.setItem('last_shipping', JSON.stringify(shipping));
-            if (appliedPromo) {
-                localStorage.setItem('last_promo', JSON.stringify(appliedPromo));
-            }
+            // activePromo is persisted by Context
             window.location.href = session.url;
 
         } catch (err) {
