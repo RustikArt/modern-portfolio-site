@@ -31,7 +31,6 @@ import {
     Search,
     MapPin,
     Check,
-    Check,
     Shield,
     LayoutDashboard
 } from 'lucide-react';
