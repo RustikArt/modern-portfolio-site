@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import { Heart } from 'lucide-react';
+import { useData } from '../context/DataContext';
 import { WEBSITE_VERSION } from '../version';
 import StarRating from './StarRating';
 import LazyImage from './LazyImage';

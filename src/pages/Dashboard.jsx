@@ -35,7 +35,6 @@ import {
     LayoutDashboard
 } from 'lucide-react';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
-import GlobalSearch from '../components/dashboard/GlobalSearch';
 import ActivityLog from '../components/dashboard/ActivityLog';
 import { downloadCSV } from '../utils/export';
 import { sendShippingUpdate, sendVideoProof } from '../utils/emailService';
@@ -51,7 +50,7 @@ const Dashboard = () => {
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
 
-        checkPermission, loginHistory, users: allUsers,
+        checkPermission, loginHistory,
         showToast
     } = useData();
 
@@ -409,15 +408,7 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    <GlobalSearch
-                        data={{ products, orders, users }}
-                        onNavigate={(tab, itemId) => {
-                            setActiveTab(tab);
-                            if (tab === 'orders' && itemId) {
-                                setExpandedOrders(prev => ({ ...prev, [itemId]: true }));
-                            }
-                        }}
-                    />
+
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         {/* Notification Bell */}
                         <div style={{ position: 'relative' }} ref={notificationRef}>

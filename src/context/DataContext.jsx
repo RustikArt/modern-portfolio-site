@@ -639,15 +639,22 @@ export const DataProvider = ({ children }) => {
             text: 'Bienvenue sur Rustikop ! Découvrez nos nouveaux services.',
             bgColor: '#d4af37',
             textColor: '#000000',
-            height: '40px',
-            link: '',
-            isActive: false,
-            fontWeight: 'normal',
-            fontStyle: 'normal',
-            showTimer: false,
-            timerEnd: ''
+            isActive: true,
+            link: '/shop'
         };
     });
+
+    const [loginHistory, setLoginHistory] = useState(() => {
+        const saved = localStorage.getItem('portfolio_login_history');
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    const checkPermission = (requiredPermission) => {
+        if (!currentUser) return false;
+        const userPermissions = PERMISSIONS[currentUser.role] || [];
+        return userPermissions.includes('all') || userPermissions.includes(requiredPermission);
+    };
+
 
     // Admin Notifications State
     const [notifications, setNotifications] = useState(() => {
@@ -672,34 +679,39 @@ export const DataProvider = ({ children }) => {
                     fetch('/api/orders')
                 ]);
 
-                // Recovery mechanism: Check local storage first if API fails
-                if (projectsRes.ok) {
+                if (projectsRes && projectsRes.ok) {
                     const projectsData = await projectsRes.json();
-                    setProjects(projectsData);
+                    if (Array.isArray(projectsData)) {
+                        setProjects(projectsData);
+                    } else {
+                        throw new Error('Invalid projects data format');
+                    }
                 } else {
-                    console.error('Projects API failed:', projectsRes.status, await projectsRes.text());
+                    console.error('Projects API failed:', projectsRes?.status);
                     // Try to recover from local storage
                     const localProjects = localStorage.getItem('portfolio_projects');
                     if (localProjects) {
-                        console.log('Recovering projects from local storage');
-                        setProjects(JSON.parse(localProjects));
+                        const parsed = JSON.parse(localProjects);
+                        setProjects(Array.isArray(parsed) ? parsed : fallbackProjects);
                     } else {
-                        console.log('No local projects found, using fallback');
                         setProjects(fallbackProjects);
                     }
                 }
 
-                if (productsRes.ok) {
+                if (productsRes && productsRes.ok) {
                     const productsData = await productsRes.json();
-                    setProducts(productsData);
+                    if (Array.isArray(productsData)) {
+                        setProducts(productsData);
+                    } else {
+                        throw new Error('Invalid products data format');
+                    }
                 } else {
-                    console.error('Products API failed:', productsRes.status, await productsRes.text());
+                    console.error('Products API failed:', productsRes?.status);
                     const localProducts = localStorage.getItem('portfolio_products');
                     if (localProducts) {
-                        console.log('Recovering products from local storage');
-                        setProducts(JSON.parse(localProducts));
+                        const parsed = JSON.parse(localProducts);
+                        setProducts(Array.isArray(parsed) ? parsed : fallbackProducts);
                     } else {
-                        console.log('No local products found, using fallback');
                         setProducts(fallbackProducts);
                     }
                 }
@@ -1503,7 +1515,7 @@ export const DataProvider = ({ children }) => {
             addProduct, deleteProduct, updateProduct,
 
             // Auth
-            users, currentUser, register, login, logout,
+            users, currentUser, register, login, logout, checkPermission, loginHistory,
 
             // Cart
             cart, addToCart, removeFromCart, clearCart, getCartTotal,

@@ -1,4 +1,3 @@
-import { useData } from '../context/DataContext';
 import { useState, useMemo } from 'react';
 import { Grid, List, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
@@ -16,13 +15,14 @@ const Shop = () => {
 
     const itemsPerPage = 9;
 
-    // Derived Data
-    const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
-    const maxPrice = Math.max(...products.map(p => p.price), 0);
+    // Derived Data - Robustness
+    const safeProducts = Array.isArray(products) ? products : [];
+    const categories = ['All', ...new Set(safeProducts.map(p => p.category).filter(Boolean))];
+    const maxPrice = safeProducts.length > 0 ? Math.max(...safeProducts.map(p => p.price), 0) : 2000;
 
     // Filter & Sort Logic using useMemo for performance
     const processedProducts = useMemo(() => {
-        let result = [...products];
+        let result = [...safeProducts];
 
         // 1. Filter by Category
         if (filterCategory !== 'All') {
@@ -49,7 +49,7 @@ const Shop = () => {
         });
 
         return result;
-    }, [products, filterCategory, priceRange, sortBy]);
+    }, [safeProducts, filterCategory, priceRange, sortBy]);
 
     // Pagination Logic
     const totalPages = Math.ceil(processedProducts.length / itemsPerPage);

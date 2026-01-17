@@ -12,8 +12,6 @@ const Navbar = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const { cart, currentUser } = useData();
 
   useEffect(() => {
@@ -31,13 +29,11 @@ const Navbar = () => {
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
-    setIsSearchOpen(false);
   }, [location]);
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-  const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} role="navigation" aria-label="Menu principal">
@@ -69,22 +65,6 @@ const Navbar = () => {
 
         {/* RIGHT ACTIONS */}
         <div className="nav-actions">
-          {/* SEARCH BAR */}
-          <div className={`search-container ${isSearchOpen ? 'active' : ''}`}>
-            <button className="action-link icon-link search-toggle" onClick={toggleSearch} aria-label="Rechercher">
-              <Search size={20} aria-hidden="true" />
-            </button>
-            <div className="search-input-wrapper">
-              <input
-                type="text"
-                placeholder="Rechercher..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Champ de recherche"
-              />
-            </div>
-          </div>
-
           <Link to="/wishlist" className="action-link icon-link" title="Wishlist" aria-label="Ma Wishlist">
             <Heart size={20} aria-hidden="true" />
           </Link>
