@@ -24,13 +24,19 @@ const Home = () => {
 
     useEffect(() => {
         const observerOptions = {
-            threshold: 0.1
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px' // Slight delay for more natural feel
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
+                } else if (entry.boundingClientRect.top > 0) {
+                    // Only remove when scrolling up (above the element)
+                    // Or remove always for full replay? The user said "a l'envers quand on remonte"
+                    // And "rejouer quand on descend".
+                    entry.target.classList.remove('active');
                 }
             });
         }, observerOptions);

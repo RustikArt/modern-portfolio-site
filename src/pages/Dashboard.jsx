@@ -29,7 +29,17 @@ import {
     Ticket,
     Palette,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    Bell,
+    Settings,
+    X,
+    Mail,
+    UserPlus,
+    ShoppingCart,
+    RotateCcw,
+    Percent,
+    MapPin,
+    Check
 } from 'lucide-react';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import ActivityLog from '../components/dashboard/ActivityLog';
