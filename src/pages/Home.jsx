@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { ArrowRight, Palette, Code, Briefcase, TrendingUp, Star, Quote } from 'lucide-react';
