@@ -32,7 +32,9 @@ import {
     MapPin,
     Check,
     Shield,
-    LayoutDashboard
+    LayoutDashboard,
+    Zap,
+    Layers
 } from 'lucide-react';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import ActivityLog from '../components/dashboard/ActivityLog';

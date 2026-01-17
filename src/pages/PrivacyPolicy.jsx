@@ -56,7 +56,7 @@ const PrivacyPolicy = () => {
                     <h2 style={{ color: 'white', marginBottom: '1rem' }}>5. Vos Droits</h2>
                     <p>
                         Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données.
-                        Pour exercer ces droits, contactez-nous à <a href="mailto:privacy@rustikop.com" style={{ color: 'var(--color-accent)' }}>privacy@rustikop.com</a>.
+                        Pour exercer ces droits, contactez-nous à <a href="mailto:rustikop@outlook.fr" style={{ color: 'var(--color-accent)' }}>privacy@rustikop.com</a>.
                     </p>
                 </section>
             </div>

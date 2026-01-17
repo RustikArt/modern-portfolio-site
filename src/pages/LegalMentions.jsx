@@ -14,17 +14,17 @@ const LegalMentions = () => {
                     <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-accent)' }}>Éditeur du site</h2>
                     <p style={{ lineHeight: '1.8', color: '#aaa' }}>
                         <strong style={{ color: '#fff' }}>Rustikop</strong><br />
-                        Adresse : [À compléter]<br />
-                        Email : contact@rustikop.com<br />
-                        Téléphone : [À compléter]<br />
-                        SIRET : [À compléter]
+                        Adresse : Pas d'adresse fixe. Organisation numérique.<br />
+                        Email : <a href="mailto:rustikop@outlook.fr" style={{ color: 'var(--color-accent)' }}>rustikop@outlook.fr</a><br />
+                        Téléphone : A venir...<br />
+                        SIRET : En cours de création...
                     </p>
                 </section>
 
                 <section style={{ marginBottom: '2.5rem' }}>
                     <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-accent)' }}>Directeur de la publication</h2>
                     <p style={{ lineHeight: '1.8', color: '#aaa' }}>
-                        [Nom du directeur de publication à compléter]
+                        Rustik, fondateur de l'organisation et développeur du site.
                     </p>
                 </section>
 
@@ -43,6 +43,7 @@ const LegalMentions = () => {
                     <p style={{ lineHeight: '1.8', color: '#aaa' }}>
                         L'ensemble de ce site relève de la législation française et internationale sur le droit d'auteur et la propriété intellectuelle.
                         Tous les droits de reproduction sont réservés, y compris pour les documents téléchargeables et les représentations iconographiques et photographiques.
+                        Cependant, lors de production d'oeuvre à but commerciale, l'oeuvre est propriété de Rustikop ET de l'acheteur.
                     </p>
                 </section>
 
@@ -50,7 +51,7 @@ const LegalMentions = () => {
                     <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-accent)' }}>Protection des données</h2>
                     <p style={{ lineHeight: '1.8', color: '#aaa' }}>
                         Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification,
-                        de suppression et de portabilité de vos données personnelles. Pour exercer ces droits, contactez-nous à : contact@rustikop.com
+                        de suppression et de portabilité de vos données personnelles. Pour exercer ces droits, contactez-nous à : <a href="mailto:rustikop@outlook.fr" style={{ color: 'var(--color-accent)' }}>rustikop@outlook.fr</a>.
                     </p>
                 </section>
             </div>

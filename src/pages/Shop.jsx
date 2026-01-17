@@ -1,3 +1,4 @@
+import { useData } from '../context/DataContext';
 import { useState, useMemo } from 'react';
 import { Grid, List, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
