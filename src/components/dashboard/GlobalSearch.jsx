@@ -2,13 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, Package, ShoppingBag, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const GlobalSearch = ({ data }) => {
+const GlobalSearch = ({ data, onNavigate }) => {
     const { products, orders, users } = data;
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const searchRef = useRef(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -57,13 +56,17 @@ const GlobalSearch = ({ data }) => {
     }, [query, orders, products, users]);
 
     const handleSelect = (result) => {
-        // Here we could emit an event to the parent to switch tab and highlight item
-        // For now, let's just log it or maybe setup a callback prop if needed
-        // Ideally: onNavigate(result.type, result.item.id)
-        console.log('Selected:', result);
+        // Navigate to the appropriate tab based on result type
+        if (onNavigate) {
+            const tabMap = {
+                'order': 'orders',
+                'product': 'products',
+                'user': 'clients'
+            };
+            onNavigate(tabMap[result.type], result.item.id);
+        }
         setIsOpen(false);
         setQuery('');
-        // This part would ideally be connected to the Dashboard's state to switch tabs
     };
 
     return (

@@ -409,7 +409,15 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    <GlobalSearch data={{ products, orders, users }} />
+                    <GlobalSearch
+                        data={{ products, orders, users }}
+                        onNavigate={(tab, itemId) => {
+                            setActiveTab(tab);
+                            if (tab === 'orders' && itemId) {
+                                setExpandedOrders(prev => ({ ...prev, [itemId]: true }));
+                            }
+                        }}
+                    />
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         {/* Notification Bell */}
                         <div style={{ position: 'relative' }} ref={notificationRef}>
@@ -516,75 +524,24 @@ const Dashboard = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '3rem' }}>
                     {/* SIDE PANEL */}
-                    <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <button
-                            onClick={() => setActiveTab('overview')}
-                            style={{ ...sideBtnStyle('overview'), justifyContent: 'flex-start' }}
-                        >
-                            <LayoutDashboard size={18} /> Vue d'ensemble
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('orders')}
-                            style={{ ...sideBtnStyle('orders'), justifyContent: 'flex-start' }}
-                        >
-                            <Package size={18} /> Commandes
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('archives')}
-                            style={{ ...sideBtnStyle('archives'), justifyContent: 'flex-start' }}
-                        >
-                            <FolderArchive size={18} /> Archives
-                        </button>
+                    <div style={{ marginBottom: '2rem' }}>
+                        <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Gestion</h3>
+                        <button onClick={() => setActiveTab('overview')} style={sideBtnStyle(activeTab === 'overview')}><LayoutDashboard size={18} /> Vue d'ensemble</button>
+                        <button onClick={() => setActiveTab('orders')} style={sideBtnStyle(activeTab === 'orders')}><ShoppingBag size={18} /> Commandes</button>
+                        <button onClick={() => setActiveTab('clients')} style={sideBtnStyle(activeTab === 'clients')}><Users size={18} /> Clients</button>
 
-                        <div style={{ margin: '1rem 0', borderBottom: '1px solid #111' }}></div>
+                        <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Boutique</h3>
+                        <button onClick={() => setActiveTab('products')} style={sideBtnStyle(activeTab === 'products')}><Plus size={18} /> Produits</button>
+                        <button onClick={() => setActiveTab('promos')} style={sideBtnStyle(activeTab === 'promos')}><Zap size={18} /> Codes Promo</button>
 
-                        <button
-                            onClick={() => setActiveTab('products')}
-                            style={{ ...sideBtnStyle('products'), justifyContent: 'flex-start' }}
-                        >
-                            <ShoppingBag size={18} /> Boutique
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('promos')}
-                            style={{ ...sideBtnStyle('promos'), justifyContent: 'flex-start' }}
-                        >
-                            <Ticket size={18} /> Coupons
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('clients')}
-                            style={{ ...sideBtnStyle('clients'), justifyContent: 'flex-start' }}
-                        >
-                            <Users size={18} /> CRM Clients
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('projects')}
-                            style={{ ...sideBtnStyle('projects'), justifyContent: 'flex-start' }}
-                        >
-                            <Palette size={18} /> Portfolio
-                        </button>
+                        <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Contenu</h3>
+                        <button onClick={() => setActiveTab('projects')} style={sideBtnStyle(activeTab === 'projects')}><FileCode size={18} /> Projets / Portfolio</button>
+                        <button onClick={() => setActiveTab('homeEditor')} style={sideBtnStyle(activeTab === 'homeEditor')}><Layers size={18} /> Editeur Accueil</button>
 
-                        <div style={{ margin: '1rem 0', borderBottom: '1px solid #111' }}></div>
-
-                        <button
-                            onClick={() => setActiveTab('homeEditor')}
-                            style={{ ...sideBtnStyle('homeEditor'), justifyContent: 'flex-start' }}
-                        >
-                            <Globe size={18} /> Home Editor
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('settings')}
-                            style={{ ...sideBtnStyle('settings'), justifyContent: 'flex-start' }}
-                        >
-                            <Settings size={18} /> Configuration
-                        </button>
-
-                        <div style={{ marginTop: 'auto', padding: '1.5rem', background: '#0a0a0a', borderRadius: '12px', border: '1px solid #111', fontSize: '0.8rem', color: '#444' }}>
-                            <strong>Système Artisan</strong><br />
-                            Status: <span style={{ color: '#4caf50' }}>En ligne</span><br />
-                            Bridge: <span style={{ color: '#4caf50' }}>Actif</span>
-                        </div>
-                    </aside>
+                        <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Système</h3>
+                        <button onClick={() => setActiveTab('security')} style={sideBtnStyle(activeTab === 'security')}><Shield size={18} /> Sécurité</button>
+                        <button onClick={() => setActiveTab('settings')} style={sideBtnStyle(activeTab === 'settings')}><Globe size={18} /> Paramètres</button>
+                    </div>
 
                     {/* MAIN CONTENT */}
                     <main>
@@ -610,12 +567,48 @@ const Dashboard = () => {
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+                                    <AnalyticsChart
+                                        data={chartData}
+                                        title="Revenus Mensuels (€)"
+                                    />
                                     <div style={cardStyle}>
-                                        <h3 style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>Revenus Mensuels</h3>
-                                        <AnalyticsChart data={chartData} />
+                                        <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Distribution Ventes</h3>
+                                        <div style={{ height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {/* Simplified Pie Chart Representation */}
+                                            <div style={{ position: 'relative', width: '200px', height: '200px', borderRadius: '50%', background: 'conic-gradient(var(--color-accent) 0% 65%, #222 65% 100%)' }}>
+                                                <div style={{ position: 'absolute', inset: '40px', background: '#050505', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                                                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>65%</span>
+                                                    <span style={{ fontSize: '0.6rem', color: '#555' }}>SaaS / Web</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style={{ marginTop: '1rem', display: 'grid', gap: '0.5rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                                <span style={{ color: '#888' }}><span style={{ display: 'inline-block', width: '8px', height: '8px', background: 'var(--color-accent)', borderRadius: '2px', marginRight: '5px' }}></span> Travaux Créatifs</span>
+                                                <span>65%</span>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                                <span style={{ color: '#888' }}><span style={{ display: 'inline-block', width: '8px', height: '8px', background: '#222', borderRadius: '2px', marginRight: '5px' }}></span> Boutique</span>
+                                                <span>35%</span>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <ActivityLog logs={recentActivity} />
+                                <div style={{ ...cardStyle, marginTop: '2rem' }}>
+                                    <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Status des Commandes</h3>
+                                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '150px', padding: '1rem' }}>
+                                        {[
+                                            { label: 'Livrées', count: 12, color: 'var(--color-accent)' },
+                                            { label: 'En cours', count: 5, color: '#333' },
+                                            { label: 'Annulées', count: 2, color: '#111' }
+                                        ].map(stat => (
+                                            <div key={stat.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                                <div style={{ width: '100%', height: `${(stat.count / 12) * 100}%`, background: stat.color, borderRadius: '4px' }}></div>
+                                                <span style={{ fontSize: '0.7rem', color: '#555' }}>{stat.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -1376,6 +1369,16 @@ const Dashboard = () => {
                                             </button>
                                         </div>
                                     </div>
+
+                                    <button
+                                        onClick={() => {
+                                            updateHomeContent(homeContent);
+                                            alert("Contenu de la page d'accueil enregistré avec succès !");
+                                        }}
+                                        style={{ ...btnPrimaryModern, marginTop: '2rem', width: '100%', justifyContent: 'center' }}
+                                    >
+                                        <Save size={18} /> Enregistrer toute la configuration
+                                    </button>
                                 </section>
                             </div>
                         )}

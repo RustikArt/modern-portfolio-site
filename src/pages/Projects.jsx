@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { useData } from '../context/DataContext';
 import { WEBSITE_VERSION } from '../version';
 import LazyImage from '../components/LazyImage';
 import './Projects.css';

@@ -26,6 +26,9 @@ const CookieConsent = lazy(() => import('./components/CookieConsent'));
 const About = lazy(() => import('./pages/About'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const Blog = lazy(() => import('./pages/Blog'));
+const LegalMentions = lazy(() => import('./pages/LegalMentions'));
+const CGV = lazy(() => import('./pages/CGV'));
+const Sitemap = lazy(() => import('./pages/Sitemap'));
 
 function App() {
   return (
@@ -52,6 +55,9 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/legal" element={<LegalMentions />} />
+            <Route path="/terms" element={<CGV />} />
+            <Route path="/sitemap" element={<Sitemap />} />
             <Route
               path="/admin"
               element={

@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import Toast from '../components/Toast';
 import emailjs from '@emailjs/browser';
-import bcrypt from 'bcryptjs';
+// BCrypt is handled backend-side in production, removed frontend import to fix build error
 
 const DataContext = createContext();
 
