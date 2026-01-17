@@ -285,12 +285,18 @@ const Dashboard = () => {
         }
     };
 
-    const sideBtnStyle = (tab) => ({
+    const sideBtnStyle = (isActive) => ({
         ...btnModern,
-        background: activeTab === tab ? 'white' : 'rgba(255,255,255,0.02)',
-        color: activeTab === tab ? 'black' : '#888',
-        border: activeTab === tab ? 'none' : '1px solid rgba(255,255,255,0.05)',
-        fontWeight: activeTab === tab ? 'bold' : 'normal'
+        width: '100%',
+        marginBottom: '0.8rem',
+        background: isActive ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.02)',
+        color: isActive ? 'var(--color-accent)' : '#888',
+        border: '1px solid',
+        borderColor: isActive ? 'var(--color-accent-glow)' : 'rgba(255,255,255,0.05)',
+        fontWeight: isActive ? 'bold' : 'normal',
+        borderLeft: isActive ? '4px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.05)',
+        paddingLeft: isActive ? '1.2rem' : '1.5rem',
+        boxShadow: isActive ? '0 4px 15px rgba(212, 175, 55, 0.1)' : 'none'
     });
 
     const stats = {
@@ -565,25 +571,20 @@ const Dashboard = () => {
                                         title="Revenus Mensuels (€)"
                                     />
                                     <div style={cardStyle}>
-                                        <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Distribution Ventes</h3>
-                                        <div style={{ height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            {/* Simplified Pie Chart Representation */}
-                                            <div style={{ position: 'relative', width: '200px', height: '200px', borderRadius: '50%', background: 'conic-gradient(var(--color-accent) 0% 65%, #222 65% 100%)' }}>
-                                                <div style={{ position: 'absolute', inset: '40px', background: '#050505', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                                                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>65%</span>
-                                                    <span style={{ fontSize: '0.6rem', color: '#555' }}>SaaS / Web</span>
+                                        <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Dernière Activité</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                            {recentActivity.slice(0, 5).map(log => (
+                                                <div key={log.id} style={{ display: 'flex', gap: '1rem', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                    <div style={{ color: 'var(--color-accent)', minWidth: '40px' }}>
+                                                        <Timer size={14} />
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem' }}>
+                                                        <div style={{ color: '#eee' }}>{log.message}</div>
+                                                        <div style={{ color: '#444', fontSize: '0.7rem' }}>{new Date(log.date).toLocaleTimeString()}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                        <div style={{ marginTop: '1rem', display: 'grid', gap: '0.5rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                                <span style={{ color: '#888' }}><span style={{ display: 'inline-block', width: '8px', height: '8px', background: 'var(--color-accent)', borderRadius: '2px', marginRight: '5px' }}></span> Travaux Créatifs</span>
-                                                <span>65%</span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                                <span style={{ color: '#888' }}><span style={{ display: 'inline-block', width: '8px', height: '8px', background: '#222', borderRadius: '2px', marginRight: '5px' }}></span> Boutique</span>
-                                                <span>35%</span>
-                                            </div>
+                                            ))}
+                                            {recentActivity.length === 0 && <p style={{ fontSize: '0.8rem', color: '#444' }}>Aucune activité récente.</p>}
                                         </div>
                                     </div>
                                 </div>
@@ -1129,71 +1130,117 @@ const Dashboard = () => {
 
                         {/* --- SECURITY TAB --- */}
                         {activeTab === 'security' && (
-                            <div className="dashboard-section">
-                                <h2>Sécurité & Connexions</h2>
+                            <div className="animate-in">
+                                <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Sécurité & Accès</h2>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
                                     {/* Login History */}
-                                    <div className="card">
-                                        <h3>Historique de vos connexions</h3>
-                                        <div className="table-container">
-                                            <table className="data-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Date</th>
-                                                        <th>Appareil</th>
-                                                        <th>IP</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {loginHistory && loginHistory.length > 0 ? loginHistory.map((entry, idx) => (
-                                                        <tr key={idx}>
-                                                            <td>{new Date(entry.date).toLocaleString()}</td>
-                                                            <td>{entry.device} ({entry.browser})</td>
-                                                            <td>{entry.ip}</td>
-                                                        </tr>
-                                                    )) : (
-                                                        <tr><td colSpan="3">Aucun historique disponible.</td></tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
+                                    <div style={cardStyle}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                                            <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--color-accent)' }}>
+                                                <Shield size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Historique de Connexion</h3>
+                                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>Dernières tentatives d'accès à votre compte</p>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            {loginHistory && loginHistory.length > 0 ? loginHistory.slice(0, 8).map((entry, idx) => (
+                                                <div key={idx} style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    padding: '1rem',
+                                                    background: 'rgba(255,255,255,0.02)',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid rgba(255,255,255,0.05)'
+                                                }}>
+                                                    <div>
+                                                        <div style={{ fontSize: '0.9rem', color: '#eee' }}>{entry.device} • {entry.browser}</div>
+                                                        <div style={{ fontSize: '0.7rem', color: '#444' }}>{entry.ip}</div>
+                                                    </div>
+                                                    <div style={{ textAlign: 'right' }}>
+                                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-accent)' }}>{new Date(entry.date).toLocaleDateString()}</div>
+                                                        <div style={{ fontSize: '0.65rem', color: '#444' }}>{new Date(entry.date).toLocaleTimeString()}</div>
+                                                    </div>
+                                                </div>
+                                            )) : (
+                                                <p style={{ textAlign: 'center', color: '#444', padding: '2rem' }}>Aucun historique disponible.</p>
+                                            )}
                                         </div>
                                     </div>
 
                                     {/* Role Management (Super Admin Only) */}
-                                    {checkPermission('all') && (
-                                        <div className="card">
-                                            <h3>Gestion des Rôles (Super Admin)</h3>
-                                            <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1rem' }}>
-                                                Gérez les permissions des utilisateurs enregistrés.
-                                            </p>
-                                            <div className="table-container">
-                                                <table className="data-table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Email</th>
-                                                            <th>Nom</th>
-                                                            <th>Rôle Actuel</th>
-                                                            {/* <th>Action</th> */}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {users.map(u => (
-                                                            <tr key={u.id || u.email}>
-                                                                <td>{u.email}</td>
-                                                                <td>{u.name || '-'}</td>
-                                                                <td>
-                                                                    <span className={`status-badge status-${u.role === 'admin' || u.role === 'super_admin' ? 'paid' : 'pending'}`}>
-                                                                        {u.role}
-                                                                    </span>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
+                                    <div>
+                                        {checkPermission('all') ? (
+                                            <div style={cardStyle}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                                                    <div style={{ background: 'rgba(0, 255, 128, 0.1)', padding: '0.8rem', borderRadius: '12px', color: '#00ff80' }}>
+                                                        <Users size={24} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Gestion des Rôles</h3>
+                                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>Permissions globales du système</p>
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                                    {users.filter(u => u.role !== 'client').map(u => (
+                                                        <div key={u.id || u.email} style={{
+                                                            padding: '1rem',
+                                                            background: 'rgba(255,255,255,0.01)',
+                                                            borderRadius: '12px',
+                                                            border: '1px solid rgba(255,255,255,0.03)',
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center'
+                                                        }}>
+                                                            <div>
+                                                                <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{u.name || 'Sans nom'}</div>
+                                                                <div style={{ fontSize: '0.7rem', color: '#555' }}>{u.email}</div>
+                                                            </div>
+                                                            <div style={{
+                                                                padding: '0.3rem 0.8rem',
+                                                                background: u.role === 'super_admin' ? 'rgba(212,175,55,0.1)' : 'rgba(255,255,255,0.05)',
+                                                                color: u.role === 'super_admin' ? 'var(--color-accent)' : '#888',
+                                                                borderRadius: '20px',
+                                                                fontSize: '0.65rem',
+                                                                textTransform: 'uppercase',
+                                                                letterSpacing: '1px'
+                                                            }}>
+                                                                {u.role}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
+                                        ) : (
+                                            <div style={{ ...cardStyle, textAlign: 'center', opacity: 0.5 }}>
+                                                <Shield size={48} style={{ marginBottom: '1rem', color: '#333' }} />
+                                                <p style={{ fontSize: '0.9rem', color: '#555' }}>Accès restreint au Super Admin uniquement.</p>
+                                            </div>
+                                        )}
+
+                                        <div style={{ ...cardStyle, marginTop: '2rem', background: 'rgba(255, 0, 0, 0.02)', borderColor: 'rgba(255, 0, 0, 0.1)' }}>
+                                            <h3 style={{ fontSize: '1rem', color: '#ff4d4d', marginBottom: '1rem' }}>Zone de Danger</h3>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.5rem' }}>Action destructrice. La réinitialisation supprimera toutes les commandes et clients non-admin.</p>
+                                            <button
+                                                onClick={() => {
+                                                    const pwd = prompt("Entrez le mot de passe de sécurité :");
+                                                    if (secureFullReset(pwd)) {
+                                                        showToast("Réinitialisation terminée", "success");
+                                                    } else {
+                                                        showToast("Mot de passe incorrect", "error");
+                                                    }
+                                                }}
+                                                style={{ ...btnModern, width: '100%', justifyContent: 'center', border: '1px solid #ff4d4d', color: '#ff4d4d', background: 'transparent' }}
+                                            >
+                                                Réinitialisation Globale
+                                            </button>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -1354,24 +1401,14 @@ const Dashboard = () => {
                                             <button
                                                 onClick={() => {
                                                     updateAnnouncement(announcementForm);
-                                                    alert("Configuration de la banderole enregistrée.");
+                                                    showToast("Configuration de la banderole appliquée !", "success");
                                                 }}
                                                 style={{ ...btnPrimaryModern, marginTop: 'auto', width: '100%', justifyContent: 'center' }}
                                             >
-                                                <Save size={18} /> Appliquer les changements
+                                                <Edit size={18} /> Appliquer les modifications
                                             </button>
                                         </div>
                                     </div>
-
-                                    <button
-                                        onClick={() => {
-                                            updateHomeContent(homeContent);
-                                            alert("Contenu de la page d'accueil enregistré avec succès !");
-                                        }}
-                                        style={{ ...btnPrimaryModern, marginTop: '2rem', width: '100%', justifyContent: 'center' }}
-                                    >
-                                        <Save size={18} /> Enregistrer toute la configuration
-                                    </button>
                                 </section>
                             </div>
                         )}

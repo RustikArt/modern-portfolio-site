@@ -14,7 +14,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
     const isGrid = viewMode === 'grid';
 
     return (
-        <div className={`product-card ${!isGrid ? 'list-view' : ''}`} style={{
+        <div className={`product-card glass ${!isGrid ? 'list-view' : ''}`} style={{
             display: isGrid ? 'block' : 'flex',
             gap: isGrid ? '0' : '2rem',
             alignItems: 'center',

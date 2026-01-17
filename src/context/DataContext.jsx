@@ -1045,6 +1045,7 @@ export const DataProvider = ({ children }) => {
             const localUser = { ...newUser, id: Date.now() };
             setUsers([...users, localUser]);
             setCurrentUser(localUser);
+            addNotification('account', `Nouveau compte créé (Local) : ${name} (${cleanEmail})`);
             return { success: true, message: 'Compte créé localement (mode hors-ligne).' };
         }
     };
@@ -1087,9 +1088,9 @@ export const DataProvider = ({ children }) => {
                 // Check for new device (simple heuristic)
                 const isNewDevice = !user.loginHistory || !user.loginHistory.some(h => h.device === historyEntry.device);
                 if (isNewDevice && user.role !== 'client') {
-                    // Simulate Email Alert
+                    // Simulate Email Alert 
                     console.warn(`SECURITY ALERT: New device login for ${user.email}`);
-                    addNotification('security', `Nouvelle connexion détectée pour ${user.email} (${historyEntry.device})`);
+                    // Removed notification to reduce noise as requested
                 }
 
                 // Update user history

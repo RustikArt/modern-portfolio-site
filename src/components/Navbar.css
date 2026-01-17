@@ -11,12 +11,12 @@
 }
 
 .navbar.scrolled {
-    background: rgba(5, 5, 5, 0.95);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background: rgba(5, 5, 5, 0.6);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     padding: 1rem 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .navbar-content {
@@ -54,8 +54,8 @@
     padding: 0.8rem 2rem;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
 }
 
 .nav-links a {
@@ -73,7 +73,7 @@
     color: var(--color-accent);
 }
 
-/* ACTIONS (Cart, Profile, Search) */
+/* ACTIONS (Cart, Profile) */
 .nav-actions {
     display: flex;
     align-items: center;
@@ -101,6 +101,8 @@
     height: 40px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
 }
 
 .cart-count {
@@ -133,51 +135,6 @@
     min-height: 44px;
     align-items: center;
     justify-content: center;
-}
-
-/* SEARCH BAR */
-.search-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    z-index: 10;
-}
-
-.search-toggle {
-    cursor: pointer;
-    border: none;
-    position: relative;
-    z-index: 2;
-}
-
-.search-input-wrapper {
-    position: absolute;
-    right: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    overflow: hidden;
-    transition: width 0.3s ease, opacity 0.3s ease;
-    background: rgba(0, 0, 0, 0.95);
-    border-radius: 20px;
-    margin-right: 8px;
-    opacity: 0;
-}
-
-.search-container.active .search-input-wrapper {
-    width: 200px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    opacity: 1;
-}
-
-.search-input-wrapper input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: white;
-    padding: 0.5rem 1rem;
-    outline: none;
-    font-size: 0.9rem;
 }
 
 

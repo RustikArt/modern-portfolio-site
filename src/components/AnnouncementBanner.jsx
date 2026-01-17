@@ -75,10 +75,12 @@ const AnnouncementBanner = () => {
     }
 
     const bannerStyle = {
-        backgroundColor: announcement.bgColor || '#d4af37',
+        backgroundColor: announcement.bgColor ? `${announcement.bgColor}cc` : 'rgba(212, 175, 55, 0.8)', // Add transparency
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         color: announcement.textColor || '#000',
         height: announcement.height || '40px',
-        fontWeight: announcement.fontWeight || 'normal',
+        fontWeight: announcement.fontWeight || '700', // Make bold by default for better readability on glass
         fontStyle: announcement.fontStyle || 'normal',
         width: '100%',
         display: 'flex',
@@ -89,10 +91,12 @@ const AnnouncementBanner = () => {
         top: 0,
         left: 0,
         zIndex: 2001,
-        fontSize: '0.85rem',
+        fontSize: '0.8rem',
         textAlign: 'center',
         transition: 'all 0.3s ease',
-        gap: '1rem'
+        gap: '1rem',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
     };
 
     const closeButtonStyle = {

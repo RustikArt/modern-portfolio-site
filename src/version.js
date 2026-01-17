@@ -1,2 +1,2 @@
-export const WEBSITE_VERSION = "Version 5.0 ALPHA-V1.4 EDITION";
+export const WEBSITE_VERSION = "Version 5.0 ALPHA-V1.5 EDITION";
 export const VERSION_DETAILS = "SYSTEMS REVIEWS & ADDED";
