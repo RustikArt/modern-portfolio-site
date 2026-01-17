@@ -182,6 +182,7 @@ const ProductDetail = () => {
 
                         {/* REVIEWS SECTION */}
                         <ProductReviews
+                            productId={product.id}
                             reviews={productReviews}
                             averageRating={averageRating}
                             onAddReview={(review) => addReview(product.id, review)}

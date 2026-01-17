@@ -49,7 +49,7 @@ const Footer = () => {
                     <div className="footer-col">
                         <h4>Contact</h4>
                         <ul className="contact-list">
-                            <li><Mail size={16} /> contact@rustikop.com</li>
+                            <li><Mail size={16} /> rustikop@outlook.fr</li>
                             <li><MapPin size={16} /> Paris, France</li>
                         </ul>
                     </div>

@@ -21,6 +21,25 @@ const DynamicIcon = ({ name, size = 24, className }) => {
 const Home = () => {
     const { homeContent, projects } = useData();
 
+    useEffect(() => {
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        const elements = document.querySelectorAll('.reveal, .zoom-in, .stagger-reveal');
+        elements.forEach(el => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, [homeContent]);
+
     // Fallback if context not ready
     if (!homeContent) return null;
 
@@ -34,22 +53,24 @@ const Home = () => {
             {/* HERO SECTION */}
             <section className="hero">
                 <div className="container">
-                    <h1 className="hero-title">
+                    <h1 className="hero-title reveal">
                         <span className="block-reveal">{hero.titleLine1}</span>
                         <br />
                         <span className="block-reveal">{hero.titleLine2}</span>
                     </h1>
-                    <p className="hero-subtitle">{hero.subtitle}</p>
-                    <Link to={hero.buttonLink} className="btn btn-primary">{hero.buttonText}</Link>
+                    <p className="hero-subtitle reveal reveal-delay-1">{hero.subtitle}</p>
+                    <div className="reveal reveal-delay-2">
+                        <Link to={hero.buttonLink} className="btn btn-primary">{hero.buttonText}</Link>
+                    </div>
                 </div>
             </section>
 
             {/* SERVICES SECTION */}
             <section className="services-section">
                 <div className="container">
-                    <div className="services-grid">
+                    <div className="services-grid stagger-reveal">
                         {services.map((service) => (
-                            <div key={service.id} className="service-card">
+                            <div key={service.id} className="service-card reveal">
                                 <div className="service-icon">
                                     <DynamicIcon name={service.icon} size={32} />
                                 </div>
@@ -62,17 +83,17 @@ const Home = () => {
             </section>
 
             {/* FEATURED PROJECTS */}
-            <section className="featured-section">
+            <section className="featured-section reveal">
                 <div className="container">
                     <div className="section-header">
                         <h2>{featuredProjects.title}</h2>
                         <Link to="/projects" className="btn-link">Voir tout <ArrowRight size={16} /></Link>
                     </div>
 
-                    <div className="featured-grid">
+                    <div className="featured-grid stagger-reveal">
                         {featuredList.length > 0 ? (
                             featuredList.map(project => (
-                                <Link to={`/project/${project.id}`} key={project.id} className="project-card">
+                                <Link to={`/project/${project.id}`} key={project.id} className="project-card reveal">
                                     <div className="project-image">
                                         <img src={`${project.image}?v=${WEBSITE_VERSION}`} alt={project.title} />
                                     </div>
@@ -83,7 +104,7 @@ const Home = () => {
                                 </Link>
                             ))
                         ) : (
-                            <div className="no-projects">
+                            <div className="no-projects reveal">
                                 <p>Aucun projet mis en avant pour le moment.</p>
                             </div>
                         )}
@@ -92,11 +113,11 @@ const Home = () => {
             </section>
 
             {/* TESTIMONIALS */}
-            <section className="testimonials-section">
+            <section className="testimonials-section zoom-in">
                 <div className="container">
-                    <div className="testimonials-grid">
+                    <div className="testimonials-grid stagger-reveal">
                         {testimonials.map(t => (
-                            <div key={t.id} className="testimonial-card">
+                            <div key={t.id} className="testimonial-card reveal">
                                 <Quote size={40} className="quote-icon" />
                                 <p className="testimonial-text">"{t.quote}"</p>
                                 <div className="testimonial-author">
@@ -127,9 +148,9 @@ const Home = () => {
             </section>
 
             {/* CTA SECTION */}
-            <section className="cta-section">
+            <section className="cta-section reveal">
                 <div className="container">
-                    <div className="cta-content">
+                    <div className="cta-content zoom-in reveal-delay-1">
                         <h2>{cta.title}</h2>
                         <p>{cta.text}</p>
                         <Link to={cta.buttonLink} className="btn btn-primary">{cta.buttonText}</Link>

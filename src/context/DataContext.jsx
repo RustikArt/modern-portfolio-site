@@ -1479,6 +1479,26 @@ export const DataProvider = ({ children }) => {
         return sum / productReviews.length;
     };
 
+    const deleteReview = (productId, reviewIndex) => {
+        setReviews(prev => {
+            const productReviews = [...(prev[productId] || [])];
+            productReviews.splice(reviewIndex, 1);
+            return {
+                ...prev,
+                [productId]: productReviews
+            };
+        });
+    };
+
+    const hasPurchasedProduct = (productId) => {
+        if (!currentUser) return false;
+        // Check if any order of the current user contains this product
+        return orders.some(order =>
+            (order.userEmail === currentUser.email || (order.billingDetails && order.billingDetails.email === currentUser.email)) &&
+            order.items.some(item => item.id === productId)
+        );
+    };
+
     // --- ANNOUNCEMENT & NOTIFICATIONS ACTIONS ---
     const updateAnnouncement = (config) => {
         setAnnouncement(prev => ({ ...prev, ...config }));
@@ -1541,7 +1561,7 @@ export const DataProvider = ({ children }) => {
             wishlist, toggleWishlist, isInWishlist,
 
             // Reviews
-            reviews, addReview, getProductReviews, getProductRating,
+            reviews, addReview, getProductReviews, getProductRating, deleteReview, hasPurchasedProduct,
 
             // Admin Actions
             secureFullReset,

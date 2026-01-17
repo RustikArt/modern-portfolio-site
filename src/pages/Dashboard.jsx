@@ -19,22 +19,9 @@ import {
     Edit,
     Save,
     FileCode,
-    Bell,
-    Settings,
-    X,
-    Mail,
-    UserPlus,
-    ShoppingCart,
-    Timer,
-    RotateCcw,
-    Percent,
-    Search,
-    MapPin,
-    Check,
-    Shield,
-    LayoutDashboard,
-    Zap,
-    Layers
+    LayoutDashboard, ShoppingBag, Users, Plus, Zap, FileCode, Layers,
+    Shield, Globe, Save, Edit, Trash2, CheckCircle, Clock, Package,
+    AlertCircle, Search, LogOut, ExternalLink, Timer, Star
 } from 'lucide-react';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import ActivityLog from '../components/dashboard/ActivityLog';
@@ -51,7 +38,7 @@ const Dashboard = () => {
         announcement, updateAnnouncement,
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
-
+        reviews, deleteReview,
         checkPermission, loginHistory,
         showToast
     } = useData();
@@ -532,6 +519,7 @@ const Dashboard = () => {
                         <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Boutique</h3>
                         <button onClick={() => setActiveTab('products')} style={sideBtnStyle(activeTab === 'products')}><Plus size={18} /> Produits</button>
                         <button onClick={() => setActiveTab('promos')} style={sideBtnStyle(activeTab === 'promos')}><Zap size={18} /> Codes Promo</button>
+                        <button onClick={() => setActiveTab('reviews')} style={sideBtnStyle(activeTab === 'reviews')}><Star size={18} /> Avis Clients</button>
 
                         <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Contenu</h3>
                         <button onClick={() => setActiveTab('projects')} style={sideBtnStyle(activeTab === 'projects')}><FileCode size={18} /> Projets / Portfolio</button>
@@ -1410,6 +1398,69 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                 </section>
+                            </div>
+                        )}
+                        {activeTab === 'reviews' && (
+                            <div className="animate-in">
+                                <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Gestion des Avis</h2>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {Object.keys(reviews).length > 0 ? Object.entries(reviews).map(([prodId, prodReviews]) => {
+                                        const product = products.find(p => p.id === parseInt(prodId));
+                                        return (
+                                            <div key={prodId} style={cardStyle}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
+                                                    {product?.image && <img src={product.image} alt="" style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                                    <div>
+                                                        <h3 style={{ margin: 0, fontSize: '1rem' }}>{product?.name || `Produit #${prodId}`}</h3>
+                                                        <span style={{ fontSize: '0.75rem', color: '#666' }}>{prodReviews.length} avis</span>
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                    {prodReviews.map((rev, index) => (
+                                                        <div key={index} style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'flex-start',
+                                                            padding: '1rem',
+                                                            background: 'rgba(255,255,255,0.02)',
+                                                            borderRadius: '8px',
+                                                            border: '1px solid rgba(255,255,255,0.03)'
+                                                        }}>
+                                                            <div style={{ flex: 1 }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.4rem' }}>
+                                                                    <span style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{rev.user}</span>
+                                                                    <span style={{ fontSize: '0.7rem', color: '#444' }}>{rev.date}</span>
+                                                                    <div style={{ display: 'flex', color: 'var(--color-accent)' }}>
+                                                                        {[...Array(5)].map((_, i) => (
+                                                                            <Star key={i} size={10} fill={i < rev.rating ? "var(--color-accent)" : "none"} />
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#aaa', lineHeight: '1.4' }}>{rev.comment}</p>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (confirm("Supprimer cet avis ?")) {
+                                                                        deleteReview(parseInt(prodId), index);
+                                                                        showToast("Avis supprimé", "success");
+                                                                    }
+                                                                }}
+                                                                style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', padding: '0.5rem' }}
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    }) : (
+                                        <div style={{ ...cardStyle, textAlign: 'center', padding: '4rem' }}>
+                                            <Star size={48} style={{ color: '#222', marginBottom: '1rem' }} />
+                                            <p style={{ color: '#555' }}>Aucun avis à gérer pour le moment.</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </main>
