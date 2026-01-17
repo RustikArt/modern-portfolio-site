@@ -4,24 +4,32 @@ import { useNavigate } from 'react-router-dom';
 import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
 import BlockEditor from '../components/BlockEditor';
 import {
-    Package,
-    FolderArchive,
+    LayoutDashboard,
     ShoppingBag,
-    Ticket,
     Users,
-    Palette,
-    LogOut,
-    Globe,
-    ChevronDown,
-    ChevronUp,
     Plus,
-    Trash2,
-    Edit,
-    Save,
+    Zap,
     FileCode,
-    LayoutDashboard, ShoppingBag, Users, Plus, Zap, FileCode, Layers,
-    Shield, Globe, Save, Edit, Trash2, CheckCircle, Clock, Package,
-    AlertCircle, Search, LogOut, ExternalLink, Timer, Star
+    Layers,
+    Shield,
+    Globe,
+    Save,
+    Edit,
+    Trash2,
+    CheckCircle,
+    Clock,
+    Package,
+    AlertCircle,
+    Search,
+    LogOut,
+    ExternalLink,
+    Timer,
+    Star,
+    FolderArchive,
+    Ticket,
+    Palette,
+    ChevronDown,
+    ChevronUp
 } from 'lucide-react';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import ActivityLog from '../components/dashboard/ActivityLog';
