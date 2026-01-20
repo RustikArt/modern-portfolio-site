@@ -730,7 +730,16 @@ export const DataProvider = ({ children }) => {
 
                 if (ordersRes && ordersRes.ok) {
                     const ordersData = await ordersRes.json();
-                    if (ordersData && ordersData.length > 0) setOrders(ordersData);
+                    if (ordersData && ordersData.length > 0) {
+                        // Normalize to camelCase
+                        const normalizedOrders = ordersData.map(o => ({
+                            ...o,
+                            customerName: o.customer_name || o.customerName,
+                            userId: o.user_id || o.userId,
+                            paymentId: o.payment_id || o.paymentId
+                        }));
+                        setOrders(normalizedOrders);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to fetch data from API:', error);
@@ -1281,15 +1290,35 @@ export const DataProvider = ({ children }) => {
         };
 
         try {
+            const orderData = {
+                ...newOrder,
+                user_id: newOrder.userId,
+                customer_name: newOrder.customerName,
+                payment_id: newOrder.paymentId
+            };
+            // Keep original camelCase keys if DB is lax, but ensure snake_case are present
+            // Or remove camelCase if DB is strict? Let's send both or just strict depending on DB.
+            // Assuming strict snake_case is safer for Supabase if columns are snake_case.
+            delete orderData.userId;
+            delete orderData.customerName;
+            delete orderData.paymentId;
+
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newOrder)
+                body: JSON.stringify(orderData)
             });
 
             if (res.ok) {
                 const updatedOrders = await res.json();
-                setOrders(updatedOrders);
+                // Normalize response
+                const normalizedOrders = updatedOrders.map(o => ({
+                    ...o,
+                    customerName: o.customer_name || o.customerName,
+                    userId: o.user_id || o.userId,
+                    paymentId: o.payment_id || o.paymentId
+                }));
+                setOrders(normalizedOrders);
                 const createdOrder = updatedOrders[0]; // Assuming newest first
                 clearCart();
                 addNotification('order', `Nouvelle commande de ${currentUser.name} (${newOrder.total}€)`);

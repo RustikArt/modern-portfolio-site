@@ -32,10 +32,8 @@ const Home = () => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
-                } else if (entry.boundingClientRect.top > 0) {
-                    // Only remove when scrolling up (above the element)
-                    // Or remove always for full replay? The user said "a l'envers quand on remonte"
-                    // And "rejouer quand on descend".
+                } else {
+                    // Always remove 'active' when not intersecting to allow replay
                     entry.target.classList.remove('active');
                 }
             });

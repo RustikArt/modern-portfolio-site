@@ -223,7 +223,7 @@ const Checkout = () => {
                                     <span>{getCartTotal().toFixed(2)}€</span>
                                 </div>
 
-                                {!appliedPromo ? (
+                                {!activePromo ? (
                                     <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
                                         <input
                                             type="text"
@@ -236,7 +236,8 @@ const Checkout = () => {
                                     </div>
                                 ) : (
                                     <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '0.8rem', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <span style={{ fontSize: '0.85rem', color: '#4caf50' }}>Coupon <strong>{appliedPromo.code}</strong> (-{appliedPromo.value}{appliedPromo.type === 'percent' ? '%' : '€'})</span>
+                                        <span style={{ fontSize: '0.85rem', color: '#4caf50' }}>Coupon <strong>{activePromo.code}</strong> (-{activePromo.value}{activePromo.type === 'percent' ? '%' : '€'})</span>
+
                                         <button onClick={handleRemovePromo} style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer' }}>Retirer</button>
                                     </div>
                                 )}
