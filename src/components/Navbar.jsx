@@ -12,7 +12,7 @@ const Navbar = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { cart, currentUser } = useData();
+  const { cart, currentUser, settings } = useData();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,7 +52,7 @@ const Navbar = () => {
         {/* LOGO */}
         <Link to="/" className="logo" aria-label="Retour à l'accueil">
           <img src={logoSrc} alt="Logo Rustikop" className="logo-image" />
-          <span>RUSTIKOP<span className="dot">.</span></span>
+          <span style={{ textTransform: 'uppercase' }}>{settings?.siteTitle || 'RUSTIKOP'}<span className="dot">.</span></span>
         </Link>
 
         {/* NAV LINKS (Desktop + Mobile Drawer) */}

@@ -120,7 +120,7 @@ const Home = () => {
                     <div className="featured-grid stagger-reveal">
                         {featuredList.length > 0 ? (
                             featuredList.map(project => (
-                                <Link to={`/project/${project.id}`} key={project.id} className="project-card reveal">
+                                <Link to={`/projects/${project.id}`} key={project.id} className="project-card reveal">
                                     <div className="project-image">
                                         <img src={`${project.image}?v=${WEBSITE_VERSION}`} alt={project.title} />
                                     </div>

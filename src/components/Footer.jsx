@@ -5,7 +5,7 @@ import { useData } from '../context/DataContext';
 import './Footer.css';
 
 const Footer = () => {
-    const { currentUser } = useData();
+    const { currentUser, settings } = useData();
     const year = new Date().getFullYear();
 
     return (
@@ -14,12 +14,12 @@ const Footer = () => {
                 <div className="footer-grid">
                     {/* Column 1: Brand */}
                     <div className="footer-col">
-                        <h4>RUSTIKOP.</h4>
+                        <h4>{settings?.siteTitle || 'RUSTIKOP'}.</h4>
                         <p>Artisanat numérique et design immersif.</p>
                         <div className="social-links">
-                            <a href="https://www.instagram.com/rustikop.art/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={20} /></a>
-                            <a href="https://x.com/rustikop" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><Twitter size={20} /></a>
-                            <a href="https://discord.gg/uaKYcrfyN6" target="_blank" rel="noopener noreferrer" aria-label="Discord"><FaDiscord size={20} /></a>
+                            {settings?.socials?.instagram && <a href={settings.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={20} /></a>}
+                            {settings?.socials?.twitter && <a href={settings.socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter"><Twitter size={20} /></a>}
+                            {settings?.socials?.discord && <a href={settings.socials.discord} target="_blank" rel="noopener noreferrer" aria-label="Discord"><FaDiscord size={20} /></a>}
                         </div>
                     </div>
 
@@ -49,14 +49,14 @@ const Footer = () => {
                     <div className="footer-col">
                         <h4>Contact</h4>
                         <ul className="contact-list">
-                            <li><Mail size={16} /> rustikop@outlook.fr</li>
+                            <li><Mail size={16} /> {settings?.contactEmail || 'rustikop@outlook.fr'}</li>
                             <li><MapPin size={16} /> Paris, France</li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="footer-bottom">
-                    <p>&copy; {year} Rustikop. Tous droits réservés.</p>
+                    <p>&copy; {year} {settings?.siteTitle || 'Rustikop'}. Tous droits réservés.</p>
                     {currentUser?.role === 'admin' && (
                         <Link to="/admin" className="admin-link-icon" title="Administration">
                             <Settings size={18} /> Admin

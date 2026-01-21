@@ -672,13 +672,14 @@ export const DataProvider = ({ children }) => {
         const saved = localStorage.getItem('portfolio_settings');
         return saved ? JSON.parse(saved) : {
             maintenanceMode: false,
-            siteTitle: 'Rustik',
-            contactEmail: 'contact@rustikop.com',
-            supportPhone: '+33 6 00 00 00 00',
+            siteTitle: 'RUSTIKOP',
+            contactEmail: 'rustikop@outlook.fr',
+            supportPhone: '',
             socials: {
-                instagram: 'https://instagram.com',
-                linkedin: 'https://linkedin.com',
-                twitter: ''
+                instagram: 'https://www.instagram.com/rustikop.art/',
+                twitter: 'https://x.com/rustikop',
+                discord: 'https://discord.gg/uaKYcrfyN6',
+                linkedin: ''
             }
         };
     });

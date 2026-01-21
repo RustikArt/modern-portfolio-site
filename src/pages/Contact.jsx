@@ -4,7 +4,7 @@ import './Contact.css';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 const Contact = () => {
-    const { currentUser, addNotification } = useData();
+    const { currentUser, addNotification, settings } = useData();
     const [formData, setFormData] = useState({
         name: currentUser ? currentUser.name : '',
         email: currentUser ? currentUser.email : '',
@@ -13,6 +13,7 @@ const Contact = () => {
     const [status, setStatus] = useState('idle'); // idle, sending, success, error
 
     const handleSubmit = async (e) => {
+        // ... (Keep existing submit logic)
         e.preventDefault();
         if (!formData.name || !formData.email || !formData.message) {
             alert("Merci de remplir tous les champs.");
@@ -35,16 +36,16 @@ const Contact = () => {
             // 1. Send NOTIFICATION to ADMIN
             const adminParams = {
                 name: String(formData.name),
-                initial: String(formData.name).charAt(0).toUpperCase(), // Added for the avatar
+                initial: String(formData.name).charAt(0).toUpperCase(),
                 message: String(formData.message),
                 time: new Date().toLocaleString('fr-FR', {
                     day: 'numeric', month: 'long', year: 'numeric',
                     hour: '2-digit', minute: '2-digit'
                 }),
-                reply_to: String(formData.email), // CRITICAL: This allows replying directly to the client
-                customer_email: 'rustikop@outlook.fr',
-                to_email: 'rustikop@outlook.fr',
-                email: 'rustikop@outlook.fr',
+                reply_to: String(formData.email),
+                customer_email: settings?.contactEmail || 'rustikop@outlook.fr',
+                to_email: settings?.contactEmail || 'rustikop@outlook.fr',
+                email: settings?.contactEmail || 'rustikop@outlook.fr',
                 title: 'Nouveau message reçu - Contact'
             };
 
@@ -77,7 +78,7 @@ const Contact = () => {
                     <h1>Parlons de votre projet.</h1>
                     <p>Disponible pour des missions en freelance.<br />Transformons vos idées en expériences digitales.</p>
                     <div className="contact-details">
-                        <p style={{ color: 'var(--color-accent)' }}>rustikop@outlook.fr</p>
+                        <p style={{ color: 'var(--color-accent)' }}>{settings?.contactEmail || 'rustikop@outlook.fr'}</p>
                     </div>
                 </div>
 
