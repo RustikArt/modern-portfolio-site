@@ -635,13 +635,18 @@ export const DataProvider = ({ children }) => {
     // Announcement Banner State
     const [announcement, setAnnouncement] = useState(() => {
         const saved = localStorage.getItem('portfolio_announcement');
-        return saved ? JSON.parse(saved) : {
-            text: 'Bienvenue sur Rustikop ! Découvrez nos nouveaux services.',
+        const defaultAnn = {
+            text: '🚀 Nouveau site en ligne ! Découvrez nos projets récents.',
             bgColor: '#d4af37',
             textColor: '#000000',
             isActive: true,
-            link: '/shop'
+            link: '/projects',
+            version: 1.1
         };
+        if (!saved) return defaultAnn;
+        const parsed = JSON.parse(saved);
+        if (parsed.version !== defaultAnn.version) return defaultAnn;
+        return parsed;
     });
 
     const [loginHistory, setLoginHistory] = useState(() => {
@@ -669,10 +674,9 @@ export const DataProvider = ({ children }) => {
 
     // --- GLOBAL SETTINGS (New) ---
     const [settings, setSettings] = useState(() => {
-        const saved = localStorage.getItem('portfolio_settings');
-        return saved ? JSON.parse(saved) : {
+        const defaultSettings = {
             maintenanceMode: false,
-            grainEffect: true, // New setting for grain
+            grainEffect: true,
             siteTitle: 'RUSTIKOP',
             contactEmail: 'rustikop@outlook.fr',
             supportPhone: '',
@@ -681,8 +685,18 @@ export const DataProvider = ({ children }) => {
                 twitter: 'https://x.com/rustikop',
                 discord: 'https://discord.gg/uaKYcrfyN6',
                 linkedin: ''
-            }
+            },
+            version: 1.1 // Increment to force updates
         };
+        const saved = localStorage.getItem('portfolio_settings');
+        if (!saved) return defaultSettings;
+
+        const parsed = JSON.parse(saved);
+        // Force update socials if they are using the placeholder ones
+        if (parsed.version !== defaultSettings.version) {
+            return { ...defaultSettings, ...parsed, socials: defaultSettings.socials, version: defaultSettings.version };
+        }
+        return { ...defaultSettings, ...parsed };
     });
 
     useEffect(() => {

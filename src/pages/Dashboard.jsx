@@ -60,6 +60,7 @@ const Dashboard = () => {
         homeContent, setHomeContent,
         reviews, deleteReview,
         checkPermission, loginHistory,
+        currentUser,
         showToast,
         settings, updateSettings
     } = useData();
@@ -398,6 +399,7 @@ const Dashboard = () => {
         textTransform: 'uppercase',
         letterSpacing: '1px'
     };
+
 
     return (
         <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#050505', color: '#eee' }}>
