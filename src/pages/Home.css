@@ -160,17 +160,18 @@
 
 .service-card {
     padding: 2.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #111;
+    /* Slightly lighter than black bg */
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
     transition: all 0.3s ease;
 }
 
 .service-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: #161616;
+    border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 .service-icon {

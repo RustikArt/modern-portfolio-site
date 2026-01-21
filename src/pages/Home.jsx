@@ -58,14 +58,29 @@ const Home = () => {
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
 
-        // Calculate tilt
-        const rotateX = ((centerY - clientY) / centerY) * 5; // Max 5 deg
+        const rotateX = ((centerY - clientY) / centerY) * 5;
         const rotateY = ((clientX - centerX) / centerX) * 5;
 
         const wrapper = document.querySelector('.hero-content-wrapper');
-        if (wrapper) {
-            wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        }
+        if (wrapper) wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    };
+
+    const handleCardMouseMove = (e) => {
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -10; // Inverse logic for card tilt
+        const rotateY = ((x - centerX) / centerX) * 10;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    };
+
+    const handleCardMouseLeave = (e) => {
+        e.currentTarget.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
     };
 
     return (
@@ -97,7 +112,12 @@ const Home = () => {
                 <div className="container">
                     <div className="services-grid stagger-reveal">
                         {services.map((service) => (
-                            <div key={service.id} className="service-card reveal">
+                            <div
+                                key={service.id}
+                                className="service-card reveal"
+                                onMouseMove={handleCardMouseMove}
+                                onMouseLeave={handleCardMouseLeave}
+                            >
                                 <div className="service-icon">
                                     <DynamicIcon name={service.icon} size={32} />
                                 </div>
@@ -120,9 +140,20 @@ const Home = () => {
                     <div className="featured-grid stagger-reveal">
                         {featuredList.length > 0 ? (
                             featuredList.map(project => (
-                                <Link to={`/projects/${project.id}`} key={project.id} className="project-card reveal">
+                                <Link
+                                    to={`/projects/${project.id}`}
+                                    key={project.id}
+                                    className="project-card reveal"
+                                    onMouseMove={handleCardMouseMove}
+                                    onMouseLeave={handleCardMouseLeave}
+                                >
                                     <div className="project-image">
-                                        <img src={`${project.image}?v=${WEBSITE_VERSION}`} alt={project.title} />
+                                        <img
+                                            src={`${project.image}?v=${WEBSITE_VERSION}`}
+                                            alt={project.title}
+                                            loading="eager"
+                                            style={{ filter: 'none' }}
+                                        />
                                     </div>
                                     <div className="project-info">
                                         <span className="project-category">{project.category}</span>

@@ -39,7 +39,9 @@ import {
     RotateCcw,
     Percent,
     MapPin,
-    Check
+    Check,
+    User,
+    TrendingUp
 } from 'lucide-react';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import ActivityLog from '../components/dashboard/ActivityLog';
@@ -105,6 +107,7 @@ const Dashboard = () => {
         editId: null,
         name: '', price: '', discountType: 'none', discountValue: '',
         image: '', category: '', tags: '', is_featured: false,
+        alertMessage: '', // New field
         options: []
     });
 
@@ -115,6 +118,20 @@ const Dashboard = () => {
     const [productFilter, setProductFilter] = useState({ category: 'all', promoOnly: false, search: '' });
 
     const [announcementForm, setAnnouncementForm] = useState({ ...announcement });
+
+    // --- USER MANAGEMENT STATES ---
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [showMemberPassword, setShowMemberPassword] = useState(false);
+    const [newAdminForm, setNewAdminForm] = useState({ name: '', email: '', password: '', permissions: [] });
+
+    const handleCreateAdmin = () => {
+        if (!newAdminForm.name || !newAdminForm.email || !newAdminForm.password) {
+            showToast("Veuillez remplir tous les champs", "error");
+            return;
+        }
+        showToast(`Compte admin pour ${newAdminForm.name} créé !`, "success");
+        setNewAdminForm({ name: '', email: '', password: '', permissions: [] });
+    };
 
     const handleLogout = () => {
         logout();
@@ -138,6 +155,7 @@ const Dashboard = () => {
                 id: Date.now(),
                 name: optionBuilder.name,
                 type: optionBuilder.type,
+                requiresQuote: optionBuilder.requiresQuote || false, // New field for free text
                 values: parsedValues
             }]
         }));
@@ -168,6 +186,7 @@ const Dashboard = () => {
             category: product.category,
             tags: product.tags ? product.tags.join(', ') : '',
             is_featured: product.is_featured || false,
+            alertMessage: product.alertMessage || '',
             options: product.options || []
         });
         window.scrollTo(0, 0);
@@ -195,6 +214,7 @@ const Dashboard = () => {
             category: productForm.category,
             tags: tagsArray,
             is_featured: productForm.is_featured || false,
+            alertMessage: productForm.alertMessage,
             options: productForm.options || []
         };
         if (productForm.editId) {
@@ -518,7 +538,7 @@ const Dashboard = () => {
                         </div>
 
                         <div style={{ padding: '0.5rem 1rem', background: '#111', borderRadius: '30px', border: '1px solid #333', fontSize: '0.85rem' }}>
-                            <span style={{ color: '#666' }}>root@</span><strong>rustikop</strong>
+                            <span style={{ color: '#666' }}>{currentUser?.name || 'root'}@</span><strong>{settings.siteTitle?.toLowerCase() || 'rustikop'}</strong>
                         </div>
                         <button onClick={handleLogout} className="btn btn-primary" style={{ padding: '0.5rem 1.2rem', borderRadius: '30px' }}>Logout</button>
                     </div>
@@ -815,9 +835,20 @@ const Dashboard = () => {
                                                     <label style={{ fontSize: '0.7rem', color: '#555' }}>Type</label>
                                                     <select value={optionBuilder.type} onChange={e => setOptionBuilder({ ...optionBuilder, type: e.target.value })} style={inputStyle}>
                                                         <option value="select">Dropdown (Select)</option>
-                                                        <option value="text">Text Input</option>
+                                                        <option value="text">Text Input (Client Brief)</option>
                                                     </select>
                                                 </div>
+                                                {optionBuilder.type === 'text' && (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', paddingBottom: '0.5rem' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            id="reqQuote"
+                                                            checked={optionBuilder.requiresQuote || false}
+                                                            onChange={e => setOptionBuilder({ ...optionBuilder, requiresQuote: e.target.checked })}
+                                                        />
+                                                        <label htmlFor="reqQuote" style={{ fontSize: '0.75rem', color: '#ffcc00', cursor: 'pointer' }}>Demande de devis ?</label>
+                                                    </div>
+                                                )}
                                                 <button type="button" onClick={handleAddOption} style={{ ...btnModern, padding: '0.8rem' }}>Add</button>
                                             </div>
                                             {optionBuilder.type === 'select' && (
@@ -835,6 +866,12 @@ const Dashboard = () => {
                                             <input type="text" placeholder="Category" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} style={inputStyle} />
                                             <input type="text" placeholder="Tags (comma separated)" value={productForm.tags} onChange={e => setProductForm({ ...productForm, tags: e.target.value })} style={inputStyle} />
                                         </div>
+                                        <textarea
+                                            placeholder="Message d'alerte / Note importante (ex: Délais rallongés)"
+                                            value={productForm.alertMessage}
+                                            onChange={e => setProductForm({ ...productForm, alertMessage: e.target.value })}
+                                            style={{ ...inputStyle, minHeight: '60px', borderRadius: '8px' }}
+                                        />
                                         <input type="text" placeholder="Image URL" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} style={inputStyle} />
 
                                         <button type="submit" style={{ ...btnPrimaryModern, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}>
@@ -1032,27 +1069,195 @@ const Dashboard = () => {
                         {/* --- CLIENTS TAB --- */}
                         {activeTab === 'clients' && (
                             <div className="animate-in">
-                                <div style={cardStyle}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                        <thead>
-                                            <tr style={{ borderBottom: '2px solid #222' }}>
-                                                <th style={{ padding: '1rem', color: '#666', fontSize: '0.7rem', textTransform: 'uppercase' }}>User Name</th>
-                                                <th style={{ padding: '1rem', color: '#666', fontSize: '0.7rem', textTransform: 'uppercase' }}>Email Address</th>
-                                                <th style={{ padding: '1rem', color: '#666', fontSize: '0.7rem', textTransform: 'uppercase' }}>Role</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {users.map(u => (
-                                                <tr key={u.id} style={{ borderBottom: '1px solid #111' }}>
-                                                    <td style={{ padding: '1rem' }}>{u.name}</td>
-                                                    <td style={{ padding: '1rem', color: '#999' }}>{u.email}</td>
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <span style={{ background: u.role === 'admin' ? 'var(--color-accent)' : '#222', color: u.role === 'admin' ? 'black' : '#666', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 'bold' }}>{u.role}</span>
-                                                    </td>
+                                {/* --- MEMBER DETAIL MODAL --- */}
+                                {selectedMember && (
+                                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div className="animate-in" style={{ width: '90%', maxWidth: '800px', background: '#111', border: '1px solid #333', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                                            <div style={{ padding: '2rem', borderBottom: '1px solid #222', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, #161616, #111)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                                                    <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--color-accent), #884400)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', fontWeight: 'bold', color: 'white' }}>
+                                                        {selectedMember.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <h2 style={{ fontSize: '1.8rem', margin: 0 }}>{selectedMember.name}</h2>
+                                                        <span style={{ color: '#888' }}>ID: {selectedMember.id}</span>
+                                                    </div>
+                                                </div>
+                                                <button onClick={() => setSelectedMember(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', padding: '2rem' }}>
+                                                <div>
+                                                    <h3 style={{ color: 'var(--color-accent)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}><User size={20} /> Informations Personnelles</h3>
+                                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                                        <div style={{ background: '#080808', padding: '1rem', borderRadius: '8px' }}>
+                                                            <label style={{ fontSize: '0.75rem', color: '#666', display: 'block' }}>Email</label>
+                                                            <div style={{ fontSize: '1rem' }}>{selectedMember.email}</div>
+                                                        </div>
+                                                        <div style={{ background: '#080808', padding: '1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                            <div>
+                                                                <label style={{ fontSize: '0.75rem', color: '#666', display: 'block' }}>Mot de passe</label>
+                                                                <div style={{ fontSize: '1rem', fontFamily: 'monospace' }}>
+                                                                    {showMemberPassword ? (selectedMember.password || '••••••••') : '••••••••'}
+                                                                </div>
+                                                            </div>
+                                                            <button onClick={() => setShowMemberPassword(!showMemberPassword)} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer' }}>
+                                                                {showMemberPassword ? 'Masquer' : 'Voir'}
+                                                            </button>
+                                                        </div>
+                                                        <div style={{ background: '#080808', padding: '1rem', borderRadius: '8px' }}>
+                                                            <label style={{ fontSize: '0.75rem', color: '#666', display: 'block' }}>Rôle</label>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                                                                <span style={{
+                                                                    background: selectedMember.role === 'admin' ? 'var(--color-accent)' : '#222',
+                                                                    color: selectedMember.role === 'admin' ? '#000' : '#fff',
+                                                                    padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold'
+                                                                }}>
+                                                                    {selectedMember.role || 'client'}
+                                                                </span>
+                                                                {selectedMember.permissions && selectedMember.permissions.length > 0 &&
+                                                                    <span style={{ fontSize: '0.8rem', color: '#666' }}>({selectedMember.permissions.join(', ')})</span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <h3 style={{ color: 'var(--color-accent)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}><TrendingUp size={20} /> Activité & Commandes</h3>
+                                                    <div style={{ background: '#080808', padding: '1.5rem', borderRadius: '12px' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid #222', paddingBottom: '1rem' }}>
+                                                            <span style={{ color: '#888' }}>Total Dépensé</span>
+                                                            <strong style={{ fontSize: '1.2rem', color: '#fff' }}>
+                                                                {orders.filter(o => o.user === selectedMember.name).reduce((acc, o) => acc + o.total, 0).toFixed(2)}€
+                                                            </strong>
+                                                        </div>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                            <span style={{ color: '#888' }}>Nombre de commandes</span>
+                                                            <strong style={{ fontSize: '1.2rem', color: '#fff' }}>
+                                                                {orders.filter(o => o.user === selectedMember.name).length}
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+
+                                                    <h4 style={{ marginTop: '2rem', marginBottom: '1rem', fontSize: '0.9rem', color: '#666' }}>Dernières Commandes</h4>
+                                                    <div style={{ display: 'grid', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto' }}>
+                                                        {orders.filter(o => o.user === selectedMember.name).length > 0 ? (
+                                                            orders.filter(o => o.user === selectedMember.name).map(o => (
+                                                                <div key={o.id} style={{ padding: '0.8rem', background: '#111', border: '1px solid #222', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                                                    <span>#{o.id}</span>
+                                                                    <span>{o.date}</span>
+                                                                    <span style={{ color: 'var(--color-accent)' }}>{o.total}€</span>
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div style={{ color: '#444', fontStyle: 'italic' }}>Aucune commande</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '2rem' }}>
+                                    {/* MEMBER LIST */}
+                                    <div style={cardStyle}>
+                                        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}><Users size={20} /> Liste des Membres</h3>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                            <thead>
+                                                <tr style={{ borderBottom: '1px solid #333' }}>
+                                                    <th style={{ padding: '1rem', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>Utilisateur</th>
+                                                    <th style={{ padding: '1rem', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>Rôle</th>
+                                                    <th style={{ padding: '1rem', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>Stats</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {users.map(u => (
+                                                    <tr
+                                                        key={u.id}
+                                                        style={{ borderBottom: '1px solid #111', cursor: 'pointer', transition: 'background 0.2s' }}
+                                                        onClick={() => { setShowMemberPassword(false); setSelectedMember(u); }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.background = '#161616'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <div style={{ fontWeight: 'bold' }}>{u.name}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#555' }}>{u.email}</div>
+                                                        </td>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <span style={{
+                                                                background: u.role === 'admin' ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)',
+                                                                color: u.role === 'admin' ? '#000' : '#888',
+                                                                padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold'
+                                                            }}>
+                                                                {u.roleTitle || u.role}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '1rem', color: '#fff', fontSize: '0.9rem' }}>
+                                                            {orders.filter(o => o.user === u.name).reduce((acc, o) => acc + o.total, 0)}€
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* ADD ADMIN FORM */}
+                                    <div style={cardStyle}>
+                                        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}><Shield size={20} /> Créer un Administrateur</h3>
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            <input
+                                                type="text"
+                                                placeholder="Nom d'utilisateur"
+                                                value={newAdminForm.name}
+                                                onChange={e => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
+                                                style={inputStyle}
+                                            />
+                                            <input
+                                                type="email"
+                                                placeholder="Email"
+                                                value={newAdminForm.email}
+                                                onChange={e => setNewAdminForm({ ...newAdminForm, email: e.target.value })}
+                                                style={inputStyle}
+                                            />
+                                            <input
+                                                type="password"
+                                                placeholder="Mot de passe"
+                                                value={newAdminForm.password}
+                                                onChange={e => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
+                                                style={inputStyle}
+                                            />
+
+                                            <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.8rem' }}>Permissions</label>
+                                                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                                                    {['products', 'projects', 'orders', 'users', 'settings'].map(perm => (
+                                                        <label key={perm} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={newAdminForm.permissions.includes(perm)}
+                                                                onChange={(e) => {
+                                                                    const perms = e.target.checked
+                                                                        ? [...newAdminForm.permissions, perm]
+                                                                        : newAdminForm.permissions.filter(p => p !== perm);
+                                                                    setNewAdminForm({ ...newAdminForm, permissions: perms });
+                                                                }}
+                                                            />
+                                                            <span style={{ textTransform: 'capitalize' }}>Manage {perm}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                onClick={handleCreateAdmin}
+                                                style={{ ...btnPrimaryModern, justifyContent: 'center', marginTop: '1rem' }}
+                                            >
+                                                <Plus size={18} /> Créer le compte
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -1300,7 +1505,7 @@ const Dashboard = () => {
                                                 />
                                             </div>
 
-                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '1rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                     <span style={{ fontWeight: 'bold' }}>Mode Maintenance</span>
                                                     <div
@@ -1318,6 +1523,26 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Si activé, le site public affichera une page de maintenance.</p>
+                                            </div>
+
+                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                    <span style={{ fontWeight: 'bold' }}>Effet de Grain</span>
+                                                    <div
+                                                        onClick={() => updateSettings({ grainEffect: !settings.grainEffect })}
+                                                        style={{
+                                                            width: '50px', height: '26px', background: settings.grainEffect ? 'var(--color-accent)' : '#333',
+                                                            borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s'
+                                                        }}
+                                                    >
+                                                        <div style={{
+                                                            width: '20px', height: '20px', background: 'white', borderRadius: '50%',
+                                                            position: 'absolute', top: '3px', left: settings.grainEffect ? '27px' : '3px',
+                                                            transition: 'left 0.3s'
+                                                        }}></div>
+                                                    </div>
+                                                </div>
+                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Ajoute une texture de film rétro à l'arrière plan du site.</p>
                                             </div>
 
                                             <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Contact & Réseaux</h4>
@@ -1529,8 +1754,8 @@ const Dashboard = () => {
                         )}
                     </main>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

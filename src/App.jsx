@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
@@ -55,6 +55,16 @@ function App() {
 }
 
 const AppContent = () => {
+  const { settings } = useData();
+
+  useEffect(() => {
+    if (settings?.grainEffect) {
+      document.body.classList.add('enable-grain');
+    } else {
+      document.body.classList.remove('enable-grain');
+    }
+  }, [settings?.grainEffect]);
+
   return (
     <>
       <AnnouncementBanner />

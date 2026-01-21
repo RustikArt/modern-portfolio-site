@@ -672,6 +672,7 @@ export const DataProvider = ({ children }) => {
         const saved = localStorage.getItem('portfolio_settings');
         return saved ? JSON.parse(saved) : {
             maintenanceMode: false,
+            grainEffect: true, // New setting for grain
             siteTitle: 'RUSTIKOP',
             contactEmail: 'rustikop@outlook.fr',
             supportPhone: '',

@@ -151,25 +151,41 @@ const ProductDetail = () => {
                                     </div>
                                 ) : (
                                     // Text Input
-                                    <textarea
-                                        rows="3"
-                                        placeholder="Votre réponse ici..."
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.8rem',
-                                            background: '#1a1a1a',
-                                            border: '1px solid #333',
-                                            color: 'white',
-                                            fontFamily: 'inherit'
-                                        }}
-                                        onChange={(e) => handleOptionChange(opt.name, 'text', e.target.value, 0)}
-                                    />
+                                    <>
+                                        <textarea
+                                            rows="3"
+                                            placeholder="Votre réponse ici..."
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.8rem',
+                                                background: '#1a1a1a',
+                                                border: '1px solid #333',
+                                                color: 'white',
+                                                fontFamily: 'inherit'
+                                            }}
+                                            onChange={(e) => handleOptionChange(opt.name, 'text', e.target.value, 0)}
+                                        />
+                                        {opt.requiresQuote && (
+                                            <p style={{ color: 'var(--color-accent)', fontSize: '0.8rem', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                                                ⚠️ Cette option nécessite un devis manuel après commande.
+                                            </p>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         ))}
 
+                        {product.alertMessage && (
+                            <div style={{ padding: '1rem', background: 'rgba(255,204,0,0.1)', border: '1px solid rgba(255,204,0,0.3)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <span>⚠️</span>
+                                <span style={{ color: '#eee', fontSize: '0.9rem' }}>{product.alertMessage}</span>
+                            </div>
+                        )}
+
                         <button className="btn btn-primary" style={{ width: '100%', fontSize: '1.2rem' }} onClick={handleAddToCart}>
-                            Ajouter au panier
+                            {Object.values(selectedOptions).some(o => product.options?.find(po => po.name === o.name)?.requiresQuote && o.value)
+                                ? 'Demander un devis'
+                                : 'Ajouter au panier'}
                         </button>
 
                         {product.tags && (
