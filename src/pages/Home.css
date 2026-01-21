@@ -383,43 +383,90 @@
 .testimonials-section {
     padding: 8rem 0;
     background: #080808;
+    overflow: hidden;
+    position: relative;
+    /* Masking for edges */
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
 }
 
-.testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 3rem;
+.testimonials-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+.testimonials-track {
+    display: flex;
+    gap: 2rem;
+    width: max-content;
+    animation: marquee 40s linear infinite;
+    padding: 2rem 0;
+}
+
+.testimonials-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        /* We use -33.33% because we duplicated the list 3 times (100% / 3) */
+        transform: translateX(-33.33333333%);
+    }
 }
 
 .testimonial-card {
     position: relative;
-    padding: 3rem;
+    padding: 2.5rem;
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    /* Brutalist sharp-ish but refined */
+    width: 450px;
+    flex-shrink: 0;
+    transition: all 0.4s ease;
+}
+
+.testimonial-card:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--color-accent);
+    transform: translateY(-5px);
 }
 
 .quote-icon {
-    color: rgba(255, 255, 255, 0.1);
-    margin-bottom: 2rem;
+    color: var(--color-accent);
+    opacity: 0.2;
+    margin-bottom: 1.5rem;
 }
 
 .testimonial-text {
-    font-size: 1.2rem;
-    line-height: 1.6;
+    font-size: 1.1rem;
+    line-height: 1.7;
     margin-bottom: 2rem;
-    font-style: italic;
-    color: #ddd;
+    color: #eee;
+    font-family: var(--font-main);
 }
 
 .testimonial-author {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.2rem;
+}
+
+.author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(45deg, var(--color-accent), transparent);
 }
 
 .testimonial-author img {
-    width: 50px;
-    height: 50px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -428,11 +475,14 @@
     margin: 0;
     font-size: 1rem;
     font-weight: 700;
+    color: #fff;
 }
 
 .testimonial-author span {
     font-size: 0.8rem;
     color: #666;
+    display: block;
+    margin-top: 2px;
 }
 
 /* STATS SECTION */

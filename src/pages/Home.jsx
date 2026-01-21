@@ -77,6 +77,23 @@ const Home = () => {
         if (selected.length > 0) displayTestimonials = selected;
     }
 
+    // Default to at least 4 reviews (using testimonials from homeContent if none selected)
+    // If we have fewer than 4 selected, we might want to fill with defaults or just display those.
+    // The user said "4 avis par défault sont mis seulement si aucun avis n'ai choisi".
+    if (!homeContent.selectedTestimonials || homeContent.selectedTestimonials.length === 0) {
+        // We ensure we at least have the mock ones, and maybe duplicate to reach 4 if needed
+        const mockDefaults = [
+            { id: 'd1', name: "Sophie Martin", role: "CEO, TechFlow", quote: "Une équipe incroyable qui a su transformer notre vision en réalité.", image: "https://placehold.co/100x100/333/FFF?text=SM" },
+            { id: 'd2', name: "Thomas Dubois", role: "Directeur Artistique", quote: "Créativité et professionnalisme au rendez-vous. Je recommande !", image: "https://placehold.co/100x100/333/FFF?text=TD" },
+            { id: 'd3', name: "Julie Leroux", role: "Product Manager", quote: "Un résultat qui dépasse nos attentes. Un plaisir de collaborer.", image: "https://placehold.co/100x100/333/FFF?text=JL" },
+            { id: 'd4', name: "Marc Antoine", role: "Entrepreneur", quote: "Réactivité et talent. Le duo parfait pour mon projet.", image: "https://placehold.co/100x100/333/FFF?text=MA" }
+        ];
+        displayTestimonials = mockDefaults;
+    }
+
+    // For marquee, duplicate the array to ensure smooth looping
+    const marqueeList = [...displayTestimonials, ...displayTestimonials, ...displayTestimonials];
+
     const displayStats = homeContent.stats && homeContent.stats.length > 0 ? homeContent.stats : stats;
 
     const handleMouseMove = (e) => {
@@ -205,15 +222,17 @@ const Home = () => {
             </section>
 
             {/* TESTIMONIALS */}
-            <section className="testimonials-section zoom-in">
-                <div className="container">
-                    <div className="testimonials-grid stagger-reveal">
-                        {displayTestimonials.map(t => (
-                            <div key={t.id} className="testimonial-card reveal">
+            <section className="testimonials-section">
+                <div className="testimonials-wrapper">
+                    <div className="testimonials-track">
+                        {marqueeList.map((t, idx) => (
+                            <div key={`${t.id}-${idx}`} className="testimonial-card">
                                 <Quote size={40} className="quote-icon" />
                                 <p className="testimonial-text">"{t.quote}"</p>
                                 <div className="testimonial-author">
-                                    <img src={t.image} alt={t.name} />
+                                    <div className="author-avatar">
+                                        <img src={t.image} alt={t.name} />
+                                    </div>
                                     <div>
                                         <h4>{t.name}</h4>
                                         <span>{t.role}</span>
