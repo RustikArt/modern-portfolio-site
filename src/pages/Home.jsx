@@ -39,7 +39,7 @@ const Home = () => {
             });
         }, observerOptions);
 
-        const elements = document.querySelectorAll('.reveal, .zoom-in, .stagger-reveal');
+        const elements = document.querySelectorAll('.reveal, .zoom-in, .stagger-reveal, .blur-reveal');
         elements.forEach(el => observer.observe(el));
 
         return () => observer.disconnect();
@@ -73,9 +73,11 @@ const Home = () => {
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        const rotateX = ((y - centerY) / centerY) * -10; // Inverse logic for card tilt
+        const rotateX = ((y - centerY) / centerY) * -10;
         const rotateY = ((x - centerX) / centerX) * 10;
 
+        card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+        card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
         card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
     };
 
@@ -137,27 +139,33 @@ const Home = () => {
                         <Link to="/projects" className="btn-link">Voir tout <ArrowRight size={16} /></Link>
                     </div>
 
-                    <div className="featured-grid stagger-reveal">
+                    <div className="featured-grid blur-reveal">
                         {featuredList.length > 0 ? (
-                            featuredList.map(project => (
+                            featuredList.map((project, index) => (
                                 <Link
                                     to={`/projects/${project.id}`}
                                     key={project.id}
-                                    className="project-card reveal"
+                                    className={`project-card reveal project-card-${index + 1}`}
                                     onMouseMove={handleCardMouseMove}
                                     onMouseLeave={handleCardMouseLeave}
                                 >
-                                    <div className="project-image">
-                                        <img
-                                            src={`${project.image}?v=${WEBSITE_VERSION}`}
-                                            alt={project.title}
-                                            loading="eager"
-                                            style={{ filter: 'none' }}
-                                        />
+                                    <div className="project-image-container">
+                                        <div className="project-number">0{index + 1}</div>
+                                        <div className="project-image">
+                                            <img
+                                                src={`${project.image}?v=${WEBSITE_VERSION}`}
+                                                alt={project.title}
+                                                loading="eager"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="project-info">
+                                    <div className="project-content">
                                         <span className="project-category">{project.category}</span>
-                                        <h3>{project.title}</h3>
+                                        <h3 className="project-title">{project.title}</h3>
+                                        <div className="project-view-more">
+                                            <span>Découvrir le projet</span>
+                                            <ArrowRight size={16} />
+                                        </div>
                                     </div>
                                 </Link>
                             ))

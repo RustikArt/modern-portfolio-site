@@ -59,8 +59,7 @@ const Dashboard = () => {
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
         reviews, deleteReview,
-        checkPermission, loginHistory,
-        currentUser,
+        currentUser, register, checkPermission, loginHistory,
         showToast,
         settings, updateSettings
     } = useData();
@@ -125,13 +124,27 @@ const Dashboard = () => {
     const [showMemberPassword, setShowMemberPassword] = useState(false);
     const [newAdminForm, setNewAdminForm] = useState({ name: '', email: '', password: '', permissions: [] });
 
-    const handleCreateAdmin = () => {
+    const handleCreateAdmin = async () => {
         if (!newAdminForm.name || !newAdminForm.email || !newAdminForm.password) {
             showToast("Veuillez remplir tous les champs", "error");
             return;
         }
-        showToast(`Compte admin pour ${newAdminForm.name} créé !`, "success");
-        setNewAdminForm({ name: '', email: '', password: '', permissions: [] });
+        try {
+            const adminData = {
+                ...newAdminForm,
+                role: 'admin',
+                roleTitle: 'Administrateur'
+            };
+            const result = await register(adminData);
+            if (result.success) {
+                showToast(`Compte admin pour ${newAdminForm.name} créé !`, "success");
+                setNewAdminForm({ name: '', email: '', password: '', permissions: [] });
+            } else {
+                showToast(result.message || "Erreur de création", "error");
+            }
+        } catch (err) {
+            showToast("Une erreur est survenue", "error");
+        }
     };
 
     const handleLogout = () => {

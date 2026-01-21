@@ -2,46 +2,58 @@ import { createClient } from '@supabase/supabase-js';
 import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
 import bcrypt from 'bcryptjs';
 
-// Fallback for local dev if process.env is not populated by the runner
+// Configuration Supabase
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://whkahjdzptwbaalvnvle.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indoa2FoamR6cHR3YmFhbHZudmxlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODAzMzYxMiwiZXhwIjoyMDgzNjA5NjEyfQ.keE21Iz9L3Pwbj7wkxPwSVmagTLGD4eialJm0xm8E_A';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-
-const getSupabase = () => {
-    const url = SUPABASE_URL;
-    const key = SUPABASE_KEY;
-    if (!url || !key) throw new Error('Configuration manquante : Supabase URL ou Key non trouvée sur le serveur.');
-    return createClient(url, key);
-};
+let supabase;
+try {
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+        throw new Error('Supabase credentials missing.');
+    }
+    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+    console.error('Supabase Init Error:', e);
+}
 
 export default async function handler(req, res) {
     setCorsHeaders(res, req.headers.origin);
     if (handleCorsPreFlight(req, res)) return;
 
-    try {
-        const supabase = getSupabase();
+    if (!supabase) {
+        return res.status(500).json({ error: 'Database connection not initialized' });
+    }
 
+    try {
         if (req.method === 'GET') {
             const { data: users, error } = await supabase
                 .from('portfolio_users')
                 .select('*')
                 .order('id', { ascending: true });
-            if (error) throw error;
+
+            if (error) {
+                console.error('Supabase Select Error:', error);
+                return res.status(500).json({ error: 'Table "portfolio_users" non trouvée ou inaccessible. Vérifiez votre base de données.', details: error });
+            }
             res.status(200).json(users || []);
         } else if (req.method === 'POST') {
             const newUser = req.body;
+
             // HASH PASSWORD
-            if (newUser.password) {
+            if (newUser.password && newUser.password.length < 50) {
                 const salt = bcrypt.genSaltSync(10);
                 newUser.password = bcrypt.hashSync(newUser.password, salt);
             }
-            const { error } = await supabase
-                .from('portfolio_users')
-                .insert([newUser])
-                .select();
-            if (error) throw error;
 
-            // Get all users to return-sync
+            const { error: insertError } = await supabase
+                .from('portfolio_users')
+                .insert([newUser]);
+
+            if (insertError) {
+                console.error('Supabase Insert Error:', insertError);
+                return res.status(500).json({ error: 'Échec de l\'insertion de l\'utilisateur.', details: insertError });
+            }
+
             const { data: allUsers, error: fetchError } = await supabase
                 .from('portfolio_users')
                 .select('*');
@@ -50,24 +62,18 @@ export default async function handler(req, res) {
             res.status(201).json(allUsers);
         } else if (req.method === 'PUT') {
             const { id, ...updatedUser } = req.body;
-            // HASH PASSWORD IF CHANGED
-            if (updatedUser.password) {
-                // Simple check: if it looks like a hash (starts with $2a$), maybe skip?
-                // But safer to assume if sent, it's a new password.
-                // However, we must ensure we don't re-hash an existing hash if frontend sends it back.
-                // Typically frontend sends updated fields only.
-                // If password length < 20, it's plaintext. bcrypt hashes are 60 chars.
-                if (updatedUser.password.length < 50) {
-                    const salt = bcrypt.genSaltSync(10);
-                    updatedUser.password = bcrypt.hashSync(updatedUser.password, salt);
-                }
+
+            if (updatedUser.password && updatedUser.password.length < 50) {
+                const salt = bcrypt.genSaltSync(10);
+                updatedUser.password = bcrypt.hashSync(updatedUser.password, salt);
             }
-            const { error } = await supabase
+
+            const { error: updateError } = await supabase
                 .from('portfolio_users')
                 .update(updatedUser)
-                .eq('id', id)
-                .select();
-            if (error) throw error;
+                .eq('id', id);
+
+            if (updateError) throw updateError;
 
             const { data: allUsers, error: fetchError } = await supabase
                 .from('portfolio_users')
@@ -80,6 +86,7 @@ export default async function handler(req, res) {
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
     } catch (error) {
+        console.error('API Users catch block:', error);
         handleError(res, error);
     }
 }

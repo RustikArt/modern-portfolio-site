@@ -1070,13 +1070,17 @@ export const DataProvider = ({ children }) => {
     };
 
     // User Auth
-    const register = async (email, password, name) => {
-        const cleanEmail = email.trim().toLowerCase();
-        const cleanPassword = password.trim();
-        const exists = users.find(u => u.email === cleanEmail);
-        if (exists) return { success: false, message: 'Email déjà utilisé.' };
+    const register = async (emailOrObj, password, name) => {
+        let newUser;
+        if (typeof emailOrObj === 'object') {
+            newUser = { role: 'client', ...emailOrObj };
+        } else {
+            newUser = { email: emailOrObj.trim().toLowerCase(), password: password.trim(), name, role: 'client' };
+        }
 
-        const newUser = { email: cleanEmail, password: cleanPassword, name, role: 'client' };
+        const email = newUser.email;
+        const exists = users.find(u => u.email === email);
+        if (exists) return { success: false, message: 'Email déjà utilisé.' };
 
         try {
             const res = await fetch('/api/users', {
@@ -1088,9 +1092,9 @@ export const DataProvider = ({ children }) => {
             if (res.ok) {
                 const updatedUsers = await res.json();
                 setUsers(updatedUsers);
-                const createdUser = updatedUsers.find(u => u.email === cleanEmail);
+                const createdUser = updatedUsers.find(u => u.email === email);
                 setCurrentUser(createdUser || newUser);
-                addNotification('account', `Nouveau compte créé : ${name} (${cleanEmail})`);
+                addNotification('account', `Nouveau compte créé : ${newUser.name} (${email})`);
                 return { success: true };
             } else {
                 throw new Error('Erreur lors de la création du compte sur le serveur');
@@ -1101,7 +1105,7 @@ export const DataProvider = ({ children }) => {
             const localUser = { ...newUser, id: Date.now() };
             setUsers([...users, localUser]);
             setCurrentUser(localUser);
-            addNotification('account', `Nouveau compte créé (Local) : ${name} (${cleanEmail})`);
+            addNotification('account', `Nouveau compte créé (Local) : ${newUser.name} (${email})`);
             return { success: true, message: 'Compte créé localement (mode hors-ligne).' };
         }
     };
