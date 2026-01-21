@@ -58,7 +58,8 @@ const Dashboard = () => {
         homeContent, setHomeContent,
         reviews, deleteReview,
         checkPermission, loginHistory,
-        showToast
+        showToast,
+        settings, updateSettings
     } = useData();
 
     const [showVersionDetails, setShowVersionDetails] = useState(false);
@@ -569,13 +570,42 @@ const Dashboard = () => {
                                         <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Utilisateurs</div>
                                         <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalUsers}</div>
                                     </div>
+                                    {/* QUICK ACTION CARD */}
+                                    <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
+                                        <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Accès Rapide</div>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <button onClick={() => setActiveTab('products')} style={{ ...btnModern, flex: 1, padding: '0.5rem', justifyContent: 'center' }}><Plus size={16} /> Produit</button>
+                                            <button onClick={() => setActiveTab('projects')} style={{ ...btnModern, flex: 1, padding: '0.5rem', justifyContent: 'center' }}><FileCode size={16} /> Projet</button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-                                    <AnalyticsChart
-                                        data={chartData}
-                                        title="Revenus Mensuels (€)"
-                                    />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                        <AnalyticsChart
+                                            data={chartData}
+                                            title="Revenus Mensuels (€)"
+                                        />
+
+                                        {/* ADMIN NOTEPAD WIDGET */}
+                                        <div style={cardStyle}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                <h3 style={{ fontSize: '1rem' }}>Bloc-notes Admin</h3>
+                                                <Save size={16} color="#888" />
+                                            </div>
+                                            <textarea
+                                                placeholder="Notes rapides, idées, tâches à faire..."
+                                                style={{
+                                                    width: '100%', minHeight: '120px', background: '#111', border: 'none',
+                                                    color: '#ccc', padding: '1rem', borderRadius: '8px', resize: 'vertical',
+                                                    fontSize: '0.9rem', lineHeight: '1.5'
+                                                }}
+                                                defaultValue={localStorage.getItem('admin_notes') || ''}
+                                                onChange={(e) => localStorage.setItem('admin_notes', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div style={cardStyle}>
                                         <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Dernière Activité</h3>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
@@ -592,22 +622,18 @@ const Dashboard = () => {
                                             ))}
                                             {recentActivity.length === 0 && <p style={{ fontSize: '0.8rem', color: '#444' }}>Aucune activité récente.</p>}
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div style={{ ...cardStyle, marginTop: '2rem' }}>
-                                    <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Status des Commandes</h3>
-                                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '150px', padding: '1rem' }}>
-                                        {[
-                                            { label: 'Livrées', count: 12, color: 'var(--color-accent)' },
-                                            { label: 'En cours', count: 5, color: '#333' },
-                                            { label: 'Annulées', count: 2, color: '#111' }
-                                        ].map(stat => (
-                                            <div key={stat.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                                                <div style={{ width: '100%', height: `${(stat.count / 12) * 100}%`, background: stat.color, borderRadius: '4px' }}></div>
-                                                <span style={{ fontSize: '0.7rem', color: '#555' }}>{stat.label}</span>
+                                        <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #222' }}>
+                                            <h4 style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Système</h4>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>
+                                                <span>Version</span>
+                                                <span style={{ color: 'var(--color-accent)' }}>{WEBSITE_VERSION}</span>
                                             </div>
-                                        ))}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#888' }}>
+                                                <span>Status DB</span>
+                                                <span style={{ color: '#4caf50' }}>Connecté</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1254,12 +1280,92 @@ const Dashboard = () => {
                         {/* --- SETTINGS TAB --- */}
                         {activeTab === 'settings' && (
                             <div className="animate-in">
-                                <section style={cardStyle}>
-                                    <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <Globe size={24} /> Banderole d'annonce
-                                    </h2>
+                                <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <Globe size={24} /> Paramètres du Site
+                                </h2>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+
+                                    {/* GLOBAL SETTINGS CARD */}
+                                    <div style={cardStyle}>
+                                        <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <Settings size={20} /> Configuration Générale
+                                        </h3>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Nom du Site</label>
+                                                <input
+                                                    type="text"
+                                                    value={settings.siteTitle}
+                                                    onChange={(e) => updateSettings({ siteTitle: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+
+                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                    <span style={{ fontWeight: 'bold' }}>Mode Maintenance</span>
+                                                    <div
+                                                        onClick={() => updateSettings({ maintenanceMode: !settings.maintenanceMode })}
+                                                        style={{
+                                                            width: '50px', height: '26px', background: settings.maintenanceMode ? '#ff4d4d' : '#333',
+                                                            borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s'
+                                                        }}
+                                                    >
+                                                        <div style={{
+                                                            width: '20px', height: '20px', background: 'white', borderRadius: '50%',
+                                                            position: 'absolute', top: '3px', left: settings.maintenanceMode ? '27px' : '3px',
+                                                            transition: 'left 0.3s'
+                                                        }}></div>
+                                                    </div>
+                                                </div>
+                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Si activé, le site public affichera une page de maintenance.</p>
+                                            </div>
+
+                                            <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Contact & Réseaux</h4>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Email de contact</label>
+                                                <input
+                                                    type="email"
+                                                    value={settings.contactEmail}
+                                                    onChange={(e) => updateSettings({ contactEmail: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Instagram</label>
+                                                    <input
+                                                        type="text"
+                                                        value={settings.socials?.instagram || ''}
+                                                        onChange={(e) => updateSettings({ socials: { ...settings.socials, instagram: e.target.value } })}
+                                                        style={inputStyle}
+                                                        placeholder="@username"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>LinkedIn</label>
+                                                    <input
+                                                        type="text"
+                                                        value={settings.socials?.linkedin || ''}
+                                                        onChange={(e) => updateSettings({ socials: { ...settings.socials, linkedin: e.target.value } })}
+                                                        style={inputStyle}
+                                                        placeholder="URL Profil"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ANNOUNCEMENT BANNER CARD */}
+                                    <div style={cardStyle}>
+                                        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <AlertCircle size={20} /> Banderole d'annonce
+                                        </h2>
+
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                 <input
@@ -1292,94 +1398,6 @@ const Dashboard = () => {
                                                 <p style={{ fontSize: '0.7rem', color: '#555', marginTop: '0.5rem' }}>Utilisez <code style={{ background: '#222', padding: '2px 5px', borderRadius: '3px' }}>[lien]</code> dans le texte pour placer le lien. Ex: "Voir notre [lien] ici !"</p>
                                             </div>
 
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Fond (Hex)</label>
-                                                    <input
-                                                        type="color"
-                                                        value={announcementForm.bgColor}
-                                                        onChange={e => setAnnouncementForm({ ...announcementForm, bgColor: e.target.value })}
-                                                        style={{ ...inputStyle, height: '40px', padding: '2px' }}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Texte (Hex)</label>
-                                                    <input
-                                                        type="color"
-                                                        value={announcementForm.textColor}
-                                                        onChange={e => setAnnouncementForm({ ...announcementForm, textColor: e.target.value })}
-                                                        style={{ ...inputStyle, height: '40px', padding: '2px' }}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'end' }}>
-                                                <div style={{ flex: 1 }}>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hauteur (ex: 40px)</label>
-                                                    <input
-                                                        type="text"
-                                                        value={announcementForm.height}
-                                                        onChange={e => setAnnouncementForm({ ...announcementForm, height: e.target.value })}
-                                                        style={inputStyle}
-                                                    />
-                                                </div>
-                                                <button
-                                                    onClick={() => setAnnouncementForm({
-                                                        ...announcementForm,
-                                                        bgColor: '#d4af37',
-                                                        textColor: '#000000',
-                                                        height: '40px'
-                                                    })}
-                                                    style={{ ...btnModern, padding: '0.8rem', marginBottom: '0' }}
-                                                    title="Réinitialiser couleurs et taille"
-                                                >
-                                                    <RotateCcw size={16} />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Style de police</label>
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        <button
-                                                            onClick={() => setAnnouncementForm({ ...announcementForm, fontWeight: announcementForm.fontWeight === 'bold' ? 'normal' : 'bold' })}
-                                                            style={{ ...btnModern, flex: 1, justifyContent: 'center', background: announcementForm.fontWeight === 'bold' ? 'white' : 'rgba(255,255,255,0.05)', color: announcementForm.fontWeight === 'bold' ? 'black' : '#888' }}
-                                                        >
-                                                            Gras
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setAnnouncementForm({ ...announcementForm, fontStyle: announcementForm.fontStyle === 'italic' ? 'normal' : 'italic' })}
-                                                            style={{ ...btnModern, flex: 1, justifyContent: 'center', background: announcementForm.fontStyle === 'italic' ? 'white' : 'rgba(255,255,255,0.05)', color: announcementForm.fontStyle === 'italic' ? 'black' : '#888' }}
-                                                        >
-                                                            Italique
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                            <div style={{ marginTop: '2rem' }}>
-                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '1rem' }}>Aperçu du rendu :</label>
-                                                <div style={{
-                                                    background: announcementForm.bgColor,
-                                                    color: announcementForm.textColor,
-                                                    height: announcementForm.height,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    borderRadius: '8px',
-                                                    fontWeight: announcementForm.fontWeight,
-                                                    fontStyle: announcementForm.fontStyle,
-                                                    fontSize: '0.8rem',
-                                                    padding: '0 1rem',
-                                                    textAlign: 'center'
-                                                }}>
-                                                    {announcementForm.text || 'Texte de votre annonce...'}
-                                                </div>
-                                            </div>
-
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', paddingBottom: '0.8rem' }}>
                                                     <input
@@ -1388,12 +1406,12 @@ const Dashboard = () => {
                                                         onChange={e => setAnnouncementForm({ ...announcementForm, showTimer: e.target.checked })}
                                                         style={{ width: '18px', height: '18px' }}
                                                     />
-                                                    <label style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                        <Timer size={16} /> Afficher un compte à rebours
+                                                    <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <Timer size={14} /> Compte à rebours
                                                     </label>
                                                 </div>
                                                 <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Date de fin (Timer)</label>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Date de fin</label>
                                                     <input
                                                         type="datetime-local"
                                                         value={announcementForm.timerEnd}
@@ -1401,6 +1419,25 @@ const Dashboard = () => {
                                                         style={inputStyle}
                                                         disabled={!announcementForm.showTimer}
                                                     />
+                                                </div>
+                                            </div>
+
+                                            <div style={{ marginTop: '1rem' }}>
+                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '1rem' }}>Aperçu du rendu :</label>
+                                                <div style={{
+                                                    background: announcementForm.bgColor || '#d4af37',
+                                                    color: announcementForm.textColor || 'black',
+                                                    padding: '1rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    borderRadius: '8px',
+                                                    fontWeight: announcementForm.fontWeight,
+                                                    fontStyle: announcementForm.fontStyle,
+                                                    fontSize: '0.8rem',
+                                                    textAlign: 'center'
+                                                }}>
+                                                    {announcementForm.text || 'Texte de votre annonce...'}
                                                 </div>
                                             </div>
 
@@ -1415,7 +1452,7 @@ const Dashboard = () => {
                                             </button>
                                         </div>
                                     </div>
-                                </section>
+                                </div>
                             </div>
                         )}
                         {activeTab === 'reviews' && (

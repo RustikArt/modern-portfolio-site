@@ -667,6 +667,30 @@ export const DataProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : defaultHomeContent;
     });
 
+    // --- GLOBAL SETTINGS (New) ---
+    const [settings, setSettings] = useState(() => {
+        const saved = localStorage.getItem('portfolio_settings');
+        return saved ? JSON.parse(saved) : {
+            maintenanceMode: false,
+            siteTitle: 'Rustik',
+            contactEmail: 'contact@rustikop.com',
+            supportPhone: '+33 6 00 00 00 00',
+            socials: {
+                instagram: 'https://instagram.com',
+                linkedin: 'https://linkedin.com',
+                twitter: ''
+            }
+        };
+    });
+
+    useEffect(() => {
+        localStorage.setItem('portfolio_settings', JSON.stringify(settings));
+    }, [settings]);
+
+    const updateSettings = (newSettings) => {
+        setSettings(prev => ({ ...prev, ...newSettings }));
+    };
+
     // --- FETCH DATA ON MOUNT ---
     useEffect(() => {
         const fetchData = async () => {
@@ -718,7 +742,14 @@ export const DataProvider = ({ children }) => {
 
                 if (promoRes.ok) {
                     const promoData = await promoRes.json();
-                    setPromoCodes(promoData);
+                    // Normalize to camelCase for frontend usage
+                    const normalizedPromos = promoData.map(p => ({
+                        ...p,
+                        expirationDate: p.expiration_date || p.expirationDate,
+                        maxUses: p.max_uses || p.maxUses,
+                        minAmount: p.min_amount || p.minAmount
+                    }));
+                    setPromoCodes(normalizedPromos);
                 } else {
                     console.error('Promo codes API failed');
                 }
@@ -1157,8 +1188,13 @@ export const DataProvider = ({ children }) => {
         try {
             // Convert camelCase to snake_case for Supabase compatibility
             const promoData = {
-                ...code,
-                value: code.value || 0
+                code: code.code,
+                type: code.type,
+                value: code.value || 0,
+                // Add optional fields map
+                expiration_date: code.expirationDate,
+                max_uses: code.maxUses,
+                min_amount: code.minAmount
             };
 
             const res = await fetch('/api/promo-codes', {
@@ -1585,6 +1621,9 @@ export const DataProvider = ({ children }) => {
 
             // Home Content
             homeContent, setHomeContent,
+
+            // Settings
+            settings, updateSettings,
 
             // Wishlist
             wishlist, toggleWishlist, isInWishlist,

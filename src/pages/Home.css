@@ -11,13 +11,85 @@
 }
 
 /* HERO SECTION */
+/* HERO SECTION */
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-30px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes float-horizontal {
+    0% { transform: translateX(0px) rotate(0deg); }
+    50% { transform: translateX(30px) rotate(-2deg); }
+    100% { transform: translateX(0px) rotate(0deg); }
+}
+
 .hero {
-    height: 90vh;
+    min-height: 90vh; /* Changed from height to min-height */
     display: flex;
     align-items: center;
     position: relative;
     overflow: hidden;
+    perspective: 1200px; /* Enable 3D space */
 }
+
+/* New 3D Elements */
+.hero-content-wrapper {
+    position: relative;
+    z-index: 2;
+    transform-style: preserve-3d;
+    transition: transform 0.2s ease-out; /* Smooth follow */
+}
+
+.floating-bg {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px); /* Increased blur */
+    z-index: 0;
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.floating-bg.one {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--color-accent), transparent);
+    top: -20%; left: -10%;
+    animation: float 12s infinite ease-in-out;
+}
+
+.floating-bg.two {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #4caf50, transparent);
+    bottom: -10%; right: -10%;
+    animation: float-horizontal 15s infinite ease-in-out;
+}
+
+.floating-bg.three {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #ff4d4d, transparent);
+    top: 40%; right: 20%;
+    opacity: 0.15;
+    animation: float 10s infinite ease-in-out reverse;
+}
+
+/* Enhanced Reveal */
+.reveal {
+    opacity: 0;
+    transform: translateY(60px) scale(0.9);
+    filter: blur(10px);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
 
 .hero-title {
     font-size: clamp(3rem, 8vw, 6rem);

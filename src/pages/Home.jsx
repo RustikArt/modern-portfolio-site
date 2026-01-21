@@ -53,11 +53,33 @@ const Home = () => {
     // Get actual project objects for featured section
     const featuredList = projects.filter(p => featuredProjects.ids.includes(p.id));
 
+    const handleMouseMove = (e) => {
+        const { clientX, clientY } = e;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        // Calculate tilt
+        const rotateX = ((centerY - clientY) / centerY) * 5; // Max 5 deg
+        const rotateY = ((clientX - centerX) / centerX) * 5;
+
+        const wrapper = document.querySelector('.hero-content-wrapper');
+        if (wrapper) {
+            wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+    };
+
     return (
         <div className="page-home">
             {/* HERO SECTION */}
-            <section className="hero">
-                <div className="container">
+            <section className="hero" onMouseMove={handleMouseMove} onMouseLeave={() => {
+                const wrapper = document.querySelector('.hero-content-wrapper');
+                if (wrapper) wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
+            }}>
+                <div className="floating-bg one"></div>
+                <div className="floating-bg two"></div>
+                <div className="floating-bg three"></div>
+
+                <div className="container hero-content-wrapper">
                     <h1 className="hero-title reveal">
                         <span className="block-reveal">{hero.titleLine1}</span>
                         <br />

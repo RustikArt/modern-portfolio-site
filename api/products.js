@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
 
+// Fallback for local dev
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://whkahjdzptwbaalvnvle.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indoa2FoamR6cHR3YmFhbHZudmxlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODAzMzYxMiwiZXhwIjoyMDgzNjA5NjEyfQ.keE21Iz9L3Pwbj7wkxPwSVmagTLGD4eialJm0xm8E_A';
+
 // Utiliser la clé de service pour contourner les politiques RLS
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     console.error('CRITICAL: NEXT_PUBLIC_SUPABASE_URL missing in environment variables');
@@ -17,7 +18,7 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_
 export default async function handler(req, res) {
     // Configurer les headers CORS
     setCorsHeaders(res);
-    
+
     // Gérer les requêtes OPTIONS
     if (handleCorsPreFlight(req, res)) {
         return;
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
     } else if (req.method === 'POST') {
         try {
             const newProduct = req.body;
-            
+
             // Validation des données requises
             if (!newProduct.name || typeof newProduct.name !== 'string') {
                 return res.status(400).json({ error: 'Le nom du produit est requis et doit être une chaîne' });
@@ -49,7 +50,7 @@ export default async function handler(req, res) {
             if (newProduct.category && typeof newProduct.category !== 'string') {
                 return res.status(400).json({ error: 'La catégorie doit être une chaîne' });
             }
-            
+
             // Normaliser les données
             const productToInsert = {
                 name: newProduct.name,
@@ -61,32 +62,32 @@ export default async function handler(req, res) {
                 is_featured: newProduct.is_featured || false,
                 options: newProduct.options || []
             };
-            
+
             console.log('Inserting product:', productToInsert);
-            
+
             const { data, error } = await supabase
                 .from('portfolio_products')
                 .insert([productToInsert])
                 .select();
-            
+
             if (error) {
                 console.error('Supabase insert error:', error);
                 throw error;
             }
-            
+
             console.log('Product inserted successfully:', data);
-            
+
             // Return all products
             const { data: allProducts, error: fetchError } = await supabase
                 .from('portfolio_products')
                 .select('*')
                 .order('id', { ascending: true });
-            
+
             if (fetchError) {
                 console.error('Supabase fetch error:', fetchError);
                 throw fetchError;
             }
-            
+
             res.status(201).json(allProducts);
         } catch (error) {
             console.error('Add product error:', error);
@@ -95,51 +96,51 @@ export default async function handler(req, res) {
     } else if (req.method === 'PUT') {
         try {
             const { id, ...updatedProduct } = req.body;
-            
+
             if (!id) {
                 return res.status(400).json({ error: 'L\'ID du produit est requis' });
             }
-            
+
             const numId = Number(id);
             if (isNaN(numId)) {
                 return res.status(400).json({ error: 'L\'ID du produit doit être un nombre' });
             }
-            
+
             // Normaliser les données
             const productToUpdate = {
                 ...updatedProduct,
                 promo_price: updatedProduct.promo_price !== undefined ? updatedProduct.promo_price : updatedProduct.promoPrice,
                 is_featured: updatedProduct.is_featured !== undefined ? updatedProduct.is_featured : false
             };
-            
+
             // Supprimer les champs non nécessaires
             delete productToUpdate.promoPrice;
             delete productToUpdate.id;
-            
+
             console.log('Updating product:', numId, productToUpdate);
-            
+
             const { data, error } = await supabase
                 .from('portfolio_products')
                 .update(productToUpdate)
                 .eq('id', numId)
                 .select();
-            
+
             if (error) {
                 console.error('Supabase update error:', error);
                 throw error;
             }
-            
+
             // Return all products
             const { data: allProducts, error: fetchError } = await supabase
                 .from('portfolio_products')
                 .select('*')
                 .order('id', { ascending: true });
-            
+
             if (fetchError) {
                 console.error('Supabase fetch error:', fetchError);
                 throw fetchError;
             }
-            
+
             res.status(200).json(allProducts);
         } catch (error) {
             console.error('Update product error:', error);
@@ -148,39 +149,39 @@ export default async function handler(req, res) {
     } else if (req.method === 'DELETE') {
         try {
             const { id } = req.body;
-            
+
             if (!id) {
                 return res.status(400).json({ error: 'L\'ID du produit est requis' });
             }
-            
+
             const numId = Number(id);
             if (isNaN(numId)) {
                 return res.status(400).json({ error: 'L\'ID du produit doit être un nombre' });
             }
-            
+
             console.log('Deleting product:', numId);
-            
+
             const { data, error } = await supabase
                 .from('portfolio_products')
                 .delete()
                 .eq('id', numId);
-            
+
             if (error) {
                 console.error('Supabase delete error:', error);
                 throw error;
             }
-            
+
             // Return all products
             const { data: allProducts, error: fetchError } = await supabase
                 .from('portfolio_products')
                 .select('*')
                 .order('id', { ascending: true });
-            
+
             if (fetchError) {
                 console.error('Supabase fetch error:', fetchError);
                 throw fetchError;
             }
-            
+
             res.status(200).json(allProducts);
         } catch (error) {
             console.error('Delete product error:', error);
