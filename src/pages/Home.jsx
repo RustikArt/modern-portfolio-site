@@ -53,6 +53,32 @@ const Home = () => {
     // Get actual project objects for featured section
     const featuredList = projects.filter(p => featuredProjects.ids.includes(p.id));
 
+    // Get selected testimonials from reviews
+    const { reviews, products: allProducts } = useData();
+    let displayTestimonials = testimonials; // Fallback to default mock ones
+
+    if (homeContent.selectedTestimonials && homeContent.selectedTestimonials.length > 0) {
+        const selected = [];
+        homeContent.selectedTestimonials.forEach(idStr => {
+            const [prodId, revIdx] = idStr.split('-');
+            const prodReviews = reviews[prodId];
+            if (prodReviews && prodReviews[revIdx]) {
+                const rev = prodReviews[revIdx];
+                const prod = allProducts.find(p => p.id === parseInt(prodId));
+                selected.push({
+                    id: idStr,
+                    name: rev.user,
+                    role: prod ? prod.name : 'Client',
+                    quote: rev.comment,
+                    image: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' // Default avatar
+                });
+            }
+        });
+        if (selected.length > 0) displayTestimonials = selected;
+    }
+
+    const displayStats = homeContent.stats && homeContent.stats.length > 0 ? homeContent.stats : stats;
+
     const handleMouseMove = (e) => {
         const { clientX, clientY } = e;
         const centerX = window.innerWidth / 2;
@@ -182,7 +208,7 @@ const Home = () => {
             <section className="testimonials-section zoom-in">
                 <div className="container">
                     <div className="testimonials-grid stagger-reveal">
-                        {testimonials.map(t => (
+                        {displayTestimonials.map(t => (
                             <div key={t.id} className="testimonial-card reveal">
                                 <Quote size={40} className="quote-icon" />
                                 <p className="testimonial-text">"{t.quote}"</p>
@@ -203,7 +229,7 @@ const Home = () => {
             <section className="stats-section">
                 <div className="container">
                     <div className="stats-grid">
-                        {stats.map(s => (
+                        {displayStats.map(s => (
                             <div key={s.id} className="stat-item">
                                 <span className="stat-value">{s.value}</span>
                                 <span className="stat-label">{s.label}</span>

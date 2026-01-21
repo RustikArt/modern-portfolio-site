@@ -1375,8 +1375,30 @@ export const DataProvider = ({ children }) => {
                     paymentId: o.payment_id || o.paymentId
                 }));
                 setOrders(normalizedOrders);
-                const createdOrder = updatedOrders[0]; // Assuming newest first
+                const createdOrder = updatedOrders[0];
+
+                // Increment Promo Usage if applicable
+                if (activePromo) {
+                    const updatedPromos = promoCodes.map(p =>
+                        p.code === activePromo.code ? { ...p, uses: (p.uses || 0) + 1 } : p
+                    );
+                    setPromoCodes(updatedPromos);
+
+                    // Sync to DB
+                    const targetPromo = updatedPromos.find(p => p.code === activePromo.code);
+                    if (targetPromo) {
+                        try {
+                            fetch('/api/promo-codes', {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ id: targetPromo.id, uses: targetPromo.uses })
+                            }).catch(err => console.error("Sync Promo Error:", err));
+                        } catch (e) { }
+                    }
+                }
+
                 clearCart();
+                setActivePromo(null);
                 addNotification('order', `Nouvelle commande de ${currentUser.name} (${newOrder.total}€)`);
                 sendOrderConfirmation(createdOrder || newOrder);
                 return createdOrder || newOrder;
@@ -1388,10 +1410,39 @@ export const DataProvider = ({ children }) => {
             // Fallback to local
             const localOrder = { ...newOrder, id: Date.now().toString() };
             setOrders([localOrder, ...orders]);
+            if (activePromo) {
+                const updatedPromos = promoCodes.map(p =>
+                    p.code === activePromo.code ? { ...p, uses: (p.uses || 0) + 1 } : p
+                );
+                setPromoCodes(updatedPromos);
+            }
             clearCart();
+            setActivePromo(null);
             addNotification('order', `Nouvelle commande de ${currentUser.name} (${newOrder.total}€)`);
             sendOrderConfirmation(localOrder);
             return localOrder;
+        }
+    };
+
+    const deleteUser = async (userId) => {
+        try {
+            const res = await fetch('/api/users', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: userId })
+            });
+
+            if (res.ok) {
+                const updatedUsers = await res.json();
+                setUsers(updatedUsers);
+                return { success: true };
+            } else {
+                throw new Error('Erreur lors de la suppression de l\'utilisateur');
+            }
+        } catch (error) {
+            console.error('Delete user error:', error);
+            setUsers(prev => prev.filter(u => u.id !== userId));
+            return { success: true, message: 'Utilisateur supprimé localement.' };
         }
     };
 
@@ -1621,7 +1672,7 @@ export const DataProvider = ({ children }) => {
             addProduct, deleteProduct, updateProduct,
 
             // Auth
-            users, currentUser, register, login, logout, checkPermission, loginHistory,
+            users, currentUser, register, login, logout, deleteUser, checkPermission, loginHistory,
 
             // Cart
             cart, addToCart, removeFromCart, clearCart, getCartTotal,

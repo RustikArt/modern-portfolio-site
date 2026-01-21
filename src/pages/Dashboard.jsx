@@ -59,7 +59,7 @@ const Dashboard = () => {
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
         reviews, deleteReview,
-        currentUser, register, checkPermission, loginHistory,
+        currentUser, register, deleteUser, checkPermission, loginHistory,
         showToast,
         settings, updateSettings
     } = useData();
@@ -150,6 +150,18 @@ const Dashboard = () => {
     const handleLogout = () => {
         logout();
         navigate('/login');
+    };
+
+    const handleDeleteUser = async (userId) => {
+        if (window.confirm("Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.")) {
+            const res = await deleteUser(userId);
+            if (res.success) {
+                showToast("Compte supprimé avec succès", "success");
+                setSelectedMember(null);
+            } else {
+                showToast(res.message || "Erreur lors de la suppression", "error");
+            }
+        }
     };
 
     const handleAddOption = () => {
@@ -1071,7 +1083,9 @@ const Dashboard = () => {
                                                 <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', display: 'flex', gap: '1rem' }}>
                                                     {c.minAmount && <span>Min: {c.minAmount}€</span>}
                                                     {c.expirationDate && <span>Exp: {new Date(c.expirationDate).toLocaleDateString()}</span>}
-                                                    {c.maxUses && <span>Limit: {c.maxUses}</span>}
+                                                    <span style={{ color: (c.maxUses && (c.uses || 0) >= c.maxUses) ? '#ff4d4d' : '#888' }}>
+                                                        Utilisation: [{c.uses || 0} / {c.maxUses || '∞'}]
+                                                    </span>
                                                 </div>
                                             </div>
                                             <button onClick={() => deletePromoCode(c.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
@@ -1098,7 +1112,15 @@ const Dashboard = () => {
                                                         <span style={{ color: '#888' }}>ID: {selectedMember.id}</span>
                                                     </div>
                                                 </div>
-                                                <button onClick={() => setSelectedMember(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+                                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                    <button
+                                                        onClick={() => handleDeleteUser(selectedMember.id)}
+                                                        style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}
+                                                    >
+                                                        <Trash2 size={18} /> Supprimer le compte
+                                                    </button>
+                                                    <button onClick={() => setSelectedMember(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+                                                </div>
                                             </div>
 
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', padding: '2rem' }}>
@@ -1361,7 +1383,7 @@ const Dashboard = () => {
                                     </div>
 
                                     {/* CTA */}
-                                    <div>
+                                    <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
                                         <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Call to Action</h3>
                                         <div style={{ display: 'grid', gap: '1rem' }}>
                                             <input type="text" placeholder="Title" value={homeContent.cta.title} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, title: e.target.value } })} style={inputStyle} />
@@ -1370,6 +1392,73 @@ const Dashboard = () => {
                                                 <input type="text" placeholder="Button Text" value={homeContent.cta.buttonText} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonText: e.target.value } })} style={inputStyle} />
                                                 <input type="text" placeholder="Button Link" value={homeContent.cta.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonLink: e.target.value } })} style={inputStyle} />
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {/* STATS SECTION */}
+                                    <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Statistics (Bottom section)</h3>
+                                            <button onClick={() => setHomeContent({ ...homeContent, stats: [...(homeContent.stats || []), { id: Date.now(), label: 'New Stat', value: '100+' }] })} style={btnModern}><Plus size={14} /> Add</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                                            {(homeContent.stats || []).map((stat, idx) => (
+                                                <div key={stat.id} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                        <label style={{ fontSize: '0.7rem', color: '#666' }}>Stat #{idx + 1}</label>
+                                                        <button onClick={() => setHomeContent({ ...homeContent, stats: homeContent.stats.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer' }}><Trash2 size={14} /></button>
+                                                    </div>
+                                                    <input type="text" placeholder="Label (e.g. Clients Satisfaits)" value={stat.label} onChange={(e) => {
+                                                        const newStats = [...homeContent.stats];
+                                                        newStats[idx].label = e.target.value;
+                                                        setHomeContent({ ...homeContent, stats: newStats });
+                                                    }} style={{ ...inputStyle, marginBottom: '0.5rem' }} />
+                                                    <input type="text" placeholder="Value (e.g. 250+)" value={stat.value} onChange={(e) => {
+                                                        const newStats = [...homeContent.stats];
+                                                        newStats[idx].value = e.target.value;
+                                                        setHomeContent({ ...homeContent, stats: newStats });
+                                                    }} style={inputStyle} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* TESTIMONIALS SECTION */}
+                                    <div>
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Selected Testimonials</h3>
+                                        <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>Select which reviews will appear on the homepage (Featured).</p>
+                                        <div style={{ display: 'grid', gap: '0.8rem', maxHeight: '300px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
+                                            {/* We need to get all reviews from DataContext. Dashboard uses reviews state. */}
+                                            {Object.keys(reviews).length > 0 ? Object.entries(reviews).map(([prodId, prodReviews]) => (
+                                                <div key={prodId}>
+                                                    <h4 style={{ fontSize: '0.75rem', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Product: {products.find(p => p.id === parseInt(prodId))?.name || prodId}</h4>
+                                                    <div style={{ display: 'grid', gap: '0.5rem', marginLeft: '1rem' }}>
+                                                        {prodReviews.map((rev, revIdx) => {
+                                                            const revId = `${prodId}-${revIdx}`;
+                                                            const isSelected = (homeContent.selectedTestimonials || []).includes(revId);
+                                                            return (
+                                                                <label key={revId} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.85rem', background: isSelected ? 'rgba(212,175,55,0.05)' : 'transparent', padding: '0.5rem', borderRadius: '4px' }}>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={isSelected}
+                                                                        onChange={(e) => {
+                                                                            let newList = [...(homeContent.selectedTestimonials || [])];
+                                                                            if (e.target.checked) newList.push(revId);
+                                                                            else newList = newList.filter(id => id !== revId);
+                                                                            setHomeContent({ ...homeContent, selectedTestimonials: newList });
+                                                                        }}
+                                                                    />
+                                                                    <div style={{ flex: 1 }}>
+                                                                        <strong>{rev.user}</strong>: "{rev.comment.substring(0, 60)}{rev.comment.length > 60 ? '...' : ''}"
+                                                                    </div>
+                                                                </label>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )) : (
+                                                <p style={{ color: '#444', fontStyle: 'italic', textAlign: 'center' }}>No reviews available yet.</p>
+                                            )}
                                         </div>
                                     </div>
 
