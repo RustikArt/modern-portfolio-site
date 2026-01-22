@@ -656,8 +656,20 @@ export const DataProvider = ({ children }) => {
 
     const checkPermission = (requiredPermission) => {
         if (!currentUser) return false;
-        const userPermissions = PERMISSIONS[currentUser.role] || [];
-        return userPermissions.includes('all') || userPermissions.includes(requiredPermission);
+
+        // Super admin always has all permissions
+        if (currentUser.role === ROLES.SUPER_ADMIN) return true;
+
+        // If user has EXPLICIT granular permissions defined, they are the source of truth.
+        // This allows restricting access by providing an empty array [].
+        if (currentUser.permissions && Array.isArray(currentUser.permissions)) {
+            return currentUser.permissions.includes('all') || currentUser.permissions.includes(requiredPermission);
+        }
+
+        const rolePermissions = PERMISSIONS[currentUser.role] || [];
+
+        // Fallback to role-based permissions if granular ones aren't defined
+        return rolePermissions.includes('all') || rolePermissions.includes(requiredPermission);
     };
 
 
@@ -1097,7 +1109,9 @@ export const DataProvider = ({ children }) => {
                 addNotification('account', `Nouveau compte créé : ${newUser.name} (${email})`);
                 return { success: true };
             } else {
-                throw new Error('Erreur lors de la création du compte sur le serveur');
+                const errData = await res.json().catch(() => ({}));
+                console.error('Registration failed on server:', errData);
+                throw new Error(errData.error || 'Erreur lors de la création du compte sur le serveur');
             }
         } catch (error) {
             console.error('Registration error:', error);

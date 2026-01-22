@@ -8,9 +8,10 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_P
 let supabase;
 try {
     if (!SUPABASE_URL || !SUPABASE_KEY) {
-        throw new Error('Supabase credentials missing.');
+        console.error('CRITICAL: Supabase credentials missing (Orders)');
+    } else {
+        supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     }
-    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch (e) {
     console.error('Supabase Init Error (Orders):', e);
 }
@@ -20,7 +21,11 @@ export default async function handler(req, res) {
     if (handleCorsPreFlight(req, res)) return;
 
     if (!supabase) {
-        return res.status(500).json({ error: 'Database connection not initialized' });
+        return res.status(500).json({
+            error: 'Database connection not initialized',
+            details: 'Supabase client is null. Check environment variables.',
+            config: { url: SUPABASE_URL ? 'PRESENT' : 'MISSING', key: SUPABASE_KEY ? 'PRESENT' : 'MISSING' }
+        });
     }
 
     try {

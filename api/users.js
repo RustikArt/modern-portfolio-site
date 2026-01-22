@@ -9,9 +9,10 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_P
 let supabase;
 try {
     if (!SUPABASE_URL || !SUPABASE_KEY) {
-        throw new Error('Supabase credentials missing.');
+        console.error('CRITICAL: Supabase credentials missing (URL or KEY)');
+    } else {
+        supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     }
-    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch (e) {
     console.error('Supabase Init Error:', e);
 }
@@ -21,7 +22,11 @@ export default async function handler(req, res) {
     if (handleCorsPreFlight(req, res)) return;
 
     if (!supabase) {
-        return res.status(500).json({ error: 'Database connection not initialized' });
+        return res.status(500).json({
+            error: 'Database connection not initialized',
+            details: 'Supabase client is null. Check environment variables.',
+            config: { url: SUPABASE_URL ? 'PRESENT' : 'MISSING', key: SUPABASE_KEY ? 'PRESENT' : 'MISSING' }
+        });
     }
 
     try {
@@ -32,8 +37,15 @@ export default async function handler(req, res) {
                 .order('id', { ascending: true });
 
             if (error) {
-                console.error('Supabase Select Error:', error);
-                return res.status(500).json({ error: 'Table "portfolio_users" non trouvée ou inaccessible. Vérifiez votre base de données.', details: error });
+                console.error('DATABASE ERROR (Select Users):', JSON.stringify(error, null, 2));
+                // Clearer error for the user to understand if it's a schema issue
+                const isTableMissing = error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('does not exist');
+                return res.status(500).json({
+                    error: isTableMissing ? 'Table "portfolio_users" manquante' : 'Erreur base de données',
+                    message: error.message,
+                    code: error.code,
+                    hint: isTableMissing ? 'Créez la table "portfolio_users" dans Supabase avec les colonnes: id, email, password, name, role, permissions (jsonb/text), roleTitle.' : error.hint
+                });
             }
             res.status(200).json(users || []);
         } else if (req.method === 'POST') {
@@ -45,9 +57,22 @@ export default async function handler(req, res) {
                 newUser.password = bcrypt.hashSync(newUser.password, salt);
             }
 
+            // Filter fields to avoid Supabase errors if columns don't exist
+            // We only keep the core fields that are definitely expected in a user table
+            const filteredUser = {
+                email: newUser.email,
+                password: newUser.password,
+                name: newUser.name,
+                role: newUser.role || 'client'
+            };
+
+            // Optional fields (only add if they have values to avoid null constraint issues)
+            if (newUser.permissions) filteredUser.permissions = typeof newUser.permissions === 'string' ? newUser.permissions : JSON.stringify(newUser.permissions);
+            if (newUser.roleTitle) filteredUser.roleTitle = newUser.roleTitle;
+
             const { error: insertError } = await supabase
                 .from('portfolio_users')
-                .insert([newUser]);
+                .insert([filteredUser]);
 
             if (insertError) {
                 console.error('Supabase Insert Error:', insertError);
