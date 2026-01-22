@@ -784,7 +784,14 @@ export const DataProvider = ({ children }) => {
 
                 if (usersRes && usersRes.ok) {
                     const usersData = await usersRes.json();
-                    if (usersData && usersData.length > 0) setUsers(usersData);
+                    if (usersData && usersData.length > 0) {
+                        // Normalize users (permissions as array)
+                        const normalizedUsers = usersData.map(u => ({
+                            ...u,
+                            permissions: typeof u.permissions === 'string' ? JSON.parse(u.permissions) : (u.permissions || [])
+                        }));
+                        setUsers(normalizedUsers);
+                    }
                 }
 
                 if (ordersRes && ordersRes.ok) {
@@ -1103,24 +1110,32 @@ export const DataProvider = ({ children }) => {
 
             if (res.ok) {
                 const updatedUsers = await res.json();
-                setUsers(updatedUsers);
-                const createdUser = updatedUsers.find(u => u.email === email);
+
+                // Ensure permissions are parsed if they come as JSON strings
+                const normalizedUsers = updatedUsers.map(u => ({
+                    ...u,
+                    permissions: typeof u.permissions === 'string' ? JSON.parse(u.permissions) : (u.permissions || [])
+                }));
+
+                setUsers(normalizedUsers);
+                const createdUser = normalizedUsers.find(u => u.email === email);
                 setCurrentUser(createdUser || newUser);
                 addNotification('account', `Nouveau compte créé : ${newUser.name} (${email})`);
                 return { success: true };
             } else {
                 const errData = await res.json().catch(() => ({}));
                 console.error('Registration failed on server:', errData);
-                throw new Error(errData.error || 'Erreur lors de la création du compte sur le serveur');
+                return {
+                    success: false,
+                    message: errData.error || 'Erreur lors de la création du compte sur le serveur.'
+                };
             }
         } catch (error) {
             console.error('Registration error:', error);
-            // Fallback to local
-            const localUser = { ...newUser, id: Date.now() };
-            setUsers([...users, localUser]);
-            setCurrentUser(localUser);
-            addNotification('account', `Nouveau compte créé (Local) : ${newUser.name} (${email})`);
-            return { success: true, message: 'Compte créé localement (mode hors-ligne).' };
+            return {
+                success: false,
+                message: 'Impossible de contacter le serveur. Vérifiez votre connexion.'
+            };
         }
     };
 

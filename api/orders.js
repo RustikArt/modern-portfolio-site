@@ -36,19 +36,43 @@ export default async function handler(req, res) {
                 .order('date', { ascending: false });
 
             if (error) {
-                console.error('Supabase Select Orders Error:', error);
-                return res.status(500).json({ error: 'Table "portfolio_orders" non trouvée ou inaccessible.', details: error });
+                console.error('DATABASE ERROR (Select Orders):', JSON.stringify(error, null, 2));
+                return res.status(500).json({
+                    error: 'Impossible de lire les commandes',
+                    message: error.message,
+                    code: error.code
+                });
             }
             res.status(200).json(orders || []);
         } else if (req.method === 'POST') {
-            const newOrder = req.body;
+            const body = req.body;
+
+            // Map camelCase to snake_case for Supabase compatibility if needed
+            const orderToInsert = {
+                customer_name: body.customerName || body.customer_name,
+                email: body.email,
+                total: body.total,
+                status: body.status || 'Payé',
+                items: typeof body.items === 'string' ? body.items : JSON.stringify(body.items),
+                date: body.date || new Date().toISOString(),
+                user_id: body.userId || body.user_id,
+                payment_id: body.paymentId || body.payment_id,
+                shipping: typeof body.shipping === 'string' ? body.shipping : JSON.stringify(body.shipping),
+                newsletter: !!body.newsletter,
+                discount: body.discount || 0
+            };
+
             const { error: insertError } = await supabase
                 .from('portfolio_orders')
-                .insert([newOrder]);
+                .insert([orderToInsert]);
 
             if (insertError) {
                 console.error('Supabase Insert Order Error:', insertError);
-                return res.status(500).json({ error: 'Échec de la création de la commande.', details: insertError });
+                return res.status(500).json({
+                    error: 'Échec de la création de la commande.',
+                    message: insertError.message,
+                    details: insertError
+                });
             }
 
             const { data: allOrders, error: fetchError } = await supabase
@@ -60,9 +84,20 @@ export default async function handler(req, res) {
             res.status(201).json(allOrders);
         } else if (req.method === 'PUT') {
             const { id, ...updatedOrder } = req.body;
+            if (!id) return res.status(400).json({ error: 'ID requis.' });
+
+            // Filter and map fields for update
+            const cleanedUpdate = {};
+            if (updatedOrder.customerName || updatedOrder.customer_name)
+                cleanedUpdate.customer_name = updatedOrder.customerName || updatedOrder.customer_name;
+            if (updatedOrder.status) cleanedUpdate.status = updatedOrder.status;
+            if (updatedOrder.items) cleanedUpdate.items = typeof updatedOrder.items === 'string' ? updatedOrder.items : JSON.stringify(updatedOrder.items);
+            if (updatedOrder.shipping) cleanedUpdate.shipping = typeof updatedOrder.shipping === 'string' ? updatedOrder.shipping : JSON.stringify(updatedOrder.shipping);
+            if (updatedOrder.archived !== undefined) cleanedUpdate.archived = !!updatedOrder.archived;
+
             const { error: updateError } = await supabase
                 .from('portfolio_orders')
-                .update(updatedOrder)
+                .update(cleanedUpdate)
                 .eq('id', id);
 
             if (updateError) throw updateError;
@@ -76,6 +111,8 @@ export default async function handler(req, res) {
             res.status(200).json(allOrders);
         } else if (req.method === 'DELETE') {
             const { id } = req.body;
+            if (!id) return res.status(400).json({ error: 'ID requis.' });
+
             const { error: deleteError } = await supabase
                 .from('portfolio_orders')
                 .delete()
@@ -95,7 +132,7 @@ export default async function handler(req, res) {
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
     } catch (error) {
-        console.error('API Orders catch block:', error);
+        console.error('API Orders internal error:', error);
         handleError(res, error);
     }
 }

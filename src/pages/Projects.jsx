@@ -17,9 +17,12 @@ const Projects = () => {
                             <div className="project-image-container">
                                 <LazyImage src={`${project.image}?v=${WEBSITE_VERSION}`} alt={project.title} className="project-image" />
                                 <div className="project-overlay">
-                                    <h3>{project.title}</h3>
-                                    <span>{project.category}</span>
+                                    <span className="view-project">Voir le projet</span>
                                 </div>
+                            </div>
+                            <div className="project-info">
+                                <h3>{project.title}</h3>
+                                <span>{project.category}</span>
                             </div>
                         </Link>
                     ))}

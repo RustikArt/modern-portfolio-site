@@ -38,45 +38,51 @@ export default async function handler(req, res) {
 
             if (error) {
                 console.error('DATABASE ERROR (Select Users):', JSON.stringify(error, null, 2));
-                // Clearer error for the user to understand if it's a schema issue
-                const isTableMissing = error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('does not exist');
                 return res.status(500).json({
-                    error: isTableMissing ? 'Table "portfolio_users" manquante' : 'Erreur base de données',
+                    error: 'Impossible de lire les utilisateurs',
                     message: error.message,
                     code: error.code,
-                    hint: isTableMissing ? 'Créez la table "portfolio_users" dans Supabase avec les colonnes: id, email, password, name, role, permissions (jsonb/text), roleTitle.' : error.hint
+                    hint: 'Vérifiez que la table "portfolio_users" existe et contient les colonnes nécessaires.'
                 });
             }
             res.status(200).json(users || []);
         } else if (req.method === 'POST') {
             const newUser = req.body;
 
+            if (!newUser.email || !newUser.password) {
+                return res.status(400).json({ error: 'Email et mot de passe requis.' });
+            }
+
             // HASH PASSWORD
-            if (newUser.password && newUser.password.length < 50) {
+            if (newUser.password.length < 50) {
                 const salt = bcrypt.genSaltSync(10);
                 newUser.password = bcrypt.hashSync(newUser.password, salt);
             }
 
-            // Filter fields to avoid Supabase errors if columns don't exist
-            // We only keep the core fields that are definitely expected in a user table
-            const filteredUser = {
-                email: newUser.email,
+            // Strictly filter fields to match Supabase schema exactly
+            const userToInsert = {
+                email: newUser.email.trim().toLowerCase(),
                 password: newUser.password,
-                name: newUser.name,
-                role: newUser.role || 'client'
+                name: newUser.name || newUser.email.split('@')[0],
+                role: newUser.role || 'client',
+                permissions: Array.isArray(newUser.permissions) ? JSON.stringify(newUser.permissions) : (newUser.permissions || '[]'),
+                roleTitle: newUser.roleTitle || (newUser.role === 'admin' ? 'Administrateur' : 'Client')
             };
-
-            // Optional fields (only add if they have values to avoid null constraint issues)
-            if (newUser.permissions) filteredUser.permissions = typeof newUser.permissions === 'string' ? newUser.permissions : JSON.stringify(newUser.permissions);
-            if (newUser.roleTitle) filteredUser.roleTitle = newUser.roleTitle;
 
             const { error: insertError } = await supabase
                 .from('portfolio_users')
-                .insert([filteredUser]);
+                .insert([userToInsert]);
 
             if (insertError) {
                 console.error('Supabase Insert Error:', insertError);
-                return res.status(500).json({ error: 'Échec de l\'insertion de l\'utilisateur.', details: insertError });
+                if (insertError.code === '23505') {
+                    return res.status(409).json({ error: 'Cet email est déjà utilisé.', code: 'DUPLICATE_EMAIL' });
+                }
+                return res.status(500).json({
+                    error: 'Échec de la création du compte.',
+                    message: insertError.message,
+                    details: insertError
+                });
             }
 
             const { data: allUsers, error: fetchError } = await supabase
@@ -88,14 +94,25 @@ export default async function handler(req, res) {
         } else if (req.method === 'PUT') {
             const { id, ...updatedUser } = req.body;
 
+            if (!id) return res.status(400).json({ error: 'ID requis pour la mise à jour.' });
+
             if (updatedUser.password && updatedUser.password.length < 50) {
                 const salt = bcrypt.genSaltSync(10);
                 updatedUser.password = bcrypt.hashSync(updatedUser.password, salt);
             }
 
+            // Filter fields for update
+            const cleanedUpdate = {};
+            if (updatedUser.email) cleanedUpdate.email = updatedUser.email;
+            if (updatedUser.password) cleanedUpdate.password = updatedUser.password;
+            if (updatedUser.name) cleanedUpdate.name = updatedUser.name;
+            if (updatedUser.role) cleanedUpdate.role = updatedUser.role;
+            if (updatedUser.permissions) cleanedUpdate.permissions = Array.isArray(updatedUser.permissions) ? JSON.stringify(updatedUser.permissions) : updatedUser.permissions;
+            if (updatedUser.roleTitle) cleanedUpdate.roleTitle = updatedUser.roleTitle;
+
             const { error: updateError } = await supabase
                 .from('portfolio_users')
-                .update(updatedUser)
+                .update(cleanedUpdate)
                 .eq('id', id);
 
             if (updateError) throw updateError;
@@ -111,7 +128,7 @@ export default async function handler(req, res) {
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
     } catch (error) {
-        console.error('API Users catch block:', error);
+        console.error('API Users internal error:', error);
         handleError(res, error);
     }
 }
