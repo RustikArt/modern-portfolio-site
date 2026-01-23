@@ -1,19 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
 
-// Configuration Supabase
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://whkahjdzptwbaalvnvle.supabase.co';
+// Configuration Supabase - NEVER hardcode keys
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-let supabase;
-try {
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-        console.error('CRITICAL: Supabase credentials missing (Orders)');
-    } else {
+// Create Supabase client
+let supabase = null;
+if (SUPABASE_URL && SUPABASE_KEY) {
+    try {
         supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (e) {
+        console.error('Supabase Init Error:', e);
     }
-} catch (e) {
-    console.error('Supabase Init Error (Orders):', e);
+} else {
+    console.error('CRITICAL: Supabase credentials missing in environment variables');
+    console.error('Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env');
 }
 
 export default async function handler(req, res) {

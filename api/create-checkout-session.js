@@ -9,13 +9,17 @@ import {
     handleError
 } from './middleware.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Validate Stripe configuration
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+if (!STRIPE_SECRET_KEY) {
+    console.error('CRITICAL ERROR: STRIPE_SECRET_KEY missing in environment variables');
+    console.error('Set STRIPE_SECRET_KEY in .env');
+}
 
-const ALLOWED_ORIGINS = [
-    'https://rustikop.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:3000'
-];
+const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY) : null;
+
+// CORS: Use environment variable, fallback to hardcoded list
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://rustikop.vercel.app,http://localhost:5173,http://localhost:3000').split(',').map(o => o.trim());
 
 export default async function handler(req, res) {
     // Configurer les headers CORS
@@ -24,6 +28,14 @@ export default async function handler(req, res) {
     // Gérer les requêtes OPTIONS
     if (handleCorsPreFlight(req, res)) {
         return;
+    }
+
+    // Check if Stripe is configured
+    if (!stripe) {
+        return res.status(500).json({
+            error: 'Service unavailable',
+            message: 'Stripe configuration missing. Check STRIPE_SECRET_KEY in environment variables.'
+        });
     }
 
     if (req.method !== 'POST') {

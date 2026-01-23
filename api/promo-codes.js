@@ -1,19 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
 
-// Fallback for local dev
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://whkahjdzptwbaalvnvle.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indoa2FoamR6cHR3YmFhbHZudmxlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODAzMzYxMiwiZXhwIjoyMDgzNjA5NjEyfQ.keE21Iz9L3Pwbj7wkxPwSVmagTLGD4eialJm0xm8E_A';
+// Configuration Supabase - NEVER hardcode keys
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Utiliser la clé de service pour contourner les politiques RLS
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// Validate environment variables
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.error('CRITICAL ERROR: Supabase credentials missing!');
+    console.error('Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env');
+}
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    console.error('CRITICAL: NEXT_PUBLIC_SUPABASE_URL missing in environment variables');
-}
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.error('CRITICAL: Supabase credentials missing in environment variables');
-}
+// Create Supabase client
+const supabase = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 export default async function handler(req, res) {
     // Configurer les headers CORS
