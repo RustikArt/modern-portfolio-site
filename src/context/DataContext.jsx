@@ -683,7 +683,6 @@ export const DataProvider = ({ children }) => {
         // Fallback to role-based permissions if granular ones aren't defined
         return rolePermissions.includes('all') || rolePermissions.includes(requiredPermission);
     };
-    };
 
 
     // Admin Notifications State
