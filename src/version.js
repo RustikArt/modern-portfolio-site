@@ -1,2 +1,2 @@
 export const WEBSITE_VERSION = "Version 5.0 BETA EDITION";
-export const VERSION_DETAILS = "Vsc build";
+export const VERSION_DETAILS = "Vercel Deployment fix";
