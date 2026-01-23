@@ -1139,62 +1139,36 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    const login = (email, password) => {
-        const cleanEmail = email.trim().toLowerCase();
-        const cleanPassword = password.trim();
+    const login = async (email, password) => {
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.trim().toLowerCase(), password: password.trim() })
+            });
 
-        const user = users.find(u => u.email === cleanEmail);
-
-        if (user) {
-            // VERIFY PASSWORD (HASH or PLAIN)
-            let isValid = false;
-
-            // Check if stored password is a hash (bcrypt starts with $2a$ or $2b$)
-            if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
-                try {
-                    isValid = bcrypt.compareSync(cleanPassword, user.password);
-                } catch (e) {
-                    console.error("Error comparing hash", e);
-                }
-            } else {
-                // Fallback for legacy plaintext
-                if (user.password === cleanPassword) {
-                    isValid = true;
-                }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                return { success: false, message: err.error || 'Identifiants ou mot de passe incorrects.' };
             }
 
-            if (isValid) {
-                // --- SECURITY: LOGIN HISTORY & ALERT ---
-                const mockIp = Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255);
-                const userAgent = navigator.userAgent;
-                const historyEntry = {
-                    date: new Date().toISOString(),
-                    ip: mockIp,
-                    device: userAgent.includes("Mobile") ? "Mobile" : "Desktop",
-                    browser: "Chrome (Simulated)"
-                };
+            const { user } = await res.json();
+            if (!user) return { success: false, message: 'Identifiants invalides.' };
 
-                // Check for new device (simple heuristic)
-                const isNewDevice = !user.loginHistory || !user.loginHistory.some(h => h.device === historyEntry.device);
-                if (isNewDevice && user.role !== 'client') {
-                    // Simulate Email Alert 
-                    console.warn(`SECURITY ALERT: New device login for ${user.email}`);
-                    // Removed notification to reduce noise as requested
-                }
+            // Update client state
+            // Ensure we keep users list in sync (merge or add)
+            setUsers(prev => {
+                const exists = prev.some(u => u.email === user.email);
+                if (exists) return prev.map(u => u.email === user.email ? { ...u, ...user } : u);
+                return [user, ...prev];
+            });
 
-                // Update user history
-                const updatedUser = {
-                    ...user,
-                    loginHistory: [historyEntry, ...(user.loginHistory || [])].slice(0, 50) // Keep last 50
-                };
-
-                // Update global users state
-                setUsers(prev => prev.map(u => u.email === cleanEmail ? updatedUser : u));
-                setCurrentUser(updatedUser);
-                return { success: true, isAdmin: user.role === 'admin' };
-            }
+            setCurrentUser(user);
+            return { success: true, isAdmin: user.role === 'admin' };
+        } catch (e) {
+            console.error('Login error:', e);
+            return { success: false, message: 'Impossible de contacter le serveur.' };
         }
-        return { success: false, message: 'Identifiants ou mot de passe incorrects.' };
     };
 
     const logout = () => {
