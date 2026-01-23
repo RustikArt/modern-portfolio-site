@@ -122,7 +122,8 @@ const Dashboard = () => {
     // --- USER MANAGEMENT STATES ---
     const [selectedMember, setSelectedMember] = useState(null);
     const [showMemberPassword, setShowMemberPassword] = useState(false);
-    const [newAdminForm, setNewAdminForm] = useState({ name: '', email: '', password: '', permissions: [] });
+    const [newAdminForm, setNewAdminForm] = useState({ name: '', email: '', password: '', roleTitle: '', permissions: [] });
+    const [editingUserPermissions, setEditingUserPermissions] = useState(null);
 
     const handleCreateAdmin = async () => {
         if (!newAdminForm.name || !newAdminForm.email || !newAdminForm.password) {
@@ -133,12 +134,13 @@ const Dashboard = () => {
             const adminData = {
                 ...newAdminForm,
                 role: 'admin',
-                roleTitle: 'Administrateur'
+                roleTitle: newAdminForm.roleTitle || 'Administrateur',
+                permissions: newAdminForm.permissions.length > 0 ? newAdminForm.permissions : ['manage_orders', 'manage_products', 'manage_content', 'view_users', 'view_stats']
             };
             const result = await register(adminData);
             if (result.success) {
-                showToast(`Compte admin pour ${newAdminForm.name} créé !`, "success");
-                setNewAdminForm({ name: '', email: '', password: '', permissions: [] });
+                showToast(`Compte pour ${newAdminForm.name} créé !`, "success");
+                setNewAdminForm({ name: '', email: '', password: '', roleTitle: '', permissions: [] });
             } else {
                 showToast(result.message || "Erreur de création", "error");
             }
@@ -1265,23 +1267,37 @@ const Dashboard = () => {
                                                 onChange={e => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
                                                 style={inputStyle}
                                             />
+                                            <input
+                                                type="text"
+                                                placeholder="Titre du rôle (ex: Modérateur, Éditeur, Gestionnaire)"
+                                                value={newAdminForm.roleTitle}
+                                                onChange={e => setNewAdminForm({ ...newAdminForm, roleTitle: e.target.value })}
+                                                style={inputStyle}
+                                            />
 
                                             <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.8rem' }}>Permissions</label>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.8rem', fontWeight: 'bold' }}>Permissions</label>
                                                 <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                                    {['products', 'projects', 'orders', 'users', 'settings'].map(perm => (
-                                                        <label key={perm} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                    {[
+                                                        { id: 'manage_products', label: 'Gérer les produits' },
+                                                        { id: 'manage_projects', label: 'Gérer les projets' },
+                                                        { id: 'manage_orders', label: 'Gérer les commandes' },
+                                                        { id: 'view_users', label: 'Voir les utilisateurs' },
+                                                        { id: 'manage_content', label: 'Gérer le contenu' },
+                                                        { id: 'view_stats', label: 'Voir les statistiques' }
+                                                    ].map(perm => (
+                                                        <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.9rem' }}>
                                                             <input
                                                                 type="checkbox"
-                                                                checked={newAdminForm.permissions.includes(perm)}
+                                                                checked={newAdminForm.permissions.includes(perm.id)}
                                                                 onChange={(e) => {
                                                                     const perms = e.target.checked
-                                                                        ? [...newAdminForm.permissions, perm]
-                                                                        : newAdminForm.permissions.filter(p => p !== perm);
+                                                                        ? [...newAdminForm.permissions, perm.id]
+                                                                        : newAdminForm.permissions.filter(p => p !== perm.id);
                                                                     setNewAdminForm({ ...newAdminForm, permissions: perms });
                                                                 }}
                                                             />
-                                                            <span style={{ textTransform: 'capitalize' }}>Manage {perm}</span>
+                                                            <span>{perm.label}</span>
                                                         </label>
                                                     ))}
                                                 </div>

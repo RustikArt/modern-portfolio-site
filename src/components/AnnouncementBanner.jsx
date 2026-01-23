@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { X } from 'lucide-react';
+import Logo from '../assets/Logos/OrangeNoir.png';
 
 const AnnouncementBanner = () => {
     const { announcement } = useData();
@@ -30,7 +31,7 @@ const AnnouncementBanner = () => {
     };
 
     useEffect(() => {
-        const height = (announcement && announcement.isActive && isVisible) ? (announcement.height || '40px') : '0px';
+        const height = (announcement && announcement.isActive && isVisible) ? (announcement.height || '56px') : '0px';
         document.documentElement.style.setProperty('--banner-height', height);
     }, [announcement, isVisible]);
 
@@ -75,33 +76,31 @@ const AnnouncementBanner = () => {
     }
 
     const bannerStyle = {
-        backgroundColor: announcement.bgColor ? `${announcement.bgColor}cc` : 'rgba(212, 175, 55, 0.8)', // Add transparency
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        color: announcement.textColor || '#000',
-        height: announcement.height || '40px',
-        fontWeight: announcement.fontWeight || '700', // Make bold by default for better readability on glass
+        backgroundColor: announcement.bgColor ? `${announcement.bgColor}cc` : 'rgba(212, 175, 55, 0.9)',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+        color: announcement.textColor || '#111',
+        height: announcement.height || '56px',
+        fontWeight: announcement.fontWeight || '700',
         fontStyle: announcement.fontStyle || 'normal',
         width: '100%',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0 3rem',
+        justifyContent: 'space-between',
+        padding: '0 1rem',
         position: 'fixed',
         top: 0,
         left: 0,
         zIndex: 2001,
-        fontSize: '0.8rem',
-        textAlign: 'center',
+        fontSize: '0.95rem',
+        textAlign: 'left',
         transition: 'all 0.3s ease',
         gap: '1rem',
-        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        boxShadow: '0 6px 30px rgba(0, 0, 0, 0.12)',
+        borderBottom: '1px solid rgba(0,0,0,0.08)'
     };
 
     const closeButtonStyle = {
-        position: 'absolute',
-        right: '1rem',
         background: 'none',
         border: 'none',
         color: 'inherit',
@@ -109,8 +108,10 @@ const AnnouncementBanner = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: 0.7,
-        transition: 'opacity 0.2s'
+        opacity: 0.8,
+        transition: 'opacity 0.2s',
+        padding: '0.4rem',
+        borderRadius: '6px'
     };
 
     // Render text with embedded link using [lien] placeholder
@@ -140,22 +141,36 @@ const AnnouncementBanner = () => {
 
     return (
         <div style={bannerStyle} className="announcement-banner">
-            <button
-                onClick={handleClose}
-                style={closeButtonStyle}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}
-                aria-label="Fermer"
-            >
-                <X size={16} />
-            </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                {renderTextWithLink()}
+                <img src={Logo} alt="logo" style={{ height: '36px', width: 'auto', marginRight: '0.5rem' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+                    <div style={{ fontWeight: '700' }}>{renderTextWithLink()}</div>
+                    {announcement.subtext && <div style={{ fontSize: '0.75rem', color: 'rgba(0,0,0,0.6)' }}>{announcement.subtext}</div>}
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 {announcement.showTimer && timeLeft !== 'EXPIRE' && (
-                    <span style={{ background: 'rgba(0,0,0,0.1)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                    <span style={{ background: 'rgba(0,0,0,0.06)', padding: '4px 10px', borderRadius: '6px', fontWeight: '700', fontFamily: 'monospace', fontSize: '0.85rem' }}>
                         {timeLeft}
                     </span>
                 )}
+
+                {announcement.link && (
+                    <a href={announcement.link} style={{ background: 'rgba(0,0,0,0.08)', padding: '8px 12px', borderRadius: '8px', color: 'inherit', textDecoration: 'none', fontWeight: '700' }}>
+                        Voir
+                    </a>
+                )}
+
+                <button
+                    onClick={handleClose}
+                    style={closeButtonStyle}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = 0.8}
+                    aria-label="Fermer"
+                >
+                    <X size={16} />
+                </button>
             </div>
         </div>
     );

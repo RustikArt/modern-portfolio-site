@@ -14,8 +14,12 @@ import {
 } from 'lucide-react';
 
 const UserDashboard = () => {
-    const { currentUser, orders, logout, sendOrderConfirmation } = useData();
+    const { currentUser, orders, logout, sendOrderConfirmation, showToast } = useData();
     const navigate = useNavigate();
+    const [oldPwd, setOldPwd] = useState('');
+    const [newPwd, setNewPwd] = useState('');
+    const [confirmPwd, setConfirmPwd] = useState('');
+    const [changingPwd, setChangingPwd] = useState(false);
 
     if (!currentUser) {
         navigate('/login');
@@ -28,6 +32,42 @@ const UserDashboard = () => {
     const handleLogout = () => {
         logout();
         navigate('/');
+    };
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        if (newPwd !== confirmPwd) {
+            alert('Les mots de passe ne correspondent pas.');
+            return;
+        }
+        if (newPwd.length < 6) {
+            alert('Le nouveau mot de passe doit faire au moins 6 caractères.');
+            return;
+        }
+        
+        setChangingPwd(true);
+        try {
+            const res = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: currentUser.email, oldPassword: oldPwd, newPassword: newPwd })
+            });
+
+            if (res.ok) {
+                alert('Mot de passe changé avec succès.');
+                setOldPwd('');
+                setNewPwd('');
+                setConfirmPwd('');
+            } else {
+                const err = await res.json().catch(() => ({}));
+                alert(err.error || 'Impossible de changer le mot de passe.');
+            }
+        } catch (e) {
+            console.error('Change password error:', e);
+            alert('Erreur réseau.');
+        } finally {
+            setChangingPwd(false);
+        }
     };
 
     // Client-friendly status mapping
@@ -70,6 +110,62 @@ const UserDashboard = () => {
                         Se déconnecter
                     </button>
                 </header>
+
+                {/* PASSWORD CHANGE SECTION */}
+                <div style={{ marginBottom: '3rem', maxWidth: '500px' }}>
+                    <h3 style={{ fontSize: '1rem', color: '#888', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '1rem' }}>Sécurité</h3>
+                    <form onSubmit={handleChangePassword} className="glass" style={{ padding: '2rem', borderRadius: '12px' }}>
+                        <h4 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1rem' }}>Changer le mot de passe</h4>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <input
+                                type="password"
+                                placeholder="Mot de passe actuel"
+                                value={oldPwd}
+                                onChange={(e) => setOldPwd(e.target.value)}
+                                disabled={changingPwd}
+                                required
+                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #222', background: '#0a0a0a', color: '#fff' }}
+                            />
+                            <input
+                                type="password"
+                                placeholder="Nouveau mot de passe"
+                                value={newPwd}
+                                onChange={(e) => setNewPwd(e.target.value)}
+                                disabled={changingPwd}
+                                required
+                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #222', background: '#0a0a0a', color: '#fff' }}
+                            />
+                            <input
+                                type="password"
+                                placeholder="Confirmer le nouveau mot de passe"
+                                value={confirmPwd}
+                                onChange={(e) => setConfirmPwd(e.target.value)}
+                                disabled={changingPwd}
+                                required
+                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #222', background: '#0a0a0a', color: '#fff' }}
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={changingPwd}
+                            style={{
+                                marginTop: '1.5rem',
+                                padding: '0.8rem 1.5rem',
+                                background: changingPwd ? '#555' : 'var(--color-accent)',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontWeight: 'bold',
+                                cursor: changingPwd ? 'not-allowed' : 'pointer',
+                                width: '100%'
+                            }}
+                        >
+                            {changingPwd ? 'En cours...' : 'Mettre à jour'}
+                        </button>
+                    </form>
+                </div>
 
                 <div style={{ marginBottom: '3rem' }}>
                     <h3 style={{ fontSize: '1rem', color: '#888', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '2rem' }}>Historique de vos projets</h3>

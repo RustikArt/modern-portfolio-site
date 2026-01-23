@@ -660,16 +660,29 @@ export const DataProvider = ({ children }) => {
         // Super admin always has all permissions
         if (currentUser.role === ROLES.SUPER_ADMIN) return true;
 
-        // If user has EXPLICIT granular permissions defined, they are the source of truth.
-        // This allows restricting access by providing an empty array [].
-        if (currentUser.permissions && Array.isArray(currentUser.permissions)) {
-            return currentUser.permissions.includes('all') || currentUser.permissions.includes(requiredPermission);
+        // Normalize permissions whether they come as string or array
+        let perms = currentUser.permissions;
+        if (typeof perms === 'string') {
+            try {
+                perms = JSON.parse(perms);
+            } catch (e) {
+                // allow comma-separated or '*' styles
+                if (perms.includes(',')) perms = perms.split(',').map(p => p.trim());
+                else perms = [perms];
+            }
+        }
+
+        if (Array.isArray(perms)) {
+            // Accept both 'all' and '*' as global wildcard
+            if (perms.includes('all') || perms.includes('*')) return true;
+            return perms.includes(requiredPermission);
         }
 
         const rolePermissions = PERMISSIONS[currentUser.role] || [];
 
         // Fallback to role-based permissions if granular ones aren't defined
         return rolePermissions.includes('all') || rolePermissions.includes(requiredPermission);
+    };
     };
 
 
