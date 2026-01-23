@@ -1,11 +1,17 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import Toast from '../components/Toast';
 import emailjs from '@emailjs/browser';
+import { createClient } from '@supabase/supabase-js';
 // BCrypt is handled backend-side in production, removed frontend import to fix build error
 
 const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
+
+// --- SUPABASE CLIENT ---
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 // --- SECURITY CONSTANTS ---
 export const ROLES = {
@@ -608,6 +614,56 @@ export const DataProvider = ({ children }) => {
         const saved = localStorage.getItem('portfolio_orders');
         return saved ? JSON.parse(saved) : [];
     });
+
+    // Load cart from Supabase when user authenticates
+    useEffect(() => {
+        const loadCartFromSupabase = async () => {
+            if (!currentUser || !supabase) {
+                // Load from localStorage if no user
+                const saved = localStorage.getItem('portfolio_cart');
+                if (saved) {
+                    try {
+                        setCart(JSON.parse(saved));
+                    } catch (e) {
+                        console.error('Error parsing saved cart:', e);
+                    }
+                }
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('portfolio_carts')
+                    .select('*')
+                    .eq('user_id', currentUser.id);
+
+                if (error) {
+                    console.error('Error loading cart from Supabase:', error);
+                    // Fallback to localStorage
+                    const saved = localStorage.getItem('portfolio_cart');
+                    if (saved) setCart(JSON.parse(saved));
+                } else if (data && data.length > 0) {
+                    // Convert Supabase format to cart format
+                    const loadedCart = data.map(item => ({
+                        productId: item.product_id,
+                        name: item.product_name,
+                        price: item.price,
+                        basePrice: item.base_price,
+                        image: item.image,
+                        quantity: item.quantity,
+                        selectedOptions: item.selected_options || []
+                    }));
+                    setCart(loadedCart);
+                }
+            } catch (error) {
+                console.error('Failed to load cart from Supabase:', error);
+                const saved = localStorage.getItem('portfolio_cart');
+                if (saved) setCart(JSON.parse(saved));
+            }
+        };
+
+        loadCartFromSupabase();
+    }, [currentUser, supabase]);
 
     // Promo Codes State
     const [promoCodes, setPromoCodes] = useState([]);
@@ -1332,6 +1388,45 @@ export const DataProvider = ({ children }) => {
         return base;
     };
 
+    // Cart synchronization functions
+    const syncCartToSupabase = async (cartItems) => {
+        if (!currentUser || !supabase) return;
+
+        try {
+            // Clear old cart items for this user
+            await supabase
+                .from('portfolio_carts')
+                .delete()
+                .eq('user_id', currentUser.id);
+
+            // Add new cart items
+            if (cartItems.length > 0) {
+                const itemsToInsert = cartItems.map(item => ({
+                    user_id: currentUser.id,
+                    product_id: item.productId,
+                    product_name: item.name,
+                    price: item.price,
+                    base_price: item.basePrice,
+                    image: item.image,
+                    quantity: item.quantity,
+                    selected_options: item.selectedOptions || [],
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }));
+
+                const { error } = await supabase
+                    .from('portfolio_carts')
+                    .insert(itemsToInsert);
+
+                if (error) {
+                    console.error('Error syncing cart to Supabase:', error);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to sync cart to Supabase:', error);
+        }
+    };
+
     // Cart
     const addToCart = (product, selectedOptions = [], quantity = 1) => {
         // selectedOptions should be array of { name, value, priceModifier, type }
@@ -1348,30 +1443,55 @@ export const DataProvider = ({ children }) => {
                 if (opt.priceModifier) unitPrice += parseFloat(opt.priceModifier);
             });
 
+            let updatedCart;
             if (existing) {
-                return prev.map(item =>
+                updatedCart = prev.map(item =>
                     (item.productId === product.id && JSON.stringify(item.selectedOptions) === JSON.stringify(selectedOptions))
                         ? { ...item, quantity: item.quantity + quantity }
                         : item
                 );
+            } else {
+                updatedCart = [...prev, {
+                    productId: product.id,
+                    name: product.name,
+                    price: unitPrice, // Persist the calculated price
+                    basePrice: product.price,
+                    image: product.image,
+                    selectedOptions,
+                    quantity
+                }];
             }
-            return [...prev, {
-                productId: product.id,
-                name: product.name,
-                price: unitPrice, // Persist the calculated price
-                basePrice: product.price,
-                image: product.image,
-                selectedOptions,
-                quantity
-            }];
+
+            // Sync to Supabase if user is authenticated
+            if (currentUser && supabase) {
+                syncCartToSupabase(updatedCart);
+            }
+
+            return updatedCart;
         });
     };
 
     const removeFromCart = (index) => {
-        setCart(prev => prev.filter((_, i) => i !== index));
+        setCart(prev => {
+            const updatedCart = prev.filter((_, i) => i !== index);
+            
+            // Sync to Supabase if user is authenticated
+            if (currentUser && supabase) {
+                syncCartToSupabase(updatedCart);
+            }
+            
+            return updatedCart;
+        });
     };
 
-    const clearCart = () => setCart([]);
+    const clearCart = () => {
+        setCart([]);
+        
+        // Sync to Supabase if user is authenticated
+        if (currentUser && supabase) {
+            syncCartToSupabase([]);
+        }
+    };
 
     const getCartTotal = () => cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
@@ -1624,16 +1744,96 @@ export const DataProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : [];
     });
 
+    // Load wishlist from Supabase when user authenticates
+    useEffect(() => {
+        const loadWishlistFromSupabase = async () => {
+            if (!currentUser || !supabase) {
+                // Load from localStorage if no user
+                const saved = localStorage.getItem('portfolio_wishlist');
+                if (saved) {
+                    try {
+                        setWishlist(JSON.parse(saved));
+                    } catch (e) {
+                        console.error('Error parsing saved wishlist:', e);
+                    }
+                }
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('portfolio_wishlists')
+                    .select('product_id')
+                    .eq('user_id', currentUser.id);
+
+                if (error) {
+                    console.error('Error loading wishlist from Supabase:', error);
+                    // Fallback to localStorage
+                    const saved = localStorage.getItem('portfolio_wishlist');
+                    if (saved) setWishlist(JSON.parse(saved));
+                } else if (data && data.length > 0) {
+                    // Convert Supabase format to wishlist format (array of product IDs)
+                    const productIds = data.map(item => item.product_id);
+                    setWishlist(productIds);
+                }
+            } catch (error) {
+                console.error('Failed to load wishlist from Supabase:', error);
+                const saved = localStorage.getItem('portfolio_wishlist');
+                if (saved) setWishlist(JSON.parse(saved));
+            }
+        };
+
+        loadWishlistFromSupabase();
+    }, [currentUser, supabase]);
+
     useEffect(() => {
         localStorage.setItem('portfolio_wishlist', JSON.stringify(wishlist));
     }, [wishlist]);
 
+    // Wishlist synchronization function
+    const syncWishlistToSupabase = async (productId, action = 'add') => {
+        if (!currentUser || !supabase) return;
+
+        try {
+            if (action === 'add') {
+                // Add to wishlist
+                await supabase
+                    .from('portfolio_wishlists')
+                    .insert([{
+                        user_id: currentUser.id,
+                        product_id: productId,
+                        created_at: new Date().toISOString()
+                    }]);
+            } else if (action === 'remove') {
+                // Remove from wishlist
+                await supabase
+                    .from('portfolio_wishlists')
+                    .delete()
+                    .eq('user_id', currentUser.id)
+                    .eq('product_id', productId);
+            }
+        } catch (error) {
+            console.error(`Error ${action}ing wishlist item to Supabase:`, error);
+        }
+    };
+
     const toggleWishlist = (productId) => {
         setWishlist(prev => {
+            let updatedWishlist;
             if (prev.includes(productId)) {
-                return prev.filter(id => id !== productId);
+                updatedWishlist = prev.filter(id => id !== productId);
+                // Sync to Supabase if user is authenticated
+                if (currentUser && supabase) {
+                    syncWishlistToSupabase(productId, 'remove');
+                }
+            } else {
+                updatedWishlist = [...prev, productId];
+                // Sync to Supabase if user is authenticated
+                if (currentUser && supabase) {
+                    syncWishlistToSupabase(productId, 'add');
+                }
             }
-            return [...prev, productId];
+            return updatedWishlist;
         });
     };
 
