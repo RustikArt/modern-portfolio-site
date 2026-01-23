@@ -72,13 +72,14 @@ export default async function handler(req, res) {
             }
 
             // Strictly filter fields to match Supabase schema exactly
+            // Write DB columns in snake_case, but keep roleTitle for frontend compatibility
             const userToInsert = {
                 email: newUser.email.trim().toLowerCase(),
                 password: newUser.password,
                 name: newUser.name || newUser.email.split('@')[0],
                 role: newUser.role || 'client',
                 permissions: Array.isArray(newUser.permissions) ? JSON.stringify(newUser.permissions) : (newUser.permissions || '[]'),
-                roleTitle: newUser.roleTitle || (newUser.role === 'admin' ? 'Administrateur' : 'Client')
+                role_title: newUser.roleTitle || (newUser.role === 'admin' ? 'Administrateur' : 'Client')
             };
 
             const { error: insertError } = await supabase
@@ -102,7 +103,14 @@ export default async function handler(req, res) {
                 .select('*');
             if (fetchError) throw fetchError;
 
-            res.status(201).json(allUsers);
+            // Normalize DB snake_case -> frontend camelCase
+            const normalized = (allUsers || []).map(u => ({
+                ...u,
+                roleTitle: u.role_title ?? u.roleTitle,
+                permissions: typeof u.permissions === 'string' ? JSON.parse(u.permissions) : u.permissions
+            }));
+
+            res.status(201).json(normalized);
         } else if (req.method === 'PUT') {
             const { id, ...updatedUser } = req.body;
 
@@ -113,14 +121,14 @@ export default async function handler(req, res) {
                 updatedUser.password = bcrypt.hashSync(updatedUser.password, salt);
             }
 
-            // Filter fields for update
+            // Filter fields for update (map frontend names to DB columns)
             const cleanedUpdate = {};
             if (updatedUser.email) cleanedUpdate.email = updatedUser.email;
             if (updatedUser.password) cleanedUpdate.password = updatedUser.password;
             if (updatedUser.name) cleanedUpdate.name = updatedUser.name;
             if (updatedUser.role) cleanedUpdate.role = updatedUser.role;
             if (updatedUser.permissions) cleanedUpdate.permissions = Array.isArray(updatedUser.permissions) ? JSON.stringify(updatedUser.permissions) : updatedUser.permissions;
-            if (updatedUser.roleTitle) cleanedUpdate.roleTitle = updatedUser.roleTitle;
+            if (updatedUser.roleTitle) cleanedUpdate.role_title = updatedUser.roleTitle;
 
             const { error: updateError } = await supabase
                 .from('portfolio_users')
@@ -134,7 +142,13 @@ export default async function handler(req, res) {
                 .select('*');
             if (fetchError) throw fetchError;
 
-            res.status(200).json(allUsers);
+            const normalized = (allUsers || []).map(u => ({
+                ...u,
+                roleTitle: u.role_title ?? u.roleTitle,
+                permissions: typeof u.permissions === 'string' ? JSON.parse(u.permissions) : u.permissions
+            }));
+
+            res.status(200).json(normalized);
         } else if (req.method === 'DELETE') {
             const { id } = req.body;
 
@@ -161,7 +175,13 @@ export default async function handler(req, res) {
                 .select('*');
             if (fetchError) throw fetchError;
 
-            res.status(200).json(allUsers);
+            const normalized = (allUsers || []).map(u => ({
+                ...u,
+                roleTitle: u.role_title ?? u.roleTitle,
+                permissions: typeof u.permissions === 'string' ? JSON.parse(u.permissions) : u.permissions
+            }));
+
+            res.status(200).json(normalized);
         } else {
             res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
             res.status(405).end(`Method ${req.method} Not Allowed`);
