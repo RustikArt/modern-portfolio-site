@@ -1149,7 +1149,9 @@ export const DataProvider = ({ children }) => {
 
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                return { success: false, message: err.error || 'Identifiants ou mot de passe incorrects.' };
+                const msg = err.error || err.message || 'Identifiants ou mot de passe incorrects.';
+                try { addNotification('account', `Échec connexion : ${msg}`); } catch (e) { console.warn('addNotification unavailable', e); }
+                return { success: false, message: msg };
             }
 
             const { user } = await res.json();
@@ -1167,6 +1169,7 @@ export const DataProvider = ({ children }) => {
             return { success: true, isAdmin: user.role === 'admin' };
         } catch (e) {
             console.error('Login error:', e);
+            try { addNotification('account', 'Impossible de contacter le serveur.'); } catch (e2) { /* ignore */ }
             return { success: false, message: 'Impossible de contacter le serveur.' };
         }
     };

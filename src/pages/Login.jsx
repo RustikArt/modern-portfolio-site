@@ -9,28 +9,40 @@ const Login = () => {
     const [name, setName] = useState('');
     const [error, setError] = useState('');
 
-    const { login, register } = useData();
+    const { login, register, addNotification } = useData();
     const navigate = useNavigate();
     const location = useLocation();
+    const [loading, setLoading] = useState(false);
 
     const handleAuth = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
-        if (isLogin) {
-            const result = login(email, password);
-            if (result.success) {
-                navigate('/');
+        try {
+            if (isLogin) {
+                const result = await login(email, password);
+                if (result.success) {
+                    navigate('/');
+                } else {
+                    setError(result.message);
+                    try { addNotification('account', `Échec connexion : ${result.message}`); } catch (e) {}
+                }
             } else {
-                setError(result.message);
+                const result = await register(email, password, name);
+                if (result.success) {
+                    navigate('/');
+                } else {
+                    setError(result.message);
+                    try { addNotification('account', `Inscription échouée : ${result.message}`); } catch (e) {}
+                }
             }
-        } else {
-            const result = await register(email, password, name);
-            if (result.success) {
-                navigate('/');
-            } else {
-                setError(result.message);
-            }
+        } catch (e) {
+            console.error('Auth handler error:', e);
+            setError('Erreur inattendue.');
+            try { addNotification('account', 'Erreur inattendue lors de l\'authentification.'); } catch (err) {}
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -61,8 +73,8 @@ const Login = () => {
 
                     {error && <p style={{ color: 'red', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</p>}
 
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                        {isLogin ? 'Se connecter' : "S'inscrire"}
+                    <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+                        {loading ? 'Connexion…' : (isLogin ? 'Se connecter' : "S'inscrire")}
                     </button>
                 </form>
 
