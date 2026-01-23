@@ -1744,3 +1744,6 @@ export const DataProvider = ({ children }) => {
         </DataContext.Provider>
     );
 };
+
+export { DataProvider };
+export default DataContext;
