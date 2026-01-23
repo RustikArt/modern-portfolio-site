@@ -632,22 +632,8 @@ export const DataProvider = ({ children }) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     };
 
-    // Announcement Banner State
-    const [announcement, setAnnouncement] = useState(() => {
-        const saved = localStorage.getItem('portfolio_announcement');
-        const defaultAnn = {
-            text: '🚀 Nouveau site en ligne ! Découvrez nos projets récents.',
-            bgColor: '#d4af37',
-            textColor: '#000000',
-            isActive: true,
-            link: '/projects',
-            version: 1.1
-        };
-        if (!saved) return defaultAnn;
-        const parsed = JSON.parse(saved);
-        if (parsed.version !== defaultAnn.version) return defaultAnn;
-        return parsed;
-    });
+    // Announcement Banner State (from Supabase)
+    const [announcement, setAnnouncement] = useState(null);
 
     const [loginHistory, setLoginHistory] = useState(() => {
         const saved = localStorage.getItem('portfolio_login_history');
@@ -696,7 +682,14 @@ export const DataProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : defaultHomeContent;
     });
 
-    // --- GLOBAL SETTINGS (New) ---
+    // Add effect to save announcement to localStorage for dismissal tracking
+    useEffect(() => {
+        if (announcement) {
+            localStorage.setItem('portfolio_announcement', JSON.stringify(announcement));
+        }
+    }, [announcement]);
+
+    // --- GLOBAL SETTINGS (from Supabase) ---
     const [settings, setSettings] = useState(() => {
         const defaultSettings = {
             maintenanceMode: false,
@@ -710,26 +703,20 @@ export const DataProvider = ({ children }) => {
                 discord: 'https://discord.gg/uaKYcrfyN6',
                 linkedin: ''
             },
-            version: 1.1 // Increment to force updates
+            version: 1.1
         };
+        // Load from localStorage as fallback while waiting for Supabase
         const saved = localStorage.getItem('portfolio_settings');
-        if (!saved) return defaultSettings;
-
-        const parsed = JSON.parse(saved);
-        // Force update socials if they are using the placeholder ones
-        if (parsed.version !== defaultSettings.version) {
-            return { ...defaultSettings, ...parsed, socials: defaultSettings.socials, version: defaultSettings.version };
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return { ...defaultSettings, ...parsed };
+            } catch (e) {
+                return defaultSettings;
+            }
         }
-        return { ...defaultSettings, ...parsed };
+        return defaultSettings;
     });
-
-    useEffect(() => {
-        localStorage.setItem('portfolio_settings', JSON.stringify(settings));
-    }, [settings]);
-
-    const updateSettings = (newSettings) => {
-        setSettings(prev => ({ ...prev, ...newSettings }));
-    };
 
     // --- FETCH DATA ON MOUNT ---
     useEffect(() => {
@@ -843,6 +830,55 @@ export const DataProvider = ({ children }) => {
             }
         };
         fetchData();
+    }, []);
+
+    // --- FETCH SETTINGS & ANNOUNCEMENTS FROM SUPABASE ---
+    useEffect(() => {
+        const fetchSupabaseData = async () => {
+            if (!supabase) return;
+
+            try {
+                // Fetch settings
+                const { data: settingsData, error: settingsError } = await supabase
+                    .from('portfolio_settings')
+                    .select('*')
+                    .order('id', { ascending: false })
+                    .limit(1);
+
+                if (settingsError) {
+                    console.error('Error fetching settings:', settingsError);
+                } else if (settingsData && settingsData.length > 0) {
+                    const fetchedSettings = settingsData[0];
+                    setSettings(prev => ({
+                        ...prev,
+                        maintenanceMode: fetchedSettings.maintenance_mode || prev.maintenanceMode,
+                        siteTitle: fetchedSettings.site_title || prev.siteTitle,
+                        contactEmail: fetchedSettings.contact_email || prev.contactEmail,
+                        supportPhone: fetchedSettings.support_phone || prev.supportPhone,
+                        socials: fetchedSettings.socials || prev.socials
+                    }));
+                }
+
+                // Fetch announcement
+                const { data: announcementData, error: announcementError } = await supabase
+                    .from('portfolio_announcements')
+                    .select('*')
+                    .eq('is_archived', false)
+                    .eq('is_active', true)
+                    .order('updated_at', { ascending: false })
+                    .limit(1);
+
+                if (announcementError) {
+                    console.error('Error fetching announcement:', announcementError);
+                } else if (announcementData && announcementData.length > 0) {
+                    setAnnouncement(announcementData[0]);
+                }
+            } catch (error) {
+                console.error('Failed to fetch Supabase data:', error);
+            }
+        };
+
+        fetchSupabaseData();
     }, []);
 
     // --- PERSISTENCE --- (Now handled by API)
@@ -1654,8 +1690,149 @@ export const DataProvider = ({ children }) => {
     };
 
     // --- ANNOUNCEMENT & NOTIFICATIONS ACTIONS ---
-    const updateAnnouncement = (config) => {
-        setAnnouncement(prev => ({ ...prev, ...config }));
+    const updateAnnouncement = async (config) => {
+        try {
+            // Update in Supabase if user is authenticated
+            if (supabase && currentUser) {
+                let error;
+                
+                if (announcement && announcement.id) {
+                    // Update existing
+                    const result = await supabase
+                        .from('portfolio_announcements')
+                        .update({
+                            ...config,
+                            text: config.text || announcement.text,
+                            updated_by: currentUser.id,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', announcement.id);
+                    
+                    error = result.error;
+                } else {
+                    // Create new if doesn't exist
+                    const result = await supabase
+                        .from('portfolio_announcements')
+                        .insert([{
+                            text: config.text || 'Annonce',
+                            subtext: config.subtext || '',
+                            bg_color: config.bgColor || '#d4af37',
+                            text_color: config.textColor || '#000000',
+                            is_active: config.isActive !== undefined ? config.isActive : true,
+                            link: config.link || '',
+                            show_timer: config.showTimer || false,
+                            timer_end: config.timerEnd || null,
+                            font_weight: config.fontWeight || '700',
+                            font_style: config.fontStyle || 'normal',
+                            height: config.height || '56px',
+                            created_by: currentUser.id,
+                            updated_by: currentUser.id
+                        }])
+                        .select();
+                    
+                    error = result.error;
+                    if (!error && result.data && result.data.length > 0) {
+                        setAnnouncement(result.data[0]);
+                    }
+                }
+
+                if (error) {
+                    console.error('Error updating announcement:', error);
+                    addNotification('error', 'Erreur: impossible de sauvegarder l\'annonce');
+                    return;
+                }
+
+                // Log activity
+                await logActivity('UPDATE', 'announcement_banner', announcement?.id || 'new', config);
+
+                // Update local state
+                setAnnouncement(prev => prev ? { ...prev, ...config } : prev);
+                addNotification('success', 'Annonce mise à jour avec succès');
+            } else {
+                // Fallback: just update local state if not authenticated
+                setAnnouncement(prev => prev ? { ...prev, ...config } : prev);
+            }
+        } catch (error) {
+            console.error('Failed to update announcement:', error);
+            addNotification('error', 'Erreur: impossible de sauvegarder l\'annonce');
+        }
+    };
+
+    const updateSettings = async (newSettings) => {
+        try {
+            // Update in Supabase if authenticated
+            if (supabase && currentUser) {
+                // First try to update
+                const { error: updateError, data: updateData } = await supabase
+                    .from('portfolio_settings')
+                    .update({
+                        maintenance_mode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
+                        site_title: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
+                        contact_email: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
+                        support_phone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
+                        socials: newSettings.socials || settings.socials,
+                        updated_by: currentUser.id,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', 1);
+
+                // If update failed (no row exists), try to insert
+                if (updateError && updateError.message?.includes('No rows')) {
+                    const { error: insertError } = await supabase
+                        .from('portfolio_settings')
+                        .insert([{
+                            id: 1,
+                            maintenance_mode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
+                            site_title: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
+                            contact_email: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
+                            support_phone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
+                            socials: newSettings.socials || settings.socials,
+                            updated_by: currentUser.id
+                        }]);
+
+                    if (insertError) {
+                        console.error('Error creating settings:', insertError);
+                        addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
+                        return;
+                    }
+                } else if (updateError) {
+                    console.error('Error updating settings:', updateError);
+                    addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
+                    return;
+                }
+
+                // Log activity
+                await logActivity('UPDATE', 'site_settings', 1, newSettings);
+
+                // Update local state
+                setSettings(prev => ({ ...prev, ...newSettings }));
+                addNotification('success', 'Paramètres mis à jour avec succès');
+            } else {
+                // Fallback: just update local state
+                setSettings(prev => ({ ...prev, ...newSettings }));
+            }
+        } catch (error) {
+            console.error('Failed to update settings:', error);
+            addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
+        }
+    };
+
+    const logActivity = async (action, resourceType, resourceId, details = {}) => {
+        if (!supabase || !currentUser) return;
+
+        try {
+            await supabase.from('portfolio_activity_logs').insert([{
+                user_id: currentUser.id,
+                action,
+                resource_type: resourceType,
+                resource_id: resourceId,
+                details,
+                ip_address: 'client',
+                user_agent: navigator.userAgent
+            }]);
+        } catch (error) {
+            console.error('Failed to log activity:', error);
+        }
     };
 
     const addNotification = (type, message) => {
@@ -1712,7 +1889,7 @@ export const DataProvider = ({ children }) => {
             homeContent, setHomeContent,
 
             // Settings
-            settings, updateSettings,
+            settings, updateSettings, logActivity,
 
             // Wishlist
             wishlist, toggleWishlist, isInWishlist,
