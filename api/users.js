@@ -8,15 +8,25 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_P
 
 // Create Supabase client
 let supabase = null;
+console.log('[api/users] Initializing Supabase client...');
+console.log('[api/users] SUPABASE_URL present?', !!SUPABASE_URL);
+console.log('[api/users] SUPABASE_KEY present?', !!SUPABASE_KEY);
+
 if (SUPABASE_URL && SUPABASE_KEY) {
     try {
         supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('[api/users] ✓ Supabase client initialized successfully');
     } catch (e) {
-        console.error('Supabase Init Error:', e);
+        console.error('[api/users] ✗ Supabase Init Error:', e.message);
+        console.error('[api/users] Full error:', e);
     }
 } else {
-    console.error('CRITICAL: Supabase credentials missing in environment variables');
-    console.error('Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env');
+    console.error('[api/users] CRITICAL: Supabase credentials missing');
+    console.error('[api/users] NEXT_PUBLIC_SUPABASE_URL:', SUPABASE_URL ? '✓ present' : '✗ MISSING');
+    console.error('[api/users] SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_KEY ? '✓ present' : '✗ MISSING');
+    console.error('[api/users] env.NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✓ present' : '✗ MISSING');
+    console.error('[api/users] env.SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✓ present' : '✗ MISSING');
+    console.error('[api/users] env.NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✓ present' : '✗ MISSING');
 }
 
 export default async function handler(req, res) {
@@ -125,8 +135,35 @@ export default async function handler(req, res) {
             if (fetchError) throw fetchError;
 
             res.status(200).json(allUsers);
+        } else if (req.method === 'DELETE') {
+            const { id } = req.body;
+
+            if (!id) {
+                return res.status(400).json({ error: 'ID requis pour la suppression.' });
+            }
+
+            const { error: deleteError } = await supabase
+                .from('portfolio_users')
+                .delete()
+                .eq('id', id);
+
+            if (deleteError) {
+                console.error('Supabase Delete User Error:', deleteError);
+                return res.status(500).json({
+                    error: 'Échec de la suppression de l\'utilisateur.',
+                    message: deleteError.message,
+                    details: deleteError
+                });
+            }
+
+            const { data: allUsers, error: fetchError } = await supabase
+                .from('portfolio_users')
+                .select('*');
+            if (fetchError) throw fetchError;
+
+            res.status(200).json(allUsers);
         } else {
-            res.setHeader('Allow', ['GET', 'POST', 'PUT']);
+            res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
     } catch (error) {

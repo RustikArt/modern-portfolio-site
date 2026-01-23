@@ -12,7 +12,9 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 // Create Supabase client
+console.log('[api/promo-codes] Creating Supabase client...');
 const supabase = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+console.log('[api/promo-codes] Supabase client created:', supabase ? '✓' : '✗ NULL');
 
 export default async function handler(req, res) {
     // Configurer les headers CORS

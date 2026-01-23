@@ -7,15 +7,25 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_P
 
 // Create Supabase client
 let supabase = null;
+console.log('[api/orders] Initializing Supabase client...');
+console.log('[api/orders] SUPABASE_URL present?', !!SUPABASE_URL);
+console.log('[api/orders] SUPABASE_KEY present?', !!SUPABASE_KEY);
+
 if (SUPABASE_URL && SUPABASE_KEY) {
     try {
         supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('[api/orders] ✓ Supabase client initialized successfully');
     } catch (e) {
-        console.error('Supabase Init Error:', e);
+        console.error('[api/orders] ✗ Supabase Init Error:', e.message);
+        console.error('[api/orders] Full error:', e);
     }
 } else {
-    console.error('CRITICAL: Supabase credentials missing in environment variables');
-    console.error('Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env');
+    console.error('[api/orders] CRITICAL: Supabase credentials missing');
+    console.error('[api/orders] NEXT_PUBLIC_SUPABASE_URL:', SUPABASE_URL ? '✓ present' : '✗ MISSING');
+    console.error('[api/orders] SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_KEY ? '✓ present' : '✗ MISSING');
+    console.error('[api/orders] env.NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✓ present' : '✗ MISSING');
+    console.error('[api/orders] env.SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✓ present' : '✗ MISSING');
+    console.error('[api/orders] env.NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✓ present' : '✗ MISSING');
 }
 
 export default async function handler(req, res) {
