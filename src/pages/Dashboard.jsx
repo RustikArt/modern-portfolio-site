@@ -3,6 +3,7 @@ import { useData, AVAILABLE_PERMISSIONS } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
 import BlockEditor from '../components/BlockEditor';
+import * as LucideIcons from 'lucide-react';
 import {
     LayoutDashboard,
     ShoppingBag,
@@ -45,13 +46,58 @@ import {
     AlignLeft,
     AlignCenter,
     PieChart,
-    BarChart3
+    BarChart3,
+    Sparkles,
+    Ban,
+    Code,
+    PenLine
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import ActivityLog from '../components/dashboard/ActivityLog';
 import { downloadCSV } from '../utils/export';
 import { sendShippingUpdate, sendVideoProof } from '../utils/emailService';
+
+// Liste des icônes Lucide populaires pour le sélecteur de banderole
+const BANNER_ICON_OPTIONS = [
+    { name: 'none', label: 'Aucune icône' },
+    { name: 'Sparkles', label: 'Sparkles (Étincelles)' },
+    { name: 'Star', label: 'Star (Étoile)' },
+    { name: 'Zap', label: 'Zap (Éclair)' },
+    { name: 'Bell', label: 'Bell (Cloche)' },
+    { name: 'Gift', label: 'Gift (Cadeau)' },
+    { name: 'Heart', label: 'Heart (Cœur)' },
+    { name: 'Tag', label: 'Tag (Étiquette)' },
+    { name: 'Percent', label: 'Percent (Pourcentage)' },
+    { name: 'ShoppingBag', label: 'ShoppingBag (Sac)' },
+    { name: 'Truck', label: 'Truck (Livraison)' },
+    { name: 'Clock', label: 'Clock (Horloge)' },
+    { name: 'AlertCircle', label: 'AlertCircle (Alerte)' },
+    { name: 'Info', label: 'Info (Information)' },
+    { name: 'Megaphone', label: 'Megaphone (Annonce)' },
+    { name: 'PartyPopper', label: 'PartyPopper (Fête)' },
+    { name: 'Flame', label: 'Flame (Flamme)' },
+    { name: 'Crown', label: 'Crown (Couronne)' },
+    { name: 'Trophy', label: 'Trophy (Trophée)' },
+    { name: 'Rocket', label: 'Rocket (Fusée)' },
+    { name: 'BadgePercent', label: 'BadgePercent (Badge %)' },
+    { name: 'CircleDollarSign', label: 'CircleDollarSign (Dollar)' },
+    { name: 'Banknote', label: 'Banknote (Billet)' },
+    { name: 'TicketPercent', label: 'TicketPercent (Promo)' },
+    { name: 'CalendarDays', label: 'CalendarDays (Calendrier)' },
+    { name: 'Timer', label: 'Timer (Minuteur)' },
+    { name: 'Mail', label: 'Mail (Email)' },
+    { name: 'MessageCircle', label: 'MessageCircle (Message)' },
+    { name: 'ThumbsUp', label: 'ThumbsUp (Pouce)' },
+    { name: 'Award', label: 'Award (Récompense)' },
+];
+
+// Helper pour rendre une icône Lucide par son nom
+const renderLucideIcon = (iconName, props = {}) => {
+    if (!iconName || iconName === 'none') return null;
+    const IconComponent = LucideIcons[iconName];
+    return IconComponent ? <IconComponent {...props} /> : null;
+};
 
 const Dashboard = () => {
     const {
@@ -131,7 +177,7 @@ const Dashboard = () => {
     const [announcementTimerEnd, setAnnouncementTimerEnd] = useState(announcement?.timerEnd || '');
     const [announcementLink, setAnnouncementLink] = useState(announcement?.link || '');
     const [announcementHeight, setAnnouncementHeight] = useState(announcement?.height || '56px');
-    const [announcementEmoji, setAnnouncementEmoji] = useState(announcement?.emoji || '✨');
+    const [announcementIcon, setAnnouncementIcon] = useState(announcement?.icon || 'Sparkles');
     const [announcementTextAlign, setAnnouncementTextAlign] = useState(announcement?.textAlign || 'left');
     const [announcementTimerPosition, setAnnouncementTimerPosition] = useState(announcement?.timerPosition || 'right');
 
@@ -722,34 +768,42 @@ const Dashboard = () => {
                                     {/* Order Status Pie Chart */}
                                     <div style={cardStyle}>
                                         <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Statuts des Commandes</h3>
-                                        <ResponsiveContainer width="100%" height={220}>
-                                            <RechartsPie>
-                                                <Pie
-                                                    data={(() => {
-                                                        const statusCounts = { 'Réception': 0, 'En cours': 0, 'Terminé': 0, 'En attente': 0 };
-                                                        orders.filter(o => !isArchived(o)).forEach(o => {
-                                                            if (o.status === 'Payé') statusCounts['Réception']++;
-                                                            else if (statusCounts[o.status] !== undefined) statusCounts[o.status]++;
-                                                        });
-                                                        return Object.entries(statusCounts).map(([name, value]) => ({ name, value })).filter(d => d.value > 0);
-                                                    })()}
-                                                    cx="50%"
-                                                    cy="50%"
-                                                    innerRadius={50}
-                                                    outerRadius={80}
-                                                    paddingAngle={3}
-                                                    dataKey="value"
-                                                    label={({ name, value }) => `${name}: ${value}`}
-                                                    labelLine={false}
-                                                >
-                                                    <Cell fill="#ff4d4d" />
-                                                    <Cell fill="#ffd700" />
-                                                    <Cell fill="#4caf50" />
-                                                    <Cell fill="#ff8c00" />
-                                                </Pie>
-                                                <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} />
-                                            </RechartsPie>
-                                        </ResponsiveContainer>
+                                        {(() => {
+                                            const statusCounts = { 'Réception': 0, 'En cours': 0, 'Terminé': 0, 'En attente': 0 };
+                                            orders.filter(o => !isArchived(o)).forEach(o => {
+                                                if (o.status === 'Payé') statusCounts['Réception']++;
+                                                else if (statusCounts[o.status] !== undefined) statusCounts[o.status]++;
+                                            });
+                                            const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name, value })).filter(d => d.value > 0);
+                                            
+                                            if (pieData.length === 0) {
+                                                return <p style={{ color: '#555', fontSize: '0.85rem', textAlign: 'center', padding: '3rem 0' }}>Aucune commande à afficher</p>;
+                                            }
+                                            
+                                            return (
+                                                <ResponsiveContainer width="100%" height={220} minWidth={0}>
+                                                    <RechartsPie>
+                                                        <Pie
+                                                            data={pieData}
+                                                            cx="50%"
+                                                            cy="50%"
+                                                            innerRadius={50}
+                                                            outerRadius={80}
+                                                            paddingAngle={3}
+                                                            dataKey="value"
+                                                            label={({ name, value }) => `${name}: ${value}`}
+                                                            labelLine={false}
+                                                        >
+                                                            {pieData.map((entry, index) => {
+                                                                const colors = { 'Réception': '#ff4d4d', 'En cours': '#ffd700', 'Terminé': '#4caf50', 'En attente': '#ff8c00' };
+                                                                return <Cell key={`cell-${index}`} fill={colors[entry.name] || '#888'} />;
+                                                            })}
+                                                        </Pie>
+                                                        <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} />
+                                                    </RechartsPie>
+                                                </ResponsiveContainer>
+                                            );
+                                        })()}
                                         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
                                             <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff4d4d' }}></span> Réception</span>
                                             <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffd700' }}></span> En cours</span>
@@ -761,28 +815,33 @@ const Dashboard = () => {
                                     {/* Category Sales Bar Chart */}
                                     <div style={cardStyle}>
                                         <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Ventes par Catégorie</h3>
-                                        <ResponsiveContainer width="100%" height={250}>
-                                            <BarChart
-                                                data={(() => {
-                                                    const catSales = {};
-                                                    orders.filter(o => o.status === 'Terminé' || isArchived(o)).forEach(order => {
-                                                        (order.items || []).forEach(item => {
-                                                            const product = products.find(p => p.id === item.productId);
-                                                            const cat = product?.category || 'Autre';
-                                                            catSales[cat] = (catSales[cat] || 0) + (item.price || 0) * (item.quantity || 1);
-                                                        });
-                                                    });
-                                                    return Object.entries(catSales).map(([name, total]) => ({ name, total: Math.round(total) })).sort((a, b) => b.total - a.total).slice(0, 5);
-                                                })()}
-                                                margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
-                                            >
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                                <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
-                                                <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
-                                                <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
-                                                <Bar dataKey="total" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
-                                            </BarChart>
-                                        </ResponsiveContainer>
+                                        {(() => {
+                                            const catSales = {};
+                                            orders.filter(o => o.status === 'Terminé' || isArchived(o)).forEach(order => {
+                                                (order.items || []).forEach(item => {
+                                                    const product = products.find(p => p.id === item.productId);
+                                                    const cat = product?.category || 'Autre';
+                                                    catSales[cat] = (catSales[cat] || 0) + (item.price || 0) * (item.quantity || 1);
+                                                });
+                                            });
+                                            const barData = Object.entries(catSales).map(([name, total]) => ({ name, total: Math.round(total) })).sort((a, b) => b.total - a.total).slice(0, 5);
+                                            
+                                            if (barData.length === 0) {
+                                                return <p style={{ color: '#555', fontSize: '0.85rem', textAlign: 'center', padding: '3rem 0' }}>Aucune vente terminée</p>;
+                                            }
+                                            
+                                            return (
+                                                <ResponsiveContainer width="100%" height={250} minWidth={0}>
+                                                    <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+                                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                                                        <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
+                                                        <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
+                                                        <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
+                                                        <Bar dataKey="total" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
 
@@ -1461,8 +1520,8 @@ const Dashboard = () => {
                                                                             }}
                                                                             style={{ accentColor: 'var(--color-accent)' }}
                                                                         />
-                                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                                            <span style={{ fontSize: '0.9rem' }}>{perm.icon}</span>
+                                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ccc' }}>
+                                                                            <span style={{ color: 'var(--color-accent)', display: 'flex' }}>{renderLucideIcon(perm.icon, { size: 14 })}</span>
                                                                             {perm.label}
                                                                         </span>
                                                                     </label>
@@ -1941,15 +2000,28 @@ const Dashboard = () => {
                                             {/* Nouvelles options de personnalisation */}
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                                 <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Emoji (à gauche)</label>
-                                                    <input
-                                                        type="text"
-                                                        value={announcementEmoji}
-                                                        onChange={(e) => setAnnouncementEmoji(e.target.value)}
-                                                        style={inputStyle}
-                                                        placeholder="✨"
-                                                        maxLength={4}
-                                                    />
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Icône (à gauche)</label>
+                                                    <div style={{ position: 'relative' }}>
+                                                        <select
+                                                            value={announcementIcon}
+                                                            onChange={(e) => setAnnouncementIcon(e.target.value)}
+                                                            style={{ ...inputStyle, paddingLeft: '2.5rem' }}
+                                                        >
+                                                            {BANNER_ICON_OPTIONS.map(opt => (
+                                                                <option key={opt.name} value={opt.name}>{opt.label}</option>
+                                                            ))}
+                                                        </select>
+                                                        <div style={{ 
+                                                            position: 'absolute', 
+                                                            left: '0.75rem', 
+                                                            top: '50%', 
+                                                            transform: 'translateY(-50%)',
+                                                            color: announcementIcon === 'none' ? '#666' : 'var(--color-accent)',
+                                                            pointerEvents: 'none'
+                                                        }}>
+                                                            {announcementIcon === 'none' ? <Ban size={16} /> : renderLucideIcon(announcementIcon, { size: 16 })}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Épaisseur</label>
@@ -2053,7 +2125,9 @@ const Dashboard = () => {
                                                     border: '1px solid rgba(212, 175, 55, 0.15)'
                                                 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: announcementTextAlign === 'center' ? 'none' : 1 }}>
-                                                        <span style={{ color: '#d4af37' }}>{announcementEmoji || '✨'}</span>
+                                                        {announcementIcon && announcementIcon !== 'none' && (
+                                                            <span style={{ color: '#d4af37', display: 'flex' }}>{renderLucideIcon(announcementIcon, { size: 18 })}</span>
+                                                        )}
                                                         <span>{announcementText || 'Texte de votre annonce...'}</span>
                                                         {announcementShowTimer && announcementTimerPosition === 'inline' && (
                                                             <span style={{ color: '#d4af37', fontFamily: 'monospace', marginLeft: '0.5rem' }}>00h 00m 00s</span>
@@ -2087,7 +2161,7 @@ const Dashboard = () => {
                                                         timerEnd: announcementTimerEnd || null,
                                                         link: announcementLink,
                                                         height: announcementHeight,
-                                                        emoji: announcementEmoji,
+                                                        icon: announcementIcon,
                                                         textAlign: announcementTextAlign,
                                                         timerPosition: announcementTimerPosition
                                                     });

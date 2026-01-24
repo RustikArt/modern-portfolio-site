@@ -10,20 +10,41 @@
 
 -- ============================================================
 -- MISE À JOUR DE LA TABLE portfolio_announcements
--- Ajout des colonnes: emoji, text_align, timer_position
+-- Ajout des colonnes: icon, text_align, timer_position
 -- ============================================================
 
--- Ajouter la colonne emoji si elle n'existe pas
+-- Ajouter la colonne icon si elle n'existe pas (nom de l'icône Lucide)
 DO $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.columns 
         WHERE table_schema = 'public' 
         AND table_name = 'portfolio_announcements' 
-        AND column_name = 'emoji'
+        AND column_name = 'icon'
     ) THEN
         ALTER TABLE public.portfolio_announcements 
-        ADD COLUMN emoji VARCHAR(10) DEFAULT '✨';
+        ADD COLUMN icon VARCHAR(50) DEFAULT 'Sparkles';
+    END IF;
+END $$;
+
+-- Renommer emoji en icon si emoji existe encore
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'portfolio_announcements' 
+        AND column_name = 'emoji'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'portfolio_announcements' 
+        AND column_name = 'icon'
+    ) THEN
+        ALTER TABLE public.portfolio_announcements 
+        RENAME COLUMN emoji TO icon;
+        ALTER TABLE public.portfolio_announcements 
+        ALTER COLUMN icon SET DEFAULT 'Sparkles';
     END IF;
 END $$;
 

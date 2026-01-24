@@ -28,31 +28,31 @@ export const ROLES = {
     CLIENT: 'client'
 };
 
-// Permissions par onglet du dashboard
-export const AVAILABLE_PERMISSIONS = {
+// Permissions par onglet du dashboard (tableau pour faciliter l'itération)
+export const AVAILABLE_PERMISSIONS = [
     // Gestion
-    'tab_overview': { label: 'Vue d\'ensemble', category: 'Gestion', icon: 'LayoutDashboard' },
-    'tab_orders': { label: 'Commandes', category: 'Gestion', icon: 'ShoppingBag' },
-    'tab_clients': { label: 'Clients', category: 'Gestion', icon: 'Users' },
+    { id: 'tab_overview', label: 'Vue d\'ensemble', category: 'Gestion', icon: 'LayoutDashboard' },
+    { id: 'tab_orders', label: 'Commandes', category: 'Gestion', icon: 'ShoppingBag' },
+    { id: 'tab_clients', label: 'Clients', category: 'Gestion', icon: 'Users' },
     // Boutique
-    'tab_products': { label: 'Produits', category: 'Boutique', icon: 'Plus' },
-    'tab_promos': { label: 'Codes Promo', category: 'Boutique', icon: 'Zap' },
-    'tab_reviews': { label: 'Avis Clients', category: 'Boutique', icon: 'Star' },
+    { id: 'tab_products', label: 'Produits', category: 'Boutique', icon: 'Package' },
+    { id: 'tab_promos', label: 'Codes Promo', category: 'Boutique', icon: 'Zap' },
+    { id: 'tab_reviews', label: 'Avis Clients', category: 'Boutique', icon: 'Star' },
     // Contenu
-    'tab_projects': { label: 'Projets / Portfolio', category: 'Contenu', icon: 'FileCode' },
-    'tab_homeEditor': { label: 'Editeur Accueil', category: 'Contenu', icon: 'Layers' },
+    { id: 'tab_projects', label: 'Projets / Portfolio', category: 'Contenu', icon: 'Code' },
+    { id: 'tab_homeEditor', label: 'Editeur Accueil', category: 'Contenu', icon: 'Palette' },
     // Système
-    'tab_security': { label: 'Sécurité', category: 'Système', icon: 'Shield' },
-    'tab_settings': { label: 'Paramètres', category: 'Système', icon: 'Globe' },
+    { id: 'tab_security', label: 'Sécurité', category: 'Système', icon: 'Shield' },
+    { id: 'tab_settings', label: 'Paramètres', category: 'Système', icon: 'Settings' },
     // Actions spéciales
-    'create_reviews': { label: 'Créer des avis', category: 'Actions', icon: 'Star' },
-    'manage_users': { label: 'Gérer les utilisateurs', category: 'Actions', icon: 'UserPlus' },
-    'full_reset': { label: 'Réinitialisation complète', category: 'Actions', icon: 'RotateCcw' }
-};
+    { id: 'create_reviews', label: 'Créer des avis', category: 'Actions', icon: 'PenLine' },
+    { id: 'manage_users', label: 'Gérer les utilisateurs', category: 'Actions', icon: 'UserPlus' },
+    { id: 'full_reset', label: 'Réinitialisation complète', category: 'Actions', icon: 'RotateCcw' }
+];
 
 const PERMISSIONS = {
     [ROLES.SUPER_ADMIN]: ['all'],
-    [ROLES.ADMIN]: Object.keys(AVAILABLE_PERMISSIONS),
+    [ROLES.ADMIN]: AVAILABLE_PERMISSIONS.map(p => p.id),
     [ROLES.MODERATOR]: ['tab_overview', 'tab_orders', 'tab_clients', 'tab_reviews'],
     [ROLES.EDITOR]: ['tab_overview', 'tab_projects', 'tab_homeEditor'],
     [ROLES.CLIENT]: []
@@ -967,7 +967,7 @@ export const DataProvider = ({ children }) => {
                             fontWeight: data.font_weight || data.fontWeight,
                             fontStyle: data.font_style || data.fontStyle,
                             height: data.height,
-                            emoji: data.emoji || '✨',
+                            icon: data.icon || 'Sparkles',
                             textAlign: data.text_align || data.textAlign || 'left',
                             timerPosition: data.timer_position || data.timerPosition || 'right',
                             createdAt: data.created_at || data.createdAt,
@@ -1991,7 +1991,7 @@ export const DataProvider = ({ children }) => {
                     fontWeight: data.font_weight || data.fontWeight,
                     fontStyle: data.font_style || data.fontStyle,
                     height: data.height,
-                    emoji: data.emoji || '✨',
+                    icon: data.icon || 'Sparkles',
                     textAlign: data.text_align || data.textAlign || 'left',
                     timerPosition: data.timer_position || data.timerPosition || 'right',
                     createdAt: data.created_at || data.createdAt,

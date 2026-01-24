@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useData } from '../context/DataContext';
+import * as LucideIcons from 'lucide-react';
 import { X } from 'lucide-react';
+
+// Helper pour rendre une icône Lucide par son nom
+const renderLucideIcon = (iconName, props = {}) => {
+    if (!iconName || iconName === 'none') return null;
+    const IconComponent = LucideIcons[iconName];
+    return IconComponent ? <IconComponent {...props} /> : null;
+};
 
 const AnnouncementBanner = () => {
     const { announcement } = useData();
@@ -68,7 +76,7 @@ const AnnouncementBanner = () => {
 
     const textAlign = announcement.textAlign || 'left';
     const timerPosition = announcement.timerPosition || 'right';
-    const emoji = announcement.emoji || '✨';
+    const icon = announcement.icon || 'Sparkles';
 
     const bannerStyle = {
         backgroundColor: 'rgba(5, 5, 5, 0.95)',
@@ -155,7 +163,9 @@ const AnnouncementBanner = () => {
                         alignItems: 'center',
                         gap: '0.5rem'
                     }}>
-                        <span style={{ color: '#d4af37', fontSize: '1.1rem' }}>{emoji}</span>
+                        {icon && icon !== 'none' && (
+                            <span style={{ color: '#d4af37', display: 'flex' }}>{renderLucideIcon(icon, { size: 18 })}</span>
+                        )}
                         {renderTextWithLink()}
                         {/* Timer inline si position = inline */}
                         {announcement.showTimer && timerPosition === 'inline' && timeLeft !== 'EXPIRE' && (

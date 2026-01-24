@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS public.portfolio_announcements (
     font_weight VARCHAR(20) DEFAULT '700',
     font_style VARCHAR(20) DEFAULT 'normal',
     height VARCHAR(20) DEFAULT '56px',
-    emoji VARCHAR(10) DEFAULT '✨',
+    icon VARCHAR(50) DEFAULT 'Sparkles',
     text_align VARCHAR(20) DEFAULT 'left',
     timer_position VARCHAR(20) DEFAULT 'right',
     created_at TIMESTAMPTZ DEFAULT NOW(),

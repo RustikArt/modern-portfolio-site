@@ -45,7 +45,7 @@ export default async function handler(req, res) {
                 fontWeight,
                 fontStyle,
                 height,
-                emoji,
+                icon,
                 textAlign,
                 timerPosition
             } = req.body;
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
                 font_weight: fontWeight || '700',
                 font_style: fontStyle || 'normal',
                 height: height || '56px',
-                emoji: emoji || '✨',
+                icon: icon || 'Sparkles',
                 text_align: textAlign || 'left',
                 timer_position: timerPosition || 'right',
                 created_at: new Date().toISOString(),
@@ -103,7 +103,7 @@ export default async function handler(req, res) {
                 font_weight: updatedData.fontWeight || undefined,
                 font_style: updatedData.fontStyle || undefined,
                 height: updatedData.height || undefined,
-                emoji: updatedData.emoji !== undefined ? updatedData.emoji : undefined,
+                icon: updatedData.icon !== undefined ? updatedData.icon : undefined,
                 text_align: updatedData.textAlign !== undefined ? updatedData.textAlign : undefined,
                 timer_position: updatedData.timerPosition !== undefined ? updatedData.timerPosition : undefined,
                 updated_at: new Date().toISOString()
