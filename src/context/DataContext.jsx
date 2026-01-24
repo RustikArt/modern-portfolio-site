@@ -28,11 +28,33 @@ export const ROLES = {
     CLIENT: 'client'
 };
 
+// Permissions par onglet du dashboard
+export const AVAILABLE_PERMISSIONS = {
+    // Gestion
+    'tab_overview': { label: 'Vue d\'ensemble', category: 'Gestion', icon: 'LayoutDashboard' },
+    'tab_orders': { label: 'Commandes', category: 'Gestion', icon: 'ShoppingBag' },
+    'tab_clients': { label: 'Clients', category: 'Gestion', icon: 'Users' },
+    // Boutique
+    'tab_products': { label: 'Produits', category: 'Boutique', icon: 'Plus' },
+    'tab_promos': { label: 'Codes Promo', category: 'Boutique', icon: 'Zap' },
+    'tab_reviews': { label: 'Avis Clients', category: 'Boutique', icon: 'Star' },
+    // Contenu
+    'tab_projects': { label: 'Projets / Portfolio', category: 'Contenu', icon: 'FileCode' },
+    'tab_homeEditor': { label: 'Editeur Accueil', category: 'Contenu', icon: 'Layers' },
+    // Système
+    'tab_security': { label: 'Sécurité', category: 'Système', icon: 'Shield' },
+    'tab_settings': { label: 'Paramètres', category: 'Système', icon: 'Globe' },
+    // Actions spéciales
+    'create_reviews': { label: 'Créer des avis', category: 'Actions', icon: 'Star' },
+    'manage_users': { label: 'Gérer les utilisateurs', category: 'Actions', icon: 'UserPlus' },
+    'full_reset': { label: 'Réinitialisation complète', category: 'Actions', icon: 'RotateCcw' }
+};
+
 const PERMISSIONS = {
     [ROLES.SUPER_ADMIN]: ['all'],
-    [ROLES.ADMIN]: ['manage_orders', 'manage_products', 'manage_content', 'view_users', 'view_stats'],
-    [ROLES.MODERATOR]: ['manage_orders', 'view_users', 'view_stats'],
-    [ROLES.EDITOR]: ['manage_content', 'view_stats'],
+    [ROLES.ADMIN]: Object.keys(AVAILABLE_PERMISSIONS),
+    [ROLES.MODERATOR]: ['tab_overview', 'tab_orders', 'tab_clients', 'tab_reviews'],
+    [ROLES.EDITOR]: ['tab_overview', 'tab_projects', 'tab_homeEditor'],
     [ROLES.CLIENT]: []
 };
 
@@ -945,6 +967,9 @@ export const DataProvider = ({ children }) => {
                             fontWeight: data.font_weight || data.fontWeight,
                             fontStyle: data.font_style || data.fontStyle,
                             height: data.height,
+                            emoji: data.emoji || '✨',
+                            textAlign: data.text_align || data.textAlign || 'left',
+                            timerPosition: data.timer_position || data.timerPosition || 'right',
                             createdAt: data.created_at || data.createdAt,
                             updatedAt: data.updated_at || data.updatedAt
                         };
@@ -1876,13 +1901,18 @@ export const DataProvider = ({ children }) => {
         localStorage.setItem('portfolio_reviews', JSON.stringify(reviews));
     }, [reviews]);
 
-    const addReview = (productId, review) => {
-        // review: { user: string, rating: number, comment: string, date: string }
+    const addReview = (productId, review, isAdmin = false) => {
+        // review: { user: string, rating: number, comment: string, date: string, isVerified?: boolean }
+        const reviewWithMeta = {
+            ...review,
+            isVerified: isAdmin ? true : review.isVerified || false,
+            isAdminCreated: isAdmin
+        };
         setReviews(prev => {
             const productReviews = prev[productId] || [];
             return {
                 ...prev,
-                [productId]: [review, ...productReviews]
+                [productId]: [reviewWithMeta, ...productReviews]
             };
         });
     };
@@ -1961,6 +1991,9 @@ export const DataProvider = ({ children }) => {
                     fontWeight: data.font_weight || data.fontWeight,
                     fontStyle: data.font_style || data.fontStyle,
                     height: data.height,
+                    emoji: data.emoji || '✨',
+                    textAlign: data.text_align || data.textAlign || 'left',
+                    timerPosition: data.timer_position || data.timerPosition || 'right',
                     createdAt: data.created_at || data.createdAt,
                     updatedAt: data.updated_at || data.updatedAt
                 };

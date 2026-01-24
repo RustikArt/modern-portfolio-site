@@ -66,6 +66,10 @@ const AnnouncementBanner = () => {
         return null;
     }
 
+    const textAlign = announcement.textAlign || 'left';
+    const timerPosition = announcement.timerPosition || 'right';
+    const emoji = announcement.emoji || '✨';
+
     const bannerStyle = {
         backgroundColor: 'rgba(5, 5, 5, 0.95)',
         backdropFilter: 'blur(15px)',
@@ -76,7 +80,7 @@ const AnnouncementBanner = () => {
         width: '100%',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: textAlign === 'center' ? 'center' : 'space-between',
         padding: '0 2rem',
         position: 'fixed',
         top: 0,
@@ -85,7 +89,7 @@ const AnnouncementBanner = () => {
         fontSize: '0.95rem',
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         fontWeight: '500',
-        textAlign: 'left',
+        textAlign: textAlign,
         transition: 'all 0.3s ease',
         gap: '2rem',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
@@ -134,7 +138,14 @@ const AnnouncementBanner = () => {
     return (
         <div style={bannerStyle} className="announcement-banner">
             {/* Left: Message content */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1, minWidth: 0 }}>
+            <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '1.5rem', 
+                flex: textAlign === 'center' ? 'none' : 1, 
+                minWidth: 0,
+                justifyContent: textAlign === 'center' ? 'center' : 'flex-start'
+            }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <div style={{ 
                         fontSize: '0.95rem',
@@ -144,8 +155,19 @@ const AnnouncementBanner = () => {
                         alignItems: 'center',
                         gap: '0.5rem'
                     }}>
-                        <span style={{ color: '#d4af37', fontSize: '1.1rem' }}>✨</span>
+                        <span style={{ color: '#d4af37', fontSize: '1.1rem' }}>{emoji}</span>
                         {renderTextWithLink()}
+                        {/* Timer inline si position = inline */}
+                        {announcement.showTimer && timerPosition === 'inline' && timeLeft !== 'EXPIRE' && (
+                            <span style={{ 
+                                color: '#d4af37',
+                                fontFamily: 'monospace',
+                                fontSize: '0.85rem',
+                                marginLeft: '0.5rem'
+                            }}>
+                                {timeLeft}
+                            </span>
+                        )}
                     </div>
                     {announcement.subtext && (
                         <div style={{ 
@@ -166,7 +188,8 @@ const AnnouncementBanner = () => {
                 gap: '0.75rem',
                 flexShrink: 0
             }}>
-                {announcement.showTimer && timeLeft !== 'EXPIRE' && (
+                {/* Timer à droite si position = right */}
+                {announcement.showTimer && timerPosition === 'right' && timeLeft !== 'EXPIRE' && (
                     <div style={{ 
                         background: 'rgba(255, 255, 255, 0.05)',
                         border: '1px solid rgba(212, 175, 55, 0.15)',

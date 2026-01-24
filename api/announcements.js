@@ -44,7 +44,10 @@ export default async function handler(req, res) {
                 timerEnd,
                 fontWeight,
                 fontStyle,
-                height
+                height,
+                emoji,
+                textAlign,
+                timerPosition
             } = req.body;
 
             if (!text) {
@@ -63,6 +66,9 @@ export default async function handler(req, res) {
                 font_weight: fontWeight || '700',
                 font_style: fontStyle || 'normal',
                 height: height || '56px',
+                emoji: emoji || '✨',
+                text_align: textAlign || 'left',
+                timer_position: timerPosition || 'right',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
@@ -97,6 +103,9 @@ export default async function handler(req, res) {
                 font_weight: updatedData.fontWeight || undefined,
                 font_style: updatedData.fontStyle || undefined,
                 height: updatedData.height || undefined,
+                emoji: updatedData.emoji !== undefined ? updatedData.emoji : undefined,
+                text_align: updatedData.textAlign !== undefined ? updatedData.textAlign : undefined,
+                timer_position: updatedData.timerPosition !== undefined ? updatedData.timerPosition : undefined,
                 updated_at: new Date().toISOString()
             };
 

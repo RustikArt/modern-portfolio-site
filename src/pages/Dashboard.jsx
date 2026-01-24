@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useData } from '../context/DataContext';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useData, AVAILABLE_PERMISSIONS } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
 import BlockEditor from '../components/BlockEditor';
@@ -41,8 +41,13 @@ import {
     MapPin,
     Check,
     User,
-    TrendingUp
+    TrendingUp,
+    AlignLeft,
+    AlignCenter,
+    PieChart,
+    BarChart3
 } from 'lucide-react';
+import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import ActivityLog from '../components/dashboard/ActivityLog';
 import { downloadCSV } from '../utils/export';
@@ -126,7 +131,13 @@ const Dashboard = () => {
     const [announcementTimerEnd, setAnnouncementTimerEnd] = useState(announcement?.timerEnd || '');
     const [announcementLink, setAnnouncementLink] = useState(announcement?.link || '');
     const [announcementHeight, setAnnouncementHeight] = useState(announcement?.height || '56px');
+    const [announcementEmoji, setAnnouncementEmoji] = useState(announcement?.emoji || '✨');
+    const [announcementTextAlign, setAnnouncementTextAlign] = useState(announcement?.textAlign || 'left');
+    const [announcementTimerPosition, setAnnouncementTimerPosition] = useState(announcement?.timerPosition || 'right');
 
+    // --- ADMIN REVIEW CREATION STATES ---
+    const [showNewReviewForm, setShowNewReviewForm] = useState(false);
+    const [newReviewForm, setNewReviewForm] = useState({ productId: '', user: '', rating: 5, comment: '' });
 
     // --- USER MANAGEMENT STATES ---
     const [selectedMember, setSelectedMember] = useState(null);
@@ -539,36 +550,75 @@ const Dashboard = () => {
                                         {notifications.length === 0 ? (
                                             <p style={{ textAlign: 'center', color: '#444', fontSize: '0.8rem', padding: '2rem 0' }}>Aucune notification</p>
                                         ) : (
-                                            notifications.map(n => (
-                                                <div key={n.id} style={{
-                                                    background: n.isRead ? 'rgba(255,255,255,0.01)' : 'rgba(212,175,55,0.05)',
-                                                    padding: '1rem',
-                                                    borderRadius: '8px',
-                                                    border: '1px solid',
-                                                    borderColor: n.isRead ? 'rgba(255,255,255,0.03)' : 'rgba(212,175,55,0.1)',
-                                                    display: 'flex',
-                                                    gap: '1rem',
-                                                    position: 'relative'
-                                                }}>
-                                                    <div style={{ color: n.isRead ? '#444' : 'var(--color-accent)' }}>
-                                                        {n.type === 'order' && <ShoppingCart size={18} />}
-                                                        {n.type === 'account' && <UserPlus size={18} />}
-                                                        {n.type === 'contact' && <Mail size={18} />}
+                                            // Grouper les notifications similaires
+                                            (() => {
+                                                const grouped = [];
+                                                const seen = new Map();
+                                                
+                                                notifications.forEach(n => {
+                                                    const key = n.message;
+                                                    if (seen.has(key)) {
+                                                        seen.get(key).count++;
+                                                        seen.get(key).ids.push(n.id);
+                                                    } else {
+                                                        const item = { ...n, count: 1, ids: [n.id] };
+                                                        seen.set(key, item);
+                                                        grouped.push(item);
+                                                    }
+                                                });
+                                                
+                                                return grouped.map(n => (
+                                                    <div key={n.id} style={{
+                                                        background: n.isRead ? 'rgba(255,255,255,0.01)' : 'rgba(212,175,55,0.05)',
+                                                        padding: '1rem',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid',
+                                                        borderColor: n.isRead ? 'rgba(255,255,255,0.03)' : 'rgba(212,175,55,0.1)',
+                                                        display: 'flex',
+                                                        gap: '1rem',
+                                                        position: 'relative'
+                                                    }}>
+                                                        <div style={{ color: n.isRead ? '#444' : 'var(--color-accent)' }}>
+                                                            {n.type === 'order' && <ShoppingCart size={18} />}
+                                                            {n.type === 'account' && <UserPlus size={18} />}
+                                                            {n.type === 'contact' && <Mail size={18} />}
+                                                            {n.type === 'success' && <CheckCircle size={18} />}
+                                                            {!['order', 'account', 'contact', 'success'].includes(n.type) && <Bell size={18} />}
+                                                        </div>
+                                                        <div style={{ flex: 1 }}>
+                                                            <p style={{ fontSize: '0.8rem', margin: '0 0 0.3rem', color: n.isRead ? '#888' : '#eee' }}>
+                                                                {n.message}
+                                                                {n.count > 1 && (
+                                                                    <span style={{ 
+                                                                        marginLeft: '0.5rem',
+                                                                        background: 'rgba(212, 175, 55, 0.2)',
+                                                                        color: 'var(--color-accent)',
+                                                                        padding: '0.1rem 0.4rem',
+                                                                        borderRadius: '10px',
+                                                                        fontSize: '0.7rem',
+                                                                        fontWeight: 'bold'
+                                                                    }}>
+                                                                        x{n.count}
+                                                                    </span>
+                                                                )}
+                                                            </p>
+                                                            <span style={{ fontSize: '0.65rem', color: '#444' }}>{new Date(n.date).toLocaleString('fr-FR')}</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={(e) => { 
+                                                                e.stopPropagation(); 
+                                                                // Supprimer toutes les notifications groupées
+                                                                n.ids.forEach(id => deleteNotification(id));
+                                                            }}
+                                                            style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', padding: '5px' }}
+                                                            onMouseEnter={e => e.target.style.color = '#ff4d4d'}
+                                                            onMouseLeave={e => e.target.style.color = '#444'}
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
                                                     </div>
-                                                    <div style={{ flex: 1 }}>
-                                                        <p style={{ fontSize: '0.8rem', margin: '0 0 0.3rem', color: n.isRead ? '#888' : '#eee' }}>{n.message}</p>
-                                                        <span style={{ fontSize: '0.65rem', color: '#444' }}>{new Date(n.date).toLocaleString('fr-FR')}</span>
-                                                    </div>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
-                                                        style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', padding: '5px' }}
-                                                        onMouseEnter={e => e.target.style.color = '#ff4d4d'}
-                                                        onMouseLeave={e => e.target.style.color = '#444'}
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                </div>
-                                            ))
+                                                ));
+                                            })()
                                         )}
                                     </div>
                                 </div>
@@ -585,41 +635,53 @@ const Dashboard = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '3rem' }}>
                     {/* SIDE PANEL */}
                     <div style={{ marginBottom: '2rem' }}>
-                        <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Gestion</h3>
-                        {checkPermission('view_stats') && (
+                        {/* Gestion */}
+                        {(checkPermission('tab_overview') || checkPermission('tab_orders') || checkPermission('tab_clients')) && (
+                            <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Gestion</h3>
+                        )}
+                        {checkPermission('tab_overview') && (
                             <button onClick={() => setActiveTab('overview')} style={sideBtnStyle(activeTab === 'overview')}><LayoutDashboard size={18} /> Vue d'ensemble</button>
                         )}
-                        {checkPermission('manage_orders') && (
+                        {checkPermission('tab_orders') && (
                             <button onClick={() => setActiveTab('orders')} style={sideBtnStyle(activeTab === 'orders')}><ShoppingBag size={18} /> Commandes</button>
                         )}
-                        {checkPermission('view_users') && (
+                        {checkPermission('tab_clients') && (
                             <button onClick={() => setActiveTab('clients')} style={sideBtnStyle(activeTab === 'clients')}><Users size={18} /> Clients</button>
                         )}
 
-                        <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Boutique</h3>
-                        {checkPermission('manage_products') && (
-                            <>
-                                <button onClick={() => setActiveTab('products')} style={sideBtnStyle(activeTab === 'products')}><Plus size={18} /> Produits</button>
-                                <button onClick={() => setActiveTab('promos')} style={sideBtnStyle(activeTab === 'promos')}><Zap size={18} /> Codes Promo</button>
-                            </>
+                        {/* Boutique */}
+                        {(checkPermission('tab_products') || checkPermission('tab_promos') || checkPermission('tab_reviews')) && (
+                            <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Boutique</h3>
                         )}
-                        {checkPermission('manage_content') && (
+                        {checkPermission('tab_products') && (
+                            <button onClick={() => setActiveTab('products')} style={sideBtnStyle(activeTab === 'products')}><Plus size={18} /> Produits</button>
+                        )}
+                        {checkPermission('tab_promos') && (
+                            <button onClick={() => setActiveTab('promos')} style={sideBtnStyle(activeTab === 'promos')}><Zap size={18} /> Codes Promo</button>
+                        )}
+                        {checkPermission('tab_reviews') && (
                             <button onClick={() => setActiveTab('reviews')} style={sideBtnStyle(activeTab === 'reviews')}><Star size={18} /> Avis Clients</button>
                         )}
 
-                        <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Contenu</h3>
-                        {checkPermission('manage_content') && (
-                            <>
-                                <button onClick={() => setActiveTab('projects')} style={sideBtnStyle(activeTab === 'projects')}><FileCode size={18} /> Projets / Portfolio</button>
-                                <button onClick={() => setActiveTab('homeEditor')} style={sideBtnStyle(activeTab === 'homeEditor')}><Layers size={18} /> Editeur Accueil</button>
-                            </>
+                        {/* Contenu */}
+                        {(checkPermission('tab_projects') || checkPermission('tab_homeEditor')) && (
+                            <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Contenu</h3>
+                        )}
+                        {checkPermission('tab_projects') && (
+                            <button onClick={() => setActiveTab('projects')} style={sideBtnStyle(activeTab === 'projects')}><FileCode size={18} /> Projets / Portfolio</button>
+                        )}
+                        {checkPermission('tab_homeEditor') && (
+                            <button onClick={() => setActiveTab('homeEditor')} style={sideBtnStyle(activeTab === 'homeEditor')}><Layers size={18} /> Editeur Accueil</button>
                         )}
 
-                        <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Système</h3>
-                        {checkPermission('view_users') && (
+                        {/* Système */}
+                        {(checkPermission('tab_security') || checkPermission('tab_settings')) && (
+                            <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Système</h3>
+                        )}
+                        {checkPermission('tab_security') && (
                             <button onClick={() => setActiveTab('security')} style={sideBtnStyle(activeTab === 'security')}><Shield size={18} /> Sécurité</button>
                         )}
-                        {checkPermission('view_stats') && (
+                        {checkPermission('tab_settings') && (
                             <button onClick={() => setActiveTab('settings')} style={sideBtnStyle(activeTab === 'settings')}><Globe size={18} /> Paramètres</button>
                         )}
                     </div>
@@ -652,6 +714,75 @@ const Dashboard = () => {
                                             <button onClick={() => setActiveTab('products')} style={{ ...btnModern, flex: 1, padding: '0.5rem', justifyContent: 'center' }}><Plus size={16} /> Produit</button>
                                             <button onClick={() => setActiveTab('projects')} style={{ ...btnModern, flex: 1, padding: '0.5rem', justifyContent: 'center' }}><FileCode size={16} /> Projet</button>
                                         </div>
+                                    </div>
+                                </div>
+
+                                {/* CHARTS ROW - Order Status Pie & Category Bar */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                                    {/* Order Status Pie Chart */}
+                                    <div style={cardStyle}>
+                                        <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Statuts des Commandes</h3>
+                                        <ResponsiveContainer width="100%" height={220}>
+                                            <RechartsPie>
+                                                <Pie
+                                                    data={(() => {
+                                                        const statusCounts = { 'Réception': 0, 'En cours': 0, 'Terminé': 0, 'En attente': 0 };
+                                                        orders.filter(o => !isArchived(o)).forEach(o => {
+                                                            if (o.status === 'Payé') statusCounts['Réception']++;
+                                                            else if (statusCounts[o.status] !== undefined) statusCounts[o.status]++;
+                                                        });
+                                                        return Object.entries(statusCounts).map(([name, value]) => ({ name, value })).filter(d => d.value > 0);
+                                                    })()}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={50}
+                                                    outerRadius={80}
+                                                    paddingAngle={3}
+                                                    dataKey="value"
+                                                    label={({ name, value }) => `${name}: ${value}`}
+                                                    labelLine={false}
+                                                >
+                                                    <Cell fill="#ff4d4d" />
+                                                    <Cell fill="#ffd700" />
+                                                    <Cell fill="#4caf50" />
+                                                    <Cell fill="#ff8c00" />
+                                                </Pie>
+                                                <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} />
+                                            </RechartsPie>
+                                        </ResponsiveContainer>
+                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                                            <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff4d4d' }}></span> Réception</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffd700' }}></span> En cours</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4caf50' }}></span> Terminé</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff8c00' }}></span> En attente</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Category Sales Bar Chart */}
+                                    <div style={cardStyle}>
+                                        <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Ventes par Catégorie</h3>
+                                        <ResponsiveContainer width="100%" height={250}>
+                                            <BarChart
+                                                data={(() => {
+                                                    const catSales = {};
+                                                    orders.filter(o => o.status === 'Terminé' || isArchived(o)).forEach(order => {
+                                                        (order.items || []).forEach(item => {
+                                                            const product = products.find(p => p.id === item.productId);
+                                                            const cat = product?.category || 'Autre';
+                                                            catSales[cat] = (catSales[cat] || 0) + (item.price || 0) * (item.quantity || 1);
+                                                        });
+                                                    });
+                                                    return Object.entries(catSales).map(([name, total]) => ({ name, total: Math.round(total) })).sort((a, b) => b.total - a.total).slice(0, 5);
+                                                })()}
+                                                margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+                                            >
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                                                <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
+                                                <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
+                                                <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
+                                                <Bar dataKey="total" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
                                     </div>
                                 </div>
 
@@ -1307,29 +1438,53 @@ const Dashboard = () => {
 
                                                 <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
                                                     <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.8rem', fontWeight: 'bold' }}>Permissions</label>
-                                                    <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                                        {[
-                                                            { id: 'manage_products', label: 'Gérer les produits' },
-                                                            { id: 'manage_projects', label: 'Gérer les projets' },
-                                                            { id: 'manage_orders', label: 'Gérer les commandes' },
-                                                            { id: 'view_users', label: 'Voir les utilisateurs' },
-                                                            { id: 'manage_content', label: 'Gérer le contenu' },
-                                                            { id: 'view_stats', label: 'Voir les statistiques' }
-                                                        ].map(perm => (
-                                                            <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={newAdminForm.permissions.includes(perm.id)}
-                                                                    onChange={(e) => {
-                                                                        const perms = e.target.checked
-                                                                            ? [...newAdminForm.permissions, perm.id]
-                                                                            : newAdminForm.permissions.filter(p => p !== perm.id);
-                                                                        setNewAdminForm({ ...newAdminForm, permissions: perms });
-                                                                    }}
-                                                                />
-                                                                <span>{perm.label}</span>
-                                                            </label>
-                                                        ))}
+                                                    {Object.entries(
+                                                        AVAILABLE_PERMISSIONS.reduce((acc, perm) => {
+                                                            acc[perm.category] = acc[perm.category] || [];
+                                                            acc[perm.category].push(perm);
+                                                            return acc;
+                                                        }, {})
+                                                    ).map(([category, perms]) => (
+                                                        <div key={category} style={{ marginBottom: '1rem' }}>
+                                                            <div style={{ fontSize: '0.75rem', color: '#555', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>{category}</div>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem' }}>
+                                                                {perms.map(perm => (
+                                                                    <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', fontSize: '0.85rem', padding: '0.3rem 0' }}>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={newAdminForm.permissions.includes(perm.id)}
+                                                                            onChange={(e) => {
+                                                                                const perms = e.target.checked
+                                                                                    ? [...newAdminForm.permissions, perm.id]
+                                                                                    : newAdminForm.permissions.filter(p => p !== perm.id);
+                                                                                setNewAdminForm({ ...newAdminForm, permissions: perms });
+                                                                            }}
+                                                                            style={{ accentColor: 'var(--color-accent)' }}
+                                                                        />
+                                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                            <span style={{ fontSize: '0.9rem' }}>{perm.icon}</span>
+                                                                            {perm.label}
+                                                                        </span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewAdminForm({ ...newAdminForm, permissions: AVAILABLE_PERMISSIONS.map(p => p.id) })}
+                                                            style={{ ...btnModern, padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
+                                                        >
+                                                            Tout sélectionner
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewAdminForm({ ...newAdminForm, permissions: [] })}
+                                                            style={{ ...btnModern, padding: '0.4rem 0.8rem', fontSize: '0.75rem', background: 'transparent', border: '1px solid #333' }}
+                                                        >
+                                                            Tout désélectionner
+                                                        </button>
                                                     </div>
                                                 </div>
 
@@ -1742,7 +1897,7 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     {/* ANNOUNCEMENT BANNER CARD */}
                                     <div style={cardStyle}>
                                         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -1783,6 +1938,79 @@ const Dashboard = () => {
                                                 />
                                             </div>
 
+                                            {/* Nouvelles options de personnalisation */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Emoji (à gauche)</label>
+                                                    <input
+                                                        type="text"
+                                                        value={announcementEmoji}
+                                                        onChange={(e) => setAnnouncementEmoji(e.target.value)}
+                                                        style={inputStyle}
+                                                        placeholder="✨"
+                                                        maxLength={4}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Épaisseur</label>
+                                                    <select
+                                                        value={announcementHeight}
+                                                        onChange={(e) => setAnnouncementHeight(e.target.value)}
+                                                        style={inputStyle}
+                                                    >
+                                                        <option value="40px">Fine (40px)</option>
+                                                        <option value="48px">Normale (48px)</option>
+                                                        <option value="56px">Standard (56px)</option>
+                                                        <option value="64px">Large (64px)</option>
+                                                        <option value="72px">Très large (72px)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Alignement du texte</label>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <button
+                                                            onClick={() => setAnnouncementTextAlign('left')}
+                                                            style={{
+                                                                ...btnModern,
+                                                                flex: 1,
+                                                                justifyContent: 'center',
+                                                                background: announcementTextAlign === 'left' ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.02)',
+                                                                borderColor: announcementTextAlign === 'left' ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)'
+                                                            }}
+                                                        >
+                                                            <AlignLeft size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setAnnouncementTextAlign('center')}
+                                                            style={{
+                                                                ...btnModern,
+                                                                flex: 1,
+                                                                justifyContent: 'center',
+                                                                background: announcementTextAlign === 'center' ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.02)',
+                                                                borderColor: announcementTextAlign === 'center' ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)'
+                                                            }}
+                                                        >
+                                                            <AlignCenter size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Position du timer</label>
+                                                    <select
+                                                        value={announcementTimerPosition}
+                                                        onChange={(e) => setAnnouncementTimerPosition(e.target.value)}
+                                                        style={inputStyle}
+                                                        disabled={!announcementShowTimer}
+                                                    >
+                                                        <option value="right">À droite (séparé)</option>
+                                                        <option value="inline">À côté du texte</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', paddingBottom: '0.8rem' }}>
                                                     <input
@@ -1812,24 +2040,44 @@ const Dashboard = () => {
                                             <div style={{ marginTop: '1rem' }}>
                                                 <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '1rem' }}>Aperçu du rendu :</label>
                                                 <div style={{
-                                                    background: announcementBgColor || '#d4af37',
-                                                    color: announcementTextColor || 'black',
-                                                    padding: '1rem',
+                                                    background: 'rgba(5, 5, 5, 0.95)',
+                                                    color: '#ffffff',
+                                                    padding: '0 1rem',
+                                                    height: announcementHeight || '56px',
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    justifyContent: 'center',
+                                                    justifyContent: announcementTextAlign === 'center' ? 'center' : 'space-between',
                                                     borderRadius: '8px',
-                                                    fontSize: '0.8rem',
-                                                    textAlign: 'center'
+                                                    fontSize: '0.85rem',
+                                                    gap: '1rem',
+                                                    border: '1px solid rgba(212, 175, 55, 0.15)'
                                                 }}>
-                                                    {announcementText || 'Texte de votre annonce...'}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: announcementTextAlign === 'center' ? 'none' : 1 }}>
+                                                        <span style={{ color: '#d4af37' }}>{announcementEmoji || '✨'}</span>
+                                                        <span>{announcementText || 'Texte de votre annonce...'}</span>
+                                                        {announcementShowTimer && announcementTimerPosition === 'inline' && (
+                                                            <span style={{ color: '#d4af37', fontFamily: 'monospace', marginLeft: '0.5rem' }}>00h 00m 00s</span>
+                                                        )}
+                                                    </div>
+                                                    {announcementShowTimer && announcementTimerPosition === 'right' && (
+                                                        <div style={{ 
+                                                            background: 'rgba(255, 255, 255, 0.05)',
+                                                            padding: '0.35rem 0.75rem', 
+                                                            borderRadius: '6px',
+                                                            color: '#d4af37',
+                                                            fontFamily: 'monospace',
+                                                            fontSize: '0.8rem'
+                                                        }}>
+                                                            00h 00m 00s
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             <button
                                                 onClick={async () => {
                                                     await updateAnnouncement({
-                                                        id: announcement.id,
+                                                        id: announcement?.id,
                                                         text: announcementText,
                                                         subtext: announcementSubtext,
                                                         bgColor: announcementBgColor,
@@ -1838,7 +2086,10 @@ const Dashboard = () => {
                                                         showTimer: announcementShowTimer,
                                                         timerEnd: announcementTimerEnd || null,
                                                         link: announcementLink,
-                                                        height: announcementHeight
+                                                        height: announcementHeight,
+                                                        emoji: announcementEmoji,
+                                                        textAlign: announcementTextAlign,
+                                                        timerPosition: announcementTimerPosition
                                                     });
                                                     showToast("Configuration de la banderole appliquée !", "success");
                                                 }}
@@ -1853,7 +2104,116 @@ const Dashboard = () => {
                         )}
                         {activeTab === 'reviews' && (
                             <div className="animate-in">
-                                <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Gestion des Avis</h2>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                    <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Gestion des Avis</h2>
+                                    {checkPermission('create_reviews') && (
+                                        <button
+                                            onClick={() => setShowNewReviewForm(!showNewReviewForm)}
+                                            style={{ ...btnModern, background: showNewReviewForm ? '#333' : 'var(--color-accent)' }}
+                                        >
+                                            {showNewReviewForm ? <X size={16} /> : <Plus size={16} />}
+                                            {showNewReviewForm ? 'Annuler' : 'Créer un Avis'}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* ADMIN CREATE REVIEW FORM */}
+                                {showNewReviewForm && checkPermission('create_reviews') && (
+                                    <div style={{ ...cardStyle, marginBottom: '2rem', border: '1px solid var(--color-accent)' }}>
+                                        <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <Star size={18} style={{ color: 'var(--color-accent)' }} />
+                                            Créer un Avis Admin
+                                        </h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Produit *</label>
+                                                <select
+                                                    value={newReviewForm.productId}
+                                                    onChange={(e) => setNewReviewForm({ ...newReviewForm, productId: e.target.value })}
+                                                    style={inputStyle}
+                                                >
+                                                    <option value="">Sélectionner un produit</option>
+                                                    {products.map(p => (
+                                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Nom du client *</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="ex: Jean Dupont"
+                                                    value={newReviewForm.user}
+                                                    onChange={(e) => setNewReviewForm({ ...newReviewForm, user: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Note *</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                                    {[1, 2, 3, 4, 5].map(star => (
+                                                        <button
+                                                            key={star}
+                                                            onClick={() => setNewReviewForm({ ...newReviewForm, rating: star })}
+                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem' }}
+                                                        >
+                                                            <Star
+                                                                size={24}
+                                                                fill={star <= newReviewForm.rating ? 'var(--color-accent)' : 'none'}
+                                                                style={{ color: 'var(--color-accent)' }}
+                                                            />
+                                                        </button>
+                                                    ))}
+                                                    <span style={{ marginLeft: '0.5rem', fontSize: '0.9rem', color: '#888' }}>{newReviewForm.rating}/5</span>
+                                                </div>
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Commentaire *</label>
+                                                <textarea
+                                                    placeholder="Écrire le commentaire du client..."
+                                                    value={newReviewForm.comment}
+                                                    onChange={(e) => setNewReviewForm({ ...newReviewForm, comment: e.target.value })}
+                                                    style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+                                            <button
+                                                onClick={() => {
+                                                    setShowNewReviewForm(false);
+                                                    setNewReviewForm({ productId: '', user: '', rating: 5, comment: '' });
+                                                }}
+                                                style={{ ...btnModern, background: 'transparent', border: '1px solid #333' }}
+                                            >
+                                                Annuler
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!newReviewForm.productId || !newReviewForm.user || !newReviewForm.comment) {
+                                                        showToast("Veuillez remplir tous les champs", "error");
+                                                        return;
+                                                    }
+                                                    await addReview(parseInt(newReviewForm.productId), {
+                                                        user: newReviewForm.user,
+                                                        rating: newReviewForm.rating,
+                                                        comment: newReviewForm.comment,
+                                                        date: new Date().toLocaleDateString('fr-FR')
+                                                    }, true); // isAdmin = true
+                                                    showToast("Avis créé avec succès", "success");
+                                                    setShowNewReviewForm(false);
+                                                    setNewReviewForm({ productId: '', user: '', rating: 5, comment: '' });
+                                                }}
+                                                style={{ ...btnModern, background: 'var(--color-accent)' }}
+                                            >
+                                                <Check size={16} /> Créer l'avis
+                                            </button>
+                                        </div>
+                                        <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '1rem', fontStyle: 'italic' }}>
+                                            ⚠️ Les avis créés manuellement seront marqués comme vérifiés et identifiés comme avis admin.
+                                        </p>
+                                    </div>
+                                )}
+
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                     {Object.keys(reviews).length > 0 ? Object.entries(reviews)
                                         .filter(([_, prodReviews]) => prodReviews && prodReviews.length > 0)
@@ -1877,11 +2237,17 @@ const Dashboard = () => {
                                                                 padding: '1rem',
                                                                 background: 'rgba(255,255,255,0.02)',
                                                                 borderRadius: '8px',
-                                                                border: '1px solid rgba(255,255,255,0.03)'
+                                                                border: rev.isAdminCreated ? '1px solid rgba(var(--color-accent-rgb), 0.3)' : '1px solid rgba(255,255,255,0.03)'
                                                             }}>
                                                                 <div style={{ flex: 1 }}>
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.4rem' }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.4rem', flexWrap: 'wrap' }}>
                                                                         <span style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{rev.user}</span>
+                                                                        {rev.isAdminCreated && (
+                                                                            <span style={{ fontSize: '0.65rem', background: 'var(--color-accent)', color: '#000', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>ADMIN</span>
+                                                                        )}
+                                                                        {rev.isVerified && !rev.isAdminCreated && (
+                                                                            <span style={{ fontSize: '0.65rem', background: '#4caf50', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>Vérifié</span>
+                                                                        )}
                                                                         <span style={{ fontSize: '0.7rem', color: '#444' }}>{rev.date}</span>
                                                                         <div style={{ display: 'flex', color: 'var(--color-accent)' }}>
                                                                             {[...Array(5)].map((_, i) => (

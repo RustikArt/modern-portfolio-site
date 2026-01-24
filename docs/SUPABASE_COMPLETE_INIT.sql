@@ -151,6 +151,9 @@ CREATE TABLE IF NOT EXISTS public.portfolio_announcements (
     font_weight VARCHAR(20) DEFAULT '700',
     font_style VARCHAR(20) DEFAULT 'normal',
     height VARCHAR(20) DEFAULT '56px',
+    emoji VARCHAR(10) DEFAULT '✨',
+    text_align VARCHAR(20) DEFAULT 'left',
+    timer_position VARCHAR(20) DEFAULT 'right',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -169,6 +172,7 @@ CREATE TABLE IF NOT EXISTS public.portfolio_reviews (
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
     is_verified BOOLEAN DEFAULT FALSE,
+    is_admin_created BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
