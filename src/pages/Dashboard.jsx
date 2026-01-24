@@ -577,26 +577,46 @@ const Dashboard = () => {
                     {/* SIDE PANEL */}
                     <div style={{ marginBottom: '2rem' }}>
                         <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Gestion</h3>
-                        <button onClick={() => setActiveTab('overview')} style={sideBtnStyle(activeTab === 'overview')}><LayoutDashboard size={18} /> Vue d'ensemble</button>
-                        <button onClick={() => setActiveTab('orders')} style={sideBtnStyle(activeTab === 'orders')}><ShoppingBag size={18} /> Commandes</button>
-                        <button onClick={() => setActiveTab('clients')} style={sideBtnStyle(activeTab === 'clients')}><Users size={18} /> Clients</button>
+                        {checkPermission('view_stats') && (
+                            <button onClick={() => setActiveTab('overview')} style={sideBtnStyle(activeTab === 'overview')}><LayoutDashboard size={18} /> Vue d'ensemble</button>
+                        )}
+                        {checkPermission('manage_orders') && (
+                            <button onClick={() => setActiveTab('orders')} style={sideBtnStyle(activeTab === 'orders')}><ShoppingBag size={18} /> Commandes</button>
+                        )}
+                        {checkPermission('view_users') && (
+                            <button onClick={() => setActiveTab('clients')} style={sideBtnStyle(activeTab === 'clients')}><Users size={18} /> Clients</button>
+                        )}
 
                         <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Boutique</h3>
-                        <button onClick={() => setActiveTab('products')} style={sideBtnStyle(activeTab === 'products')}><Plus size={18} /> Produits</button>
-                        <button onClick={() => setActiveTab('promos')} style={sideBtnStyle(activeTab === 'promos')}><Zap size={18} /> Codes Promo</button>
-                        <button onClick={() => setActiveTab('reviews')} style={sideBtnStyle(activeTab === 'reviews')}><Star size={18} /> Avis Clients</button>
+                        {checkPermission('manage_products') && (
+                            <>
+                                <button onClick={() => setActiveTab('products')} style={sideBtnStyle(activeTab === 'products')}><Plus size={18} /> Produits</button>
+                                <button onClick={() => setActiveTab('promos')} style={sideBtnStyle(activeTab === 'promos')}><Zap size={18} /> Codes Promo</button>
+                            </>
+                        )}
+                        {checkPermission('manage_content') && (
+                            <button onClick={() => setActiveTab('reviews')} style={sideBtnStyle(activeTab === 'reviews')}><Star size={18} /> Avis Clients</button>
+                        )}
 
                         <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Contenu</h3>
-                        <button onClick={() => setActiveTab('projects')} style={sideBtnStyle(activeTab === 'projects')}><FileCode size={18} /> Projets / Portfolio</button>
-                        <button onClick={() => setActiveTab('homeEditor')} style={sideBtnStyle(activeTab === 'homeEditor')}><Layers size={18} /> Editeur Accueil</button>
+                        {checkPermission('manage_content') && (
+                            <>
+                                <button onClick={() => setActiveTab('projects')} style={sideBtnStyle(activeTab === 'projects')}><FileCode size={18} /> Projets / Portfolio</button>
+                                <button onClick={() => setActiveTab('homeEditor')} style={sideBtnStyle(activeTab === 'homeEditor')}><Layers size={18} /> Editeur Accueil</button>
+                            </>
+                        )}
 
                         <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Système</h3>
-                        <button onClick={() => setActiveTab('security')} style={sideBtnStyle(activeTab === 'security')}><Shield size={18} /> Sécurité</button>
-                        <button onClick={() => setActiveTab('settings')} style={sideBtnStyle(activeTab === 'settings')}><Globe size={18} /> Paramètres</button>
+                        {checkPermission('view_users') && (
+                            <button onClick={() => setActiveTab('security')} style={sideBtnStyle(activeTab === 'security')}><Shield size={18} /> Sécurité</button>
+                        )}
+                        {checkPermission('view_stats') && (
+                            <button onClick={() => setActiveTab('settings')} style={sideBtnStyle(activeTab === 'settings')}><Globe size={18} /> Paramètres</button>
+                        )}
                     </div>
 
                     {/* MAIN CONTENT */}
-                    <main>
+                    <main style={{ minWidth: 0 }}>
                         {/* --- OVERVIEW TAB --- */}
                         {activeTab === 'overview' && (
                             <div className="animate-in">
@@ -627,7 +647,7 @@ const Dashboard = () => {
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0 }}>
                                         <AnalyticsChart
                                             data={chartData}
                                             title="Revenus Mensuels (€)"
@@ -1242,75 +1262,77 @@ const Dashboard = () => {
                                         </table>
                                     </div>
 
-                                    {/* ADD ADMIN FORM */}
-                                    <div style={cardStyle}>
-                                        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}><Shield size={20} /> Créer un Administrateur</h3>
-                                        <div style={{ display: 'grid', gap: '1rem' }}>
-                                            <input
-                                                type="text"
-                                                placeholder="Nom d'utilisateur"
-                                                value={newAdminForm.name}
-                                                onChange={e => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
-                                                style={inputStyle}
-                                            />
-                                            <input
-                                                type="email"
-                                                placeholder="Email"
-                                                value={newAdminForm.email}
-                                                onChange={e => setNewAdminForm({ ...newAdminForm, email: e.target.value })}
-                                                style={inputStyle}
-                                            />
-                                            <input
-                                                type="password"
-                                                placeholder="Mot de passe"
-                                                value={newAdminForm.password}
-                                                onChange={e => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
-                                                style={inputStyle}
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Titre du rôle (ex: Modérateur, Éditeur, Gestionnaire)"
-                                                value={newAdminForm.roleTitle}
-                                                onChange={e => setNewAdminForm({ ...newAdminForm, roleTitle: e.target.value })}
-                                                style={inputStyle}
-                                            />
+                                    {/* ADD ADMIN FORM (only super_admin allowed) */}
+                                    {checkPermission && checkPermission('all') && (
+                                        <div style={cardStyle}>
+                                            <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}><Shield size={20} /> Créer un Administrateur</h3>
+                                            <div style={{ display: 'grid', gap: '1rem' }}>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Nom d'utilisateur"
+                                                    value={newAdminForm.name}
+                                                    onChange={e => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                                <input
+                                                    type="email"
+                                                    placeholder="Email"
+                                                    value={newAdminForm.email}
+                                                    onChange={e => setNewAdminForm({ ...newAdminForm, email: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                                <input
+                                                    type="password"
+                                                    placeholder="Mot de passe"
+                                                    value={newAdminForm.password}
+                                                    onChange={e => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Titre du rôle (ex: Modérateur, Éditeur, Gestionnaire)"
+                                                    value={newAdminForm.roleTitle}
+                                                    onChange={e => setNewAdminForm({ ...newAdminForm, roleTitle: e.target.value })}
+                                                    style={inputStyle}
+                                                />
 
-                                            <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.8rem', fontWeight: 'bold' }}>Permissions</label>
-                                                <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                                    {[
-                                                        { id: 'manage_products', label: 'Gérer les produits' },
-                                                        { id: 'manage_projects', label: 'Gérer les projets' },
-                                                        { id: 'manage_orders', label: 'Gérer les commandes' },
-                                                        { id: 'view_users', label: 'Voir les utilisateurs' },
-                                                        { id: 'manage_content', label: 'Gérer le contenu' },
-                                                        { id: 'view_stats', label: 'Voir les statistiques' }
-                                                    ].map(perm => (
-                                                        <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={newAdminForm.permissions.includes(perm.id)}
-                                                                onChange={(e) => {
-                                                                    const perms = e.target.checked
-                                                                        ? [...newAdminForm.permissions, perm.id]
-                                                                        : newAdminForm.permissions.filter(p => p !== perm.id);
-                                                                    setNewAdminForm({ ...newAdminForm, permissions: perms });
-                                                                }}
-                                                            />
-                                                            <span>{perm.label}</span>
-                                                        </label>
-                                                    ))}
+                                                <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.8rem', fontWeight: 'bold' }}>Permissions</label>
+                                                    <div style={{ display: 'grid', gap: '0.5rem' }}>
+                                                        {[
+                                                            { id: 'manage_products', label: 'Gérer les produits' },
+                                                            { id: 'manage_projects', label: 'Gérer les projets' },
+                                                            { id: 'manage_orders', label: 'Gérer les commandes' },
+                                                            { id: 'view_users', label: 'Voir les utilisateurs' },
+                                                            { id: 'manage_content', label: 'Gérer le contenu' },
+                                                            { id: 'view_stats', label: 'Voir les statistiques' }
+                                                        ].map(perm => (
+                                                            <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={newAdminForm.permissions.includes(perm.id)}
+                                                                    onChange={(e) => {
+                                                                        const perms = e.target.checked
+                                                                            ? [...newAdminForm.permissions, perm.id]
+                                                                            : newAdminForm.permissions.filter(p => p !== perm.id);
+                                                                        setNewAdminForm({ ...newAdminForm, permissions: perms });
+                                                                    }}
+                                                                />
+                                                                <span>{perm.label}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <button
-                                                onClick={handleCreateAdmin}
-                                                style={{ ...btnPrimaryModern, justifyContent: 'center', marginTop: '1rem' }}
-                                            >
-                                                <Plus size={18} /> Créer le compte
-                                            </button>
+                                                <button
+                                                    onClick={handleCreateAdmin}
+                                                    style={{ ...btnPrimaryModern, justifyContent: 'center', marginTop: '1rem' }}
+                                                >
+                                                    <Plus size={18} /> Créer le compte
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         )}

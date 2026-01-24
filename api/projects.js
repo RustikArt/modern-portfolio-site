@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
+import { setCorsHeaders, handleCorsPreFlight, handleError, requireAdminAuth } from './middleware.js';
 
 // Configuration Supabase - NEVER hardcode keys
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -38,6 +38,7 @@ export default async function handler(req, res) {
             handleError(res, error, 500);
         }
     } else if (req.method === 'POST') {
+        if (!requireAdminAuth(req, res)) return;
         try {
             const newProject = req.body;
             const { data, error } = await supabase
@@ -57,6 +58,7 @@ export default async function handler(req, res) {
             handleError(res, error, 500);
         }
     } else if (req.method === 'PUT') {
+        if (!requireAdminAuth(req, res)) return;
         try {
             const { id, ...updatedProject } = req.body;
             const numId = Number(id);
@@ -78,6 +80,7 @@ export default async function handler(req, res) {
             handleError(res, error, 500);
         }
     } else if (req.method === 'DELETE') {
+        if (!requireAdminAuth(req, res)) return;
         try {
             const { id } = req.body;
             const numId = Number(id);

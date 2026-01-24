@@ -1,2 +1,2 @@
-export const WEBSITE_VERSION = "Version 5.0 BETA EDITION";
-export const VERSION_DETAILS = "DATA REMIND";
+export const WEBSITE_VERSION = "Version 5.0 FRESH EDITION";
+export const VERSION_DETAILS = "FULL DATA ON";

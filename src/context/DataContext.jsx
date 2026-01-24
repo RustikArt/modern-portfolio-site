@@ -8,6 +8,12 @@ const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
+// --- ADMIN SECRET HELPER ---
+const getAdminHeaders = () => ({
+    'Content-Type': 'application/json',
+    'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET || ''
+});
+
 // --- SUPABASE CLIENT ---
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -689,7 +695,17 @@ export const DataProvider = ({ children }) => {
     };
 
     // Announcement Banner State (from Supabase)
-    const [announcement, setAnnouncement] = useState(null);
+    const [announcement, setAnnouncement] = useState(() => {
+        const saved = localStorage.getItem('portfolio_announcement');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.warn('Failed to parse saved announcement from localStorage', e);
+            }
+        }
+        return null;
+    });
 
     const [loginHistory, setLoginHistory] = useState(() => {
         const saved = localStorage.getItem('portfolio_login_history');
@@ -888,53 +904,43 @@ export const DataProvider = ({ children }) => {
         fetchData();
     }, []);
 
-    // --- FETCH SETTINGS & ANNOUNCEMENTS FROM SUPABASE ---
+    // --- FETCH SETTINGS & ANNOUNCEMENTS FROM API ---
     useEffect(() => {
-        const fetchSupabaseData = async () => {
-            if (!supabase) return;
-
+        const fetchSettings = async () => {
             try {
-                // Fetch settings
-                const { data: settingsData, error: settingsError } = await supabase
-                    .from('portfolio_settings')
-                    .select('*')
-                    .order('id', { ascending: false })
-                    .limit(1);
-
-                if (settingsError) {
-                    console.error('Error fetching settings:', settingsError);
-                } else if (settingsData && settingsData.length > 0) {
-                    const fetchedSettings = settingsData[0];
+                const res = await fetch('/api/settings');
+                if (res.ok) {
+                    const data = await res.json();
                     setSettings(prev => ({
                         ...prev,
-                        maintenanceMode: fetchedSettings.maintenance_mode || prev.maintenanceMode,
-                        siteTitle: fetchedSettings.site_title || prev.siteTitle,
-                        contactEmail: fetchedSettings.contact_email || prev.contactEmail,
-                        supportPhone: fetchedSettings.support_phone || prev.supportPhone,
-                        socials: fetchedSettings.socials || prev.socials
+                        maintenanceMode: data.maintenance_mode !== undefined ? data.maintenance_mode : prev.maintenanceMode,
+                        siteTitle: data.site_title || prev.siteTitle,
+                        contactEmail: data.contact_email || prev.contactEmail,
+                        supportPhone: data.support_phone || prev.supportPhone,
+                        socials: data.socials || prev.socials
                     }));
                 }
-
-                // Fetch announcement
-                const { data: announcementData, error: announcementError } = await supabase
-                    .from('portfolio_announcements')
-                    .select('*')
-                    .eq('is_archived', false)
-                    .eq('is_active', true)
-                    .order('updated_at', { ascending: false })
-                    .limit(1);
-
-                if (announcementError) {
-                    console.error('Error fetching announcement:', announcementError);
-                } else if (announcementData && announcementData.length > 0) {
-                    setAnnouncement(announcementData[0]);
-                }
             } catch (error) {
-                console.error('Failed to fetch Supabase data:', error);
+                console.error('Failed to fetch settings from API:', error);
             }
         };
 
-        fetchSupabaseData();
+        const fetchAnnouncement = async () => {
+            try {
+                const res = await fetch('/api/announcements');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data) {
+                        setAnnouncement(data);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch announcement from API:', error);
+            }
+        };
+
+        fetchSettings();
+        fetchAnnouncement();
     }, []);
 
     // --- PERSISTENCE --- (Now handled by API)
@@ -1036,7 +1042,7 @@ export const DataProvider = ({ children }) => {
 
             const res = await fetch('/api/projects', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify(projectData)
             });
             if (res.ok) {
@@ -1056,7 +1062,7 @@ export const DataProvider = ({ children }) => {
         try {
             const res = await fetch('/api/projects', {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify({ id })
             });
             if (res.ok) {
@@ -1082,7 +1088,7 @@ export const DataProvider = ({ children }) => {
 
             const res = await fetch('/api/projects', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify({ id, ...projectData })
             });
             if (res.ok) {
@@ -1116,7 +1122,7 @@ export const DataProvider = ({ children }) => {
 
             const res = await fetch('/api/products', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify(productData)
             });
             console.log('API response status:', res.status);
@@ -1146,7 +1152,7 @@ export const DataProvider = ({ children }) => {
         try {
             const res = await fetch('/api/products', {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify({ id })
             });
             if (res.ok) {
@@ -1175,7 +1181,7 @@ export const DataProvider = ({ children }) => {
 
             const res = await fetch('/api/products', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify({ id, ...productData })
             });
             if (res.ok) {
@@ -1206,9 +1212,13 @@ export const DataProvider = ({ children }) => {
         if (exists) return { success: false, message: 'Email déjà utilisé.' };
 
         try {
+            const headers = getAdminHeaders();
+            // For admin roles, admin secret is already in getAdminHeaders()
+            // For client roles, it will be empty string which is fine
+
             const res = await fetch('/api/users', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(newUser)
             });
 
@@ -1329,7 +1339,7 @@ export const DataProvider = ({ children }) => {
 
             const res = await fetch('/api/promo-codes', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify(promoData)
             });
             if (res.ok) {
@@ -1349,7 +1359,7 @@ export const DataProvider = ({ children }) => {
         try {
             const res = await fetch('/api/promo-codes', {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify({ id })
             });
             if (res.ok) {
@@ -1535,7 +1545,7 @@ export const DataProvider = ({ children }) => {
 
             const res = await fetch('/api/orders', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify(orderData)
             });
 
@@ -1564,7 +1574,7 @@ export const DataProvider = ({ children }) => {
                         try {
                             fetch('/api/promo-codes', {
                                 method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: getAdminHeaders(),
                                 body: JSON.stringify({ id: targetPromo.id, uses: targetPromo.uses })
                             }).catch(err => console.error("Sync Promo Error:", err));
                         } catch (e) { }
@@ -1892,61 +1902,35 @@ export const DataProvider = ({ children }) => {
     // --- ANNOUNCEMENT & NOTIFICATIONS ACTIONS ---
     const updateAnnouncement = async (config) => {
         try {
-            // Update in Supabase if user is authenticated
-            if (supabase && currentUser) {
-                let error;
+            // Update via API endpoint (requires admin secret server-side)
+            if (currentUser) {
+                const url = announcement && announcement.id 
+                    ? '/api/announcements'
+                    : '/api/announcements';
                 
-                if (announcement && announcement.id) {
-                    // Update existing
-                    const result = await supabase
-                        .from('portfolio_announcements')
-                        .update({
-                            ...config,
-                            text: config.text || announcement.text,
-                            updated_by: currentUser.id,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', announcement.id);
-                    
-                    error = result.error;
-                } else {
-                    // Create new if doesn't exist
-                    const result = await supabase
-                        .from('portfolio_announcements')
-                        .insert([{
-                            text: config.text || 'Annonce',
-                            subtext: config.subtext || '',
-                            bg_color: config.bgColor || '#d4af37',
-                            text_color: config.textColor || '#000000',
-                            is_active: config.isActive !== undefined ? config.isActive : true,
-                            link: config.link || '',
-                            show_timer: config.showTimer || false,
-                            timer_end: config.timerEnd || null,
-                            font_weight: config.fontWeight || '700',
-                            font_style: config.fontStyle || 'normal',
-                            height: config.height || '56px',
-                            created_by: currentUser.id,
-                            updated_by: currentUser.id
-                        }])
-                        .select();
-                    
-                    error = result.error;
-                    if (!error && result.data && result.data.length > 0) {
-                        setAnnouncement(result.data[0]);
-                    }
-                }
+                const method = announcement && announcement.id ? 'PUT' : 'POST';
+                const body = announcement && announcement.id
+                    ? { id: announcement.id, ...config }
+                    : config;
 
-                if (error) {
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-secret': process.env.REACT_APP_ADMIN_SECRET || ''
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
                     console.error('Error updating announcement:', error);
                     addNotification('error', 'Erreur: impossible de sauvegarder l\'annonce');
                     return;
                 }
 
-                // Log activity
-                await logActivity('UPDATE', 'announcement_banner', announcement?.id || 'new', config);
-
-                // Update local state
-                setAnnouncement(prev => prev ? { ...prev, ...config } : prev);
+                const updated = await res.json();
+                setAnnouncement(updated);
                 addNotification('success', 'Annonce mise à jour avec succès');
             } else {
                 // Fallback: just update local state if not authenticated
@@ -1960,50 +1944,31 @@ export const DataProvider = ({ children }) => {
 
     const updateSettings = async (newSettings) => {
         try {
-            // Update in Supabase if authenticated
-            if (supabase && currentUser) {
-                // First try to update
-                const { error: updateError, data: updateData } = await supabase
-                    .from('portfolio_settings')
-                    .update({
-                        maintenance_mode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
-                        site_title: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
-                        contact_email: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
-                        support_phone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
-                        socials: newSettings.socials || settings.socials,
-                        updated_by: currentUser.id,
-                        updated_at: new Date().toISOString()
+            // Update via API endpoint (requires admin secret server-side)
+            if (currentUser) {
+                const res = await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-secret': process.env.REACT_APP_ADMIN_SECRET || ''
+                    },
+                    body: JSON.stringify({
+                        maintenanceMode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
+                        siteTitle: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
+                        contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
+                        supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
+                        socials: newSettings.socials || settings.socials
                     })
-                    .eq('id', 1);
+                });
 
-                // If update failed (no row exists), try to insert
-                if (updateError && updateError.message?.includes('No rows')) {
-                    const { error: insertError } = await supabase
-                        .from('portfolio_settings')
-                        .insert([{
-                            id: 1,
-                            maintenance_mode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
-                            site_title: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
-                            contact_email: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
-                            support_phone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
-                            socials: newSettings.socials || settings.socials,
-                            updated_by: currentUser.id
-                        }]);
-
-                    if (insertError) {
-                        console.error('Error creating settings:', insertError);
-                        addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
-                        return;
-                    }
-                } else if (updateError) {
-                    console.error('Error updating settings:', updateError);
+                if (!res.ok) {
+                    const error = await res.json();
+                    console.error('Error updating settings:', error);
                     addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
                     return;
                 }
 
-                // Log activity
-                await logActivity('UPDATE', 'site_settings', 1, newSettings);
-
+                const updated = await res.json();
                 // Update local state
                 setSettings(prev => ({ ...prev, ...newSettings }));
                 addNotification('success', 'Paramètres mis à jour avec succès');

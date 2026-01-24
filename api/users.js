@@ -65,6 +65,16 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Email et mot de passe requis.' });
             }
 
+            // Prevent public creation of admin/super_admin accounts without secret
+            const ADMIN_API_SECRET = process.env.ADMIN_API_SECRET || '';
+            const providedSecret = (req.headers['x-admin-secret'] || '').toString();
+            const requestedRole = (newUser.role || 'client').toString();
+
+            if (requestedRole !== 'client' && ADMIN_API_SECRET && providedSecret !== ADMIN_API_SECRET) {
+                console.warn('Attempt to create elevated account without valid admin secret');
+                return res.status(403).json({ error: 'Forbidden: cannot create admin accounts from public endpoints.' });
+            }
+
             // HASH PASSWORD
             if (newUser.password.length < 50) {
                 const salt = bcrypt.genSaltSync(10);
@@ -116,6 +126,15 @@ export default async function handler(req, res) {
 
             if (!id) return res.status(400).json({ error: 'ID requis pour la mise à jour.' });
 
+            // If trying to elevate role or modify sensitive fields, require admin secret
+            const ADMIN_API_SECRET = process.env.ADMIN_API_SECRET || '';
+            const providedSecret = (req.headers['x-admin-secret'] || '').toString();
+            const isElevating = updatedUser.role && updatedUser.role !== 'client';
+            if (isElevating && ADMIN_API_SECRET && providedSecret !== ADMIN_API_SECRET) {
+                console.warn('Attempt to elevate account without valid admin secret');
+                return res.status(403).json({ error: 'Forbidden: cannot elevate accounts from public endpoints.' });
+            }
+
             if (updatedUser.password && updatedUser.password.length < 50) {
                 const salt = bcrypt.genSaltSync(10);
                 updatedUser.password = bcrypt.hashSync(updatedUser.password, salt);
@@ -154,6 +173,14 @@ export default async function handler(req, res) {
 
             if (!id) {
                 return res.status(400).json({ error: 'ID requis pour la suppression.' });
+            }
+
+            // Require admin secret for deletes to avoid public deletion
+            const ADMIN_API_SECRET = process.env.ADMIN_API_SECRET || '';
+            const providedSecret = (req.headers['x-admin-secret'] || '').toString();
+            if (ADMIN_API_SECRET && providedSecret !== ADMIN_API_SECRET) {
+                console.warn('Attempt to delete user without valid admin secret');
+                return res.status(403).json({ error: 'Forbidden: cannot delete users from public endpoints.' });
             }
 
             const { error: deleteError } = await supabase

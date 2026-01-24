@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
+import { setCorsHeaders, handleCorsPreFlight, handleError, requireAdminAuth } from './middleware.js';
 
 // Configuration Supabase - NEVER hardcode keys
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -95,8 +95,10 @@ export default async function handler(req, res) {
 
             res.status(201).json(allOrders);
         } else if (req.method === 'PUT') {
+            if (!requireAdminAuth(req, res)) return;
             const { id, ...updatedOrder } = req.body;
             if (!id) return res.status(400).json({ error: 'ID requis.' });
+
 
             // Filter and map fields for update
             const cleanedUpdate = {};

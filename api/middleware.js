@@ -103,6 +103,27 @@ export function checkRateLimit(identifier, maxRequests = 10, windowMs = 60000) {
     return true;
 }
 
+// Vérification d'authentification admin (x-admin-secret)
+export function requireAdminAuth(req, res) {
+    const ADMIN_API_SECRET = process.env.ADMIN_API_SECRET || '';
+    const providedSecret = (req.headers['x-admin-secret'] || '').toString();
+
+    // Si aucun secret n'est configuré, log un warning mais permets la requête (mode développement)
+    if (!ADMIN_API_SECRET) {
+        console.warn('[SECURITY] ADMIN_API_SECRET not configured - admin endpoints are unprotected!');
+        return true;
+    }
+
+    // Vérifier le secret
+    if (providedSecret !== ADMIN_API_SECRET) {
+        setCorsHeaders(res, req.headers.origin);
+        res.status(403).json({ error: 'Forbidden: Invalid or missing admin secret.' });
+        return false;
+    }
+
+    return true;
+}
+
 // Gestion des erreurs standardisée
 export function handleError(res, error, statusCode = 500) {
     console.error('API Error:', error);
