@@ -109,7 +109,7 @@ const Dashboard = () => {
         announcement, updateAnnouncement,
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
-        reviews, deleteReview,
+        reviews, addReview, deleteReview,
         currentUser, register, deleteUser, checkPermission, loginHistory,
         showToast,
         settings, updateSettings
@@ -167,6 +167,24 @@ const Dashboard = () => {
 
     // Product Filters
     const [productFilter, setProductFilter] = useState({ category: 'all', promoOnly: false, search: '' });
+
+    // --- GENERAL SETTINGS STATES (local before apply) ---
+    const [localSiteTitle, setLocalSiteTitle] = useState(settings?.siteTitle || '');
+    const [localMaintenanceMode, setLocalMaintenanceMode] = useState(settings?.maintenanceMode || false);
+    const [localGrainEffect, setLocalGrainEffect] = useState(settings?.grainEffect || false);
+    const [localContactEmail, setLocalContactEmail] = useState(settings?.contactEmail || '');
+    const [localSocials, setLocalSocials] = useState(settings?.socials || { instagram: '', twitter: '', discord: '' });
+
+    // Sync local settings when settings change from context
+    useEffect(() => {
+        if (settings) {
+            setLocalSiteTitle(settings.siteTitle || '');
+            setLocalMaintenanceMode(settings.maintenanceMode || false);
+            setLocalGrainEffect(settings.grainEffect || false);
+            setLocalContactEmail(settings.contactEmail || '');
+            setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
+        }
+    }, [settings]);
 
     const [announcementText, setAnnouncementText] = useState(announcement?.text || '');
     const [announcementSubtext, setAnnouncementSubtext] = useState(announcement?.subtext || '');
@@ -1864,8 +1882,8 @@ const Dashboard = () => {
                                                 <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Nom du Site</label>
                                                 <input
                                                     type="text"
-                                                    value={settings.siteTitle}
-                                                    onChange={(e) => updateSettings({ siteTitle: e.target.value })}
+                                                    value={localSiteTitle}
+                                                    onChange={(e) => setLocalSiteTitle(e.target.value)}
                                                     style={inputStyle}
                                                 />
                                             </div>
@@ -1874,15 +1892,15 @@ const Dashboard = () => {
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                     <span style={{ fontWeight: 'bold' }}>Mode Maintenance</span>
                                                     <div
-                                                        onClick={() => updateSettings({ maintenanceMode: !settings.maintenanceMode })}
+                                                        onClick={() => setLocalMaintenanceMode(!localMaintenanceMode)}
                                                         style={{
-                                                            width: '50px', height: '26px', background: settings.maintenanceMode ? '#ff4d4d' : '#333',
+                                                            width: '50px', height: '26px', background: localMaintenanceMode ? '#ff4d4d' : '#333',
                                                             borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s'
                                                         }}
                                                     >
                                                         <div style={{
                                                             width: '20px', height: '20px', background: 'white', borderRadius: '50%',
-                                                            position: 'absolute', top: '3px', left: settings.maintenanceMode ? '27px' : '3px',
+                                                            position: 'absolute', top: '3px', left: localMaintenanceMode ? '27px' : '3px',
                                                             transition: 'left 0.3s'
                                                         }}></div>
                                                     </div>
@@ -1894,15 +1912,15 @@ const Dashboard = () => {
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                     <span style={{ fontWeight: 'bold' }}>Effet de Grain</span>
                                                     <div
-                                                        onClick={() => updateSettings({ grainEffect: !settings.grainEffect })}
+                                                        onClick={() => setLocalGrainEffect(!localGrainEffect)}
                                                         style={{
-                                                            width: '50px', height: '26px', background: settings.grainEffect ? 'var(--color-accent)' : '#333',
+                                                            width: '50px', height: '26px', background: localGrainEffect ? 'var(--color-accent)' : '#333',
                                                             borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s'
                                                         }}
                                                     >
                                                         <div style={{
                                                             width: '20px', height: '20px', background: 'white', borderRadius: '50%',
-                                                            position: 'absolute', top: '3px', left: settings.grainEffect ? '27px' : '3px',
+                                                            position: 'absolute', top: '3px', left: localGrainEffect ? '27px' : '3px',
                                                             transition: 'left 0.3s'
                                                         }}></div>
                                                     </div>
@@ -1916,8 +1934,8 @@ const Dashboard = () => {
                                                 <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Email de contact</label>
                                                 <input
                                                     type="email"
-                                                    value={settings.contactEmail}
-                                                    onChange={(e) => updateSettings({ contactEmail: e.target.value })}
+                                                    value={localContactEmail}
+                                                    onChange={(e) => setLocalContactEmail(e.target.value)}
                                                     style={inputStyle}
                                                 />
                                             </div>
@@ -1927,8 +1945,8 @@ const Dashboard = () => {
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Instagram</label>
                                                     <input
                                                         type="text"
-                                                        value={settings.socials?.instagram || ''}
-                                                        onChange={(e) => updateSettings({ socials: { ...settings.socials, instagram: e.target.value } })}
+                                                        value={localSocials.instagram || ''}
+                                                        onChange={(e) => setLocalSocials({ ...localSocials, instagram: e.target.value })}
                                                         style={inputStyle}
                                                         placeholder="https://..."
                                                     />
@@ -1937,8 +1955,8 @@ const Dashboard = () => {
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Twitter (X)</label>
                                                     <input
                                                         type="text"
-                                                        value={settings.socials?.twitter || ''}
-                                                        onChange={(e) => updateSettings({ socials: { ...settings.socials, twitter: e.target.value } })}
+                                                        value={localSocials.twitter || ''}
+                                                        onChange={(e) => setLocalSocials({ ...localSocials, twitter: e.target.value })}
                                                         style={inputStyle}
                                                         placeholder="https://..."
                                                     />
@@ -1947,13 +1965,30 @@ const Dashboard = () => {
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Discord</label>
                                                     <input
                                                         type="text"
-                                                        value={settings.socials?.discord || ''}
-                                                        onChange={(e) => updateSettings({ socials: { ...settings.socials, discord: e.target.value } })}
+                                                        value={localSocials.discord || ''}
+                                                        onChange={(e) => setLocalSocials({ ...localSocials, discord: e.target.value })}
                                                         style={inputStyle}
                                                         placeholder="https://..."
                                                     />
                                                 </div>
                                             </div>
+
+                                            {/* APPLY BUTTON */}
+                                            <button
+                                                onClick={async () => {
+                                                    await updateSettings({
+                                                        siteTitle: localSiteTitle,
+                                                        maintenanceMode: localMaintenanceMode,
+                                                        grainEffect: localGrainEffect,
+                                                        contactEmail: localContactEmail,
+                                                        socials: localSocials
+                                                    });
+                                                    showToast("Configuration générale mise à jour !", "success");
+                                                }}
+                                                style={{ ...btnPrimaryModern, marginTop: '1rem', width: '100%', justifyContent: 'center' }}
+                                            >
+                                                <Edit size={18} /> Appliquer les modifications
+                                            </button>
                                         </div>
                                     </div>
 

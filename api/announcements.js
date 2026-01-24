@@ -19,13 +19,21 @@ export default async function handler(req, res) {
 
     try {
         if (req.method === 'GET') {
-            // Public: fetch active announcements
-            const { data: announcements, error } = await supabase
+            // Check if admin request (to get any announcement, not just active)
+            const isAdminRequest = req.headers['x-admin-secret'] || req.query.admin === 'true';
+            
+            let query = supabase
                 .from('portfolio_announcements')
                 .select('*')
-                .eq('is_active', true)
                 .order('updated_at', { ascending: false })
                 .limit(1);
+            
+            // For public requests, only return active announcements
+            if (!isAdminRequest) {
+                query = query.eq('is_active', true);
+            }
+            
+            const { data: announcements, error } = await query;
 
             if (error) throw error;
             res.status(200).json(announcements && announcements.length > 0 ? announcements[0] : null);

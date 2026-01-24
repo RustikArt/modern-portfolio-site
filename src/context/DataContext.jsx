@@ -949,7 +949,8 @@ export const DataProvider = ({ children }) => {
 
         const fetchAnnouncement = async () => {
             try {
-                const res = await fetch('/api/announcements');
+                // Fetch announcement (add admin=true to get even inactive ones for dashboard)
+                const res = await fetch('/api/announcements?admin=true');
                 if (res.ok) {
                     const data = await res.json();
                     if (data) {
