@@ -106,7 +106,7 @@ const Dashboard = () => {
         addProduct, updateProduct, deleteProduct,
         updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode,
         secureFullReset, logout,
-        announcement, updateAnnouncement,
+        announcement, updateAnnouncement, fetchAnnouncementForAdmin,
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
         reviews, addReview, deleteReview,
@@ -121,6 +121,13 @@ const Dashboard = () => {
     const [expandedOrders, setExpandedOrders] = useState({});
     const navigate = useNavigate();
     const notificationRef = React.useRef(null);
+
+    // Fetch announcement for admin on mount (includes inactive)
+    useEffect(() => {
+        if (fetchAnnouncementForAdmin) {
+            fetchAnnouncementForAdmin();
+        }
+    }, []);
 
     // Click outside to close notifications
     useEffect(() => {
@@ -172,6 +179,7 @@ const Dashboard = () => {
     const [localSiteTitle, setLocalSiteTitle] = useState(settings?.siteTitle || '');
     const [localMaintenanceMode, setLocalMaintenanceMode] = useState(settings?.maintenanceMode || false);
     const [localGrainEffect, setLocalGrainEffect] = useState(settings?.grainEffect || false);
+    const [localShowLoadingScreen, setLocalShowLoadingScreen] = useState(settings?.showLoadingScreen !== false);
     const [localContactEmail, setLocalContactEmail] = useState(settings?.contactEmail || '');
     const [localSocials, setLocalSocials] = useState(settings?.socials || { instagram: '', twitter: '', discord: '' });
 
@@ -181,6 +189,7 @@ const Dashboard = () => {
             setLocalSiteTitle(settings.siteTitle || '');
             setLocalMaintenanceMode(settings.maintenanceMode || false);
             setLocalGrainEffect(settings.grainEffect || false);
+            setLocalShowLoadingScreen(settings.showLoadingScreen !== false);
             setLocalContactEmail(settings.contactEmail || '');
             setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
         }
@@ -1928,6 +1937,26 @@ const Dashboard = () => {
                                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Ajoute une texture de film rétro à l'arrière plan du site.</p>
                                             </div>
 
+                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                    <span style={{ fontWeight: 'bold' }}>Écran de Chargement</span>
+                                                    <div
+                                                        onClick={() => setLocalShowLoadingScreen(!localShowLoadingScreen)}
+                                                        style={{
+                                                            width: '50px', height: '26px', background: localShowLoadingScreen ? 'var(--color-accent)' : '#333',
+                                                            borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s'
+                                                        }}
+                                                    >
+                                                        <div style={{
+                                                            width: '20px', height: '20px', background: 'white', borderRadius: '50%',
+                                                            position: 'absolute', top: '3px', left: localShowLoadingScreen ? '27px' : '3px',
+                                                            transition: 'left 0.3s'
+                                                        }}></div>
+                                                    </div>
+                                                </div>
+                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Affiche un écran de chargement animé au démarrage du site.</p>
+                                            </div>
+
                                             <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Contact & Réseaux</h4>
 
                                             <div>
@@ -1980,6 +2009,7 @@ const Dashboard = () => {
                                                         siteTitle: localSiteTitle,
                                                         maintenanceMode: localMaintenanceMode,
                                                         grainEffect: localGrainEffect,
+                                                        showLoadingScreen: localShowLoadingScreen,
                                                         contactEmail: localContactEmail,
                                                         socials: localSocials
                                                     });

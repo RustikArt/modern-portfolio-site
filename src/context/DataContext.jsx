@@ -716,18 +716,9 @@ export const DataProvider = ({ children }) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     };
 
-    // Announcement Banner State (from Supabase)
-    const [announcement, setAnnouncement] = useState(() => {
-        const saved = localStorage.getItem('portfolio_announcement');
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) {
-                console.warn('Failed to parse saved announcement from localStorage', e);
-            }
-        }
-        return null;
-    });
+    // Announcement Banner State (from Supabase - don't use localStorage to prevent flash)
+    const [announcement, setAnnouncement] = useState(null);
+    const [announcementLoaded, setAnnouncementLoaded] = useState(false);
 
     const [loginHistory, setLoginHistory] = useState(() => {
         const saved = localStorage.getItem('portfolio_login_history');
@@ -788,6 +779,7 @@ export const DataProvider = ({ children }) => {
         const defaultSettings = {
             maintenanceMode: false,
             grainEffect: true,
+            showLoadingScreen: true,
             siteTitle: 'RUSTIKOP',
             contactEmail: 'rustikop@outlook.fr',
             supportPhone: '',
@@ -949,8 +941,8 @@ export const DataProvider = ({ children }) => {
 
         const fetchAnnouncement = async () => {
             try {
-                // Fetch announcement (add admin=true to get even inactive ones for dashboard)
-                const res = await fetch('/api/announcements?admin=true');
+                // Fetch announcement (public - only active ones)
+                const res = await fetch('/api/announcements');
                 if (res.ok) {
                     const data = await res.json();
                     if (data) {
@@ -975,16 +967,61 @@ export const DataProvider = ({ children }) => {
                             updatedAt: data.updated_at || data.updatedAt
                         };
                         setAnnouncement(normalizedAnnouncement);
+                    } else {
+                        // No active announcement
+                        setAnnouncement(null);
                     }
+                } else {
+                    setAnnouncement(null);
                 }
             } catch (error) {
                 console.error('Failed to fetch announcement from API:', error);
+                setAnnouncement(null);
+            } finally {
+                setAnnouncementLoaded(true);
             }
         };
 
         fetchSettings();
         fetchAnnouncement();
     }, []);
+
+    // Function to fetch announcement for admin (includes inactive ones)
+    const fetchAnnouncementForAdmin = async () => {
+        try {
+            const res = await fetch('/api/announcements?admin=true');
+            if (res.ok) {
+                const data = await res.json();
+                if (data) {
+                    const normalizedAnnouncement = {
+                        id: data.id,
+                        text: data.text,
+                        subtext: data.subtext,
+                        bgColor: data.bg_color || data.bgColor,
+                        textColor: data.text_color || data.textColor,
+                        isActive: data.is_active !== undefined ? data.is_active : data.isActive,
+                        link: data.link,
+                        showTimer: data.show_timer !== undefined ? data.show_timer : data.showTimer,
+                        timerEnd: data.timer_end || data.timerEnd,
+                        fontWeight: data.font_weight || data.fontWeight,
+                        fontStyle: data.font_style || data.fontStyle,
+                        height: data.height,
+                        icon: data.icon || 'Sparkles',
+                        textAlign: data.text_align || data.textAlign || 'left',
+                        timerPosition: data.timer_position || data.timerPosition || 'right',
+                        createdAt: data.created_at || data.createdAt,
+                        updatedAt: data.updated_at || data.updatedAt
+                    };
+                    setAnnouncement(normalizedAnnouncement);
+                    return normalizedAnnouncement;
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('Failed to fetch announcement for admin:', error);
+            return null;
+        }
+    };
 
     // --- PERSISTENCE --- (Now handled by API)
 
@@ -2113,7 +2150,7 @@ export const DataProvider = ({ children }) => {
             promoCodes, addPromoCode, deletePromoCode, applyPromoCode, activePromo,
 
             // Announcement
-            announcement, updateAnnouncement,
+            announcement, updateAnnouncement, announcementLoaded, fetchAnnouncementForAdmin,
 
             // Notifications
             notifications, addNotification, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,

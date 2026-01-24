@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AnnouncementBanner from './components/AnnouncementBanner';
+import LoadingScreen from './components/LoadingScreen';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
 import Shop from './pages/Shop';
@@ -273,7 +274,7 @@ const AppContent = () => {
   }, [settings?.grainEffect]);
 
   return (
-    <>
+    <LoadingScreen>
       <AnnouncementBanner />
       <CookieConsent />
       <Navbar />
@@ -315,7 +316,7 @@ const AppContent = () => {
         </Routes>
       </main>
       <Footer />
-    </>
+    </LoadingScreen>
   );
 };
 

@@ -11,8 +11,8 @@ const renderLucideIcon = (iconName, props = {}) => {
 };
 
 const AnnouncementBanner = () => {
-    const { announcement } = useData();
-    const [isVisible, setIsVisible] = useState(true);
+    const { announcement, announcementLoaded } = useData();
+    const [isVisible, setIsVisible] = useState(false); // Start hidden to prevent flash
     const [timeLeft, setTimeLeft] = useState('');
 
     // Generate a unique key based on announcement text to track dismissal
@@ -21,16 +21,18 @@ const AnnouncementBanner = () => {
         return `banner_dismissed_${btoa(encodeURIComponent(announcement.text)).slice(0, 16)}`;
     }, [announcement?.text]);
 
-    // Check dismissal status when announcement changes
+    // Check dismissal status when announcement changes (only after loaded)
     useEffect(() => {
+        if (!announcementLoaded) return; // Wait for data to load
+        
         const key = getDismissalKey();
-        if (key) {
+        if (key && announcement?.isActive) {
             const wasDismissed = localStorage.getItem(key) === 'true';
             setIsVisible(!wasDismissed);
         } else {
-            setIsVisible(true);
+            setIsVisible(false);
         }
-    }, [getDismissalKey]);
+    }, [getDismissalKey, announcementLoaded, announcement?.isActive]);
 
     const handleClose = () => {
         const key = getDismissalKey();
