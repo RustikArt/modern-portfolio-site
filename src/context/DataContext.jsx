@@ -931,7 +931,24 @@ export const DataProvider = ({ children }) => {
                 if (res.ok) {
                     const data = await res.json();
                     if (data) {
-                        setAnnouncement(data);
+                        // Normalize snake_case from API to camelCase for frontend
+                        const normalizedAnnouncement = {
+                            id: data.id,
+                            text: data.text,
+                            subtext: data.subtext,
+                            bgColor: data.bg_color || data.bgColor,
+                            textColor: data.text_color || data.textColor,
+                            isActive: data.is_active !== undefined ? data.is_active : data.isActive,
+                            link: data.link,
+                            showTimer: data.show_timer !== undefined ? data.show_timer : data.showTimer,
+                            timerEnd: data.timer_end || data.timerEnd,
+                            fontWeight: data.font_weight || data.fontWeight,
+                            fontStyle: data.font_style || data.fontStyle,
+                            height: data.height,
+                            createdAt: data.created_at || data.createdAt,
+                            updatedAt: data.updated_at || data.updatedAt
+                        };
+                        setAnnouncement(normalizedAnnouncement);
                     }
                 }
             } catch (error) {
@@ -1929,8 +1946,25 @@ export const DataProvider = ({ children }) => {
                     return;
                 }
 
-                const updated = await res.json();
-                setAnnouncement(updated);
+                const data = await res.json();
+                // Normalize snake_case from API to camelCase for frontend
+                const normalizedAnnouncement = {
+                    id: data.id,
+                    text: data.text,
+                    subtext: data.subtext,
+                    bgColor: data.bg_color || data.bgColor,
+                    textColor: data.text_color || data.textColor,
+                    isActive: data.is_active !== undefined ? data.is_active : data.isActive,
+                    link: data.link,
+                    showTimer: data.show_timer !== undefined ? data.show_timer : data.showTimer,
+                    timerEnd: data.timer_end || data.timerEnd,
+                    fontWeight: data.font_weight || data.fontWeight,
+                    fontStyle: data.font_style || data.fontStyle,
+                    height: data.height,
+                    createdAt: data.created_at || data.createdAt,
+                    updatedAt: data.updated_at || data.updatedAt
+                };
+                setAnnouncement(normalizedAnnouncement);
                 addNotification('success', 'Annonce mise à jour avec succès');
             } else {
                 // Fallback: just update local state if not authenticated

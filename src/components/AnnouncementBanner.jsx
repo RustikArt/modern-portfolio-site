@@ -1,25 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useData } from '../context/DataContext';
 import { X } from 'lucide-react';
 
 const AnnouncementBanner = () => {
     const { announcement } = useData();
+    const [isVisible, setIsVisible] = useState(true);
+    const [timeLeft, setTimeLeft] = useState('');
 
     // Generate a unique key based on announcement text to track dismissal
-    const getDismissalKey = () => {
+    const getDismissalKey = useCallback(() => {
         if (!announcement?.text) return null;
         return `banner_dismissed_${btoa(encodeURIComponent(announcement.text)).slice(0, 16)}`;
-    };
+    }, [announcement?.text]);
 
-    const [isVisible, setIsVisible] = useState(() => {
+    // Check dismissal status when announcement changes
+    useEffect(() => {
         const key = getDismissalKey();
         if (key) {
-            const dismissed = localStorage.getItem(key) === 'true';
-            return !dismissed;
+            const wasDismissed = localStorage.getItem(key) === 'true';
+            setIsVisible(!wasDismissed);
+        } else {
+            setIsVisible(true);
         }
-        return true;
-    });
-    const [timeLeft, setTimeLeft] = useState('');
+    }, [getDismissalKey]);
 
     const handleClose = () => {
         const key = getDismissalKey();
@@ -58,17 +61,6 @@ const AnnouncementBanner = () => {
         setTimeLeft(calculateTimeLeft());
         return () => clearInterval(timer);
     }, [announcement, isVisible]);
-
-    // Reset visibility when announcement text changes
-    useEffect(() => {
-        const key = getDismissalKey();
-        if (key && localStorage.getItem(key) !== 'true') {
-            setIsVisible(true);
-        } else if (key) {
-            localStorage.removeItem(key);
-            setIsVisible(true);
-        }
-    }, [announcement?.text]);
 
     if (!announcement || !announcement.isActive || !isVisible) {
         return null;
