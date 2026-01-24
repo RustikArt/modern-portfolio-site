@@ -23,7 +23,6 @@ export default async function handler(req, res) {
             const { data: announcements, error } = await supabase
                 .from('portfolio_announcements')
                 .select('*')
-                .eq('is_archived', false)
                 .eq('is_active', true)
                 .order('updated_at', { ascending: false })
                 .limit(1);
@@ -58,7 +57,6 @@ export default async function handler(req, res) {
                 bg_color: bgColor || '#d4af37',
                 text_color: textColor || '#000000',
                 is_active: isActive !== undefined ? isActive : true,
-                is_archived: false,
                 link: link || '',
                 show_timer: showTimer || false,
                 timer_end: timerEnd || null,
@@ -103,7 +101,9 @@ export default async function handler(req, res) {
             };
 
             // Remove undefined keys
-            Object.keys(cleanedUpdate).forEach(k => cleanedUpdate[k] === undefined && delete cleanedUpdate[k]);
+            Object.keys(cleanedUpdate).forEach(
+                k => cleanedUpdate[k] === undefined && delete cleanedUpdate[k]
+            );
 
             const { error } = await supabase
                 .from('portfolio_announcements')
@@ -120,9 +120,12 @@ export default async function handler(req, res) {
 
             if (getError) throw getError;
 
-            res.status(200).json(updated && updated.length > 0 ? updated[0] : cleanedUpdate);
+            res.status(200).json(
+                updated && updated.length > 0 ? updated[0] : cleanedUpdate
+            );
+
         } else if (req.method === 'DELETE') {
-            // Admin only: archive announcement
+            // Admin only: deactivate announcement
             if (!requireAdminAuth(req, res)) return;
 
             const { id } = req.body;
@@ -133,12 +136,18 @@ export default async function handler(req, res) {
 
             const { error } = await supabase
                 .from('portfolio_announcements')
-                .update({ is_archived: true, updated_at: new Date().toISOString() })
+                .update({
+                    is_active: false,
+                    updated_at: new Date().toISOString()
+                })
                 .eq('id', id);
 
             if (error) throw error;
 
-            res.status(200).json({ message: 'Announcement archived successfully' });
+            res.status(200).json({
+                message: 'Announcement deactivated successfully'
+            });
+
         } else {
             res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
             res.status(405).end(`Method ${req.method} Not Allowed`);
