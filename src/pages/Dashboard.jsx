@@ -117,7 +117,16 @@ const Dashboard = () => {
     // Product Filters
     const [productFilter, setProductFilter] = useState({ category: 'all', promoOnly: false, search: '' });
 
-    const [announcementForm, setAnnouncementForm] = useState({ ...announcement });
+    const [announcementText, setAnnouncementText] = useState(announcement?.text || '');
+    const [announcementSubtext, setAnnouncementSubtext] = useState(announcement?.subtext || '');
+    const [announcementBgColor, setAnnouncementBgColor] = useState(announcement?.bgColor || '');
+    const [announcementTextColor, setAnnouncementTextColor] = useState(announcement?.textColor || '');
+    const [announcementIsActive, setAnnouncementIsActive] = useState(announcement?.isActive || false);
+    const [announcementShowTimer, setAnnouncementShowTimer] = useState(announcement?.showTimer || false);
+    const [announcementTimerEnd, setAnnouncementTimerEnd] = useState(announcement?.timerEnd || '');
+    const [announcementLink, setAnnouncementLink] = useState(announcement?.link || '');
+    const [announcementHeight, setAnnouncementHeight] = useState(announcement?.height || '56px');
+
 
     // --- USER MANAGEMENT STATES ---
     const [selectedMember, setSelectedMember] = useState(null);
@@ -890,11 +899,11 @@ const Dashboard = () => {
                                                 {optionBuilder.type === 'text' && (
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', paddingBottom: '0.5rem' }}>
                                                         <input
-                                                            type="checkbox"
-                                                            id="reqQuote"
-                                                            checked={optionBuilder.requiresQuote || false}
-                                                            onChange={e => setOptionBuilder({ ...optionBuilder, requiresQuote: e.target.checked })}
+                                                             type="checkbox"
+                                                             checked={announcementIsActive}
+                                                             onChange={(e) => setAnnouncementIsActive(e.target.checked)}
                                                         />
+
                                                         <label htmlFor="reqQuote" style={{ fontSize: '0.75rem', color: '#ffcc00', cursor: 'pointer' }}>Demande de devis ?</label>
                                                     </div>
                                                 )}
@@ -1733,7 +1742,7 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                     </div>
-
+                                    
                                     {/* ANNOUNCEMENT BANNER CARD */}
                                     <div style={cardStyle}>
                                         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -1744,54 +1753,58 @@ const Dashboard = () => {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                 <input
                                                     type="checkbox"
-                                                    checked={announcementForm.isActive}
-                                                    onChange={e => setAnnouncementForm({ ...announcementForm, isActive: e.target.checked })}
-                                                    style={{ width: '20px', height: '20px' }}
+                                                    id="announcementIsActive"
+                                                    checked={announcementIsActive}
+                                                    onChange={(e) => setAnnouncementIsActive(e.target.checked)}
+                                                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
                                                 />
-                                                <label>Activer la banderole</label>
+                                                <label htmlFor="announcementIsActive" style={{ cursor: 'pointer' }}>Activer la banderole</label>
                                             </div>
 
                                             <div>
-                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Texte de l'annonce</label>
+                                                <label htmlFor="announcementText" style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Texte de l'annonce</label>
                                                 <textarea
-                                                    value={announcementForm.text}
-                                                    onChange={e => setAnnouncementForm({ ...announcementForm, text: e.target.value })}
+                                                    id="announcementText"
+                                                    value={announcementText}
+                                                    onChange={(e) => setAnnouncementText(e.target.value)}
                                                     style={{ ...inputStyle, minHeight: '80px' }}
                                                 />
                                             </div>
 
                                             <div>
-                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hyperlien (optionnel)</label>
+                                                <label htmlFor="announcementLink" style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hyperlien (optionnel)</label>
                                                 <input
                                                     type="text"
-                                                    value={announcementForm.link}
-                                                    onChange={e => setAnnouncementForm({ ...announcementForm, link: e.target.value })}
+                                                    id="announcementLink"
+                                                    value={announcementLink}
+                                                    onChange={(e) => setAnnouncementLink(e.target.value)}
                                                     style={inputStyle}
                                                     placeholder="https://..."
                                                 />
-                                                <p style={{ fontSize: '0.7rem', color: '#555', marginTop: '0.5rem' }}>Utilisez <code style={{ background: '#222', padding: '2px 5px', borderRadius: '3px' }}>[lien]</code> dans le texte pour placer le lien. Ex: "Voir notre [lien] ici !"</p>
                                             </div>
 
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', paddingBottom: '0.8rem' }}>
                                                     <input
                                                         type="checkbox"
-                                                        checked={announcementForm.showTimer}
-                                                        onChange={e => setAnnouncementForm({ ...announcementForm, showTimer: e.target.checked })}
-                                                        style={{ width: '18px', height: '18px' }}
+                                                        id="announcementShowTimer"
+                                                        checked={announcementShowTimer}
+                                                        onChange={(e ) => setAnnouncementShowTimer(e.target.checked)}
+                                                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                                                     />
-                                                    <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <label htmlFor="announcementShowTimer" style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                                                         <Timer size={14} /> Compte à rebours
                                                     </label>
                                                 </div>
                                                 <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Date de fin</label>
+                                                    <label htmlFor="announcementTimerEnd" style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Date de fin</label>
                                                     <input
                                                         type="datetime-local"
-                                                        value={announcementForm.timerEnd}
-                                                        onChange={e => setAnnouncementForm({ ...announcementForm, timerEnd: e.target.value })}
+                                                        id="announcementTimerEnd"
+                                                        value={announcementTimerEnd || ''}
+                                                        onChange={(e) => setAnnouncementTimerEnd(e.target.value)}
                                                         style={inputStyle}
-                                                        disabled={!announcementForm.showTimer}
+                                                        disabled={!announcementShowTimer}
                                                     />
                                                 </div>
                                             </div>
@@ -1799,25 +1812,34 @@ const Dashboard = () => {
                                             <div style={{ marginTop: '1rem' }}>
                                                 <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '1rem' }}>Aperçu du rendu :</label>
                                                 <div style={{
-                                                    background: announcementForm.bgColor || '#d4af37',
-                                                    color: announcementForm.textColor || 'black',
+                                                    background: announcementBgColor || '#d4af37',
+                                                    color: announcementTextColor || 'black',
                                                     padding: '1rem',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     borderRadius: '8px',
-                                                    fontWeight: announcementForm.fontWeight,
-                                                    fontStyle: announcementForm.fontStyle,
                                                     fontSize: '0.8rem',
                                                     textAlign: 'center'
                                                 }}>
-                                                    {announcementForm.text || 'Texte de votre annonce...'}
+                                                    {announcementText || 'Texte de votre annonce...'}
                                                 </div>
                                             </div>
 
                                             <button
-                                                onClick={() => {
-                                                    updateAnnouncement(announcementForm);
+                                                onClick={async () => {
+                                                    await updateAnnouncement({
+                                                        id: announcement.id,
+                                                        text: announcementText,
+                                                        subtext: announcementSubtext,
+                                                        bgColor: announcementBgColor,
+                                                        textColor: announcementTextColor,
+                                                        isActive: announcementIsActive,
+                                                        showTimer: announcementShowTimer,
+                                                        timerEnd: announcementTimerEnd || null,
+                                                        link: announcementLink,
+                                                        height: announcementHeight
+                                                    });
                                                     showToast("Configuration de la banderole appliquée !", "success");
                                                 }}
                                                 style={{ ...btnPrimaryModern, marginTop: 'auto', width: '100%', justifyContent: 'center' }}
