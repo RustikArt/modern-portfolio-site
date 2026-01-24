@@ -6,6 +6,19 @@
 
 ---
 
+## ⚠️ SECURITY WARNING - IMPORTANT READ
+
+**This documentation contains PLACEHOLDER values only - NOT real credentials.**
+
+- ❌ **NEVER** copy values from this file directly to Vercel
+- ❌ **NEVER** commit real API keys to git (GitHub will block them)
+- ✅ **Always** find real values in:
+  - **Local Development:** Your `.env.local` file (gitignored)
+  - **Production:** Vercel Dashboard already has your real values
+  - **API Services:** Supabase, Stripe, EmailJS dashboards
+
+---
+
 ## Quick Copy-Paste for Vercel
 
 Follow these steps for each variable below:
@@ -46,31 +59,34 @@ VALUE: https://rustikop.vercel.app
 ### NEXT_PUBLIC_SUPABASE_URL
 ```
 KEY: NEXT_PUBLIC_SUPABASE_URL
-VALUE: https://whkahjdzptwbaalvnvle.supabase.co
+VALUE: https://your-project-ref.supabase.co
 ```
 **Purpose:** Your Supabase project URL  
 **Type:** Public (frontend accessible)  
-**Used in:** Frontend + Backend database connections
+**Used in:** Frontend + Backend database connections  
+**⚠️ Real value:** Check Vercel Dashboard (already configured there)
 
 ### NEXT_PUBLIC_SUPABASE_ANON_KEY
 ```
 KEY: NEXT_PUBLIC_SUPABASE_ANON_KEY
-VALUE: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indoa2FoamR6cHR3YmFhbHZudmxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMzM2MTIsImV4cCI6MjA4MzYwOTYxMn0.xcbUm3leKP8NT8FJsaza4Fxzovvcy1aNLQQTOljiaU4
+VALUE: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.YOUR_ANON_KEY_HERE
 ```
 **Purpose:** Supabase public/anonymous key  
 **Type:** Public (limited access)  
 **Used in:** Frontend database queries  
-**Security:** Row-level security (RLS) enforced in Supabase
+**Security:** Row-level security (RLS) enforced in Supabase  
+**⚠️ Real value:** Check Vercel Dashboard (already configured there)
 
 ### SUPABASE_SERVICE_ROLE_KEY ⚠️
 ```
 KEY: SUPABASE_SERVICE_ROLE_KEY
-VALUE: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indoa2FoamR6cHR3YmFhbHZudmxlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODAzMzYxMiwiZXhwIjoyMDgzNjA5NjEyfQ.keE21Iz9L3Pwbj7wkxPwSVmagTLGD4eialJm0xm8E_A
+VALUE: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.YOUR_SERVICE_ROLE_KEY_HERE
 ```
 **Purpose:** Supabase backend admin key  
 **Type:** 🔐 **BACKEND ONLY** (never expose to frontend)  
 **Used in:** Backend API endpoints (`/api/users`, `/api/orders`, etc.)  
-**Security:** ⚠️ **CRITICAL** - Bypasses RLS policies. Must never be in frontend code!
+**Security:** ⚠️ **CRITICAL** - Bypasses RLS policies. Must never be in frontend code!  
+**⚠️ Real value:** Check Vercel Dashboard (already configured there)
 
 ---
 
@@ -79,21 +95,23 @@ VALUE: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indo
 ### VITE_STRIPE_PUBLISHABLE_KEY
 ```
 KEY: VITE_STRIPE_PUBLISHABLE_KEY
-VALUE: pk_live_51S2Ajv2VoBLtSy2m8o6mB8H9wF3hxgPWAX9UUcGKbg8fmkX8LrSGaPMxz2YWBDX4DbL3VauYPjlWgucLSDVof3iw00eSGWATgU
+VALUE: pk_live_your_publishable_key_here
 ```
 **Purpose:** Stripe frontend public key  
 **Type:** Public (frontend accessible)  
-**Used in:** Stripe.js library in React components
+**Used in:** Stripe.js library in React components  
+**⚠️ Real value:** Check Vercel Dashboard (already configured there)
 
 ### STRIPE_SECRET_KEY ⚠️
 ```
 KEY: STRIPE_SECRET_KEY
-VALUE: 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
+VALUE: sk_live_your_secret_key_here
 ```
 **Purpose:** Stripe backend secret key  
 **Type:** 🔐 **BACKEND ONLY** (never expose to frontend)  
 **Used in:** `/api/create-checkout-session.js`  
-**Security:** ⚠️ **CRITICAL** - Can create charges and refunds. Must never be in frontend code!
+**Security:** ⚠️ **CRITICAL** - Can create charges and refunds. Must never be in frontend code!  
+**⚠️ Real value:** Check Vercel Dashboard (already configured there)
 
 ---
 

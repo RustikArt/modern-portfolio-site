@@ -3,31 +3,42 @@
 ## Production Configuration (.env.local)
 
 ```env
-# ==================== SUPABASE ====================
-NEXT_PUBLIC_SUPABASE_URL=https://whkahjdzptwbaalvnvle.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indoa2FoamR6cHR3YmFhbHZudmxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMzM2MTIsImV4cCI6MjA4MzYwOTYxMn0.xcbUm3leKP8NT8FJsaza4Fxzovvcy1aNLQQTOljiaU4
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indoa2FoamR6cHR3YmFhbHZudmxlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODAzMzYxMiwiZXhwIjoyMDgzNjA5NjEyfQ.keE21Iz9L3Pwbj7wkxPwSVmagTLGD4eialJm0xm8E_A
+# ⚠️ EXAMPLE ONLY - DO NOT USE THESE PLACEHOLDER VALUES
+# Real values are NEVER committed to git - they are in Vercel Dashboard
+# See ENVIRONMENT_VARIABLES.md for where to find real keys
 
-# ==================== STRIPE (LIVE) ====================
-STRIPE_SECRET_KEY=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
-VITE_STRIPE_PUBLISHABLE_KEY=pk_live_51S2Ajv2VoBLtSy2m8o6mB8H9wF3hxgPWAX9UUcGKbg8fmkX8LrSGaPMxz2YWBDX4DbL3VauYPjlWgucLSDVof3iw00eSGWATgU
+# ==================== SUPABASE ====================
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.YOUR_ANON_KEY_HERE...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.YOUR_SERVICE_ROLE_KEY_HERE...
+
+# ==================== STRIPE (LIVE MODE) ====================
+# ⚠️ KEEP THESE SECRET! Never commit real keys to git.
+STRIPE_SECRET_KEY=sk_live_your_actual_key_here
+VITE_STRIPE_PUBLISHABLE_KEY=pk_live_your_actual_key_here
 
 # ==================== EMAIL (EMAILJS) ====================
-VITE_EMAILJS_SERVICE_ID=service_3npm4cy
-VITE_EMAILJS_PUBLIC_KEY=x2F0_WH6Sed8YKQDk
-VITE_EMAILJS_ORDER_TEMPLATE_ID=template_ez20ag4
-VITE_EMAILJS_TEMPLATE_ID=template_925481l
-EMAILJS_PRIVATE_KEY=s1aTOO7QelF9ElULUsirw
+VITE_EMAILJS_SERVICE_ID=service_xxxxx
+VITE_EMAILJS_PUBLIC_KEY=your_public_key_here
+VITE_EMAILJS_ORDER_TEMPLATE_ID=template_xxxxx
+VITE_EMAILJS_TEMPLATE_ID=template_xxxxx
+EMAILJS_PRIVATE_KEY=your_private_key_here_backend_only
 
 # ==================== ADMIN SECURITY ====================
-ADMIN_API_SECRET=Kx9mP2jL7qRvWnZaB5cD8eF1gH3iO6uT
-VITE_ADMIN_SECRET=Kx9mP2jL7qRvWnZaB5cD8eF1gH3iO6uT
-REACT_APP_ADMIN_SECRET=Kx9mP2jL7qRvWnZaB5cD8eF1gH3iO6uT
+# Generate your own 32-character random string
+ADMIN_API_SECRET=your_random_32_char_secret_here
+VITE_ADMIN_SECRET=your_random_32_char_secret_here
+REACT_APP_ADMIN_SECRET=your_random_32_char_secret_here
 
 # ==================== VERCEL DEPLOYMENT ====================
-VITE_API_BASE_URL=https://rustikop.vercel.app/api
-ALLOWED_ORIGINS=https://rustikop.vercel.app,https://www.rustikop.vercel.app
+VITE_API_BASE_URL=https://your-domain.vercel.app/api
+ALLOWED_ORIGINS=https://your-domain.vercel.app
 ```
+
+**⚠️ IMPORTANT:**
+- Real API keys are **NEVER stored in git**
+- Real keys are in `.env.local` (local development - gitignored)
+- Real keys are in Vercel Dashboard (production - not in git)
 
 ---
 
