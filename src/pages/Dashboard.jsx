@@ -965,7 +965,7 @@ const Dashboard = () => {
                                         <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Gestion des Commandes</h2>
                                         <button
                                             onClick={() => setShowSimulateOrderForm(!showSimulateOrderForm)}
-                                            style={{ ...btnModern, background: showSimulateOrderForm ? '#333' : 'var(--color-accent)' }}
+                                            style={{ ...btnModern, background: showSimulateOrderForm ? '#333' : 'var(--color-accent)', color: showSimulateOrderForm ? '#888' : '#000', fontWeight: showSimulateOrderForm ? 'normal' : 'bold' }}
                                         >
                                             {showSimulateOrderForm ? <X size={16} /> : <Plus size={16} />}
                                             {showSimulateOrderForm ? 'Annuler' : 'Simuler une Commande'}
@@ -1127,7 +1127,7 @@ const Dashboard = () => {
                                                     setShowSimulateOrderForm(false);
                                                     setSimulateOrderForm({ customerName: '', email: '', selectedProducts: [], status: 'Terminé', total: 0, date: new Date().toISOString().split('T')[0] });
                                                 }}
-                                                style={{ ...btnModern, background: 'var(--color-accent)' }}
+                                                style={{ ...btnModern, background: 'var(--color-accent)', color: '#000', fontWeight: 'bold' }}
                                             >
                                                 <Check size={16} /> Créer la commande simulée
                                             </button>
@@ -2535,7 +2535,7 @@ const Dashboard = () => {
                                     {checkPermission('create_reviews') && (
                                         <button
                                             onClick={() => setShowNewReviewForm(!showNewReviewForm)}
-                                            style={{ ...btnModern, background: showNewReviewForm ? '#333' : 'var(--color-accent)' }}
+                                            style={{ ...btnModern, background: showNewReviewForm ? '#333' : 'var(--color-accent)', color: showNewReviewForm ? '#888' : '#000', fontWeight: showNewReviewForm ? 'normal' : 'bold' }}
                                         >
                                             {showNewReviewForm ? <X size={16} /> : <Plus size={16} />}
                                             {showNewReviewForm ? 'Annuler' : 'Créer un Avis'}
@@ -2629,7 +2629,7 @@ const Dashboard = () => {
                                                     setShowNewReviewForm(false);
                                                     setNewReviewForm({ productId: '', user: '', rating: 5, comment: '' });
                                                 }}
-                                                style={{ ...btnModern, background: 'var(--color-accent)' }}
+                                                style={{ ...btnModern, background: 'var(--color-accent)', color: '#000', fontWeight: 'bold' }}
                                             >
                                                 <Check size={16} /> Créer l'avis
                                             </button>

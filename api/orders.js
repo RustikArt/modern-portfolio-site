@@ -59,7 +59,7 @@ export default async function handler(req, res) {
         } else if (req.method === 'POST') {
             const body = req.body;
 
-            // Map camelCase to snake_case for Supabase compatibility if needed
+            // Map camelCase to snake_case for Supabase compatibility - ONLY include columns that exist in DB
             const orderToInsert = {
                 customer_name: body.customerName || body.customer_name,
                 email: body.email,
@@ -71,8 +71,15 @@ export default async function handler(req, res) {
                 payment_id: body.paymentId || body.payment_id,
                 shipping: typeof body.shipping === 'string' ? body.shipping : JSON.stringify(body.shipping),
                 newsletter: !!body.newsletter,
-                discount: body.discount || 0
+                discount: body.discount || 0,
+                notes: body.notes || null,
+                checklist: body.checklist ? (typeof body.checklist === 'string' ? body.checklist : JSON.stringify(body.checklist)) : null,
+                archived: body.archived || false,
+                completion_date: body.completionDate || body.completion_date || null
             };
+
+            // Log the data being inserted for debugging
+            console.log('[api/orders] POST - Inserting order:', JSON.stringify(orderToInsert, null, 2));
 
             const { error: insertError } = await supabase
                 .from('portfolio_orders')

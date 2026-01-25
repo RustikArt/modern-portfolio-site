@@ -219,19 +219,7 @@
     box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
 }
 
-/* Admin Dashboard Button */
-.icon-link.admin-btn {
-    background: rgba(212, 175, 55, 0.15);
-    border-color: rgba(212, 175, 55, 0.3);
-    color: var(--color-accent, #d4af37);
-}
-
-.icon-link.admin-btn:hover {
-    background: var(--color-accent, #d4af37);
-    color: var(--color-bg, #030303);
-    border-color: var(--color-accent, #d4af37);
-    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
-}
+/* Admin Dashboard Button - same style as other icons */
 
 .cart-count {
     position: absolute;

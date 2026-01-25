@@ -25,13 +25,27 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
     const isLucideIcon = product.image && product.image.startsWith('lucide:');
     const lucideIconName = isLucideIcon ? product.image.replace('lucide:', '') : null;
 
+    // Handle mouse move for cursor glow effect
+    const handleMouseMove = (e) => {
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+    };
+
     return (
-        <div className={`product-card glass ${!isGrid ? 'list-view' : ''}`} style={{
-            display: isGrid ? 'block' : 'flex',
-            gap: isGrid ? '0' : '2rem',
-            alignItems: 'center',
-            position: 'relative' // For absolute positioning of heart
-        }}>
+        <div 
+            className={`product-card glass ${!isGrid ? 'list-view' : ''}`} 
+            onMouseMove={handleMouseMove}
+            style={{
+                display: isGrid ? 'block' : 'flex',
+                gap: isGrid ? '0' : '2rem',
+                alignItems: 'center',
+                position: 'relative' // For absolute positioning of heart
+            }}
+        >
             <button
                 onClick={(e) => {
                     e.preventDefault();

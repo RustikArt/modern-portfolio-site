@@ -369,6 +369,25 @@ a:focus:not(:focus-visible) {
   transition: all var(--transition-base);
   -webkit-backdrop-filter: blur(var(--glass-blur));
   backdrop-filter: blur(var(--glass-blur));
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cursor glow effect for cards */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+              rgba(212, 175, 55, 0.06), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card:hover::before {
+  opacity: 1;
 }
 
 .card:hover {
@@ -391,6 +410,25 @@ a:focus:not(:focus-visible) {
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
   transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cursor glow effect for glass elements */
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+              rgba(212, 175, 55, 0.08), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass:hover::before {
+  opacity: 1;
 }
 
 .glass:hover {

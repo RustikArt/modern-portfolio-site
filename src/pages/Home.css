@@ -152,19 +152,8 @@
 }
 
 .hero-title .block-reveal {
-    background: linear-gradient(
-        135deg, 
-        #ffffff 0%, 
-        #e8e8e8 30%,
-        var(--color-accent, #d4af37) 50%,
-        #e8e8e8 70%,
-        #ffffff 100%
-    );
-    background-size: 300% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 6s ease-in-out infinite;
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
 }
 
 .block-reveal {

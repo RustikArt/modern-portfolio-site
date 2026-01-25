@@ -77,7 +77,7 @@ const Navbar = () => {
         <div className="nav-actions">
           {/* Admin Dashboard Button */}
           {isAdmin && (
-            <Link to="/dashboard" className="action-link icon-link admin-btn" title="Dashboard Admin" aria-label="Accéder au Dashboard Admin">
+            <Link to="/admin" className="action-link icon-link" title="Dashboard Admin" aria-label="Accéder au Dashboard Admin">
               <LayoutDashboard size={20} aria-hidden="true" />
             </Link>
           )}

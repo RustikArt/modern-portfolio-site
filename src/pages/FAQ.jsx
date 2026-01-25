@@ -29,6 +29,14 @@ const FAQ = () => {
         setActiveIndex(activeIndex === index ? null : index);
     };
 
+    // Handle mouse move for cursor glow effect
+    const handleMouseMove = (e) => {
+        const item = e.currentTarget;
+        const rect = item.getBoundingClientRect();
+        item.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        item.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    };
+
     return (
         <div className="page page-faq">
             <SEO
@@ -41,7 +49,11 @@ const FAQ = () => {
                 <h1 className="page-title">Foire Aux Questions</h1>
                 <div className="faq-list">
                     {faqs.map((faq, index) => (
-                        <div key={index} className={`faq-item ${activeIndex === index ? 'active' : ''}`}>
+                        <div 
+                            key={index} 
+                            className={`faq-item ${activeIndex === index ? 'active' : ''}`}
+                            onMouseMove={handleMouseMove}
+                        >
                             <button className="faq-question" onClick={() => toggleFAQ(index)}>
                                 <span>{faq.question}</span>
                                 {activeIndex === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}

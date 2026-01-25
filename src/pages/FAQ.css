@@ -79,6 +79,24 @@
     border-radius: var(--radius-lg, 16px);
     overflow: hidden;
     transition: all var(--transition-base, 250ms);
+    position: relative;
+}
+
+/* Cursor glow effect */
+.faq-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                rgba(212, 175, 55, 0.06), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.faq-item:hover::before {
+    opacity: 1;
 }
 
 .faq-item:hover {

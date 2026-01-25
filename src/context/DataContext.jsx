@@ -1838,7 +1838,6 @@ export const DataProvider = ({ children }) => {
     // Simulate an order (Admin feature)
     const simulateOrder = async (orderData) => {
         const simulatedOrder = {
-            id: `SIM-${Date.now()}`,
             userId: orderData.userId || 'admin-simulated',
             customerName: orderData.customerName || 'Client Simulé',
             email: orderData.email || 'simulated@admin.com',
@@ -1855,22 +1854,25 @@ export const DataProvider = ({ children }) => {
             completionDate: orderData.status === 'Terminé' ? new Date().toISOString() : null,
             shipping: orderData.shipping || { address: 'Adresse simulée', city: 'Ville', zip: '00000' },
             paymentId: 'SIMULATED_ADMIN',
-            notes: orderData.notes || '⚠️ Commande simulée par admin',
-            isSimulated: true
+            notes: orderData.notes || '⚠️ Commande simulée par admin'
         };
 
         try {
+            // Build API payload with snake_case - only include fields the API expects
             const orderApiData = {
-                ...simulatedOrder,
-                user_id: simulatedOrder.userId,
                 customer_name: simulatedOrder.customerName,
+                email: simulatedOrder.email,
+                items: simulatedOrder.items,
+                total: simulatedOrder.total,
+                status: simulatedOrder.status,
+                checklist: simulatedOrder.checklist,
+                date: simulatedOrder.date,
+                completion_date: simulatedOrder.completionDate,
+                shipping: simulatedOrder.shipping,
                 payment_id: simulatedOrder.paymentId,
-                completion_date: simulatedOrder.completionDate
+                notes: simulatedOrder.notes,
+                user_id: simulatedOrder.userId
             };
-            delete orderApiData.userId;
-            delete orderApiData.customerName;
-            delete orderApiData.paymentId;
-            delete orderApiData.completionDate;
 
             const res = await fetch('/api/orders', {
                 method: 'POST',
