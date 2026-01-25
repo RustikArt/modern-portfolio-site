@@ -50,18 +50,11 @@ const SiteBanner = () => {
             return;
         }
 
-        // Check if dismissed
-        if (dismissKey && localStorage.getItem(dismissKey) === 'dismissed') {
-            console.log('[SiteBanner] Banner was dismissed');
-            setVisible(false);
-            document.documentElement.style.setProperty('--banner-height', '0px');
-            return;
-        }
-
+        // Banner is active and valid - show it
         console.log('[SiteBanner] Showing banner');
         setVisible(true);
         document.documentElement.style.setProperty('--banner-height', announcement.height || '50px');
-    }, [announcement, announcementLoaded, dismissKey]);
+    }, [announcement, announcementLoaded]);
 
     // Countdown timer
     useEffect(() => {
@@ -96,14 +89,11 @@ const SiteBanner = () => {
         return () => clearInterval(interval);
     }, [visible, announcement?.showTimer, announcement?.timerEnd]);
 
-    // Handle dismiss
+    // Handle dismiss - only hides for current page view, reappears on refresh
     const handleDismiss = useCallback(() => {
-        if (dismissKey) {
-            localStorage.setItem(dismissKey, 'dismissed');
-        }
         setVisible(false);
         document.documentElement.style.setProperty('--banner-height', '0px');
-    }, [dismissKey]);
+    }, []);
 
     // Don't render if not visible
     if (!visible || !announcement) {

@@ -9,22 +9,23 @@
     width: 100%;
     z-index: var(--z-navbar, 1000);
     padding: var(--spacing-lg, 1.5rem) 0;
-    background: rgba(5, 5, 5, 0.9);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(8, 8, 8, 0.75);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    isolation: isolate;
 }
 
 .navbar.scrolled {
-    background: rgba(3, 3, 3, 0.95);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
-    backdrop-filter: blur(30px) saturate(200%);
+    background: rgba(5, 5, 5, 0.85);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    backdrop-filter: blur(32px) saturate(200%);
     padding: var(--spacing-md, 1rem) 0;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6),
                 0 1px 0 rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
 }
 
 .navbar-content {
@@ -456,14 +457,14 @@
     border-radius: var(--radius-full, 9999px);
     white-space: nowrap;
     letter-spacing: 0.01em;
-    cursor: not-allowed;
+    cursor: crosshair;
     opacity: 0.5;
 }
 
 .icon-link.disabled {
-    cursor: not-allowed;
+    cursor: crosshair;
     opacity: 0.4;
-    pointer-events: none;
+    pointer-events: auto;
 }
 
 .icon-link.disabled:hover {
@@ -471,6 +472,7 @@
     border-color: rgba(255, 255, 255, 0.06);
     transform: none;
     box-shadow: none;
+    cursor: crosshair;
 }
 
 /* ============================================

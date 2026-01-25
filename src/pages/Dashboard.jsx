@@ -1321,7 +1321,7 @@ const Dashboard = () => {
                                     );
                                 })}
                             </div>
-                        )}}
+                        )}
 
                         {/* --- PRODUCTS TAB --- */}
                         {activeTab === 'products' && (

@@ -368,7 +368,7 @@
    ============================================ */
 
 .security-section {
-    max-width: 500px;
+    width: 100%;
 }
 
 .security-card {
@@ -478,38 +478,61 @@
 .profile-help {
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg, 1.5rem);
+    gap: var(--spacing-xl, 2rem);
     margin-top: var(--spacing-4xl, 6rem);
-    padding: var(--spacing-xl, 2rem) var(--spacing-2xl, 3rem);
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-radius: var(--radius-xl, 24px);
+    padding: var(--spacing-2xl, 3rem);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: var(--radius-2xl, 32px);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-help::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
 }
 
 .profile-help svg:first-child {
     color: var(--color-accent, #d4af37);
     flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    padding: 12px;
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 50%;
+}
+
+.profile-help > div {
+    flex: 1;
 }
 
 .profile-help p {
-    font-size: 0.9rem;
-    color: var(--color-text-muted, #666);
-    margin-bottom: var(--spacing-xs, 0.5rem);
+    font-size: 1rem;
+    color: var(--color-text-secondary, #a0a0a0);
+    margin-bottom: var(--spacing-sm, 0.75rem);
+    font-weight: 500;
 }
 
 .profile-help a {
     display: inline-flex;
     align-items: center;
-    gap: var(--spacing-xs, 0.5rem);
+    gap: var(--spacing-sm, 0.75rem);
     color: var(--color-accent, #d4af37);
     font-weight: 600;
     text-decoration: none;
-    font-size: 1rem;
-    transition: opacity var(--transition-fast, 150ms);
+    font-size: 1.1rem;
+    transition: all var(--transition-fast, 150ms);
 }
 
 .profile-help a:hover {
-    opacity: 0.8;
+    color: #fff;
+    transform: translateX(4px);
 }
 
 /* ============================================
