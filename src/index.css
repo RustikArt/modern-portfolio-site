@@ -109,6 +109,8 @@ html {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 body {
@@ -120,7 +122,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow: visible;
   min-height: 100vh;
   padding-top: var(--banner-height, 0);
   transition: padding-top var(--transition-base);

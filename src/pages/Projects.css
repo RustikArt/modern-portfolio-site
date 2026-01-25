@@ -12,7 +12,7 @@
     font-size: clamp(2.5rem, 6vw, 4rem);
     font-weight: 600;
     margin-bottom: var(--spacing-2xl, 3rem);
-    text-align: center;
+    text-align: left;
 }
 
 .page-projects .page-title span {
