@@ -2189,17 +2189,8 @@ const Dashboard = () => {
                                                     <span style={{ fontWeight: 'bold' }}>Mode Maintenance</span>
                                                     <div
                                                         onClick={() => setLocalMaintenanceMode(!localMaintenanceMode)}
-                                                        style={{
-                                                            width: '50px', height: '26px', background: localMaintenanceMode ? '#ff4d4d' : '#333',
-                                                            borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s'
-                                                        }}
-                                                    >
-                                                        <div style={{
-                                                            width: '20px', height: '20px', background: 'white', borderRadius: '50%',
-                                                            position: 'absolute', top: '3px', left: localMaintenanceMode ? '27px' : '3px',
-                                                            transition: 'left 0.3s'
-                                                        }}></div>
-                                                    </div>
+                                                        className={`toggle-switch ${localMaintenanceMode ? 'active danger' : ''}`}
+                                                    ></div>
                                                 </div>
                                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Si activé, le site public affichera une page de maintenance.</p>
                                             </div>
@@ -2209,17 +2200,8 @@ const Dashboard = () => {
                                                     <span style={{ fontWeight: 'bold' }}>Effet de Grain</span>
                                                     <div
                                                         onClick={() => setLocalGrainEffect(!localGrainEffect)}
-                                                        style={{
-                                                            width: '50px', height: '26px', background: localGrainEffect ? 'var(--color-accent)' : '#333',
-                                                            borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s'
-                                                        }}
-                                                    >
-                                                        <div style={{
-                                                            width: '20px', height: '20px', background: 'white', borderRadius: '50%',
-                                                            position: 'absolute', top: '3px', left: localGrainEffect ? '27px' : '3px',
-                                                            transition: 'left 0.3s'
-                                                        }}></div>
-                                                    </div>
+                                                        className={`toggle-switch ${localGrainEffect ? 'active' : ''}`}
+                                                    ></div>
                                                 </div>
                                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Ajoute une texture de film rétro à l'arrière plan du site.</p>
                                             </div>
@@ -2229,17 +2211,8 @@ const Dashboard = () => {
                                                     <span style={{ fontWeight: 'bold' }}>Écran de Chargement</span>
                                                     <div
                                                         onClick={() => setLocalShowLoadingScreen(!localShowLoadingScreen)}
-                                                        style={{
-                                                            width: '50px', height: '26px', background: localShowLoadingScreen ? 'var(--color-accent)' : '#333',
-                                                            borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s'
-                                                        }}
-                                                    >
-                                                        <div style={{
-                                                            width: '20px', height: '20px', background: 'white', borderRadius: '50%',
-                                                            position: 'absolute', top: '3px', left: localShowLoadingScreen ? '27px' : '3px',
-                                                            transition: 'left 0.3s'
-                                                        }}></div>
-                                                    </div>
+                                                        className={`toggle-switch ${localShowLoadingScreen ? 'active' : ''}`}
+                                                    ></div>
                                                 </div>
                                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Affiche un écran de chargement animé au démarrage du site.</p>
                                             </div>
@@ -2322,9 +2295,9 @@ const Dashboard = () => {
                                                     id="announcementIsActive"
                                                     checked={announcementIsActive}
                                                     onChange={(e) => setAnnouncementIsActive(e.target.checked)}
-                                                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                                    className="dashboard-checkbox"
                                                 />
-                                                <label htmlFor="announcementIsActive" style={{ cursor: 'pointer' }}>Activer la banderole</label>
+                                                <label htmlFor="announcementIsActive" style={{ cursor: 'pointer', fontWeight: announcementIsActive ? 'bold' : 'normal', color: announcementIsActive ? 'var(--color-accent)' : '#888' }}>Activer la banderole</label>
                                             </div>
 
                                             <div>
@@ -2442,9 +2415,9 @@ const Dashboard = () => {
                                                         id="announcementShowTimer"
                                                         checked={announcementShowTimer}
                                                         onChange={(e ) => setAnnouncementShowTimer(e.target.checked)}
-                                                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                                        className="dashboard-checkbox"
                                                     />
-                                                    <label htmlFor="announcementShowTimer" style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                                    <label htmlFor="announcementShowTimer" style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: announcementShowTimer ? 'var(--color-accent)' : '#888' }}>
                                                         <Timer size={14} /> Compte à rebours
                                                     </label>
                                                 </div>

@@ -441,6 +441,39 @@
 }
 
 /* ============================================
+   MAINTENANCE MODE - Disabled Links
+   ============================================ */
+
+.nav-link-disabled {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm, 0.75rem) var(--spacing-lg, 1.5rem);
+    color: var(--color-text-muted, #555);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border-radius: var(--radius-full, 9999px);
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.icon-link.disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.icon-link.disabled:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+    transform: none;
+    box-shadow: none;
+}
+
+/* ============================================
    PRINT - Hide navbar
    ============================================ */
 

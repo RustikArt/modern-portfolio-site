@@ -3,7 +3,7 @@
    ============================================ */
 
 .page-wishlist {
-    padding-top: 120px;
+    padding-top: 100px;
     min-height: 100vh;
     background: var(--color-bg, #030303);
     padding-bottom: var(--spacing-4xl, 6rem);

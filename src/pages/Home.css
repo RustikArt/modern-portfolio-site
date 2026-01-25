@@ -423,6 +423,9 @@
     padding-left: var(--spacing-md, 1rem);
     border-left: 2px solid transparent;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    min-height: 120px;
 }
 
 .project-category {
@@ -440,7 +443,7 @@
     font-family: var(--font-display, 'Playfair Display', serif);
     font-size: clamp(1.5rem, 4vw, 2.25rem);
     font-weight: 600;
-    margin: 0 0 var(--spacing-md, 1rem);
+    margin: 0 0 var(--spacing-xs, 0.5rem);
     line-height: 1.15;
     letter-spacing: -0.02em;
     background: linear-gradient(135deg, #fff 0%, #999 100%);
@@ -451,22 +454,19 @@
 }
 
 .project-view-more {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: var(--spacing-sm, 0.75rem);
+    gap: var(--spacing-xs, 0.5rem);
     font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0.02em;
     color: var(--color-text-muted, #666);
     opacity: 0;
-    transform: translateX(-15px);
+    transform: translateX(-10px);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    margin-top: var(--spacing-md, 1rem);
-    padding: var(--spacing-sm, 0.75rem) var(--spacing-md, 1rem);
-    background: rgba(212, 175, 55, 0.1);
-    border-radius: var(--radius-md, 10px);
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    margin-top: auto;
+    padding-top: var(--spacing-lg, 1.5rem);
 }
 
 /* Project Card Hover Effects */
@@ -504,7 +504,15 @@
 .project-card:hover .project-view-more {
     opacity: 1;
     transform: translateX(0);
-    color: var(--color-text-primary, #fff);
+    color: var(--color-accent, #d4af37);
+}
+
+.project-view-more svg {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card:hover .project-view-more svg {
+    transform: translateX(4px);
 }
 
 /* ============================================

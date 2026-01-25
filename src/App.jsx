@@ -83,14 +83,15 @@ const MaintenancePage = () => {
 
   return (
     <div style={{ 
-      minHeight: '100vh', 
+      minHeight: 'calc(100vh - 100px)', 
       display: 'flex', 
       flexDirection: 'column', 
       alignItems: 'center', 
       justifyContent: 'center', 
       background: 'linear-gradient(180deg, #050505 0%, #0a0a0a 100%)', 
       color: '#fff', 
-      padding: '2rem'
+      padding: '2rem',
+      marginTop: '80px'
     }}>
       <div style={{ maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ 

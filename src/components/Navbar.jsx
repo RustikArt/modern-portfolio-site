@@ -16,6 +16,9 @@ const Navbar = () => {
 
   // Check if current user is admin
   const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin' || currentUser.role === 'editor');
+  
+  // Check if maintenance mode is active and user is not admin (links should be disabled)
+  const isMaintenanceForUser = settings?.maintenanceMode && !isAdmin;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,10 +70,21 @@ const Navbar = () => {
 
         {/* NAV LINKS (Desktop + Mobile Drawer) */}
         <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Accueil</Link>
-          <Link to="/projects" className={location.pathname === '/projects' ? 'active' : ''}>Projets</Link>
-          <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>Shop</Link>
-          <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>Contact</Link>
+          {isMaintenanceForUser ? (
+            <>
+              <span className="nav-link-disabled">Accueil</span>
+              <span className="nav-link-disabled">Projets</span>
+              <span className="nav-link-disabled">Shop</span>
+              <span className="nav-link-disabled">Contact</span>
+            </>
+          ) : (
+            <>
+              <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Accueil</Link>
+              <Link to="/projects" className={location.pathname === '/projects' ? 'active' : ''}>Projets</Link>
+              <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>Shop</Link>
+              <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>Contact</Link>
+            </>
+          )}
         </div>
 
         {/* RIGHT ACTIONS */}
@@ -82,14 +96,27 @@ const Navbar = () => {
             </Link>
           )}
 
-          <Link to="/wishlist" className="action-link icon-link" title="Wishlist" aria-label="Ma Wishlist">
-            <Heart size={20} aria-hidden="true" />
-          </Link>
+          {isMaintenanceForUser ? (
+            <>
+              <span className="action-link icon-link disabled" title="Wishlist indisponible" aria-label="Wishlist indisponible">
+                <Heart size={20} aria-hidden="true" />
+              </span>
+              <span className="action-link icon-link disabled" title="Panier indisponible" aria-label="Panier indisponible">
+                <ShoppingCart size={20} aria-hidden="true" />
+              </span>
+            </>
+          ) : (
+            <>
+              <Link to="/wishlist" className="action-link icon-link" title="Wishlist" aria-label="Ma Wishlist">
+                <Heart size={20} aria-hidden="true" />
+              </Link>
 
-          <Link to="/cart" className="action-link icon-link" title="Panier" aria-label={`Panier, ${cartCount} articles`}>
-            <ShoppingCart size={20} aria-hidden="true" />
-            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-          </Link>
+              <Link to="/cart" className="action-link icon-link" title="Panier" aria-label={`Panier, ${cartCount} articles`}>
+                <ShoppingCart size={20} aria-hidden="true" />
+                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+              </Link>
+            </>
+          )}
 
           <Link to={currentUser ? "/profile" : "/login"} className="action-link icon-link" title={currentUser ? "Mon Compte" : "Connexion"} aria-label={currentUser ? "Accéder à mon compte" : "Se connecter"}>
             <User size={20} aria-hidden="true" />
