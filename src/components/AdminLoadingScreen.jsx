@@ -23,39 +23,50 @@ const AdminLoadingScreen = ({ children }) => {
         { icon: Settings, label: 'Finalisation' }
     ];
 
-    // Minimum display time for smooth UX
-    const MIN_LOADING_TIME = 1500;
+    // Faster loading time for smoother UX
+    const MIN_LOADING_TIME = 1000;
 
     useEffect(() => {
-        // If admin loading screen is disabled in settings, skip it
+        // Quick check - if settings loaded and disabled, skip immediately
         if (settingsLoaded && settings?.showAdminLoading === false) {
             setIsLoading(false);
             return;
         }
 
-        // Only show for admin users
-        if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'super_admin')) {
+        // If user is not admin, skip immediately
+        if (currentUser && currentUser.role !== 'admin' && currentUser.role !== 'super_admin') {
             setIsLoading(false);
             return;
         }
 
+        // If we don't have a user yet, wait for auth check
+        if (!currentUser && settingsLoaded) {
+            // Brief timeout to allow auth to complete
+            const authTimeout = setTimeout(() => {
+                if (!currentUser) {
+                    setIsLoading(false);
+                }
+            }, 500);
+            return () => clearTimeout(authTimeout);
+        }
+
         const startTime = Date.now();
 
-        // Step progression
+        // Step progression - faster
         const stepInterval = setInterval(() => {
             setCurrentStep(prev => {
                 if (prev >= loadingSteps.length - 1) return prev;
                 return prev + 1;
             });
-        }, 250);
+        }, 150);
 
-        // Simulate progress animation
+        // Simulate progress animation - faster
         const progressInterval = setInterval(() => {
             setProgress(prev => {
                 if (prev >= 95) return prev;
-                return prev + Math.random() * 12;
+                return prev + Math.random() * 18;
             });
-        }, 120);
+        }, 80);
 
         // Wait for settings to load
         const checkReady = () => {
@@ -68,8 +79,8 @@ const AdminLoadingScreen = ({ children }) => {
                     setCurrentStep(loadingSteps.length - 1);
                     setTimeout(() => {
                         setFadeOut(true);
-                        setTimeout(() => setIsLoading(false), 500);
-                    }, 200);
+                        setTimeout(() => setIsLoading(false), 350);
+                    }, 150);
                 }, remaining);
 
                 clearInterval(progressInterval);
@@ -78,7 +89,7 @@ const AdminLoadingScreen = ({ children }) => {
         };
 
         checkReady();
-        const interval = setInterval(checkReady, 100);
+        const interval = setInterval(checkReady, 50);
         return () => {
             clearInterval(interval);
             clearInterval(progressInterval);

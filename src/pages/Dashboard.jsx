@@ -119,13 +119,14 @@ const Dashboard = () => {
     const [showVersionDetails, setShowVersionDetails] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [activeTab, setActiveTab] = useState(null); // Start null, will be set based on permissions
+    const [tabInitialized, setTabInitialized] = useState(false);
     const [expandedOrders, setExpandedOrders] = useState({});
     const navigate = useNavigate();
     const notificationRef = React.useRef(null);
 
-    // Set default tab based on permissions
+    // Set default tab based on permissions - only runs once
     useEffect(() => {
-        if (activeTab === null && checkPermission) {
+        if (!tabInitialized && checkPermission && currentUser) {
             // Priority order for default tab
             const tabOrder = [
                 { tab: 'overview', permission: 'tab_overview' },
@@ -140,19 +141,19 @@ const Dashboard = () => {
                 { tab: 'settings', permission: 'tab_settings' }
             ];
             
+            let foundTab = null;
             for (const { tab, permission } of tabOrder) {
                 if (checkPermission(permission)) {
-                    setActiveTab(tab);
+                    foundTab = tab;
                     break;
                 }
             }
             
-            // Fallback if no permissions match
-            if (activeTab === null) {
-                setActiveTab('overview');
-            }
+            // Set the found tab or fallback
+            setActiveTab(foundTab || 'overview');
+            setTabInitialized(true);
         }
-    }, [checkPermission, activeTab]);
+    }, [checkPermission, currentUser, tabInitialized]);
 
     // Fetch announcement for admin on mount (includes inactive)
     useEffect(() => {
@@ -198,6 +199,7 @@ const Dashboard = () => {
         name: '', price: '', discountType: 'none', discountValue: '',
         image: '', imageType: 'url', lucideIcon: '', category: '', tags: '', is_featured: false,
         alertMessage: '', // New field
+        stock: '', // Stock management
         options: []
     });
 
@@ -380,6 +382,7 @@ const Dashboard = () => {
             tags: product.tags ? product.tags.join(', ') : '',
             is_featured: product.is_featured || false,
             alertMessage: product.alertMessage || '',
+            stock: product.stock !== null && product.stock !== undefined ? product.stock.toString() : '',
             options: product.options || []
         });
         window.scrollTo(0, 0);
@@ -414,6 +417,7 @@ const Dashboard = () => {
             tags: tagsArray,
             is_featured: productForm.is_featured || false,
             alertMessage: productForm.alertMessage,
+            stock: productForm.stock ? parseInt(productForm.stock) : null,
             options: productForm.options || []
         };
         if (productForm.editId) {
@@ -423,7 +427,7 @@ const Dashboard = () => {
         }
         setProductForm({
             editId: null, name: '', price: '', discountType: 'none', discountValue: '',
-            image: '', imageType: 'url', lucideIcon: '', category: '', tags: '', is_featured: false, alertMessage: '', options: []
+            image: '', imageType: 'url', lucideIcon: '', category: '', tags: '', is_featured: false, alertMessage: '', stock: '', options: []
         });
     };
 
@@ -1364,11 +1368,12 @@ const Dashboard = () => {
                         {activeTab === 'products' && (
                             <div className="animate-in">
                                 <section style={{ ...cardStyle, marginBottom: '3rem' }}>
-                                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{productForm.editId ? 'Edit Product' : 'Add New Product'}</h2>
+                                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{productForm.editId ? 'Modifier le produit' : 'Ajouter un produit'}</h2>
                                     <form onSubmit={handleProductSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
-                                            <input type="text" placeholder="Product Name" value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })} style={inputStyle} required />
-                                            <input type="number" placeholder="Price €" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} style={inputStyle} required />
+                                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
+                                            <input type="text" placeholder="Nom du produit" value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })} style={inputStyle} required />
+                                            <input type="number" placeholder="Prix €" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} style={inputStyle} required />
+                                            <input type="number" placeholder="Stock (optionnel)" value={productForm.stock} onChange={e => setProductForm({ ...productForm, stock: e.target.value })} style={inputStyle} min="0" />
                                         </div>
 
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px dashed #222' }}>
@@ -1380,7 +1385,7 @@ const Dashboard = () => {
                                                     <div key={opt.id} style={{ padding: '0.5rem 1rem', background: '#181818', borderRadius: '30px', border: '1px solid #333', display: 'flex', alignItems: 'center', gap: '0.8rem', fontSize: '0.8rem' }}>
                                                         <strong>{opt.name}</strong>
                                                         <span style={{ color: '#555' }}>|</span>
-                                                        <span style={{ color: 'var(--color-accent)' }}>{opt.type === 'select' ? `${opt.values.length} choices` : 'Free Text'}</span>
+                                                        <span style={{ color: 'var(--color-accent)' }}>{opt.type === 'select' ? `${opt.values.length} choix` : 'Texte libre'}</span>
                                                         <button onClick={() => handleRemoveOption(opt.id)} style={{ border: 'none', background: 'none', color: '#ff4d4d', cursor: 'pointer', padding: 0 }}>✕</button>
                                                     </div>
                                                 ))}
@@ -1409,7 +1414,7 @@ const Dashboard = () => {
                                                         <label htmlFor="reqQuote" style={{ fontSize: '0.75rem', color: '#ffcc00', cursor: 'pointer' }}>Demande de devis ?</label>
                                                     </div>
                                                 )}
-                                                <button type="button" onClick={handleAddOption} style={{ ...btnModern, padding: '0.8rem' }}>Add</button>
+                                                <button type="button" onClick={handleAddOption} style={{ ...btnModern, padding: '0.8rem' }}>Ajouter</button>
                                             </div>
                                             {optionBuilder.type === 'select' && (
                                                 <input
@@ -1424,7 +1429,7 @@ const Dashboard = () => {
 
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                             <input type="text" placeholder="Category" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} style={inputStyle} />
-                                            <input type="text" placeholder="Tags (comma separated)" value={productForm.tags} onChange={e => setProductForm({ ...productForm, tags: e.target.value })} style={inputStyle} />
+                                            <input type="text" placeholder="Tags (séparés par virgule)" value={productForm.tags} onChange={e => setProductForm({ ...productForm, tags: e.target.value })} style={inputStyle} />
                                         </div>
                                         <textarea
                                             placeholder="Message d'alerte / Note importante (ex: Délais rallongés)"
@@ -1460,7 +1465,7 @@ const Dashboard = () => {
                                             </div>
                                             
                                             {productForm.imageType === 'url' ? (
-                                                <input type="text" placeholder="Image URL" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} style={inputStyle} />
+                                                <input type="text" placeholder="URL de l'image" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} style={inputStyle} />
                                             ) : (
                                                 <div>
                                                     <select 
@@ -1624,10 +1629,10 @@ const Dashboard = () => {
                                     </h2>
                                     <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
-                                            <input type="text" placeholder="Project Title" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} required />
+                                            <input type="text" placeholder="Titre du projet" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} required />
                                             <input type="text" placeholder="Category" value={projectForm.category} onChange={e => setProjectForm({ ...projectForm, category: e.target.value })} style={inputStyle} />
                                         </div>
-                                        <input type="text" placeholder="Main Cover URL" value={projectForm.image} onChange={e => setProjectForm({ ...projectForm, image: e.target.value })} style={inputStyle} />
+                                        <input type="text" placeholder="URL de la couverture" value={projectForm.image} onChange={e => setProjectForm({ ...projectForm, image: e.target.value })} style={inputStyle} />
 
                                         <div style={{ background: '#0a0a0a', padding: '1.5rem', borderRadius: '12px', border: '1px solid #111' }}>
                                             <h4 style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: '#555', textTransform: 'uppercase' }}>Advanced Block Editor</h4>
@@ -1680,8 +1685,8 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                                            <input type="number" placeholder="Min Amount (€)" value={promoForm.minAmount} onChange={e => setPromoForm({ ...promoForm, minAmount: e.target.value })} style={inputStyle} />
-                                            <input type="number" placeholder="Max Uses" value={promoForm.maxUses} onChange={e => setPromoForm({ ...promoForm, maxUses: e.target.value })} style={inputStyle} />
+                                            <input type="number" placeholder="Montant min. (€)" value={promoForm.minAmount} onChange={e => setPromoForm({ ...promoForm, minAmount: e.target.value })} style={inputStyle} />
+                                            <input type="number" placeholder="Utilisations max." value={promoForm.maxUses} onChange={e => setPromoForm({ ...promoForm, maxUses: e.target.value })} style={inputStyle} />
                                             <input type="date" placeholder="Expiration" value={promoForm.expirationDate} onChange={e => setPromoForm({ ...promoForm, expirationDate: e.target.value })} style={inputStyle} />
                                         </div>
                                         <button type="submit" style={btnPrimaryModern}>Generate Coupon</button>
@@ -1704,7 +1709,7 @@ const Dashboard = () => {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <button onClick={() => deletePromoCode(c.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                            <button onClick={() => deletePromoCode(c.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer' }}>Supprimer</button>
                                         </div>
                                     ))}
                                 </div>
@@ -1966,21 +1971,21 @@ const Dashboard = () => {
                                         <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Hero Section</h3>
                                         <div style={{ display: 'grid', gap: '1rem' }}>
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <input type="text" placeholder="Title Line 1" value={homeContent.hero.titleLine1} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine1: e.target.value } })} style={inputStyle} />
-                                                <input type="text" placeholder="Title Line 2" value={homeContent.hero.titleLine2} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine2: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Titre ligne 1" value={homeContent.hero.titleLine1} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine1: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Titre ligne 2" value={homeContent.hero.titleLine2} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine2: e.target.value } })} style={inputStyle} />
                                             </div>
                                             <input type="text" placeholder="Subtitle" value={homeContent.hero.subtitle} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, subtitle: e.target.value } })} style={inputStyle} />
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <input type="text" placeholder="Button Text" value={homeContent.hero.buttonText} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonText: e.target.value } })} style={inputStyle} />
-                                                <input type="text" placeholder="Button Link" value={homeContent.hero.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonLink: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Texte du bouton" value={homeContent.hero.buttonText} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonText: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Lien du bouton" value={homeContent.hero.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonLink: e.target.value } })} style={inputStyle} />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* FEATURED PROJECTS */}
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Featured Projects</h3>
-                                        <input type="text" placeholder="Section Title" value={homeContent.featuredProjects.title} onChange={(e) => setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, title: e.target.value } })} style={{ ...inputStyle, marginBottom: '1rem' }} />
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Projets mis en avant</h3>
+                                        <input type="text" placeholder="Titre de la section" value={homeContent.featuredProjects.title} onChange={(e) => setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, title: e.target.value } })} style={{ ...inputStyle, marginBottom: '1rem' }} />
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
                                             {projects.map(p => {
                                                 const isChecked = homeContent.featuredProjects.ids.includes(p.id);
@@ -2111,7 +2116,7 @@ const Dashboard = () => {
                                     {/* TESTIMONIALS SECTION */}
                                     <div>
                                         <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Selected Testimonials</h3>
-                                        <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>Select which reviews will appear on the homepage (Featured).</p>
+                                        <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>Sélectionnez les avis qui apparaîtront sur la page d'accueil (Mis en avant).</p>
                                         <div style={{ display: 'grid', gap: '0.8rem', maxHeight: '300px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
                                             {/* We need to get all reviews from DataContext. Dashboard uses reviews state. */}
                                             {Object.keys(reviews).length > 0 ? Object.entries(reviews).map(([prodId, prodReviews]) => (

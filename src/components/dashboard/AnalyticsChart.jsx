@@ -1,34 +1,60 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 const AnalyticsChart = ({ data, title }) => {
     // data expected format: [{ name: 'Jan', value: 400 }, ...]
     const containerRef = useRef(null);
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const [isReady, setIsReady] = useState(false);
+    const observerRef = useRef(null);
+
+    const checkDimensions = useCallback(() => {
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            // Ensure container has valid dimensions
+            if (rect.width > 50 && rect.height > 50) {
+                setIsReady(true);
+                return true;
+            }
+        }
+        return false;
+    }, []);
 
     useEffect(() => {
-        const updateDimensions = () => {
-            if (containerRef.current) {
-                const { offsetWidth, offsetHeight } = containerRef.current;
-                if (offsetWidth > 0 && offsetHeight > 0) {
-                    setDimensions({ width: offsetWidth, height: offsetHeight });
-                    setIsReady(true);
-                }
-            }
-        };
-
-        // Initial measurement after mount
-        const timer = setTimeout(updateDimensions, 100);
+        // Multiple attempts to catch when container is ready
+        const timers = [];
         
-        // Listen for resize
-        window.addEventListener('resize', updateDimensions);
+        // Quick check
+        if (checkDimensions()) return;
+        
+        // Delayed checks
+        [50, 150, 300, 500, 1000].forEach(delay => {
+            timers.push(setTimeout(() => {
+                if (!isReady) checkDimensions();
+            }, delay));
+        });
+
+        // Use ResizeObserver for dynamic updates
+        if (containerRef.current && typeof ResizeObserver !== 'undefined') {
+            observerRef.current = new ResizeObserver(() => {
+                if (!isReady) checkDimensions();
+            });
+            observerRef.current.observe(containerRef.current);
+        }
+
+        // Fallback resize listener
+        const handleResize = () => {
+            if (!isReady) checkDimensions();
+        };
+        window.addEventListener('resize', handleResize);
         
         return () => {
-            clearTimeout(timer);
-            window.removeEventListener('resize', updateDimensions);
+            timers.forEach(t => clearTimeout(t));
+            window.removeEventListener('resize', handleResize);
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
         };
-    }, []);
+    }, [checkDimensions, isReady]);
 
     const cardStyle = {
         background: 'rgba(255,255,255,0.02)',
@@ -46,11 +72,12 @@ const AnalyticsChart = ({ data, title }) => {
                     width: '100%', 
                     height: 280, 
                     minHeight: 200,
+                    minWidth: 100,
                     position: 'relative' 
                 }}
             >
-                {isReady && dimensions.width > 0 && dimensions.height > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
+                {isReady ? (
+                    <ResponsiveContainer width="99%" height="99%">
                         <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">

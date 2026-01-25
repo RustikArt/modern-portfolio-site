@@ -77,14 +77,14 @@ const Navbar = () => {
             <>
               <span className="nav-link-disabled">Accueil</span>
               <span className="nav-link-disabled">Projets</span>
-              <span className="nav-link-disabled">Shop</span>
+              <span className="nav-link-disabled">Boutique</span>
               <span className="nav-link-disabled">Contact</span>
             </>
           ) : (
             <>
               <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Accueil</Link>
               <Link to="/projects" className={location.pathname === '/projects' ? 'active' : ''}>Projets</Link>
-              <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>Shop</Link>
+              <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>Boutique</Link>
               <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>Contact</Link>
             </>
           )}

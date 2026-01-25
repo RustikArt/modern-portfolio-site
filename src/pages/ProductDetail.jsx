@@ -40,7 +40,7 @@ const ProductDetail = () => {
     }, [selectedOptions, product]);
 
 
-    if (!product) return <div className="container" style={{ paddingTop: '100px' }}>Produit introuvable</div>;
+    if (!product) return <div className="container" style={{ paddingTop: 'calc(140px + var(--banner-height, 0px))' }}>Produit introuvable</div>;
 
     const handleOptionChange = (optionName, optionType, value, modifier = 0) => {
         setSelectedOptions(prev => ({
@@ -73,7 +73,7 @@ const ProductDetail = () => {
     };
 
     return (
-        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#080808' }}>
+        <div className="page" style={{ paddingTop: 'calc(140px + var(--banner-height, 0px))', minHeight: '100vh', background: '#080808' }}>
             <div className="container">
                 <Breadcrumbs lastItemName={product.name} />
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '4rem' }}>

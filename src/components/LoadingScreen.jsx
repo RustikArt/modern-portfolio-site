@@ -1,18 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
+import { useLocation } from 'react-router-dom';
 
 const LoadingScreen = ({ children }) => {
-    const { settings, announcementLoaded } = useData();
+    const { settings, settingsLoaded, announcementLoaded } = useData();
+    const location = useLocation();
     const [isLoading, setIsLoading] = useState(true);
     const [fadeOut, setFadeOut] = useState(false);
     const [progress, setProgress] = useState(0);
 
+    // Skip loading screen for admin routes (they have their own)
+    const isAdminRoute = location.pathname.startsWith('/admin');
+
     // Minimum display time for smooth UX
-    const MIN_LOADING_TIME = 1200;
+    const MIN_LOADING_TIME = 800;
 
     useEffect(() => {
-        // If loading screen is disabled in settings, skip it
-        if (settings?.showLoadingScreen === false) {
+        // Skip for admin routes
+        if (isAdminRoute) {
+            setIsLoading(false);
+            return;
+        }
+
+        // If loading screen is disabled in settings, skip it immediately
+        if (settingsLoaded && settings?.showLoadingScreen === false) {
             setIsLoading(false);
             return;
         }
@@ -23,13 +34,14 @@ const LoadingScreen = ({ children }) => {
         const progressInterval = setInterval(() => {
             setProgress(prev => {
                 if (prev >= 90) return prev;
-                return prev + Math.random() * 15;
+                return prev + Math.random() * 18;
             });
-        }, 150);
+        }, 100);
 
         // Wait for critical data to load
         const checkReady = () => {
-            if (announcementLoaded) {
+            // Wait for both settings and announcement to load
+            if (settingsLoaded && announcementLoaded) {
                 const elapsed = Date.now() - startTime;
                 const remaining = Math.max(0, MIN_LOADING_TIME - elapsed);
                 
@@ -37,8 +49,8 @@ const LoadingScreen = ({ children }) => {
                     setProgress(100);
                     setTimeout(() => {
                         setFadeOut(true);
-                        setTimeout(() => setIsLoading(false), 600);
-                    }, 200);
+                        setTimeout(() => setIsLoading(false), 400);
+                    }, 150);
                 }, remaining);
                 
                 clearInterval(progressInterval);
@@ -46,12 +58,12 @@ const LoadingScreen = ({ children }) => {
         };
 
         checkReady();
-        const interval = setInterval(checkReady, 100);
+        const interval = setInterval(checkReady, 50);
         return () => {
             clearInterval(interval);
             clearInterval(progressInterval);
         };
-    }, [announcementLoaded, settings?.showLoadingScreen]);
+    }, [settingsLoaded, announcementLoaded, settings?.showLoadingScreen, isAdminRoute]);
 
     if (!isLoading) {
         return children;
@@ -96,7 +108,7 @@ const LoadingScreen = ({ children }) => {
                     
                     {/* Loading message */}
                     <div className="loading-text">
-                        <span className="loading-word">Préparation</span>
+                        <span className="loading-word">Chargement</span>
                         <span className="loading-dots">
                             <span>.</span><span>.</span><span>.</span>
                         </span>

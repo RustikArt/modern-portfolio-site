@@ -10,10 +10,10 @@ const ProjectDetail = () => {
     const project = projects.find(p => p.id === parseInt(id));
     const navigate = useNavigate();
 
-    if (!project) return <div className="container" style={{ paddingTop: '100px' }}>Projet introuvable</div>;
+    if (!project) return <div className="container" style={{ paddingTop: 'calc(140px + var(--banner-height, 0px))' }}>Projet introuvable</div>;
 
     return (
-        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh' }}>
+        <div className="page" style={{ paddingTop: 'calc(140px + var(--banner-height, 0px))', minHeight: '100vh' }}>
             <div className="container">
                 <Breadcrumbs lastItemName={project.title} />
                 <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>{project.title}</h1>

@@ -8,7 +8,7 @@ const Shop = () => {
     const { products } = useData();
 
     // State
-    const [filterCategory, setFilterCategory] = useState('All');
+    const [filterCategory, setFilterCategory] = useState('Tous');
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
     const [sortBy, setSortBy] = useState('popular'); // 'popular', 'priceAsc', 'priceDesc', 'new'
     const [priceRange, setPriceRange] = useState([0, 2000]);
@@ -18,7 +18,7 @@ const Shop = () => {
 
     // Derived Data - Robustness
     const safeProducts = Array.isArray(products) ? products : [];
-    const categories = ['All', ...new Set(safeProducts.map(p => p.category).filter(Boolean))];
+    const categories = ['Tous', ...new Set(safeProducts.map(p => p.category).filter(Boolean))];
     const maxPrice = safeProducts.length > 0 ? Math.max(...safeProducts.map(p => p.price), 0) : 2000;
 
     // Filter & Sort Logic using useMemo for performance
@@ -26,7 +26,7 @@ const Shop = () => {
         let result = [...safeProducts];
 
         // 1. Filter by Category
-        if (filterCategory !== 'All') {
+        if (filterCategory !== 'Tous') {
             result = result.filter(p => p.category === filterCategory);
         }
 
@@ -70,7 +70,7 @@ const Shop = () => {
         <div className="page page-shop">
             <div className="container">
                 <div className="shop-header">
-                    <h1 className="page-title">Shop</h1>
+                    <h1 className="page-title">Boutique</h1>
                     <div className="shop-controls">
                         {/* Sort Dropdown */}
                         <div className="control-group">
@@ -150,7 +150,7 @@ const Shop = () => {
                             ) : (
                                 <div className="no-results">
                                     <p>Aucun produit ne correspond à vos critères.</p>
-                                    <button onClick={() => { setFilterCategory('All'); setPriceRange([0, 2000]); }} className="btn-link">
+                                    <button onClick={() => { setFilterCategory('Tous'); setPriceRange([0, 2000]); }} className="btn-link">
                                         Réinitialiser les filtres
                                     </button>
                                 </div>
