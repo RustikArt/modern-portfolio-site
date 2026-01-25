@@ -7,9 +7,22 @@
     min-height: 100vh;
 }
 
+.page-projects .page-title {
+    font-family: var(--font-display, 'Playfair Display', serif);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 600;
+    margin-bottom: var(--spacing-2xl, 3rem);
+    text-align: center;
+}
+
+.page-projects .page-title span {
+    color: var(--color-accent, #d4af37);
+    font-style: italic;
+}
+
 .projects-header {
     text-align: center;
-    margin-bottom: var(--spacing-3xl, 4rem);
+    margin-bottom: var(--spacing-xl, 2rem);
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
