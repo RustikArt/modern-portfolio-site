@@ -29,13 +29,19 @@ export default async function handler(req, res) {
                 .limit(1);
             
             // For public requests, only return active announcements
+            // Use 'is' instead of 'eq' to handle both true and potential null cases
             if (!isAdminRequest) {
-                query = query.eq('is_active', true);
+                query = query.is('is_active', true);
             }
             
             const { data: announcements, error } = await query;
 
-            if (error) throw error;
+            if (error) {
+                console.error('Announcements GET error:', error);
+                throw error;
+            }
+            
+            console.log('Announcements fetched:', announcements);
             res.status(200).json(announcements && announcements.length > 0 ? announcements[0] : null);
         } else if (req.method === 'POST') {
             // Admin only: create announcement

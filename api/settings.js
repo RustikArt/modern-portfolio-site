@@ -26,11 +26,18 @@ export default async function handler(req, res) {
                 .order('id', { ascending: false })
                 .limit(1);
 
-            if (error) throw error;
+            if (error) {
+                console.error('Settings GET error:', error);
+                throw error;
+            }
+            
+            console.log('Settings fetched:', settings);
             res.status(200).json(settings && settings.length > 0 ? settings[0] : {});
         } else if (req.method === 'PUT') {
             // Admin only: update settings
             if (!requireAdminAuth(req, res)) return;
+
+            console.log('Settings PUT received body:', req.body);
 
             const { 
                 maintenanceMode, 
@@ -47,15 +54,19 @@ export default async function handler(req, res) {
                 .select('*')
                 .limit(1);
 
-            if (fetchError) throw fetchError;
+            if (fetchError) {
+                console.error('Settings fetch existing error:', fetchError);
+                throw fetchError;
+            }
 
             // Merge with existing data to preserve fields not being updated
             const existingSettings = existing && existing.length > 0 ? existing[0] : {};
+            console.log('Existing settings:', existingSettings);
             
             const settingsData = {
-                maintenance_mode: maintenanceMode !== undefined ? maintenanceMode : (existingSettings.maintenance_mode ?? false),
-                grain_effect: grainEffect !== undefined ? grainEffect : (existingSettings.grain_effect ?? true),
-                show_loading_screen: showLoadingScreen !== undefined ? showLoadingScreen : (existingSettings.show_loading_screen ?? true),
+                maintenance_mode: maintenanceMode !== undefined ? Boolean(maintenanceMode) : Boolean(existingSettings.maintenance_mode),
+                grain_effect: grainEffect !== undefined ? Boolean(grainEffect) : Boolean(existingSettings.grain_effect),
+                show_loading_screen: showLoadingScreen !== undefined ? Boolean(showLoadingScreen) : (existingSettings.show_loading_screen !== false),
                 site_title: siteTitle !== undefined ? siteTitle : (existingSettings.site_title || 'RUSTIKOP'),
                 contact_email: contactEmail !== undefined ? contactEmail : (existingSettings.contact_email || ''),
                 support_phone: supportPhone !== undefined ? supportPhone : (existingSettings.support_phone || ''),
@@ -63,23 +74,34 @@ export default async function handler(req, res) {
                 updated_at: new Date().toISOString()
             };
 
+            console.log('Settings data to save:', settingsData);
+
             let error;
             let result;
 
             if (existing && existing.length > 0) {
+                console.log('Updating existing settings with id:', existing[0].id);
                 result = await supabase
                     .from('portfolio_settings')
                     .update(settingsData)
-                    .eq('id', existing[0].id);
+                    .eq('id', existing[0].id)
+                    .select();
                 error = result.error;
+                console.log('Update result:', result);
             } else {
+                console.log('Inserting new settings');
                 result = await supabase
                     .from('portfolio_settings')
-                    .insert([settingsData]);
+                    .insert([settingsData])
+                    .select();
                 error = result.error;
+                console.log('Insert result:', result);
             }
 
-            if (error) throw error;
+            if (error) {
+                console.error('Settings save error:', error);
+                throw error;
+            }
 
             const { data: updated, error: getError } = await supabase
                 .from('portfolio_settings')
@@ -87,8 +109,12 @@ export default async function handler(req, res) {
                 .order('id', { ascending: false })
                 .limit(1);
 
-            if (getError) throw getError;
+            if (getError) {
+                console.error('Settings refetch error:', getError);
+                throw getError;
+            }
 
+            console.log('Final updated settings:', updated);
             res.status(200).json(updated && updated.length > 0 ? updated[0] : settingsData);
         } else {
             res.setHeader('Allow', ['GET', 'PUT']);

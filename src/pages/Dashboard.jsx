@@ -176,20 +176,21 @@ const Dashboard = () => {
     const [productFilter, setProductFilter] = useState({ category: 'all', promoOnly: false, search: '' });
 
     // --- GENERAL SETTINGS STATES (local before apply) ---
-    const [localSiteTitle, setLocalSiteTitle] = useState(settings?.siteTitle || '');
-    const [localMaintenanceMode, setLocalMaintenanceMode] = useState(settings?.maintenanceMode || false);
-    const [localGrainEffect, setLocalGrainEffect] = useState(settings?.grainEffect || false);
-    const [localShowLoadingScreen, setLocalShowLoadingScreen] = useState(settings?.showLoadingScreen !== false);
-    const [localContactEmail, setLocalContactEmail] = useState(settings?.contactEmail || '');
-    const [localSocials, setLocalSocials] = useState(settings?.socials || { instagram: '', twitter: '', discord: '' });
+    const [localSiteTitle, setLocalSiteTitle] = useState('');
+    const [localMaintenanceMode, setLocalMaintenanceMode] = useState(false);
+    const [localGrainEffect, setLocalGrainEffect] = useState(false);
+    const [localShowLoadingScreen, setLocalShowLoadingScreen] = useState(true);
+    const [localContactEmail, setLocalContactEmail] = useState('');
+    const [localSocials, setLocalSocials] = useState({ instagram: '', twitter: '', discord: '' });
     const [settingsInitialized, setSettingsInitialized] = useState(false);
 
-    // Sync local settings when settings change from context - only on initial load
+    // Sync local settings when settings change from context - only on initial load OR when settings object changes significantly
     useEffect(() => {
         if (settings && !settingsInitialized) {
+            console.log('Dashboard: Initializing settings from context:', settings);
             setLocalSiteTitle(settings.siteTitle || '');
-            setLocalMaintenanceMode(settings.maintenanceMode || false);
-            setLocalGrainEffect(settings.grainEffect || false);
+            setLocalMaintenanceMode(Boolean(settings.maintenanceMode));
+            setLocalGrainEffect(Boolean(settings.grainEffect));
             setLocalShowLoadingScreen(settings.showLoadingScreen !== false);
             setLocalContactEmail(settings.contactEmail || '');
             setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
@@ -2285,7 +2286,7 @@ const Dashboard = () => {
                                             {/* APPLY BUTTON */}
                                             <button
                                                 onClick={async () => {
-                                                    await updateSettings({
+                                                    console.log('Saving settings with:', {
                                                         siteTitle: localSiteTitle,
                                                         maintenanceMode: localMaintenanceMode,
                                                         grainEffect: localGrainEffect,
@@ -2293,7 +2294,19 @@ const Dashboard = () => {
                                                         contactEmail: localContactEmail,
                                                         socials: localSocials
                                                     });
-                                                    showToast("Configuration générale mise à jour !", "success");
+                                                    const success = await updateSettings({
+                                                        siteTitle: localSiteTitle,
+                                                        maintenanceMode: localMaintenanceMode,
+                                                        grainEffect: localGrainEffect,
+                                                        showLoadingScreen: localShowLoadingScreen,
+                                                        contactEmail: localContactEmail,
+                                                        socials: localSocials
+                                                    });
+                                                    if (success) {
+                                                        showToast("Configuration générale mise à jour !", "success");
+                                                    } else {
+                                                        showToast("Erreur lors de la sauvegarde", "error");
+                                                    }
                                                 }}
                                                 style={{ ...btnPrimaryModern, marginTop: '1rem', width: '100%', justifyContent: 'center' }}
                                             >
@@ -2495,7 +2508,12 @@ const Dashboard = () => {
 
                                             <button
                                                 onClick={async () => {
-                                                    await updateAnnouncement({
+                                                    console.log('Saving announcement with:', {
+                                                        id: announcement?.id,
+                                                        text: announcementText,
+                                                        isActive: announcementIsActive,
+                                                    });
+                                                    const success = await updateAnnouncement({
                                                         id: announcement?.id,
                                                         text: announcementText,
                                                         subtext: announcementSubtext,
@@ -2510,7 +2528,11 @@ const Dashboard = () => {
                                                         textAlign: announcementTextAlign,
                                                         timerPosition: announcementTimerPosition
                                                     });
-                                                    showToast("Configuration de la banderole appliquée !", "success");
+                                                    if (success) {
+                                                        showToast("Configuration de la banderole appliquée !", "success");
+                                                    } else {
+                                                        showToast("Erreur lors de la sauvegarde", "error");
+                                                    }
                                                 }}
                                                 style={{ ...btnPrimaryModern, marginTop: 'auto', width: '100%', justifyContent: 'center' }}
                                             >
