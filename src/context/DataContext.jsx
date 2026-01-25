@@ -716,6 +716,30 @@ export const DataProvider = ({ children }) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     };
 
+    // Helper to normalize announcement data from API (snake_case to camelCase)
+    const normalizeAnnouncement = (data) => {
+        if (!data) return null;
+        return {
+            id: data.id,
+            text: data.text,
+            subtext: data.subtext,
+            bgColor: data.bg_color || data.bgColor,
+            textColor: data.text_color || data.textColor,
+            isActive: Boolean(data.is_active !== undefined ? data.is_active : data.isActive),
+            link: data.link,
+            showTimer: Boolean(data.show_timer !== undefined ? data.show_timer : data.showTimer),
+            timerEnd: data.timer_end || data.timerEnd,
+            fontWeight: data.font_weight || data.fontWeight,
+            fontStyle: data.font_style || data.fontStyle,
+            height: data.height,
+            icon: data.icon || 'Sparkles',
+            textAlign: data.text_align || data.textAlign || 'left',
+            timerPosition: data.timer_position || data.timerPosition || 'right',
+            createdAt: data.created_at || data.createdAt,
+            updatedAt: data.updated_at || data.updatedAt
+        };
+    };
+
     // Announcement Banner State (from Supabase - don't use localStorage to prevent flash)
     const [announcement, setAnnouncement] = useState(null);
     const [announcementLoaded, setAnnouncementLoaded] = useState(false);
@@ -775,6 +799,7 @@ export const DataProvider = ({ children }) => {
     }, [announcement]);
 
     // --- GLOBAL SETTINGS (from Supabase) ---
+    const [settingsLoaded, setSettingsLoaded] = useState(false);
     const [settings, setSettings] = useState(() => {
         const defaultSettings = {
             maintenanceMode: false,
@@ -803,6 +828,13 @@ export const DataProvider = ({ children }) => {
         }
         return defaultSettings;
     });
+
+    // Persist settings to localStorage when they change
+    useEffect(() => {
+        if (settingsLoaded) {
+            localStorage.setItem('portfolio_settings', JSON.stringify(settings));
+        }
+    }, [settings, settingsLoaded]);
 
     // --- FETCH DATA ON MOUNT ---
     useEffect(() => {
@@ -939,6 +971,8 @@ export const DataProvider = ({ children }) => {
                 }
             } catch (error) {
                 console.error('Failed to fetch settings from API:', error);
+            } finally {
+                setSettingsLoaded(true);
             }
         };
 
@@ -949,27 +983,9 @@ export const DataProvider = ({ children }) => {
                 if (res.ok) {
                     const data = await res.json();
                     if (data) {
-                        // Normalize snake_case from API to camelCase for frontend
-                        const normalizedAnnouncement = {
-                            id: data.id,
-                            text: data.text,
-                            subtext: data.subtext,
-                            bgColor: data.bg_color || data.bgColor,
-                            textColor: data.text_color || data.textColor,
-                            isActive: data.is_active !== undefined ? data.is_active : data.isActive,
-                            link: data.link,
-                            showTimer: data.show_timer !== undefined ? data.show_timer : data.showTimer,
-                            timerEnd: data.timer_end || data.timerEnd,
-                            fontWeight: data.font_weight || data.fontWeight,
-                            fontStyle: data.font_style || data.fontStyle,
-                            height: data.height,
-                            icon: data.icon || 'Sparkles',
-                            textAlign: data.text_align || data.textAlign || 'left',
-                            timerPosition: data.timer_position || data.timerPosition || 'right',
-                            createdAt: data.created_at || data.createdAt,
-                            updatedAt: data.updated_at || data.updatedAt
-                        };
-                        setAnnouncement(normalizedAnnouncement);
+                        const normalized = normalizeAnnouncement(data);
+                        console.log('Initial announcement loaded:', normalized);
+                        setAnnouncement(normalized);
                     } else {
                         // No active announcement
                         setAnnouncement(null);
@@ -996,27 +1012,10 @@ export const DataProvider = ({ children }) => {
             if (res.ok) {
                 const data = await res.json();
                 if (data) {
-                    const normalizedAnnouncement = {
-                        id: data.id,
-                        text: data.text,
-                        subtext: data.subtext,
-                        bgColor: data.bg_color || data.bgColor,
-                        textColor: data.text_color || data.textColor,
-                        isActive: data.is_active !== undefined ? data.is_active : data.isActive,
-                        link: data.link,
-                        showTimer: data.show_timer !== undefined ? data.show_timer : data.showTimer,
-                        timerEnd: data.timer_end || data.timerEnd,
-                        fontWeight: data.font_weight || data.fontWeight,
-                        fontStyle: data.font_style || data.fontStyle,
-                        height: data.height,
-                        icon: data.icon || 'Sparkles',
-                        textAlign: data.text_align || data.textAlign || 'left',
-                        timerPosition: data.timer_position || data.timerPosition || 'right',
-                        createdAt: data.created_at || data.createdAt,
-                        updatedAt: data.updated_at || data.updatedAt
-                    };
-                    setAnnouncement(normalizedAnnouncement);
-                    return normalizedAnnouncement;
+                    const normalized = normalizeAnnouncement(data);
+                    console.log('Admin announcement loaded:', normalized);
+                    setAnnouncement(normalized);
+                    return normalized;
                 }
             }
             return null;
@@ -2103,27 +2102,9 @@ export const DataProvider = ({ children }) => {
                 const data = await res.json();
                 console.log('Announcement API response:', data);
                 
-                // Normalize snake_case from API to camelCase for frontend
-                const normalizedAnnouncement = {
-                    id: data.id,
-                    text: data.text,
-                    subtext: data.subtext,
-                    bgColor: data.bg_color || data.bgColor,
-                    textColor: data.text_color || data.textColor,
-                    isActive: data.is_active !== undefined ? data.is_active : data.isActive,
-                    link: data.link,
-                    showTimer: data.show_timer !== undefined ? data.show_timer : data.showTimer,
-                    timerEnd: data.timer_end || data.timerEnd,
-                    fontWeight: data.font_weight || data.fontWeight,
-                    fontStyle: data.font_style || data.fontStyle,
-                    height: data.height,
-                    icon: data.icon || 'Sparkles',
-                    textAlign: data.text_align || data.textAlign || 'left',
-                    timerPosition: data.timer_position || data.timerPosition || 'right',
-                    createdAt: data.created_at || data.createdAt,
-                    updatedAt: data.updated_at || data.updatedAt
-                };
-                setAnnouncement(normalizedAnnouncement);
+                const normalized = normalizeAnnouncement(data);
+                console.log('Normalized announcement:', normalized);
+                setAnnouncement(normalized);
                 return true;
             } else {
                 // Fallback: just update local state if not authenticated

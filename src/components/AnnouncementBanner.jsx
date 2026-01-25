@@ -28,16 +28,27 @@ const AnnouncementBanner = () => {
         // Debug log for troubleshooting
         console.log('AnnouncementBanner - announcement:', announcement);
         console.log('AnnouncementBanner - isActive:', announcement?.isActive);
+        console.log('AnnouncementBanner - text:', announcement?.text);
+        
+        // Check if announcement exists and is active
+        const isActive = announcement?.isActive === true;
+        const hasText = announcement?.text && announcement.text.trim().length > 0;
+        
+        if (!isActive || !hasText) {
+            setIsVisible(false);
+            return;
+        }
         
         const key = getDismissalKey();
-        if (key && announcement?.isActive) {
+        if (key) {
             const wasDismissed = localStorage.getItem(key) === 'true';
-            console.log('AnnouncementBanner - wasDismissed:', wasDismissed);
+            console.log('AnnouncementBanner - dismissalKey:', key, 'wasDismissed:', wasDismissed);
             setIsVisible(!wasDismissed);
         } else {
-            setIsVisible(false);
+            // No dismissal key means show the banner
+            setIsVisible(true);
         }
-    }, [getDismissalKey, announcementLoaded, announcement?.isActive, announcement]);
+    }, [getDismissalKey, announcementLoaded, announcement]);
 
     const handleClose = () => {
         const key = getDismissalKey();

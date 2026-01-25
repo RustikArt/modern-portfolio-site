@@ -1,2 +1,2 @@
-export const WEBSITE_VERSION = "Version 5.5.2 FRESH EDITION";
-export const VERSION_DETAILS = "Supabase backend, new logics, review design, responsive improvements, banderole fixee.";
+export const WEBSITE_VERSION = "Version 5.5.4 FRESH EDITION";
+export const VERSION_DETAILS = "Correction paramètres généraux et banderole, normalisation des booleans, code optimisé.";

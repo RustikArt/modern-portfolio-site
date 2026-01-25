@@ -182,18 +182,20 @@ const Dashboard = () => {
     const [localShowLoadingScreen, setLocalShowLoadingScreen] = useState(settings?.showLoadingScreen !== false);
     const [localContactEmail, setLocalContactEmail] = useState(settings?.contactEmail || '');
     const [localSocials, setLocalSocials] = useState(settings?.socials || { instagram: '', twitter: '', discord: '' });
+    const [settingsInitialized, setSettingsInitialized] = useState(false);
 
-    // Sync local settings when settings change from context
+    // Sync local settings when settings change from context - only on initial load
     useEffect(() => {
-        if (settings) {
+        if (settings && !settingsInitialized) {
             setLocalSiteTitle(settings.siteTitle || '');
             setLocalMaintenanceMode(settings.maintenanceMode || false);
             setLocalGrainEffect(settings.grainEffect || false);
             setLocalShowLoadingScreen(settings.showLoadingScreen !== false);
             setLocalContactEmail(settings.contactEmail || '');
             setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
+            setSettingsInitialized(true);
         }
-    }, [settings]);
+    }, [settings, settingsInitialized]);
 
     const [announcementText, setAnnouncementText] = useState(announcement?.text || '');
     const [announcementSubtext, setAnnouncementSubtext] = useState(announcement?.subtext || '');
