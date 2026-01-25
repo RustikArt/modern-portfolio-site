@@ -806,6 +806,7 @@ export const DataProvider = ({ children }) => {
             maintenanceMode: false,
             grainEffect: true,
             showLoadingScreen: true,
+            showAdminLoading: true,
             siteTitle: 'RUSTIKOP',
             contactEmail: 'rustikop@outlook.fr',
             supportPhone: '',
@@ -982,6 +983,7 @@ export const DataProvider = ({ children }) => {
                         maintenanceMode: data.maintenance_mode !== undefined ? data.maintenance_mode : prev.maintenanceMode,
                         grainEffect: data.grain_effect !== undefined ? data.grain_effect : prev.grainEffect,
                         showLoadingScreen: data.show_loading_screen !== undefined ? data.show_loading_screen : prev.showLoadingScreen,
+                        showAdminLoading: data.show_admin_loading !== undefined ? data.show_admin_loading : prev.showAdminLoading,
                         siteTitle: data.site_title || prev.siteTitle,
                         contactEmail: data.contact_email || prev.contactEmail,
                         supportPhone: data.support_phone || prev.supportPhone,
@@ -1928,14 +1930,19 @@ export const DataProvider = ({ children }) => {
                 user_id: simulatedOrder.userId
             };
 
+            console.log('[DataContext] Sending order to API:', orderApiData);
+
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: getAdminHeaders(),
                 body: JSON.stringify(orderApiData)
             });
 
+            console.log('[DataContext] API response status:', res.status);
+
             if (res.ok) {
                 const updatedOrders = await res.json();
+                console.log('[DataContext] Orders received from API:', updatedOrders.length);
                 const normalizedOrders = updatedOrders.map(o => ({
                     ...o,
                     customerName: o.customer_name || o.customerName,
@@ -1946,10 +1953,12 @@ export const DataProvider = ({ children }) => {
                 addNotification('order', `Commande simulée créée (${simulatedOrder.total}€)`);
                 return normalizedOrders[0];
             } else {
-                throw new Error('API error');
+                const errorData = await res.json().catch(() => ({}));
+                console.error('[DataContext] API error response:', errorData);
+                throw new Error(errorData.message || 'API error');
             }
         } catch (error) {
-            console.error('Simulate order error:', error);
+            console.error('[DataContext] Simulate order error:', error);
             // Local fallback - generate a unique ID
             const localOrder = {
                 ...simulatedOrder,
@@ -2185,6 +2194,7 @@ export const DataProvider = ({ children }) => {
                         maintenanceMode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
                         grainEffect: newSettings.grainEffect !== undefined ? newSettings.grainEffect : settings.grainEffect,
                         showLoadingScreen: newSettings.showLoadingScreen !== undefined ? newSettings.showLoadingScreen : settings.showLoadingScreen,
+                        showAdminLoading: newSettings.showAdminLoading !== undefined ? newSettings.showAdminLoading : settings.showAdminLoading,
                         siteTitle: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
                         contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
                         supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
@@ -2208,6 +2218,7 @@ export const DataProvider = ({ children }) => {
                     maintenanceMode: updated.maintenance_mode !== undefined ? updated.maintenance_mode : newSettings.maintenanceMode,
                     grainEffect: updated.grain_effect !== undefined ? updated.grain_effect : newSettings.grainEffect,
                     showLoadingScreen: updated.show_loading_screen !== undefined ? updated.show_loading_screen : newSettings.showLoadingScreen,
+                    showAdminLoading: updated.show_admin_loading !== undefined ? updated.show_admin_loading : newSettings.showAdminLoading,
                     siteTitle: updated.site_title || newSettings.siteTitle,
                     contactEmail: updated.contact_email || newSettings.contactEmail,
                     supportPhone: updated.support_phone || newSettings.supportPhone,

@@ -3,6 +3,7 @@ import { useData, AVAILABLE_PERMISSIONS } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
 import BlockEditor from '../components/BlockEditor';
+import AdminLoadingScreen from '../components/AdminLoadingScreen';
 import * as LucideIcons from 'lucide-react';
 import {
     LayoutDashboard,
@@ -117,10 +118,41 @@ const Dashboard = () => {
 
     const [showVersionDetails, setShowVersionDetails] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
-    const [activeTab, setActiveTab] = useState('orders');
+    const [activeTab, setActiveTab] = useState(null); // Start null, will be set based on permissions
     const [expandedOrders, setExpandedOrders] = useState({});
     const navigate = useNavigate();
     const notificationRef = React.useRef(null);
+
+    // Set default tab based on permissions
+    useEffect(() => {
+        if (activeTab === null && checkPermission) {
+            // Priority order for default tab
+            const tabOrder = [
+                { tab: 'overview', permission: 'tab_overview' },
+                { tab: 'orders', permission: 'tab_orders' },
+                { tab: 'products', permission: 'tab_products' },
+                { tab: 'projects', permission: 'tab_projects' },
+                { tab: 'clients', permission: 'tab_clients' },
+                { tab: 'promos', permission: 'tab_promos' },
+                { tab: 'reviews', permission: 'tab_reviews' },
+                { tab: 'homeEditor', permission: 'tab_homeEditor' },
+                { tab: 'security', permission: 'tab_security' },
+                { tab: 'settings', permission: 'tab_settings' }
+            ];
+            
+            for (const { tab, permission } of tabOrder) {
+                if (checkPermission(permission)) {
+                    setActiveTab(tab);
+                    break;
+                }
+            }
+            
+            // Fallback if no permissions match
+            if (activeTab === null) {
+                setActiveTab('overview');
+            }
+        }
+    }, [checkPermission, activeTab]);
 
     // Fetch announcement for admin on mount (includes inactive)
     useEffect(() => {
@@ -180,6 +212,7 @@ const Dashboard = () => {
     const [localMaintenanceMode, setLocalMaintenanceMode] = useState(false);
     const [localGrainEffect, setLocalGrainEffect] = useState(false);
     const [localShowLoadingScreen, setLocalShowLoadingScreen] = useState(true);
+    const [localShowAdminLoading, setLocalShowAdminLoading] = useState(true);
     const [localContactEmail, setLocalContactEmail] = useState('');
     const [localSocials, setLocalSocials] = useState({ instagram: '', twitter: '', discord: '' });
     const [localNavbarPadding, setLocalNavbarPadding] = useState('normal');
@@ -193,6 +226,7 @@ const Dashboard = () => {
             setLocalMaintenanceMode(Boolean(settings.maintenanceMode));
             setLocalGrainEffect(Boolean(settings.grainEffect));
             setLocalShowLoadingScreen(settings.showLoadingScreen !== false);
+            setLocalShowAdminLoading(settings.showAdminLoading !== false);
             setLocalContactEmail(settings.contactEmail || '');
             setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
             setLocalNavbarPadding(settings.navbarPadding || 'normal');
@@ -566,6 +600,7 @@ const Dashboard = () => {
 
 
     return (
+        <AdminLoadingScreen>
         <div className="page" style={{ paddingTop: '140px', paddingBottom: '4rem', minHeight: '100vh', background: '#050505', color: '#eee' }}>
             <div className="container" style={{ maxWidth: '1400px' }}>
                 {/* Header V2.2 */}
@@ -2321,6 +2356,17 @@ const Dashboard = () => {
 
                                             <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                    <span style={{ fontWeight: 'bold' }}>Chargement Admin</span>
+                                                    <div
+                                                        onClick={() => setLocalShowAdminLoading(!localShowAdminLoading)}
+                                                        className={`toggle-switch ${localShowAdminLoading ? 'active' : ''}`}
+                                                    ></div>
+                                                </div>
+                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Affiche un écran de chargement lors de l'accès au dashboard admin.</p>
+                                            </div>
+
+                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                     <span style={{ fontWeight: 'bold' }}>Épaisseur de la Navbar</span>
                                                 </div>
                                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: '0 0 1rem 0' }}>Ajuste l'espacement vertical de la barre de navigation.</p>
@@ -2405,6 +2451,7 @@ const Dashboard = () => {
                                                         maintenanceMode: localMaintenanceMode,
                                                         grainEffect: localGrainEffect,
                                                         showLoadingScreen: localShowLoadingScreen,
+                                                        showAdminLoading: localShowAdminLoading,
                                                         contactEmail: localContactEmail,
                                                         socials: localSocials,
                                                         navbarPadding: localNavbarPadding
@@ -2414,6 +2461,7 @@ const Dashboard = () => {
                                                         maintenanceMode: localMaintenanceMode,
                                                         grainEffect: localGrainEffect,
                                                         showLoadingScreen: localShowLoadingScreen,
+                                                        showAdminLoading: localShowAdminLoading,
                                                         contactEmail: localContactEmail,
                                                         socials: localSocials,
                                                         navbarPadding: localNavbarPadding
@@ -2846,6 +2894,7 @@ const Dashboard = () => {
                 </div>
             </div >
         </div >
+        </AdminLoadingScreen>
     );
 };
 

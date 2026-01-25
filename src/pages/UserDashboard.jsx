@@ -322,12 +322,17 @@ const UserDashboard = () => {
 
                 {/* Help Footer */}
                 <div className="profile-help">
-                    <Star size={20} />
-                    <div>
-                        <p>Besoin d'aide sur une commande ?</p>
-                        <a href="mailto:rustikop@outlook.fr">
-                            <Mail size={16} /> rustikop@outlook.fr
-                        </a>
+                    <div className="help-content">
+                        <div className="help-icon">
+                            <Mail size={24} />
+                        </div>
+                        <div className="help-text">
+                            <h4>Besoin d'aide ?</h4>
+                            <p>Une question sur une commande ou un projet ?</p>
+                            <a href="mailto:rustikop@outlook.fr" className="help-link">
+                                rustikop@outlook.fr
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

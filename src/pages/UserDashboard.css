@@ -476,9 +476,6 @@
    ============================================ */
 
 .profile-help {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xl, 2rem);
     margin-top: var(--spacing-4xl, 6rem);
     padding: var(--spacing-2xl, 3rem);
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -498,41 +495,63 @@
     background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
 }
 
-.profile-help svg:first-child {
-    color: var(--color-accent, #d4af37);
-    flex-shrink: 0;
-    width: 48px;
-    height: 48px;
-    padding: 12px;
+.profile-help .help-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--spacing-lg, 1.5rem);
+}
+
+.profile-help .help-icon {
+    width: 64px;
+    height: 64px;
     background: rgba(212, 175, 55, 0.1);
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent, #d4af37);
 }
 
-.profile-help > div {
-    flex: 1;
+.profile-help .help-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs, 0.5rem);
 }
 
-.profile-help p {
-    font-size: 1rem;
+.profile-help .help-text h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #fff);
+    margin: 0;
+}
+
+.profile-help .help-text p {
+    font-size: 0.9rem;
     color: var(--color-text-secondary, #a0a0a0);
-    margin-bottom: var(--spacing-sm, 0.75rem);
-    font-weight: 500;
+    margin: 0;
 }
 
-.profile-help a {
+.profile-help .help-link {
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-sm, 0.75rem);
     color: var(--color-accent, #d4af37);
     font-weight: 600;
     text-decoration: none;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    margin-top: var(--spacing-sm, 0.75rem);
+    padding: 0.6rem 1.5rem;
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 100px;
     transition: all var(--transition-fast, 150ms);
 }
 
-.profile-help a:hover {
-    color: #fff;
-    transform: translateX(4px);
+.profile-help .help-link:hover {
+    background: rgba(212, 175, 55, 0.2);
+    transform: translateY(-2px);
 }
 
 /* ============================================
@@ -596,7 +615,11 @@
     }
     
     .profile-help {
-        flex-direction: column;
-        text-align: center;
+        padding: var(--spacing-xl, 2rem);
+    }
+    
+    .profile-help .help-icon {
+        width: 56px;
+        height: 56px;
     }
 }
