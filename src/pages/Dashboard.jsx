@@ -105,7 +105,7 @@ const Dashboard = () => {
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
         updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode,
-        secureFullReset, logout,
+        secureFullReset, logout, simulateOrder,
         announcement, updateAnnouncement, fetchAnnouncementForAdmin,
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
@@ -211,6 +211,17 @@ const Dashboard = () => {
     // --- ADMIN REVIEW CREATION STATES ---
     const [showNewReviewForm, setShowNewReviewForm] = useState(false);
     const [newReviewForm, setNewReviewForm] = useState({ productId: '', user: '', rating: 5, comment: '' });
+
+    // --- ADMIN ORDER SIMULATION STATES ---
+    const [showSimulateOrderForm, setShowSimulateOrderForm] = useState(false);
+    const [simulateOrderForm, setSimulateOrderForm] = useState({
+        customerName: '',
+        email: '',
+        selectedProducts: [],
+        status: 'Terminé',
+        total: 0,
+        date: new Date().toISOString().split('T')[0]
+    });
 
     // --- USER MANAGEMENT STATES ---
     const [selectedMember, setSelectedMember] = useState(null);
@@ -944,6 +955,185 @@ const Dashboard = () => {
                         {/* --- ORDERS & ARCHIVES TABS --- */}
                         {(activeTab === 'orders' || activeTab === 'archives') && (
                             <div className="animate-in">
+                                {/* Header with Simulate Button */}
+                                {activeTab === 'orders' && checkPermission('manage_orders') && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                        <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Gestion des Commandes</h2>
+                                        <button
+                                            onClick={() => setShowSimulateOrderForm(!showSimulateOrderForm)}
+                                            style={{ ...btnModern, background: showSimulateOrderForm ? '#333' : 'var(--color-accent)' }}
+                                        >
+                                            {showSimulateOrderForm ? <X size={16} /> : <Plus size={16} />}
+                                            {showSimulateOrderForm ? 'Annuler' : 'Simuler une Commande'}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* ADMIN SIMULATE ORDER FORM */}
+                                {showSimulateOrderForm && checkPermission('manage_orders') && (
+                                    <div style={{ ...cardStyle, marginBottom: '2rem', border: '1px solid var(--color-accent)' }}>
+                                        <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <ShoppingCart size={18} style={{ color: 'var(--color-accent)' }} />
+                                            Simuler une Commande Admin
+                                        </h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Nom du client *</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="ex: Jean Dupont"
+                                                    value={simulateOrderForm.customerName}
+                                                    onChange={(e) => setSimulateOrderForm({ ...simulateOrderForm, customerName: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Email *</label>
+                                                <input
+                                                    type="email"
+                                                    placeholder="ex: client@email.com"
+                                                    value={simulateOrderForm.email}
+                                                    onChange={(e) => setSimulateOrderForm({ ...simulateOrderForm, email: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Produit(s)</label>
+                                                <select
+                                                    onChange={(e) => {
+                                                        const prodId = e.target.value;
+                                                        if (!prodId) return;
+                                                        const product = products.find(p => p.id === parseInt(prodId));
+                                                        if (product && !simulateOrderForm.selectedProducts.find(sp => sp.id === product.id)) {
+                                                            const newProducts = [...simulateOrderForm.selectedProducts, { ...product, quantity: 1 }];
+                                                            const newTotal = newProducts.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+                                                            setSimulateOrderForm({ ...simulateOrderForm, selectedProducts: newProducts, total: newTotal });
+                                                        }
+                                                        e.target.value = '';
+                                                    }}
+                                                    style={inputStyle}
+                                                >
+                                                    <option value="">+ Ajouter un produit</option>
+                                                    {products.map(p => (
+                                                        <option key={p.id} value={p.id}>{p.name} - {p.price}€</option>
+                                                    ))}
+                                                </select>
+                                                {simulateOrderForm.selectedProducts.length > 0 && (
+                                                    <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                        {simulateOrderForm.selectedProducts.map((prod, idx) => (
+                                                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 0.75rem', borderRadius: '8px' }}>
+                                                                <span style={{ flex: 1, fontSize: '0.85rem' }}>{prod.name}</span>
+                                                                <input
+                                                                    type="number"
+                                                                    min="1"
+                                                                    value={prod.quantity}
+                                                                    onChange={(e) => {
+                                                                        const newProducts = simulateOrderForm.selectedProducts.map((p, i) =>
+                                                                            i === idx ? { ...p, quantity: parseInt(e.target.value) || 1 } : p
+                                                                        );
+                                                                        const newTotal = newProducts.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+                                                                        setSimulateOrderForm({ ...simulateOrderForm, selectedProducts: newProducts, total: newTotal });
+                                                                    }}
+                                                                    style={{ ...inputStyle, width: '60px', padding: '0.3rem' }}
+                                                                />
+                                                                <span style={{ fontSize: '0.85rem', color: 'var(--color-accent)' }}>{prod.price * prod.quantity}€</span>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const newProducts = simulateOrderForm.selectedProducts.filter((_, i) => i !== idx);
+                                                                        const newTotal = newProducts.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+                                                                        setSimulateOrderForm({ ...simulateOrderForm, selectedProducts: newProducts, total: newTotal });
+                                                                    }}
+                                                                    style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer' }}
+                                                                >
+                                                                    <X size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Statut</label>
+                                                <select
+                                                    value={simulateOrderForm.status}
+                                                    onChange={(e) => setSimulateOrderForm({ ...simulateOrderForm, status: e.target.value })}
+                                                    style={inputStyle}
+                                                >
+                                                    <option value="Réception">Réception</option>
+                                                    <option value="En cours">En cours</option>
+                                                    <option value="Terminé">Terminé</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Date de la commande</label>
+                                                <input
+                                                    type="date"
+                                                    value={simulateOrderForm.date}
+                                                    onChange={(e) => setSimulateOrderForm({ ...simulateOrderForm, date: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Total personnalisé (€)</label>
+                                                <input
+                                                    type="number"
+                                                    placeholder="Laisser vide pour calcul auto"
+                                                    value={simulateOrderForm.total || ''}
+                                                    onChange={(e) => setSimulateOrderForm({ ...simulateOrderForm, total: parseFloat(e.target.value) || 0 })}
+                                                    style={inputStyle}
+                                                />
+                                                <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.3rem' }}>
+                                                    Total calculé: {simulateOrderForm.selectedProducts.reduce((sum, p) => sum + (p.price * p.quantity), 0)}€
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+                                            <button
+                                                onClick={() => {
+                                                    setShowSimulateOrderForm(false);
+                                                    setSimulateOrderForm({ customerName: '', email: '', selectedProducts: [], status: 'Terminé', total: 0, date: new Date().toISOString().split('T')[0] });
+                                                }}
+                                                style={{ ...btnModern, background: 'transparent', border: '1px solid #333' }}
+                                            >
+                                                Annuler
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!simulateOrderForm.customerName) {
+                                                        showToast("Veuillez entrer un nom de client", "error");
+                                                        return;
+                                                    }
+                                                    const items = simulateOrderForm.selectedProducts.map(p => ({
+                                                        productId: p.id,
+                                                        name: p.name,
+                                                        price: p.price,
+                                                        quantity: p.quantity,
+                                                        selectedOptions: []
+                                                    }));
+                                                    const total = simulateOrderForm.total || items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                                                    await simulateOrder({
+                                                        customerName: simulateOrderForm.customerName,
+                                                        email: simulateOrderForm.email || 'simulated@admin.com',
+                                                        items,
+                                                        total,
+                                                        status: simulateOrderForm.status,
+                                                        date: new Date(simulateOrderForm.date).toISOString()
+                                                    });
+                                                    showToast("Commande simulée créée avec succès", "success");
+                                                    setShowSimulateOrderForm(false);
+                                                    setSimulateOrderForm({ customerName: '', email: '', selectedProducts: [], status: 'Terminé', total: 0, date: new Date().toISOString().split('T')[0] });
+                                                }}
+                                                style={{ ...btnModern, background: 'var(--color-accent)' }}
+                                            >
+                                                <Check size={16} /> Créer la commande simulée
+                                            </button>
+                                        </div>
+                                        <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '1rem', fontStyle: 'italic' }}>
+                                            ⚠️ Les commandes simulées impacteront les statistiques et seront marquées comme "SIMULATED_ADMIN".
+                                        </p>
+                                    </div>
+                                )}
+
                                 {(activeTab === 'orders' ? ['Réception', 'En cours', 'Terminé', 'En attente'] : ['Archives']).map(cat => {
                                     const filteredOrders = orders.filter(o => {
                                         if (activeTab === 'archives') return isArchived(o);

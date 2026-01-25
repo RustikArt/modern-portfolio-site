@@ -148,18 +148,20 @@
     line-height: 1.05;
     margin-bottom: var(--spacing-xl, 2rem);
     letter-spacing: -0.03em;
+    color: #ffffff;
     background: linear-gradient(
         135deg, 
-        #fff 0%, 
-        #e0e0e0 30%,
-        var(--color-accent, #d4af37) 70%,
-        #fff 100%
+        #ffffff 0%, 
+        #f0f0f0 25%,
+        var(--color-accent, #d4af37) 50%,
+        #f0f0f0 75%,
+        #ffffff 100%
     );
-    background-size: 200% auto;
+    background-size: 300% auto;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: shimmer 8s linear infinite;
+    animation: shimmer 6s ease-in-out infinite;
 }
 
 .block-reveal {

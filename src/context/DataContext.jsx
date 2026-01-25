@@ -1835,6 +1835,72 @@ export const DataProvider = ({ children }) => {
         syncOrder(orderId, { notes });
     };
 
+    // Simulate an order (Admin feature)
+    const simulateOrder = async (orderData) => {
+        const simulatedOrder = {
+            id: `SIM-${Date.now()}`,
+            userId: orderData.userId || 'admin-simulated',
+            customerName: orderData.customerName || 'Client Simulé',
+            email: orderData.email || 'simulated@admin.com',
+            items: orderData.items || [],
+            total: orderData.total || 0,
+            status: orderData.status || 'Terminé',
+            checklist: [
+                { id: 1, label: 'Brief client reçu', completed: true },
+                { id: 2, label: 'Concept design validé', completed: true },
+                { id: 3, label: 'Production / Création', completed: true },
+                { id: 4, label: 'Envoi finalisé', completed: true }
+            ],
+            date: orderData.date || new Date().toISOString(),
+            completionDate: orderData.status === 'Terminé' ? new Date().toISOString() : null,
+            shipping: orderData.shipping || { address: 'Adresse simulée', city: 'Ville', zip: '00000' },
+            paymentId: 'SIMULATED_ADMIN',
+            notes: orderData.notes || '⚠️ Commande simulée par admin',
+            isSimulated: true
+        };
+
+        try {
+            const orderApiData = {
+                ...simulatedOrder,
+                user_id: simulatedOrder.userId,
+                customer_name: simulatedOrder.customerName,
+                payment_id: simulatedOrder.paymentId,
+                completion_date: simulatedOrder.completionDate
+            };
+            delete orderApiData.userId;
+            delete orderApiData.customerName;
+            delete orderApiData.paymentId;
+            delete orderApiData.completionDate;
+
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: getAdminHeaders(),
+                body: JSON.stringify(orderApiData)
+            });
+
+            if (res.ok) {
+                const updatedOrders = await res.json();
+                const normalizedOrders = updatedOrders.map(o => ({
+                    ...o,
+                    customerName: o.customer_name || o.customerName,
+                    userId: o.user_id || o.userId,
+                    paymentId: o.payment_id || o.paymentId
+                }));
+                setOrders(normalizedOrders);
+                addNotification('order', `Commande simulée créée (${simulatedOrder.total}€)`);
+                return normalizedOrders[0];
+            } else {
+                throw new Error('API error');
+            }
+        } catch (error) {
+            console.error('Simulate order error:', error);
+            // Local fallback
+            setOrders([simulatedOrder, ...orders]);
+            addNotification('order', `Commande simulée créée localement (${simulatedOrder.total}€)`);
+            return simulatedOrder;
+        }
+    };
+
     const secureFullReset = (password) => {
         if (password === 'admin123') {
             // Selective Wipe
@@ -2159,7 +2225,7 @@ export const DataProvider = ({ children }) => {
 
             // Orders
             orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes,
-            sendOrderConfirmation,
+            sendOrderConfirmation, simulateOrder,
 
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode, applyPromoCode, activePromo,

@@ -50,7 +50,14 @@ const Navbar = () => {
         </button>
 
         {/* LOGO */}
-        <Link to="/" className="logo" aria-label="Retour à l'accueil">
+        <Link 
+          to="/" 
+          className="logo" 
+          aria-label="Retour à l'accueil"
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        >
           <img src={logoSrc} alt="Logo Rustikop" className="logo-image" />
           <span style={{ textTransform: 'uppercase' }}>{settings?.siteTitle || 'RUSTIKOP'}<span className="dot">.</span></span>
         </Link>
