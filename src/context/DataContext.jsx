@@ -2000,10 +2000,7 @@ export const DataProvider = ({ children }) => {
 
                 const res = await fetch(url, {
                     method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-secret': process.env.REACT_APP_ADMIN_SECRET || ''
-                    },
+                    headers: getAdminHeaders(),
                     body: JSON.stringify(body)
                 });
 
@@ -2053,12 +2050,10 @@ export const DataProvider = ({ children }) => {
             if (currentUser) {
                 const res = await fetch('/api/settings', {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-secret': process.env.REACT_APP_ADMIN_SECRET || ''
-                    },
+                    headers: getAdminHeaders(),
                     body: JSON.stringify({
                         maintenanceMode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
+                        grainEffect: newSettings.grainEffect !== undefined ? newSettings.grainEffect : settings.grainEffect,
                         siteTitle: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
                         contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
                         supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,

@@ -34,7 +34,8 @@ export default async function handler(req, res) {
 
             const { 
                 maintenanceMode, 
-                grainEffect, 
+                grainEffect,
+                showLoadingScreen,
                 siteTitle, 
                 contactEmail, 
                 supportPhone, 
@@ -43,18 +44,22 @@ export default async function handler(req, res) {
 
             const { data: existing, error: fetchError } = await supabase
                 .from('portfolio_settings')
-                .select('id')
+                .select('*')
                 .limit(1);
 
             if (fetchError) throw fetchError;
 
+            // Merge with existing data to preserve fields not being updated
+            const existingSettings = existing && existing.length > 0 ? existing[0] : {};
+            
             const settingsData = {
-                maintenance_mode: maintenanceMode !== undefined ? maintenanceMode : false,
-                grain_effect: grainEffect !== undefined ? grainEffect : true,
-                site_title: siteTitle || 'RUSTIKOP',
-                contact_email: contactEmail || '',
-                support_phone: supportPhone || '',
-                socials: socials || {},
+                maintenance_mode: maintenanceMode !== undefined ? maintenanceMode : (existingSettings.maintenance_mode ?? false),
+                grain_effect: grainEffect !== undefined ? grainEffect : (existingSettings.grain_effect ?? true),
+                show_loading_screen: showLoadingScreen !== undefined ? showLoadingScreen : (existingSettings.show_loading_screen ?? true),
+                site_title: siteTitle !== undefined ? siteTitle : (existingSettings.site_title || 'RUSTIKOP'),
+                contact_email: contactEmail !== undefined ? contactEmail : (existingSettings.contact_email || ''),
+                support_phone: supportPhone !== undefined ? supportPhone : (existingSettings.support_phone || ''),
+                socials: socials || existingSettings.socials || {},
                 updated_at: new Date().toISOString()
             };
 
