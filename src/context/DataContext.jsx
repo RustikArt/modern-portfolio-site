@@ -11,7 +11,7 @@ export const useData = () => useContext(DataContext);
 // --- ADMIN SECRET HELPER ---
 const getAdminHeaders = () => ({
     'Content-Type': 'application/json',
-    'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET || ''
+    'x-admin-secret': (import.meta.env.VITE_ADMIN_SECRET || '').trim()
 });
 
 // --- SUPABASE CLIENT ---
@@ -2186,27 +2186,33 @@ export const DataProvider = ({ children }) => {
         try {
             // Update via API endpoint (requires admin secret server-side)
             if (currentUser) {
-                console.log('Updating settings with:', newSettings);
+                const payload = {
+                    maintenanceMode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
+                    grainEffect: newSettings.grainEffect !== undefined ? newSettings.grainEffect : settings.grainEffect,
+                    showLoadingScreen: newSettings.showLoadingScreen !== undefined ? newSettings.showLoadingScreen : settings.showLoadingScreen,
+                    showAdminLoading: newSettings.showAdminLoading !== undefined ? newSettings.showAdminLoading : settings.showAdminLoading,
+                    siteTitle: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
+                    contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
+                    supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
+                    navbarPadding: newSettings.navbarPadding !== undefined ? newSettings.navbarPadding : settings.navbarPadding,
+                    socials: newSettings.socials || settings.socials
+                };
+                
+                console.log('Updating settings - payload:', payload);
+                console.log('Admin secret configured:', import.meta.env.VITE_ADMIN_SECRET ? 'YES' : 'NO');
+                
                 const res = await fetch('/api/settings', {
                     method: 'PUT',
                     headers: getAdminHeaders(),
-                    body: JSON.stringify({
-                        maintenanceMode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
-                        grainEffect: newSettings.grainEffect !== undefined ? newSettings.grainEffect : settings.grainEffect,
-                        showLoadingScreen: newSettings.showLoadingScreen !== undefined ? newSettings.showLoadingScreen : settings.showLoadingScreen,
-                        showAdminLoading: newSettings.showAdminLoading !== undefined ? newSettings.showAdminLoading : settings.showAdminLoading,
-                        siteTitle: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
-                        contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
-                        supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
-                        navbarPadding: newSettings.navbarPadding !== undefined ? newSettings.navbarPadding : settings.navbarPadding,
-                        socials: newSettings.socials || settings.socials
-                    })
+                    body: JSON.stringify(payload)
                 });
 
+                console.log('Settings API response status:', res.status);
+                
                 if (!res.ok) {
-                    const error = await res.json();
-                    console.error('Error updating settings:', error);
-                    addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
+                    const errorData = await res.json();
+                    console.error('Error updating settings:', errorData);
+                    addNotification('error', `Erreur: ${errorData.error || 'impossible de sauvegarder les paramètres'}`);
                     return false;
                 }
 

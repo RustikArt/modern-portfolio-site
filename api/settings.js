@@ -11,6 +11,7 @@ export default async function handler(req, res) {
     if (handleCorsPreFlight(req, res)) return;
 
     if (!supabase) {
+        console.error('Supabase not initialized. URL:', SUPABASE_URL ? 'SET' : 'NOT SET', 'KEY:', SUPABASE_KEY ? 'SET' : 'NOT SET');
         return res.status(500).json({
             error: 'Database connection not initialized',
             details: 'Supabase client is null. Check environment variables.'
@@ -23,7 +24,7 @@ export default async function handler(req, res) {
             const { data: settings, error } = await supabase
                 .from('portfolio_settings')
                 .select('*')
-                .order('id', { ascending: false })
+                .order('id', { ascending: true })
                 .limit(1);
 
             if (error) {
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
             // Admin only: update settings
             if (!requireAdminAuth(req, res)) return;
 
-            console.log('Settings PUT received body:', req.body);
+            console.log('Settings PUT received body:', JSON.stringify(req.body, null, 2));
 
             const { 
                 maintenanceMode, 

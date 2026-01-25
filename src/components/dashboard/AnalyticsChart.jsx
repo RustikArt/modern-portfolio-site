@@ -1,60 +1,45 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { useState, useEffect, useRef } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 const AnalyticsChart = ({ data, title }) => {
     // data expected format: [{ name: 'Jan', value: 400 }, ...]
     const containerRef = useRef(null);
-    const [isReady, setIsReady] = useState(false);
-    const observerRef = useRef(null);
-
-    const checkDimensions = useCallback(() => {
-        if (containerRef.current) {
-            const rect = containerRef.current.getBoundingClientRect();
-            // Ensure container has valid dimensions
-            if (rect.width > 50 && rect.height > 50) {
-                setIsReady(true);
-                return true;
-            }
-        }
-        return false;
-    }, []);
+    const [dimensions, setDimensions] = useState({ width: 400, height: 250 });
 
     useEffect(() => {
-        // Multiple attempts to catch when container is ready
-        const timers = [];
-        
-        // Quick check
-        if (checkDimensions()) return;
-        
-        // Delayed checks
-        [50, 150, 300, 500, 1000].forEach(delay => {
-            timers.push(setTimeout(() => {
-                if (!isReady) checkDimensions();
-            }, delay));
-        });
+        const updateDimensions = () => {
+            if (containerRef.current) {
+                const { clientWidth, clientHeight } = containerRef.current;
+                if (clientWidth > 0 && clientHeight > 0) {
+                    setDimensions({
+                        width: Math.max(clientWidth - 20, 100),
+                        height: Math.max(clientHeight - 10, 150)
+                    });
+                }
+            }
+        };
 
-        // Use ResizeObserver for dynamic updates
+        // Initial measurement after a short delay to ensure DOM is ready
+        const initialTimer = setTimeout(updateDimensions, 100);
+        const secondTimer = setTimeout(updateDimensions, 500);
+
+        // Use ResizeObserver for responsive updates
+        let observer = null;
         if (containerRef.current && typeof ResizeObserver !== 'undefined') {
-            observerRef.current = new ResizeObserver(() => {
-                if (!isReady) checkDimensions();
-            });
-            observerRef.current.observe(containerRef.current);
+            observer = new ResizeObserver(updateDimensions);
+            observer.observe(containerRef.current);
         }
 
         // Fallback resize listener
-        const handleResize = () => {
-            if (!isReady) checkDimensions();
-        };
-        window.addEventListener('resize', handleResize);
+        window.addEventListener('resize', updateDimensions);
         
         return () => {
-            timers.forEach(t => clearTimeout(t));
-            window.removeEventListener('resize', handleResize);
-            if (observerRef.current) {
-                observerRef.current.disconnect();
-            }
+            clearTimeout(initialTimer);
+            clearTimeout(secondTimer);
+            window.removeEventListener('resize', updateDimensions);
+            if (observer) observer.disconnect();
         };
-    }, [checkDimensions, isReady]);
+    }, []);
 
     const cardStyle = {
         background: 'rgba(255,255,255,0.02)',
@@ -73,59 +58,62 @@ const AnalyticsChart = ({ data, title }) => {
                     height: 280, 
                     minHeight: 200,
                     minWidth: 100,
-                    position: 'relative' 
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                 }}
             >
-                {isReady ? (
-                    <ResponsiveContainer width="99%" height="99%">
-                        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#d4af37" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#d4af37" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                            <XAxis
-                                dataKey="name"
-                                stroke="#666"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                            />
-                            <YAxis
-                                stroke="#666"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                                tickFormatter={(value) => `${value}€`}
-                            />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: 'rgba(0,0,0,0.8)',
-                                    border: '1px solid #333',
-                                    borderRadius: '8px',
-                                    color: '#fff'
-                                }}
-                                itemStyle={{ color: '#d4af37' }}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="value"
-                                stroke="#d4af37"
-                                fillOpacity={1}
-                                fill="url(#colorValue)"
-                                strokeWidth={2}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                {dimensions.width > 100 ? (
+                    <AreaChart 
+                        width={dimensions.width} 
+                        height={dimensions.height} 
+                        data={data} 
+                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                        <defs>
+                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#d4af37" stopOpacity={0.8} />
+                                <stop offset="95%" stopColor="#d4af37" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                        <XAxis
+                            dataKey="name"
+                            stroke="#666"
+                            fontSize={12}
+                            tickLine={false}
+                            axisLine={false}
+                        />
+                        <YAxis
+                            stroke="#666"
+                            fontSize={12}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(value) => `${value}€`}
+                        />
+                        <Tooltip
+                            contentStyle={{
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                border: '1px solid #333',
+                                borderRadius: '8px',
+                                color: '#fff'
+                            }}
+                            itemStyle={{ color: '#d4af37' }}
+                        />
+                        <Area
+                            type="monotone"
+                            dataKey="value"
+                            stroke="#d4af37"
+                            fillOpacity={1}
+                            fill="url(#colorValue)"
+                            strokeWidth={2}
+                        />
+                    </AreaChart>
                 ) : (
                     <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        height: '100%',
-                        color: '#666' 
+                        color: '#666',
+                        fontSize: '0.9rem'
                     }}>
                         Chargement du graphique...
                     </div>

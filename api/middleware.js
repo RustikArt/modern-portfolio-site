@@ -105,9 +105,13 @@ export function checkRateLimit(identifier, maxRequests = 10, windowMs = 60000) {
 
 // Vérification d'authentification admin (x-admin-secret)
 export function requireAdminAuth(req, res) {
-    const ADMIN_API_SECRET = process.env.ADMIN_API_SECRET || '';
-    const providedSecret = (req.headers['x-admin-secret'] || '').toString();
+    const ADMIN_API_SECRET = (process.env.ADMIN_API_SECRET || '').trim();
+    const providedSecret = (req.headers['x-admin-secret'] || '').toString().trim();
 
+    // Debug logging (remove in production)
+    console.log('[AUTH] ADMIN_API_SECRET configured:', ADMIN_API_SECRET ? `YES (${ADMIN_API_SECRET.length} chars)` : 'NO');
+    console.log('[AUTH] Provided secret:', providedSecret ? `YES (${providedSecret.length} chars)` : 'NO');
+    
     // Si aucun secret n'est configuré, log un warning mais permets la requête (mode développement)
     if (!ADMIN_API_SECRET) {
         console.warn('[SECURITY] ADMIN_API_SECRET not configured - admin endpoints are unprotected!');
@@ -116,11 +120,13 @@ export function requireAdminAuth(req, res) {
 
     // Vérifier le secret
     if (providedSecret !== ADMIN_API_SECRET) {
+        console.log('[AUTH] Secret mismatch - Expected:', ADMIN_API_SECRET.substring(0, 4) + '...', 'Got:', providedSecret.substring(0, 4) + '...');
         setCorsHeaders(res, req.headers.origin);
         res.status(403).json({ error: 'Forbidden: Invalid or missing admin secret.' });
         return false;
     }
 
+    console.log('[AUTH] Admin authentication successful');
     return true;
 }
 
