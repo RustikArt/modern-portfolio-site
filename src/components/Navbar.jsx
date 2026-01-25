@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
-import { ShoppingCart, User, Menu, X, Search, Heart } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Search, Heart, LayoutDashboard } from 'lucide-react';
 
 // Import Logo
 import logoSrc from '../assets/Logos/Orange.png';
@@ -13,6 +13,9 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { cart, currentUser, settings } = useData();
+
+  // Check if current user is admin
+  const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin' || currentUser.role === 'editor');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,6 +75,13 @@ const Navbar = () => {
 
         {/* RIGHT ACTIONS */}
         <div className="nav-actions">
+          {/* Admin Dashboard Button */}
+          {isAdmin && (
+            <Link to="/dashboard" className="action-link icon-link admin-btn" title="Dashboard Admin" aria-label="Accéder au Dashboard Admin">
+              <LayoutDashboard size={20} aria-hidden="true" />
+            </Link>
+          )}
+
           <Link to="/wishlist" className="action-link icon-link" title="Wishlist" aria-label="Ma Wishlist">
             <Heart size={20} aria-hidden="true" />
           </Link>

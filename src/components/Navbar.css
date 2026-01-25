@@ -9,21 +9,22 @@
     width: 100%;
     z-index: var(--z-navbar, 1000);
     padding: var(--spacing-lg, 1.5rem) 0;
-    background: rgba(3, 3, 3, 0.6);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
-    backdrop-filter: blur(16px) saturate(150%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(10, 10, 10, 0.65);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .navbar.scrolled {
-    background: rgba(3, 3, 3, 0.92);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(8, 8, 8, 0.85);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    backdrop-filter: blur(30px) saturate(200%);
     padding: var(--spacing-md, 1rem) 0;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04),
-                0 12px 40px rgba(0, 0, 0, 0.5);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5),
+                0 1px 0 rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
 }
 
 .navbar-content {
@@ -216,6 +217,20 @@
     border-color: rgba(212, 175, 55, 0.2);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
+}
+
+/* Admin Dashboard Button */
+.icon-link.admin-btn {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.3);
+    color: var(--color-accent, #d4af37);
+}
+
+.icon-link.admin-btn:hover {
+    background: var(--color-accent, #d4af37);
+    color: var(--color-bg, #030303);
+    border-color: var(--color-accent, #d4af37);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
 }
 
 .cart-count {

@@ -829,27 +829,29 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <ResponsiveContainer width="100%" height={220} minWidth={0}>
-                                                    <RechartsPie>
-                                                        <Pie
-                                                            data={pieData}
-                                                            cx="50%"
-                                                            cy="50%"
-                                                            innerRadius={50}
-                                                            outerRadius={80}
-                                                            paddingAngle={3}
-                                                            dataKey="value"
-                                                            label={({ name, value }) => `${name}: ${value}`}
-                                                            labelLine={false}
-                                                        >
-                                                            {pieData.map((entry, index) => {
-                                                                const colors = { 'Réception': '#ff4d4d', 'En cours': '#ffd700', 'Terminé': '#4caf50', 'En attente': '#ff8c00' };
-                                                                return <Cell key={`cell-${index}`} fill={colors[entry.name] || '#888'} />;
-                                                            })}
-                                                        </Pie>
-                                                        <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} />
-                                                    </RechartsPie>
-                                                </ResponsiveContainer>
+                                                <div style={{ width: '100%', height: '220px', minHeight: '220px' }}>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <RechartsPie>
+                                                            <Pie
+                                                                data={pieData}
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                innerRadius={50}
+                                                                outerRadius={80}
+                                                                paddingAngle={3}
+                                                                dataKey="value"
+                                                                label={({ name, value }) => `${name}: ${value}`}
+                                                                labelLine={false}
+                                                            >
+                                                                {pieData.map((entry, index) => {
+                                                                    const colors = { 'Réception': '#ff4d4d', 'En cours': '#ffd700', 'Terminé': '#4caf50', 'En attente': '#ff8c00' };
+                                                                    return <Cell key={`cell-${index}`} fill={colors[entry.name] || '#888'} />;
+                                                                })}
+                                                            </Pie>
+                                                            <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} />
+                                                        </RechartsPie>
+                                                    </ResponsiveContainer>
+                                                </div>
                                             );
                                         })()}
                                         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
@@ -879,15 +881,17 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <ResponsiveContainer width="100%" height={250} minWidth={0}>
-                                                    <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
-                                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                                        <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
-                                                        <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
-                                                        <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
-                                                        <Bar dataKey="total" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
-                                                    </BarChart>
-                                                </ResponsiveContainer>
+                                                <div style={{ width: '100%', height: '250px', minHeight: '250px' }}>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                                                            <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
+                                                            <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
+                                                            <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
+                                                            <Bar dataKey="total" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+                                                        </BarChart>
+                                                    </ResponsiveContainer>
+                                                </div>
                                             );
                                         })()}
                                     </div>

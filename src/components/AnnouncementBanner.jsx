@@ -25,14 +25,19 @@ const AnnouncementBanner = () => {
     useEffect(() => {
         if (!announcementLoaded) return; // Wait for data to load
         
+        // Debug log for troubleshooting
+        console.log('AnnouncementBanner - announcement:', announcement);
+        console.log('AnnouncementBanner - isActive:', announcement?.isActive);
+        
         const key = getDismissalKey();
         if (key && announcement?.isActive) {
             const wasDismissed = localStorage.getItem(key) === 'true';
+            console.log('AnnouncementBanner - wasDismissed:', wasDismissed);
             setIsVisible(!wasDismissed);
         } else {
             setIsVisible(false);
         }
-    }, [getDismissalKey, announcementLoaded, announcement?.isActive]);
+    }, [getDismissalKey, announcementLoaded, announcement?.isActive, announcement]);
 
     const handleClose = () => {
         const key = getDismissalKey();
