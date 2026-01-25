@@ -1,2 +1,2 @@
-export const WEBSITE_VERSION = "Version 5.5.5 FRESH EDITION";
-export const VERSION_DETAILS = "Fix complet settings & banderole: API améliorée, logs debug, gestion NULL en BDD, initialisation Dashboard.";
+export const WEBSITE_VERSION = "Version 5.6 FRESH EDITION";
+export const VERSION_DETAILS = "DATA SET";

@@ -105,7 +105,7 @@ const Dashboard = () => {
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
         updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode,
-        secureFullReset, logout, simulateOrder,
+        secureFullReset, logout, simulateOrder, deleteOrder,
         announcement, updateAnnouncement, fetchAnnouncementForAdmin,
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
@@ -564,7 +564,7 @@ const Dashboard = () => {
 
 
     return (
-        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#050505', color: '#eee' }}>
+        <div className="page" style={{ paddingTop: '140px', paddingBottom: '4rem', minHeight: '100vh', background: '#050505', color: '#eee' }}>
             <div className="container" style={{ maxWidth: '1400px' }}>
                 {/* Header V2.2 */}
                 <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid #222', paddingBottom: '1.5rem' }}>
@@ -1287,6 +1287,29 @@ const Dashboard = () => {
                                                                             placeholder="Notes sur la commande..."
                                                                             style={{ width: '100%', background: '#080808', border: '1px solid #222', borderRadius: '12px', padding: '1rem', color: 'white', fontSize: '0.85rem', minHeight: '100px' }}
                                                                         />
+
+                                                                        {/* Delete button for simulated/admin orders */}
+                                                                        {(order.paymentId === 'SIMULATED_ADMIN' || order.payment_id === 'SIMULATED_ADMIN') && (
+                                                                            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,77,77,0.2)' }}>
+                                                                                <button
+                                                                                    onClick={async () => {
+                                                                                        if (confirm('Supprimer cette commande simulée ? Cette action est irréversible.')) {
+                                                                                            await deleteOrder(order.id);
+                                                                                            showToast('Commande supprimée', 'success');
+                                                                                        }
+                                                                                    }}
+                                                                                    style={{
+                                                                                        ...btnModern,
+                                                                                        background: 'rgba(255, 77, 77, 0.1)',
+                                                                                        border: '1px solid rgba(255, 77, 77, 0.3)',
+                                                                                        color: '#ff4d4d',
+                                                                                        width: '100%'
+                                                                                    }}
+                                                                                >
+                                                                                    <Trash2 size={16} /> Supprimer cette commande simulée
+                                                                                </button>
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -1298,7 +1321,7 @@ const Dashboard = () => {
                                     );
                                 })}
                             </div>
-                        )}
+                        )}}
 
                         {/* --- PRODUCTS TAB --- */}
                         {activeTab === 'products' && (
@@ -1922,21 +1945,50 @@ const Dashboard = () => {
                                         <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Featured Projects</h3>
                                         <input type="text" placeholder="Section Title" value={homeContent.featuredProjects.title} onChange={(e) => setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, title: e.target.value } })} style={{ ...inputStyle, marginBottom: '1rem' }} />
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
-                                            {projects.map(p => (
-                                                <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={homeContent.featuredProjects.ids.includes(p.id)}
-                                                        onChange={(e) => {
-                                                            let newIds = [...homeContent.featuredProjects.ids];
-                                                            if (e.target.checked) newIds.push(p.id);
-                                                            else newIds = newIds.filter(id => id !== p.id);
-                                                            setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, ids: newIds } });
+                                            {projects.map(p => {
+                                                const isChecked = homeContent.featuredProjects.ids.includes(p.id);
+                                                return (
+                                                    <label 
+                                                        key={p.id} 
+                                                        style={{ 
+                                                            display: 'flex', 
+                                                            alignItems: 'center', 
+                                                            gap: '0.8rem', 
+                                                            cursor: 'pointer', 
+                                                            fontSize: '0.9rem',
+                                                            padding: '0.5rem 0.8rem',
+                                                            borderRadius: '6px',
+                                                            background: isChecked ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                                                            transition: 'background 0.2s'
                                                         }}
-                                                    />
-                                                    {p.title}
-                                                </label>
-                                            ))}
+                                                    >
+                                                        <div
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                let newIds = [...homeContent.featuredProjects.ids];
+                                                                if (isChecked) newIds = newIds.filter(id => id !== p.id);
+                                                                else newIds.push(p.id);
+                                                                setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, ids: newIds } });
+                                                            }}
+                                                            style={{
+                                                                width: '20px',
+                                                                height: '20px',
+                                                                border: isChecked ? '2px solid var(--color-accent)' : '2px solid #444',
+                                                                borderRadius: '4px',
+                                                                background: isChecked ? 'var(--color-accent)' : 'transparent',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                transition: 'all 0.2s',
+                                                                flexShrink: 0
+                                                            }}
+                                                        >
+                                                            {isChecked && <Check size={14} strokeWidth={3} color="#000" />}
+                                                        </div>
+                                                        <span style={{ color: isChecked ? '#fff' : '#aaa' }}>{p.title}</span>
+                                                    </label>
+                                                );
+                                            })}
                                         </div>
                                     </div>
 
@@ -2033,19 +2085,46 @@ const Dashboard = () => {
                                                             const revId = `${prodId}-${revIdx}`;
                                                             const isSelected = (homeContent.selectedTestimonials || []).includes(revId);
                                                             return (
-                                                                <label key={revId} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.85rem', background: isSelected ? 'rgba(212,175,55,0.05)' : 'transparent', padding: '0.5rem', borderRadius: '4px' }}>
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={isSelected}
-                                                                        onChange={(e) => {
+                                                                <label 
+                                                                    key={revId} 
+                                                                    style={{ 
+                                                                        display: 'flex', 
+                                                                        alignItems: 'center', 
+                                                                        gap: '0.8rem', 
+                                                                        cursor: 'pointer', 
+                                                                        fontSize: '0.85rem', 
+                                                                        background: isSelected ? 'rgba(212,175,55,0.1)' : 'transparent', 
+                                                                        padding: '0.6rem 0.8rem', 
+                                                                        borderRadius: '6px',
+                                                                        transition: 'background 0.2s'
+                                                                    }}
+                                                                >
+                                                                    <div
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
                                                                             let newList = [...(homeContent.selectedTestimonials || [])];
-                                                                            if (e.target.checked) newList.push(revId);
-                                                                            else newList = newList.filter(id => id !== revId);
+                                                                            if (isSelected) newList = newList.filter(id => id !== revId);
+                                                                            else newList.push(revId);
                                                                             setHomeContent({ ...homeContent, selectedTestimonials: newList });
                                                                         }}
-                                                                    />
+                                                                        style={{
+                                                                            width: '20px',
+                                                                            height: '20px',
+                                                                            border: isSelected ? '2px solid var(--color-accent)' : '2px solid #444',
+                                                                            borderRadius: '4px',
+                                                                            background: isSelected ? 'var(--color-accent)' : 'transparent',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            transition: 'all 0.2s',
+                                                                            flexShrink: 0
+                                                                        }}
+                                                                    >
+                                                                        {isSelected && <Check size={14} strokeWidth={3} color="#000" />}
+                                                                    </div>
                                                                     <div style={{ flex: 1 }}>
-                                                                        <strong>{rev.user}</strong>: "{rev.comment.substring(0, 60)}{rev.comment.length > 60 ? '...' : ''}"
+                                                                        <strong style={{ color: isSelected ? '#fff' : '#aaa' }}>{rev.user}</strong>
+                                                                        <span style={{ color: '#666' }}>: "{rev.comment.substring(0, 60)}{rev.comment.length > 60 ? '...' : ''}"</span>
                                                                     </div>
                                                                 </label>
                                                             );

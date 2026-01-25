@@ -131,6 +131,7 @@ export default async function handler(req, res) {
 
             res.status(200).json(allOrders);
         } else if (req.method === 'DELETE') {
+            if (!requireAdminAuth(req, res)) return;
             const { id } = req.body;
             if (!id) return res.status(400).json({ error: 'ID requis.' });
 

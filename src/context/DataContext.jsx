@@ -639,8 +639,9 @@ export const DataProvider = ({ children }) => {
     });
 
     const [orders, setOrders] = useState(() => {
-        const saved = localStorage.getItem('portfolio_orders');
-        return saved ? JSON.parse(saved) : [];
+        // Initially load empty - will be populated from API
+        // localStorage is only a fallback if API fails
+        return [];
     });
 
     // Load cart from Supabase when user authenticates
@@ -914,14 +915,29 @@ export const DataProvider = ({ children }) => {
                 if (ordersRes && ordersRes.ok) {
                     const ordersData = await ordersRes.json();
                     if (ordersData && ordersData.length > 0) {
-                        // Normalize to camelCase
+                        // Normalize to camelCase and parse JSON fields
                         const normalizedOrders = ordersData.map(o => ({
                             ...o,
                             customerName: o.customer_name || o.customerName,
                             userId: o.user_id || o.userId,
-                            paymentId: o.payment_id || o.paymentId
+                            paymentId: o.payment_id || o.paymentId,
+                            items: typeof o.items === 'string' ? JSON.parse(o.items) : o.items,
+                            shipping: typeof o.shipping === 'string' ? JSON.parse(o.shipping) : o.shipping,
+                            checklist: typeof o.checklist === 'string' ? JSON.parse(o.checklist) : o.checklist
                         }));
                         setOrders(normalizedOrders);
+                    } else {
+                        // No orders in API, try localStorage fallback
+                        const localOrders = localStorage.getItem('portfolio_orders');
+                        if (localOrders) {
+                            setOrders(JSON.parse(localOrders));
+                        }
+                    }
+                } else {
+                    // API failed, try localStorage fallback
+                    const localOrders = localStorage.getItem('portfolio_orders');
+                    if (localOrders) {
+                        setOrders(JSON.parse(localOrders));
                     }
                 }
             } catch (error) {
@@ -930,12 +946,14 @@ export const DataProvider = ({ children }) => {
                 const localProjects = localStorage.getItem('portfolio_projects');
                 const localProducts = localStorage.getItem('portfolio_products');
                 const localPromos = localStorage.getItem('portfolio_promo_codes');
+                const localOrders = localStorage.getItem('portfolio_orders');
 
                 if (localProjects) {
                     console.log('Recovering all data from local storage');
                     setProjects(JSON.parse(localProjects));
                     setProducts(JSON.parse(localProducts || '[]'));
                     setPromoCodes(JSON.parse(localPromos || '[]'));
+                    if (localOrders) setOrders(JSON.parse(localOrders));
                 } else {
                     console.log('No local data found, using fallbacks');
                     setProjects(fallbackProjects);
@@ -1837,6 +1855,38 @@ export const DataProvider = ({ children }) => {
         syncOrder(orderId, { notes });
     };
 
+    // Delete an order (Admin feature - for simulated/admin orders)
+    const deleteOrder = async (orderId) => {
+        try {
+            const res = await fetch('/api/orders', {
+                method: 'DELETE',
+                headers: getAdminHeaders(),
+                body: JSON.stringify({ id: orderId })
+            });
+
+            if (res.ok) {
+                const refreshedOrders = await res.json();
+                const normalizedOrders = refreshedOrders.map(o => ({
+                    ...o,
+                    customerName: o.customer_name || o.customerName,
+                    userId: o.user_id || o.userId,
+                    paymentId: o.payment_id || o.paymentId
+                }));
+                setOrders(normalizedOrders);
+                return true;
+            } else {
+                // Local fallback
+                setOrders(orders.filter(o => o.id !== orderId));
+                return true;
+            }
+        } catch (error) {
+            console.error('Delete order error:', error);
+            // Local fallback
+            setOrders(orders.filter(o => o.id !== orderId));
+            return true;
+        }
+    };
+
     // Simulate an order (Admin feature)
     const simulateOrder = async (orderData) => {
         const simulatedOrder = {
@@ -2226,7 +2276,7 @@ export const DataProvider = ({ children }) => {
 
             // Orders
             orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes,
-            sendOrderConfirmation, simulateOrder,
+            sendOrderConfirmation, simulateOrder, deleteOrder,
 
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode, applyPromoCode, activePromo,

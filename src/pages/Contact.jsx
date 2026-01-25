@@ -1,16 +1,42 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import './Contact.css';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 const Contact = () => {
     const { currentUser, addNotification, settings } = useData();
+    const formCardRef = useRef(null);
     const [formData, setFormData] = useState({
         name: currentUser ? currentUser.name : '',
         email: currentUser ? currentUser.email : '',
         message: ''
     });
     const [status, setStatus] = useState('idle'); // idle, sending, success, error
+
+    // Initialize mouse position off-card
+    useEffect(() => {
+        if (formCardRef.current) {
+            formCardRef.current.style.setProperty('--mouse-x', `-100px`);
+            formCardRef.current.style.setProperty('--mouse-y', `-100px`);
+        }
+    }, []);
+
+    // Mouse tracking for card glow effect
+    const handleCardMouseMove = (e) => {
+        if (!formCardRef.current) return;
+        const rect = formCardRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        formCardRef.current.style.setProperty('--mouse-x', `${x}px`);
+        formCardRef.current.style.setProperty('--mouse-y', `${y}px`);
+    };
+
+    const handleCardMouseLeave = () => {
+        if (!formCardRef.current) return;
+        // Reset to outside the card to hide glow
+        formCardRef.current.style.setProperty('--mouse-x', `-100px`);
+        formCardRef.current.style.setProperty('--mouse-y', `-100px`);
+    };
 
     const handleSubmit = async (e) => {
         // ... (Keep existing submit logic)
@@ -82,7 +108,12 @@ const Contact = () => {
                     </div>
                 </div>
 
-                <div className="glass" style={{ padding: '2rem', borderRadius: '12px' }}>
+                <div 
+                    ref={formCardRef}
+                    className="contact-form-card" 
+                    onMouseMove={handleCardMouseMove}
+                    onMouseLeave={handleCardMouseLeave}
+                >
                     {status === 'success' ? (
                         <div style={{ textAlign: 'center', padding: '2rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', color: '#4caf50' }}>

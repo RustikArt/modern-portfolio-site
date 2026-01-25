@@ -7,7 +7,7 @@
     background: linear-gradient(180deg, var(--color-bg, #030303) 0%, rgba(0,0,0,0.95) 100%);
     border-top: 1px solid rgba(255, 255, 255, 0.04);
     color: var(--color-text-secondary, #a0a0a0);
-    margin-top: auto;
+    margin-top: var(--spacing-4xl, 6rem); /* Add space between footer and last section */
     position: relative;
 }
 

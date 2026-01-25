@@ -5,6 +5,47 @@
 .page-contact {
     padding-top: 140px;
     min-height: 100vh;
+    padding-bottom: var(--spacing-4xl, 6rem);
+}
+
+/* ============================================
+   CONTACT FORM CARD - Mouse Glow Effect
+   ============================================ */
+
+.contact-form-card {
+    background: rgba(255, 255, 255, 0.02);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-xl, 24px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+}
+
+/* Mouse-follow glow effect */
+.contact-form-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(400px circle at var(--mouse-x, -100px) var(--mouse-y, -100px), 
+                rgba(212, 175, 55, 0.1), transparent 40%);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.contact-form-card:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.contact-form-card > * {
+    position: relative;
+    z-index: 1;
 }
 
 .contact-header {

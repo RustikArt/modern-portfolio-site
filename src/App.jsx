@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AnnouncementBanner from './components/AnnouncementBanner';
 import LoadingScreen from './components/LoadingScreen';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
 import Shop from './pages/Shop';
@@ -276,8 +277,11 @@ const AppContent = () => {
 
   return (
     <LoadingScreen>
+      <ScrollToTop />
       <AnnouncementBanner />
-      <CookieConsent />
+      <Suspense fallback={null}>
+        <CookieConsent />
+      </Suspense>
       <Navbar />
       <main>
         <Routes>
