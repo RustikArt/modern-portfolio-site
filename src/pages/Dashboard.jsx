@@ -850,8 +850,8 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <div style={{ width: '100%', height: '220px', minHeight: '220px', minWidth: '200px' }}>
-                                                    <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
+                                                <div style={{ width: '100%', height: '220px', minHeight: '220px', minWidth: '200px', position: 'relative' }}>
+                                                    <ResponsiveContainer width="100%" height={220}>
                                                         <RechartsPie>
                                                             <Pie
                                                                 data={pieData}
@@ -902,8 +902,8 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <div style={{ width: '100%', height: '250px', minHeight: '250px', minWidth: '200px' }}>
-                                                    <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
+                                                <div style={{ width: '100%', height: '250px', minHeight: '250px', minWidth: '200px', position: 'relative' }}>
+                                                    <ResponsiveContainer width="100%" height={250}>
                                                         <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
                                                             <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                                                             <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />

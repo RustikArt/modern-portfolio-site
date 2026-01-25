@@ -142,6 +142,14 @@ body.enable-grain::before {
   animation: grainAnimation 0.5s steps(10) infinite;
 }
 
+/* Grain animation for GrainOverlay component */
+@keyframes grainMove {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-2px, -2px); }
+}
+
 @keyframes grainAnimation {
   0%, 100% { transform: translate(0, 0); }
   10% { transform: translate(-1%, -1%); }

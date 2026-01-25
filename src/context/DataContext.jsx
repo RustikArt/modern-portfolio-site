@@ -2291,7 +2291,7 @@ export const DataProvider = ({ children }) => {
             homeContent, setHomeContent,
 
             // Settings
-            settings, updateSettings, logActivity,
+            settings, updateSettings, logActivity, settingsLoaded,
 
             // Wishlist
             wishlist, toggleWishlist, isInWishlist,

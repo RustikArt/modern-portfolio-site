@@ -3,7 +3,8 @@ import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import AnnouncementBanner from './components/AnnouncementBanner';
+import SiteBanner from './components/SiteBanner';
+import GrainOverlay from './components/GrainOverlay';
 import LoadingScreen from './components/LoadingScreen';
 import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
@@ -265,20 +266,11 @@ function App() {
 }
 
 const AppContent = () => {
-  const { settings } = useData();
-
-  useEffect(() => {
-    if (settings?.grainEffect) {
-      document.body.classList.add('enable-grain');
-    } else {
-      document.body.classList.remove('enable-grain');
-    }
-  }, [settings?.grainEffect]);
-
   return (
     <LoadingScreen>
       <ScrollToTop />
-      <AnnouncementBanner />
+      <GrainOverlay />
+      <SiteBanner />
       <Suspense fallback={null}>
         <CookieConsent />
       </Suspense>
