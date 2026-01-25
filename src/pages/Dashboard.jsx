@@ -208,6 +208,24 @@ const Dashboard = () => {
     const [announcementTextAlign, setAnnouncementTextAlign] = useState(announcement?.textAlign || 'left');
     const [announcementTimerPosition, setAnnouncementTimerPosition] = useState(announcement?.timerPosition || 'right');
 
+    // Sync local announcement settings when announcement changes from context
+    useEffect(() => {
+        if (announcement) {
+            setAnnouncementText(announcement.text || '');
+            setAnnouncementSubtext(announcement.subtext || '');
+            setAnnouncementBgColor(announcement.bgColor || '');
+            setAnnouncementTextColor(announcement.textColor || '');
+            setAnnouncementIsActive(announcement.isActive || false);
+            setAnnouncementShowTimer(announcement.showTimer || false);
+            setAnnouncementTimerEnd(announcement.timerEnd || '');
+            setAnnouncementLink(announcement.link || '');
+            setAnnouncementHeight(announcement.height || '56px');
+            setAnnouncementIcon(announcement.icon || 'Sparkles');
+            setAnnouncementTextAlign(announcement.textAlign || 'left');
+            setAnnouncementTimerPosition(announcement.timerPosition || 'right');
+        }
+    }, [announcement]);
+
     // --- ADMIN REVIEW CREATION STATES ---
     const [showNewReviewForm, setShowNewReviewForm] = useState(false);
     const [newReviewForm, setNewReviewForm] = useState({ productId: '', user: '', rating: 5, comment: '' });
@@ -829,8 +847,8 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <div style={{ width: '100%', height: '220px', minHeight: '220px' }}>
-                                                    <ResponsiveContainer width="100%" height="100%">
+                                                <div style={{ width: '100%', height: '220px', minHeight: '220px', minWidth: '200px' }}>
+                                                    <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
                                                         <RechartsPie>
                                                             <Pie
                                                                 data={pieData}
@@ -881,8 +899,8 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <div style={{ width: '100%', height: '250px', minHeight: '250px' }}>
-                                                    <ResponsiveContainer width="100%" height="100%">
+                                                <div style={{ width: '100%', height: '250px', minHeight: '250px', minWidth: '200px' }}>
+                                                    <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
                                                         <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
                                                             <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                                                             <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />

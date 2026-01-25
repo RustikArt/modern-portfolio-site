@@ -3,7 +3,7 @@
    ============================================ */
 
 .page-cart {
-    padding-top: 100px;
+    padding-top: 140px;
     min-height: 100vh;
     background: var(--color-bg, #030303);
     padding-bottom: var(--spacing-4xl, 6rem);

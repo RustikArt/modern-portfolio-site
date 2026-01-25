@@ -925,9 +925,12 @@ export const DataProvider = ({ children }) => {
                 const res = await fetch('/api/settings');
                 if (res.ok) {
                     const data = await res.json();
+                    console.log('Fetched settings from API:', data);
                     setSettings(prev => ({
                         ...prev,
                         maintenanceMode: data.maintenance_mode !== undefined ? data.maintenance_mode : prev.maintenanceMode,
+                        grainEffect: data.grain_effect !== undefined ? data.grain_effect : prev.grainEffect,
+                        showLoadingScreen: data.show_loading_screen !== undefined ? data.show_loading_screen : prev.showLoadingScreen,
                         siteTitle: data.site_title || prev.siteTitle,
                         contactEmail: data.contact_email || prev.contactEmail,
                         supportPhone: data.support_phone || prev.supportPhone,
@@ -2077,14 +2080,13 @@ export const DataProvider = ({ children }) => {
         try {
             // Update via API endpoint (requires admin secret server-side)
             if (currentUser) {
-                const url = announcement && announcement.id 
-                    ? '/api/announcements'
-                    : '/api/announcements';
-                
+                const url = '/api/announcements';
                 const method = announcement && announcement.id ? 'PUT' : 'POST';
                 const body = announcement && announcement.id
                     ? { id: announcement.id, ...config }
                     : config;
+
+                console.log('Updating announcement with method:', method, 'body:', body);
 
                 const res = await fetch(url, {
                     method,
@@ -2095,11 +2097,12 @@ export const DataProvider = ({ children }) => {
                 if (!res.ok) {
                     const error = await res.json();
                     console.error('Error updating announcement:', error);
-                    addNotification('error', 'Erreur: impossible de sauvegarder l\'annonce');
-                    return;
+                    return false;
                 }
 
                 const data = await res.json();
+                console.log('Announcement API response:', data);
+                
                 // Normalize snake_case from API to camelCase for frontend
                 const normalizedAnnouncement = {
                     id: data.id,
@@ -2121,14 +2124,15 @@ export const DataProvider = ({ children }) => {
                     updatedAt: data.updated_at || data.updatedAt
                 };
                 setAnnouncement(normalizedAnnouncement);
-                addNotification('success', 'Annonce mise à jour avec succès');
+                return true;
             } else {
                 // Fallback: just update local state if not authenticated
-                setAnnouncement(prev => prev ? { ...prev, ...config } : prev);
+                setAnnouncement(prev => prev ? { ...prev, ...config } : config);
+                return true;
             }
         } catch (error) {
             console.error('Failed to update announcement:', error);
-            addNotification('error', 'Erreur: impossible de sauvegarder l\'annonce');
+            return false;
         }
     };
 
@@ -2136,12 +2140,14 @@ export const DataProvider = ({ children }) => {
         try {
             // Update via API endpoint (requires admin secret server-side)
             if (currentUser) {
+                console.log('Updating settings with:', newSettings);
                 const res = await fetch('/api/settings', {
                     method: 'PUT',
                     headers: getAdminHeaders(),
                     body: JSON.stringify({
                         maintenanceMode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
                         grainEffect: newSettings.grainEffect !== undefined ? newSettings.grainEffect : settings.grainEffect,
+                        showLoadingScreen: newSettings.showLoadingScreen !== undefined ? newSettings.showLoadingScreen : settings.showLoadingScreen,
                         siteTitle: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
                         contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
                         supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
@@ -2153,20 +2159,32 @@ export const DataProvider = ({ children }) => {
                     const error = await res.json();
                     console.error('Error updating settings:', error);
                     addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
-                    return;
+                    return false;
                 }
 
                 const updated = await res.json();
-                // Update local state
-                setSettings(prev => ({ ...prev, ...newSettings }));
-                addNotification('success', 'Paramètres mis à jour avec succès');
+                console.log('Settings updated response:', updated);
+                // Update local state with the response from API
+                setSettings(prev => ({
+                    ...prev,
+                    maintenanceMode: updated.maintenance_mode !== undefined ? updated.maintenance_mode : newSettings.maintenanceMode,
+                    grainEffect: updated.grain_effect !== undefined ? updated.grain_effect : newSettings.grainEffect,
+                    showLoadingScreen: updated.show_loading_screen !== undefined ? updated.show_loading_screen : newSettings.showLoadingScreen,
+                    siteTitle: updated.site_title || newSettings.siteTitle,
+                    contactEmail: updated.contact_email || newSettings.contactEmail,
+                    supportPhone: updated.support_phone || newSettings.supportPhone,
+                    socials: updated.socials || newSettings.socials
+                }));
+                return true;
             } else {
                 // Fallback: just update local state
                 setSettings(prev => ({ ...prev, ...newSettings }));
+                return true;
             }
         } catch (error) {
             console.error('Failed to update settings:', error);
             addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
+            return false;
         }
     };
 
