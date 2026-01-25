@@ -182,6 +182,7 @@ const Dashboard = () => {
     const [localShowLoadingScreen, setLocalShowLoadingScreen] = useState(true);
     const [localContactEmail, setLocalContactEmail] = useState('');
     const [localSocials, setLocalSocials] = useState({ instagram: '', twitter: '', discord: '' });
+    const [localNavbarPadding, setLocalNavbarPadding] = useState('normal');
     const [settingsInitialized, setSettingsInitialized] = useState(false);
 
     // Sync local settings when settings change from context - only on initial load OR when settings object changes significantly
@@ -194,6 +195,7 @@ const Dashboard = () => {
             setLocalShowLoadingScreen(settings.showLoadingScreen !== false);
             setLocalContactEmail(settings.contactEmail || '');
             setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
+            setLocalNavbarPadding(settings.navbarPadding || 'normal');
             setSettingsInitialized(true);
         }
     }, [settings, settingsInitialized]);
@@ -2317,6 +2319,39 @@ const Dashboard = () => {
                                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Affiche un écran de chargement animé au démarrage du site.</p>
                                             </div>
 
+                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                    <span style={{ fontWeight: 'bold' }}>Épaisseur de la Navbar</span>
+                                                </div>
+                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: '0 0 1rem 0' }}>Ajuste l'espacement vertical de la barre de navigation.</p>
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    {[
+                                                        { value: 'compact', label: 'Compact' },
+                                                        { value: 'normal', label: 'Normal' },
+                                                        { value: 'large', label: 'Large' }
+                                                    ].map(opt => (
+                                                        <button
+                                                            key={opt.value}
+                                                            onClick={() => setLocalNavbarPadding(opt.value)}
+                                                            style={{
+                                                                flex: 1,
+                                                                padding: '0.6rem 1rem',
+                                                                background: localNavbarPadding === opt.value ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)',
+                                                                color: localNavbarPadding === opt.value ? '#000' : '#888',
+                                                                border: localNavbarPadding === opt.value ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                                                                borderRadius: '8px',
+                                                                cursor: 'pointer',
+                                                                fontWeight: localNavbarPadding === opt.value ? '600' : '400',
+                                                                fontSize: '0.85rem',
+                                                                transition: 'all 0.2s'
+                                                            }}
+                                                        >
+                                                            {opt.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
                                             <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Contact & Réseaux</h4>
 
                                             <div>
@@ -2371,7 +2406,8 @@ const Dashboard = () => {
                                                         grainEffect: localGrainEffect,
                                                         showLoadingScreen: localShowLoadingScreen,
                                                         contactEmail: localContactEmail,
-                                                        socials: localSocials
+                                                        socials: localSocials,
+                                                        navbarPadding: localNavbarPadding
                                                     });
                                                     const success = await updateSettings({
                                                         siteTitle: localSiteTitle,
@@ -2379,7 +2415,8 @@ const Dashboard = () => {
                                                         grainEffect: localGrainEffect,
                                                         showLoadingScreen: localShowLoadingScreen,
                                                         contactEmail: localContactEmail,
-                                                        socials: localSocials
+                                                        socials: localSocials,
+                                                        navbarPadding: localNavbarPadding
                                                     });
                                                     if (success) {
                                                         showToast("Configuration générale mise à jour !", "success");
@@ -2794,9 +2831,12 @@ const Dashboard = () => {
                                                 </div>
                                             );
                                         }) : (
-                                        <div style={{ ...cardStyle, textAlign: 'center', padding: '4rem' }}>
-                                            <Star size={48} style={{ color: '#222', marginBottom: '1rem' }} />
-                                            <p style={{ color: '#555' }}>Aucun avis à gérer pour le moment.</p>
+                                        <div style={{ ...cardStyle, textAlign: 'center', padding: '4rem', background: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                            <div style={{ width: '80px', height: '80px', margin: '0 auto 1.5rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Star size={36} style={{ color: 'var(--color-accent)', opacity: 0.6 }} />
+                                            </div>
+                                            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#888' }}>Aucun avis client</h3>
+                                            <p style={{ color: '#555', fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto' }}>Les avis clients apparaîtront ici lorsqu'ils seront soumis sur vos produits.</p>
                                         </div>
                                     )}
                                 </div>

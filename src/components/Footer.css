@@ -39,6 +39,28 @@
     position: relative;
 }
 
+/* Footer Brand Logo - matches navbar style */
+.footer-brand .footer-logo {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-display, 'Playfair Display', serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #fff);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--spacing-lg, 1.5rem);
+    transition: color var(--transition-fast, 150ms);
+}
+
+.footer-brand .footer-logo:hover {
+    color: var(--color-accent, #d4af37);
+}
+
+.footer-brand .footer-logo .dot {
+    color: var(--color-accent, #d4af37);
+}
+
 .footer-col:first-child h4 {
     font-size: 1.25rem;
     letter-spacing: -0.02em;

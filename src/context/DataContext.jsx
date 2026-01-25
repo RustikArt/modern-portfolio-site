@@ -809,6 +809,7 @@ export const DataProvider = ({ children }) => {
             siteTitle: 'RUSTIKOP',
             contactEmail: 'rustikop@outlook.fr',
             supportPhone: '',
+            navbarPadding: 'normal',
             socials: {
                 instagram: 'https://www.instagram.com/rustikop.art/',
                 twitter: 'https://x.com/rustikop',
@@ -984,6 +985,7 @@ export const DataProvider = ({ children }) => {
                         siteTitle: data.site_title || prev.siteTitle,
                         contactEmail: data.contact_email || prev.contactEmail,
                         supportPhone: data.support_phone || prev.supportPhone,
+                        navbarPadding: data.navbar_padding || prev.navbarPadding,
                         socials: data.socials || prev.socials
                     }));
                 }
@@ -1948,10 +1950,14 @@ export const DataProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Simulate order error:', error);
-            // Local fallback
-            setOrders([simulatedOrder, ...orders]);
+            // Local fallback - generate a unique ID
+            const localOrder = {
+                ...simulatedOrder,
+                id: 'local-' + Date.now() + '-' + Math.random().toString(36).substring(2, 11)
+            };
+            setOrders([localOrder, ...orders]);
             addNotification('order', `Commande simulée créée localement (${simulatedOrder.total}€)`);
-            return simulatedOrder;
+            return localOrder;
         }
     };
 
@@ -2182,6 +2188,7 @@ export const DataProvider = ({ children }) => {
                         siteTitle: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
                         contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
                         supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
+                        navbarPadding: newSettings.navbarPadding !== undefined ? newSettings.navbarPadding : settings.navbarPadding,
                         socials: newSettings.socials || settings.socials
                     })
                 });
@@ -2204,6 +2211,7 @@ export const DataProvider = ({ children }) => {
                     siteTitle: updated.site_title || newSettings.siteTitle,
                     contactEmail: updated.contact_email || newSettings.contactEmail,
                     supportPhone: updated.support_phone || newSettings.supportPhone,
+                    navbarPadding: updated.navbar_padding || newSettings.navbarPadding,
                     socials: updated.socials || newSettings.socials
                 }));
                 return true;

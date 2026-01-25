@@ -20,6 +20,9 @@ const Navbar = () => {
   // Check if maintenance mode is active and user is not admin (links should be disabled)
   const isMaintenanceForUser = settings?.maintenanceMode && !isAdmin;
 
+  // Get navbar padding class
+  const navbarPaddingClass = settings?.navbarPadding || 'normal';
+
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 50;
@@ -42,7 +45,7 @@ const Navbar = () => {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   return (
-    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} role="navigation" aria-label="Menu principal">
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''} navbar-${navbarPaddingClass}`} role="navigation" aria-label="Menu principal">
       <div className="container navbar-content">
 
         {/* HAMBURGER BUTTON (Mobile) */}

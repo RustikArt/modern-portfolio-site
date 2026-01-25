@@ -13,8 +13,10 @@ const Footer = () => {
             <div className="container">
                 <div className="footer-grid">
                     {/* Column 1: Brand */}
-                    <div className="footer-col">
-                        <h4>{settings?.siteTitle || 'RUSTIKOP'}.</h4>
+                    <div className="footer-col footer-brand">
+                        <Link to="/" className="footer-logo">
+                            <span style={{ textTransform: 'uppercase' }}>{settings?.siteTitle || 'RUSTIKOP'}<span className="dot">.</span></span>
+                        </Link>
                         <p>Artisanat numérique et design immersif.</p>
                         <div className="social-links">
                             {settings?.socials?.instagram && <a href={settings.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={20} /></a>}

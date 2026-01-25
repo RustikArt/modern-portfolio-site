@@ -45,7 +45,8 @@ export default async function handler(req, res) {
                 showLoadingScreen,
                 siteTitle, 
                 contactEmail, 
-                supportPhone, 
+                supportPhone,
+                navbarPadding,
                 socials 
             } = req.body;
 
@@ -70,6 +71,7 @@ export default async function handler(req, res) {
                 site_title: siteTitle !== undefined ? siteTitle : (existingSettings.site_title || 'RUSTIKOP'),
                 contact_email: contactEmail !== undefined ? contactEmail : (existingSettings.contact_email || ''),
                 support_phone: supportPhone !== undefined ? supportPhone : (existingSettings.support_phone || ''),
+                navbar_padding: navbarPadding !== undefined ? navbarPadding : (existingSettings.navbar_padding || 'normal'),
                 socials: socials || existingSettings.socials || {},
                 updated_at: new Date().toISOString()
             };
