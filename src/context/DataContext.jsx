@@ -1574,6 +1574,26 @@ export const DataProvider = ({ children }) => {
         });
     };
 
+    const updateCartQuantity = (index, newQuantity) => {
+        if (newQuantity < 1) {
+            removeFromCart(index);
+            return;
+        }
+        
+        setCart(prev => {
+            const updatedCart = prev.map((item, i) => 
+                i === index ? { ...item, quantity: newQuantity } : item
+            );
+            
+            // Sync to Supabase if user is authenticated
+            if (currentUser && supabase) {
+                syncCartToSupabase(updatedCart);
+            }
+            
+            return updatedCart;
+        });
+    };
+
     const clearCart = () => {
         setCart([]);
         
@@ -2135,7 +2155,7 @@ export const DataProvider = ({ children }) => {
             users, currentUser, register, login, logout, deleteUser, checkPermission, loginHistory,
 
             // Cart
-            cart, addToCart, removeFromCart, clearCart, getCartTotal,
+            cart, addToCart, removeFromCart, updateCartQuantity, clearCart, getCartTotal,
 
             // Orders
             orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes,

@@ -9,7 +9,7 @@
 }
 
 /* ============================================
-   HERO SECTION - Immersive Entry
+   HERO SECTION - Immersive Premium Entry
    ============================================ */
 
 @keyframes float {
@@ -35,13 +35,18 @@
 
 @keyframes pulse-glow {
     0%, 100% {
-        opacity: 0.2;
+        opacity: 0.15;
         transform: scale(1);
     }
     50% {
-        opacity: 0.35;
-        transform: scale(1.05);
+        opacity: 0.25;
+        transform: scale(1.08);
     }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
 }
 
 .hero {
@@ -56,6 +61,20 @@
     padding: var(--spacing-4xl, 6rem) var(--spacing-lg, 1.5rem);
 }
 
+/* Subtle grid pattern overlay */
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(212, 175, 55, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.5;
+    z-index: 1;
+    pointer-events: none;
+}
+
 .hero-content-wrapper {
     position: relative;
     z-index: 2;
@@ -65,52 +84,52 @@
     max-width: 1000px;
 }
 
-/* Floating Background Orbs */
+/* Floating Background Orbs - More Artistic */
 .floating-bg {
     position: absolute;
     border-radius: 50%;
-    filter: blur(100px);
+    filter: blur(120px);
     z-index: 0;
     pointer-events: none;
-    will-change: transform;
+    will-change: transform, opacity;
 }
 
 .floating-bg.one {
-    width: min(700px, 80vw);
-    height: min(700px, 80vw);
+    width: min(800px, 90vw);
+    height: min(800px, 90vw);
     background: radial-gradient(circle, var(--color-accent, #d4af37) 0%, transparent 70%);
-    top: -25%;
-    left: -15%;
-    opacity: 0.15;
-    animation: pulse-glow 8s infinite ease-in-out;
+    top: -30%;
+    left: -20%;
+    opacity: 0.12;
+    animation: pulse-glow 10s infinite ease-in-out;
 }
 
 .floating-bg.two {
     width: min(600px, 70vw);
     height: min(600px, 70vw);
-    background: radial-gradient(circle, #22c55e 0%, transparent 70%);
-    bottom: -15%;
-    right: -10%;
-    opacity: 0.08;
-    animation: floatSlow 15s infinite ease-in-out;
+    background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+    bottom: -20%;
+    right: -15%;
+    opacity: 0.06;
+    animation: floatSlow 18s infinite ease-in-out;
 }
 
 .floating-bg.three {
-    width: min(400px, 50vw);
-    height: min(400px, 50vw);
-    background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
-    top: 35%;
-    right: 15%;
-    opacity: 0.06;
-    animation: float 12s infinite ease-in-out reverse;
+    width: min(450px, 55vw);
+    height: min(450px, 55vw);
+    background: radial-gradient(circle, #22c55e 0%, transparent 70%);
+    top: 40%;
+    right: 10%;
+    opacity: 0.04;
+    animation: float 14s infinite ease-in-out reverse;
 }
 
 /* Hero Content Animations */
 .reveal {
     opacity: 0;
-    transform: translateY(50px);
-    filter: blur(8px);
-    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(40px);
+    filter: blur(6px);
+    transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.active {
@@ -125,15 +144,23 @@
 
 .hero-title {
     font-family: var(--font-display, 'Playfair Display', serif);
-    font-size: clamp(2.5rem, 8vw, 5.5rem);
+    font-size: clamp(2.5rem, 8vw, 6rem);
     font-weight: 600;
     line-height: 1.05;
     margin-bottom: var(--spacing-xl, 2rem);
     letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #fff 0%, #ccc 50%, var(--color-accent, #d4af37) 100%);
+    background: linear-gradient(
+        135deg, 
+        #fff 0%, 
+        #e0e0e0 30%,
+        var(--color-accent, #d4af37) 70%,
+        #fff 100%
+    );
+    background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    animation: shimmer 8s linear infinite;
 }
 
 .block-reveal {
@@ -154,12 +181,14 @@
 }
 
 .hero-subtitle {
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-size: clamp(1.15rem, 3vw, 1.5rem);
     color: var(--color-text-secondary, #a0a0a0);
     margin-bottom: var(--spacing-2xl, 3rem);
-    max-width: 600px;
+    max-width: 650px;
     margin-inline: auto;
-    line-height: 1.7;
+    line-height: 1.75;
+    font-weight: 400;
+    letter-spacing: 0.02em;
 }
 
 /* ============================================
@@ -168,6 +197,7 @@
 
 .services-section {
     padding: var(--spacing-5xl, 8rem) 0;
+    margin-top: var(--spacing-2xl, 3rem);
     background: linear-gradient(180deg, var(--color-bg-alt, #080808) 0%, var(--color-bg, #030303) 100%);
     position: relative;
 }
@@ -179,13 +209,13 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
 }
 
 .services-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-    gap: var(--spacing-xl, 2rem);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: var(--spacing-2xl, 3rem);
 }
 
 .service-card {
@@ -253,12 +283,14 @@
     line-height: 1.7;
     margin: 0;
 }
+
 /* ============================================
    FEATURED PROJECTS SECTION
    ============================================ */
 
 .featured-section {
     padding: var(--spacing-5xl, 8rem) 0;
+    margin-top: var(--spacing-xl, 2rem);
     position: relative;
 }
 
@@ -483,6 +515,7 @@
 
 .testimonials-section {
     padding: var(--spacing-5xl, 8rem) 0;
+    margin-top: var(--spacing-xl, 2rem);
     background: var(--color-bg-alt, #080808);
     overflow: hidden;
     position: relative;
@@ -540,9 +573,7 @@
     line-height: 1.75;
     margin-bottom: var(--spacing-lg, 1.5rem);
     color: var(--color-text-secondary, #a0a0a0);
-    font-family: var(--font-main, 'Inter', sans-serif);
-}
-    font-family: var(--font-main);
+    font-family: var(--font-body, 'Inter', sans-serif);
 }
 
 .testimonial-author {
@@ -643,6 +674,7 @@
 
 .cta-section {
     padding: var(--spacing-5xl, 8rem) var(--spacing-lg, 1.5rem);
+    margin-top: var(--spacing-xl, 2rem);
     text-align: center;
     position: relative;
     overflow: hidden;

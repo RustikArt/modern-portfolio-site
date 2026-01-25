@@ -1,9 +1,17 @@
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WEBSITE_VERSION } from '../version';
 import StarRating from './StarRating';
 import LazyImage from './LazyImage';
+
+// Helper to render Lucide icon by name
+const renderLucideIcon = (iconName, props = {}) => {
+    if (!iconName) return null;
+    const IconComponent = LucideIcons[iconName];
+    return IconComponent ? <IconComponent {...props} /> : null;
+};
 
 const ProductCard = ({ product, viewMode = 'grid' }) => {
     const { toggleWishlist, isInWishlist, getProductRating, getProductReviews } = useData();
@@ -12,6 +20,10 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
     const reviewCount = getProductReviews(product.id).length;
 
     const isGrid = viewMode === 'grid';
+    
+    // Check if image is a Lucide icon
+    const isLucideIcon = product.image && product.image.startsWith('lucide:');
+    const lucideIconName = isLucideIcon ? product.image.replace('lucide:', '') : null;
 
     return (
         <div className={`product-card glass ${!isGrid ? 'list-view' : ''}`} style={{
@@ -48,13 +60,34 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                 <div className="product-image" style={{
                     width: isGrid ? '100%' : '300px',
                     height: isGrid ? 'auto' : '200px',
-                    aspectRatio: isGrid ? '1/1' : 'auto'
+                    aspectRatio: isGrid ? '1/1' : 'auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: isLucideIcon ? 'linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(20, 20, 20, 0.95) 100%)' : undefined
                 }}>
-                    <LazyImage
-                        src={`${product.image}?v=${WEBSITE_VERSION}`}
-                        alt={product.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
+                    {isLucideIcon ? (
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                            height: '100%',
+                            minHeight: isGrid ? '200px' : '100%'
+                        }}>
+                            {renderLucideIcon(lucideIconName, { 
+                                size: isGrid ? 80 : 60, 
+                                color: '#d4af37',
+                                strokeWidth: 1.5
+                            })}
+                        </div>
+                    ) : (
+                        <LazyImage
+                            src={`${product.image}?v=${WEBSITE_VERSION}`}
+                            alt={product.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                    )}
                 </div>
             </Link>
 

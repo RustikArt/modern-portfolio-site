@@ -164,7 +164,7 @@ const Dashboard = () => {
     const [productForm, setProductForm] = useState({
         editId: null,
         name: '', price: '', discountType: 'none', discountValue: '',
-        image: '', category: '', tags: '', is_featured: false,
+        image: '', imageType: 'url', lucideIcon: '', category: '', tags: '', is_featured: false,
         alertMessage: '', // New field
         options: []
     });
@@ -297,13 +297,17 @@ const Dashboard = () => {
             dType = 'fixed';
             dValue = (product.price - product.promoPrice).toFixed(2);
         }
+        // Detect if image is a Lucide icon
+        const isLucideIcon = product.image && product.image.startsWith('lucide:');
         setProductForm({
             editId: product.id,
             name: product.name,
             price: product.price,
             discountType: dType,
             discountValue: dValue,
-            image: product.image,
+            image: isLucideIcon ? '' : product.image,
+            imageType: isLucideIcon ? 'lucide' : 'url',
+            lucideIcon: isLucideIcon ? product.image.replace('lucide:', '') : '',
             category: product.category,
             tags: product.tags ? product.tags.join(', ') : '',
             is_featured: product.is_featured || false,
@@ -327,11 +331,17 @@ const Dashboard = () => {
         }
         if (finalPromoPrice && finalPromoPrice < 0) finalPromoPrice = 0;
 
+        // Determine image value based on imageType
+        let imageValue = productForm.image || 'https://placehold.co/400x400/333?text=Product';
+        if (productForm.imageType === 'lucide' && productForm.lucideIcon) {
+            imageValue = `lucide:${productForm.lucideIcon}`;
+        }
+
         const productData = {
             name: productForm.name,
             price: price,
             promoPrice: finalPromoPrice,
-            image: productForm.image || 'https://placehold.co/400x400/333?text=Product',
+            image: imageValue,
             category: productForm.category,
             tags: tagsArray,
             is_featured: productForm.is_featured || false,
@@ -345,7 +355,7 @@ const Dashboard = () => {
         }
         setProductForm({
             editId: null, name: '', price: '', discountType: 'none', discountValue: '',
-            image: '', category: '', tags: '', is_featured: false, options: []
+            image: '', imageType: 'url', lucideIcon: '', category: '', tags: '', is_featured: false, alertMessage: '', options: []
         });
     };
 
@@ -1147,7 +1157,90 @@ const Dashboard = () => {
                                             onChange={e => setProductForm({ ...productForm, alertMessage: e.target.value })}
                                             style={{ ...inputStyle, minHeight: '60px', borderRadius: '8px' }}
                                         />
-                                        <input type="text" placeholder="Image URL" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} style={inputStyle} />
+                                        
+                                        {/* Image Type Selector */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1.5rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Type d'image</p>
+                                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                    <input 
+                                                        type="radio" 
+                                                        name="imageType" 
+                                                        value="url" 
+                                                        checked={productForm.imageType === 'url'} 
+                                                        onChange={() => setProductForm({ ...productForm, imageType: 'url', lucideIcon: '' })}
+                                                    />
+                                                    URL d'image
+                                                </label>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                    <input 
+                                                        type="radio" 
+                                                        name="imageType" 
+                                                        value="lucide" 
+                                                        checked={productForm.imageType === 'lucide'} 
+                                                        onChange={() => setProductForm({ ...productForm, imageType: 'lucide', image: '' })}
+                                                    />
+                                                    Icône Lucide
+                                                </label>
+                                            </div>
+                                            
+                                            {productForm.imageType === 'url' ? (
+                                                <input type="text" placeholder="Image URL" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} style={inputStyle} />
+                                            ) : (
+                                                <div>
+                                                    <select 
+                                                        value={productForm.lucideIcon} 
+                                                        onChange={e => setProductForm({ ...productForm, lucideIcon: e.target.value })}
+                                                        style={{ ...inputStyle, marginBottom: '1rem' }}
+                                                    >
+                                                        <option value="">Choisir une icône...</option>
+                                                        <option value="Package">Package (Colis)</option>
+                                                        <option value="ShoppingBag">ShoppingBag (Sac)</option>
+                                                        <option value="Gift">Gift (Cadeau)</option>
+                                                        <option value="Star">Star (Étoile)</option>
+                                                        <option value="Heart">Heart (Cœur)</option>
+                                                        <option value="Zap">Zap (Éclair)</option>
+                                                        <option value="Crown">Crown (Couronne)</option>
+                                                        <option value="Gem">Gem (Diamant)</option>
+                                                        <option value="Palette">Palette (Peinture)</option>
+                                                        <option value="Code">Code (Code)</option>
+                                                        <option value="Layers">Layers (Calques)</option>
+                                                        <option value="FileCode">FileCode (Fichier Code)</option>
+                                                        <option value="Image">Image (Image)</option>
+                                                        <option value="Video">Video (Vidéo)</option>
+                                                        <option value="Music">Music (Musique)</option>
+                                                        <option value="Headphones">Headphones (Casque)</option>
+                                                        <option value="Gamepad2">Gamepad2 (Manette)</option>
+                                                        <option value="Brush">Brush (Pinceau)</option>
+                                                        <option value="PenTool">PenTool (Stylo)</option>
+                                                        <option value="Figma">Figma</option>
+                                                        <option value="Layout">Layout (Mise en page)</option>
+                                                        <option value="Smartphone">Smartphone</option>
+                                                        <option value="Monitor">Monitor (Écran)</option>
+                                                        <option value="Globe">Globe (Web)</option>
+                                                        <option value="Server">Server (Serveur)</option>
+                                                        <option value="Database">Database (Base de données)</option>
+                                                        <option value="Cloud">Cloud (Nuage)</option>
+                                                        <option value="Lock">Lock (Sécurité)</option>
+                                                        <option value="Shield">Shield (Bouclier)</option>
+                                                        <option value="Rocket">Rocket (Fusée)</option>
+                                                        <option value="Target">Target (Cible)</option>
+                                                        <option value="Trophy">Trophy (Trophée)</option>
+                                                        <option value="Award">Award (Récompense)</option>
+                                                        <option value="Sparkles">Sparkles (Étincelles)</option>
+                                                        <option value="Wand2">Wand2 (Baguette)</option>
+                                                    </select>
+                                                    {productForm.lucideIcon && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#181818', borderRadius: '8px' }}>
+                                                            <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05))', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {renderLucideIcon(productForm.lucideIcon, { size: 32, color: '#d4af37' })}
+                                                            </div>
+                                                            <span style={{ color: '#888', fontSize: '0.85rem' }}>Prévisualisation de l'icône</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
 
                                         <button type="submit" style={{ ...btnPrimaryModern, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}>
                                             {productForm.editId ? <><Save size={18} /> Save Changes</> : <><Plus size={18} /> Publish Product</>}

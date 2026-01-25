@@ -1,7 +1,8 @@
 import { useData } from '../context/DataContext';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Trash2, ArrowRight } from 'lucide-react';
+import { Heart, ArrowRight, Sparkles } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import './Wishlist.css';
 
 const Wishlist = () => {
     const { wishlist, products, addToCart, toggleWishlist } = useData();
@@ -10,21 +11,34 @@ const Wishlist = () => {
     const wishlistProducts = products.filter(p => wishlist.includes(p.id));
 
     return (
-        <div className="page" style={{ paddingTop: '120px', minHeight: '100vh', background: '#050505', color: '#eee' }}>
-            <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
-                <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '-1px' }}>
-                    Votre <span style={{ color: 'var(--color-accent)' }}>Wishlist</span>
-                </h1>
+        <div className="page-wishlist">
+            <div className="container">
+                {/* Header */}
+                <div className="wishlist-header">
+                    <div className="wishlist-title-group">
+                        <div className="wishlist-icon">
+                            <Heart size={28} />
+                        </div>
+                        <div>
+                            <h1>Ma <span>Wishlist</span></h1>
+                            <p>{wishlistProducts.length} article{wishlistProducts.length !== 1 ? 's' : ''} sauvegardé{wishlistProducts.length !== 1 ? 's' : ''}</p>
+                        </div>
+                    </div>
+                </div>
 
                 {wishlistProducts.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '5rem 0' }}>
-                        <p style={{ fontSize: '1.2rem', color: '#888', marginBottom: '2rem' }}>Votre liste de souhaits est vide.</p>
-                        <Link to="/shop" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 2rem' }}>
-                            Découvrir la boutique <ArrowRight size={20} />
+                    <div className="wishlist-empty">
+                        <div className="empty-icon">
+                            <Sparkles size={48} />
+                        </div>
+                        <h3>Votre wishlist est vide</h3>
+                        <p>Explorez notre boutique et ajoutez vos coups de cœur</p>
+                        <Link to="/shop" className="btn btn-primary">
+                            Découvrir la boutique <ArrowRight size={18} />
                         </Link>
                     </div>
                 ) : (
-                    <div className="shop-products grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
+                    <div className="wishlist-grid">
                         {wishlistProducts.map(product => (
                             <ProductCard key={product.id} product={product} viewMode="grid" />
                         ))}

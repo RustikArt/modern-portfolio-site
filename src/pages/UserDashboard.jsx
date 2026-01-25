@@ -10,8 +10,17 @@ import {
     Package,
     Check,
     Mail,
-    ExternalLink
+    LogOut,
+    User,
+    Shield,
+    Clock,
+    ChevronRight,
+    Eye,
+    EyeOff,
+    Lock,
+    Star
 } from 'lucide-react';
+import './UserDashboard.css';
 
 const UserDashboard = () => {
     const { currentUser, orders, logout, sendOrderConfirmation, showToast } = useData();
@@ -20,6 +29,9 @@ const UserDashboard = () => {
     const [newPwd, setNewPwd] = useState('');
     const [confirmPwd, setConfirmPwd] = useState('');
     const [changingPwd, setChangingPwd] = useState(false);
+    const [showOldPwd, setShowOldPwd] = useState(false);
+    const [showNewPwd, setShowNewPwd] = useState(false);
+    const [activeTab, setActiveTab] = useState('orders');
 
     if (!currentUser) {
         navigate('/login');
@@ -99,105 +111,231 @@ const UserDashboard = () => {
     };
 
     return (
-        <div className="page" style={{ paddingTop: '100px', minHeight: '100vh', background: '#050505' }}>
-            <div className="container" style={{ maxWidth: '1000px' }}>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem', paddingBottom: '2rem', borderBottom: '1px solid #111' }}>
-                    <div>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-2px', textTransform: 'uppercase' }}>Mon Espace <span style={{ color: 'var(--color-accent)' }}>Privé</span></h1>
-                        <p style={{ color: '#444', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.7rem' }}>Bienvenue {currentUser.name}</p>
+        <div className="page-profile">
+            <div className="container">
+                {/* Profile Header */}
+                <div className="profile-header">
+                    <div className="profile-user">
+                        <div className="profile-avatar">
+                            <User size={32} />
+                        </div>
+                        <div className="profile-info">
+                            <h1>Bienvenue, <span>{currentUser.name}</span></h1>
+                            <p>{currentUser.email}</p>
+                        </div>
                     </div>
-                    <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #333', color: '#666', borderRadius: '30px', padding: '0.6rem 1.5rem', cursor: 'pointer', transition: 'all 0.3s' }}>
+                    <button onClick={handleLogout} className="btn-logout">
+                        <LogOut size={18} />
                         Se déconnecter
                     </button>
-                </header>
-
-                {/* PASSWORD CHANGE SECTION */}
-                <div style={{ marginBottom: '3rem', maxWidth: '500px' }}>
-                    <h3 style={{ fontSize: '1rem', color: '#888', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '1rem' }}>Sécurité</h3>
-                    <form onSubmit={handleChangePassword} className="glass" style={{ padding: '2rem', borderRadius: '12px' }}>
-                        <h4 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1rem' }}>Changer le mot de passe</h4>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <input
-                                type="password"
-                                placeholder="Mot de passe actuel"
-                                value={oldPwd}
-                                onChange={(e) => setOldPwd(e.target.value)}
-                                disabled={changingPwd}
-                                required
-                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #222', background: '#0a0a0a', color: '#fff' }}
-                            />
-                            <input
-                                type="password"
-                                placeholder="Nouveau mot de passe"
-                                value={newPwd}
-                                onChange={(e) => setNewPwd(e.target.value)}
-                                disabled={changingPwd}
-                                required
-                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #222', background: '#0a0a0a', color: '#fff' }}
-                            />
-                            <input
-                                type="password"
-                                placeholder="Confirmer le nouveau mot de passe"
-                                value={confirmPwd}
-                                onChange={(e) => setConfirmPwd(e.target.value)}
-                                disabled={changingPwd}
-                                required
-                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #222', background: '#0a0a0a', color: '#fff' }}
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={changingPwd}
-                            style={{
-                                marginTop: '1.5rem',
-                                padding: '0.8rem 1.5rem',
-                                background: changingPwd ? '#555' : 'var(--color-accent)',
-                                color: '#000',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: 'bold',
-                                cursor: changingPwd ? 'not-allowed' : 'pointer',
-                                width: '100%'
-                            }}
-                        >
-                            {changingPwd ? 'En cours...' : 'Mettre à jour'}
-                        </button>
-                    </form>
                 </div>
 
-                <div style={{ marginBottom: '3rem' }}>
-                    <h3 style={{ fontSize: '1rem', color: '#888', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '2rem' }}>Historique de vos projets</h3>
+                {/* Navigation Tabs */}
+                <div className="profile-tabs">
+                    <button 
+                        className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('orders')}
+                    >
+                        <Package size={18} />
+                        Mes Commandes
+                        {myOrders.length > 0 && <span className="tab-badge">{myOrders.length}</span>}
+                    </button>
+                    <button 
+                        className={`tab-btn ${activeTab === 'security' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('security')}
+                    >
+                        <Shield size={18} />
+                        Sécurité
+                    </button>
+                </div>
 
-                    {myOrders.length === 0 ? (
-                        <div style={{ padding: '6rem 2rem', textAlign: 'center', background: '#0a0a0a', border: '1px dashed #222', borderRadius: '24px' }} className="glass">
-                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', color: '#333' }}>
-                                <Inbox size={64} />
-                            </div>
-                            <p style={{ color: '#555', fontSize: '1.1rem', marginBottom: '2rem' }}>Aucune commande en cours pour le moment.</p>
-                            <button className="btn btn-primary" onClick={() => navigate('/shop')} style={{ borderRadius: '40px', padding: '1rem 2rem' }}>Découvrir la boutique</button>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'grid', gap: '3rem' }}>
-                            {myOrders.map(order => {
-                                const statusInfo = getClientStatus(order.status);
-                                return (
-                                    <div key={order.id} className="glass" style={{
-                                        borderRadius: '24px',
-                                        padding: '2.5rem',
-                                        marginBottom: '2rem'
-                                    }}>
-                                        {/* Row 1: ID & Badge */}
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
-                                            <div>
-                                                <div style={{ color: '#333', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>ID Projet: {String(order.id).slice(-8).toUpperCase()}</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#666' }}>Posté le {new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                {/* Tab Content */}
+                <div className="profile-content">
+                    {/* Orders Tab */}
+                    {activeTab === 'orders' && (
+                        <div className="orders-section">
+                            {myOrders.length === 0 ? (
+                                <div className="orders-empty">
+                                    <div className="empty-icon">
+                                        <Inbox size={48} />
+                                    </div>
+                                    <h3>Aucune commande</h3>
+                                    <p>Vous n'avez pas encore passé de commande</p>
+                                    <button className="btn btn-primary" onClick={() => navigate('/shop')}>
+                                        Découvrir la boutique
+                                        <ChevronRight size={18} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="orders-list">
+                                    {myOrders.map(order => {
+                                        const statusInfo = getClientStatus(order.status);
+                                        return (
+                                            <div key={order.id} className="order-card">
+                                                {/* Order Header */}
+                                                <div className="order-header">
+                                                    <div className="order-meta">
+                                                        <span className="order-id">#{String(order.id).slice(-8).toUpperCase()}</span>
+                                                        <span className="order-date">
+                                                            <Clock size={14} />
+                                                            {new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                        </span>
+                                                    </div>
+                                                    <div className="order-status" style={{ '--status-color': statusInfo.color }}>
+                                                        {statusInfo.icon}
+                                                        <span>{statusInfo.label}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Progress Tracker */}
+                                                {order.checklist && order.checklist.length > 0 && (
+                                                    <div className="order-progress">
+                                                        <div className="progress-bar">
+                                                            {order.checklist.map((step, idx) => (
+                                                                <div 
+                                                                    key={idx} 
+                                                                    className={`progress-step ${step.completed ? 'completed' : ''}`}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                        <div className="progress-steps">
+                                                            {order.checklist.map((step, idx) => (
+                                                                <div 
+                                                                    key={idx} 
+                                                                    className={`step-item ${step.completed ? 'completed' : ''}`}
+                                                                >
+                                                                    <span className="step-number">0{idx + 1}</span>
+                                                                    <span className="step-label">{getClientLabel(step.label)}</span>
+                                                                    {step.completed && (
+                                                                        <span className="step-check"><Check size={12} /></span>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Order Footer */}
+                                                <div className="order-footer">
+                                                    <div className="order-items">
+                                                        {(order.items || []).map((it, idx) => (
+                                                            <div key={idx} className="order-item-tag">
+                                                                {it.name}
+                                                                <span>×{it.quantity}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="order-total">
+                                                        <span className="total-label">Total</span>
+                                                        <span className="total-value">{order.total}€</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div style={{
-                                                display: 'flex', alignItems: 'center', gap: '0.8rem',
-                                                background: 'rgba(255,255,255,0.03)', padding: '0.6rem 1.2rem',
-                                                borderRadius: '50px', border: `1px solid ${statusInfo.color}33`
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Security Tab */}
+                    {activeTab === 'security' && (
+                        <div className="security-section">
+                            <div className="security-card">
+                                <div className="security-header">
+                                    <Lock size={24} />
+                                    <div>
+                                        <h3>Modifier le mot de passe</h3>
+                                        <p>Assurez-vous d'utiliser un mot de passe fort</p>
+                                    </div>
+                                </div>
+                                
+                                <form onSubmit={handleChangePassword} className="password-form">
+                                    <div className="form-group">
+                                        <label>Mot de passe actuel</label>
+                                        <div className="input-wrapper">
+                                            <input
+                                                type={showOldPwd ? 'text' : 'password'}
+                                                placeholder="••••••••"
+                                                value={oldPwd}
+                                                onChange={(e) => setOldPwd(e.target.value)}
+                                                disabled={changingPwd}
+                                                required
+                                            />
+                                            <button 
+                                                type="button" 
+                                                className="toggle-pwd"
+                                                onClick={() => setShowOldPwd(!showOldPwd)}
+                                            >
+                                                {showOldPwd ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Nouveau mot de passe</label>
+                                        <div className="input-wrapper">
+                                            <input
+                                                type={showNewPwd ? 'text' : 'password'}
+                                                placeholder="••••••••"
+                                                value={newPwd}
+                                                onChange={(e) => setNewPwd(e.target.value)}
+                                                disabled={changingPwd}
+                                                required
+                                            />
+                                            <button 
+                                                type="button" 
+                                                className="toggle-pwd"
+                                                onClick={() => setShowNewPwd(!showNewPwd)}
+                                            >
+                                                {showNewPwd ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Confirmer le nouveau mot de passe</label>
+                                        <div className="input-wrapper">
+                                            <input
+                                                type="password"
+                                                placeholder="••••••••"
+                                                value={confirmPwd}
+                                                onChange={(e) => setConfirmPwd(e.target.value)}
+                                                disabled={changingPwd}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary"
+                                        disabled={changingPwd}
+                                    >
+                                        {changingPwd ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Help Footer */}
+                <div className="profile-help">
+                    <Star size={20} />
+                    <div>
+                        <p>Besoin d'aide sur une commande ?</p>
+                        <a href="mailto:rustikop@outlook.fr">
+                            <Mail size={16} /> rustikop@outlook.fr
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default UserDashboard;
                                             }}>
                                                 <span style={{ fontSize: '1.2rem' }}>{statusInfo.icon}</span>
                                                 <span style={{ color: statusInfo.color, fontWeight: 'bold', fontSize: '0.8rem', textTransform: 'uppercase' }}>{statusInfo.label}</span>
