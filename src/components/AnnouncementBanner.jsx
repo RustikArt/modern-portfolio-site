@@ -97,9 +97,9 @@ const AnnouncementBanner = () => {
     const icon = announcement.icon || 'Sparkles';
 
     const bannerStyle = {
-        backgroundColor: 'rgba(5, 5, 5, 0.95)',
-        backdropFilter: 'blur(15px)',
-        WebkitBackdropFilter: 'blur(15px)',
+        backgroundColor: 'rgba(5, 5, 5, 0.65)',
+        backdropFilter: 'blur(12px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(150%)',
         borderBottom: '1px solid rgba(212, 175, 55, 0.15)',
         color: '#ffffff',
         height: announcement.height || '56px',
@@ -118,7 +118,7 @@ const AnnouncementBanner = () => {
         textAlign: textAlign,
         transition: 'all 0.3s ease',
         gap: '2rem',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
     };
 
     const closeButtonStyle = {

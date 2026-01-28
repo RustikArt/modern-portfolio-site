@@ -5,15 +5,35 @@ import { useLocation } from 'react-router-dom';
 const LoadingScreen = ({ children }) => {
     const { settings, settingsLoaded, announcementLoaded } = useData();
     const location = useLocation();
-    const [isLoading, setIsLoading] = useState(true);
-    const [fadeOut, setFadeOut] = useState(false);
-    const [progress, setProgress] = useState(0);
-
+    
+    // Check localStorage cache for immediate decision (prevents flash on refresh)
+    const getCachedSetting = () => {
+        try {
+            const cached = localStorage.getItem('portfolio_settings');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                return parsed.showLoadingScreen;
+            }
+        } catch (e) {
+            return undefined;
+        }
+        return undefined;
+    };
+    
+    const cachedShowLoading = getCachedSetting();
+    
     // Skip loading screen for admin routes (they have their own)
     const isAdminRoute = location.pathname.startsWith('/admin');
-
-    // Check if loading should be skipped immediately
-    const shouldSkip = isAdminRoute || (settingsLoaded && settings?.showLoadingScreen === false);
+    
+    // Determine if should skip immediately based on cached or loaded settings
+    const shouldSkipFromCache = cachedShowLoading === false;
+    const shouldSkipFromSettings = settingsLoaded && settings?.showLoadingScreen === false;
+    const shouldSkip = isAdminRoute || shouldSkipFromCache || shouldSkipFromSettings;
+    
+    // Initialize loading state based on whether we should skip
+    const [isLoading, setIsLoading] = useState(!shouldSkip);
+    const [fadeOut, setFadeOut] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     // Minimum display time for smooth UX
     const MIN_LOADING_TIME = 800;

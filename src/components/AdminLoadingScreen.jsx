@@ -9,7 +9,30 @@ import { Shield, Settings, Database, Users, ShoppingBag, BarChart3 } from 'lucid
 
 const AdminLoadingScreen = ({ children }) => {
     const { settings, settingsLoaded, currentUser } = useData();
-    const [isLoading, setIsLoading] = useState(true);
+    
+    // Check localStorage cache for immediate decision (prevents flash on refresh)
+    const getCachedSetting = () => {
+        try {
+            const cached = localStorage.getItem('portfolio_settings');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                return parsed.showAdminLoading;
+            }
+        } catch (e) {
+            return undefined;
+        }
+        return undefined;
+    };
+    
+    const cachedShowAdminLoading = getCachedSetting();
+    
+    // Determine if should skip immediately based on cached or loaded settings
+    const shouldSkipFromCache = cachedShowAdminLoading === false;
+    const shouldSkipFromSettings = settingsLoaded && settings?.showAdminLoading === false;
+    const shouldSkip = shouldSkipFromCache || shouldSkipFromSettings;
+    
+    // Initialize loading state based on whether we should skip
+    const [isLoading, setIsLoading] = useState(!shouldSkip);
     const [fadeOut, setFadeOut] = useState(false);
     const [progress, setProgress] = useState(0);
     const [currentStep, setCurrentStep] = useState(0);
@@ -25,9 +48,6 @@ const AdminLoadingScreen = ({ children }) => {
 
     // Faster loading time for smoother UX
     const MIN_LOADING_TIME = 1000;
-
-    // Check if loading should be skipped immediately
-    const shouldSkip = settingsLoaded && settings?.showAdminLoading === false;
 
     useEffect(() => {
         // Skip immediately if disabled in settings
