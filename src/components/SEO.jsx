@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 const SEO = ({ title, description, image, url, type = 'website', schema }) => {
     const siteTitle = "Rustikop | Agence de Design Numérique";
     const defaultDescription = "Agence de design numérique spécialisée dans les expériences immersives, le développement web créatif et les solutions digitales innovantes.";
-    const defaultImage = "/Logos/OrangeNoir.png";
+    const defaultImage = "/Logos/PurpleLogo.png";
     const siteUrl = "https://rustikop.vercel.app";
 
     const fullTitle = title ? `${title} | Rustikop` : siteTitle;

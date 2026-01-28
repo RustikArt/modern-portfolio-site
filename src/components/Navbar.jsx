@@ -4,7 +4,7 @@ import { useData } from '../context/DataContext';
 import { ShoppingCart, User, Menu, X, Search, Heart, LayoutDashboard } from 'lucide-react';
 
 // Import Logo
-import logoSrc from '../assets/Logos/Orange.png';
+import logoSrc from '../assets/Logos/PurpleLogoTransparent.png';
 
 import './Navbar.css';
 

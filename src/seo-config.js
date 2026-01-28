@@ -8,7 +8,7 @@ export const SEO_CONFIG = {
     keywords: 'design numérique, expériences immersives, portfolio, agence créative, design graphique, illustration, web design, branding, identité visuelle, France',
     author: 'Rustikop',
     url: 'https://rustikop.vercel.app',
-    image: 'https://rustikop.vercel.app/Logos/OrangeNoir.png',
+    image: 'https://rustikop.vercel.app/Logos/PurpleLogo.png',
     twitterHandle: '@rustikop',
 };
 
