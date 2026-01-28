@@ -1,2 +1,2 @@
-export const WEBSITE_VERSION = "Version 5.6.6 FRESH EDITION";
-export const VERSION_DETAILS = "DATA SET";
+export const WEBSITE_VERSION = "Version 5.6.7 FINAL FRESH EDITION";
+export const VERSION_DETAILS = "DATA SET & MINOR FIXES";

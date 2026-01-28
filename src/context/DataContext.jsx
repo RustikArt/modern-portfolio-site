@@ -978,18 +978,24 @@ export const DataProvider = ({ children }) => {
                 if (res.ok) {
                     const data = await res.json();
                     console.log('Fetched settings from API:', data);
-                    setSettings(prev => ({
-                        ...prev,
-                        maintenanceMode: data.maintenance_mode !== undefined ? data.maintenance_mode : prev.maintenanceMode,
-                        grainEffect: data.grain_effect !== undefined ? data.grain_effect : prev.grainEffect,
-                        showLoadingScreen: data.show_loading_screen !== undefined ? data.show_loading_screen : prev.showLoadingScreen,
-                        showAdminLoading: data.show_admin_loading !== undefined ? data.show_admin_loading : prev.showAdminLoading,
-                        siteTitle: data.site_title || prev.siteTitle,
-                        contactEmail: data.contact_email || prev.contactEmail,
-                        supportPhone: data.support_phone || prev.supportPhone,
-                        navbarPadding: data.navbar_padding || prev.navbarPadding,
-                        socials: data.socials || prev.socials
-                    }));
+                    // Completely replace settings with API data to prevent localStorage conflicts
+                    setSettings(prev => {
+                        const newSettings = {
+                            maintenanceMode: data.maintenance_mode !== undefined ? Boolean(data.maintenance_mode) : prev.maintenanceMode,
+                            grainEffect: data.grain_effect !== undefined ? Boolean(data.grain_effect) : prev.grainEffect,
+                            showLoadingScreen: data.show_loading_screen !== undefined ? Boolean(data.show_loading_screen) : prev.showLoadingScreen,
+                            showAdminLoading: data.show_admin_loading !== undefined ? Boolean(data.show_admin_loading) : prev.showAdminLoading,
+                            siteTitle: data.site_title || prev.siteTitle,
+                            contactEmail: data.contact_email !== undefined ? data.contact_email : prev.contactEmail,
+                            supportPhone: data.support_phone !== undefined ? data.support_phone : prev.supportPhone,
+                            navbarPadding: data.navbar_padding || prev.navbarPadding,
+                            socials: data.socials || prev.socials,
+                            version: prev.version
+                        };
+                        // Clear and update localStorage immediately to sync
+                        localStorage.setItem('portfolio_settings', JSON.stringify(newSettings));
+                        return newSettings;
+                    });
                 }
             } catch (error) {
                 console.error('Failed to fetch settings from API:', error);
@@ -1894,7 +1900,7 @@ export const DataProvider = ({ children }) => {
     // Simulate an order (Admin feature)
     const simulateOrder = async (orderData) => {
         const simulatedOrder = {
-            userId: orderData.userId || 'admin-simulated',
+            userId: orderData.userId || null, // Use null for simulated orders (DB expects BIGINT)
             customerName: orderData.customerName || 'Client Simulé',
             email: orderData.email || 'simulated@admin.com',
             items: orderData.items || [],
@@ -2187,10 +2193,10 @@ export const DataProvider = ({ children }) => {
             // Update via API endpoint (requires admin secret server-side)
             if (currentUser) {
                 const payload = {
-                    maintenanceMode: newSettings.maintenanceMode !== undefined ? newSettings.maintenanceMode : settings.maintenanceMode,
-                    grainEffect: newSettings.grainEffect !== undefined ? newSettings.grainEffect : settings.grainEffect,
-                    showLoadingScreen: newSettings.showLoadingScreen !== undefined ? newSettings.showLoadingScreen : settings.showLoadingScreen,
-                    showAdminLoading: newSettings.showAdminLoading !== undefined ? newSettings.showAdminLoading : settings.showAdminLoading,
+                    maintenanceMode: newSettings.maintenanceMode !== undefined ? Boolean(newSettings.maintenanceMode) : settings.maintenanceMode,
+                    grainEffect: newSettings.grainEffect !== undefined ? Boolean(newSettings.grainEffect) : settings.grainEffect,
+                    showLoadingScreen: newSettings.showLoadingScreen !== undefined ? Boolean(newSettings.showLoadingScreen) : settings.showLoadingScreen,
+                    showAdminLoading: newSettings.showAdminLoading !== undefined ? Boolean(newSettings.showAdminLoading) : settings.showAdminLoading,
                     siteTitle: newSettings.siteTitle !== undefined ? newSettings.siteTitle : settings.siteTitle,
                     contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
                     supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
@@ -2218,19 +2224,22 @@ export const DataProvider = ({ children }) => {
 
                 const updated = await res.json();
                 console.log('Settings updated response:', updated);
-                // Update local state with the response from API
-                setSettings(prev => ({
-                    ...prev,
-                    maintenanceMode: updated.maintenance_mode !== undefined ? updated.maintenance_mode : newSettings.maintenanceMode,
-                    grainEffect: updated.grain_effect !== undefined ? updated.grain_effect : newSettings.grainEffect,
-                    showLoadingScreen: updated.show_loading_screen !== undefined ? updated.show_loading_screen : newSettings.showLoadingScreen,
-                    showAdminLoading: updated.show_admin_loading !== undefined ? updated.show_admin_loading : newSettings.showAdminLoading,
-                    siteTitle: updated.site_title || newSettings.siteTitle,
-                    contactEmail: updated.contact_email || newSettings.contactEmail,
-                    supportPhone: updated.support_phone || newSettings.supportPhone,
-                    navbarPadding: updated.navbar_padding || newSettings.navbarPadding,
-                    socials: updated.socials || newSettings.socials
-                }));
+                // Update local state with the response from API - use Boolean to ensure type consistency
+                const newState = {
+                    maintenanceMode: updated.maintenance_mode !== undefined ? Boolean(updated.maintenance_mode) : Boolean(newSettings.maintenanceMode),
+                    grainEffect: updated.grain_effect !== undefined ? Boolean(updated.grain_effect) : Boolean(newSettings.grainEffect),
+                    showLoadingScreen: updated.show_loading_screen !== undefined ? Boolean(updated.show_loading_screen) : Boolean(newSettings.showLoadingScreen),
+                    showAdminLoading: updated.show_admin_loading !== undefined ? Boolean(updated.show_admin_loading) : Boolean(newSettings.showAdminLoading),
+                    siteTitle: updated.site_title || newSettings.siteTitle || settings.siteTitle,
+                    contactEmail: updated.contact_email !== undefined ? updated.contact_email : (newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail),
+                    supportPhone: updated.support_phone !== undefined ? updated.support_phone : (newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone),
+                    navbarPadding: updated.navbar_padding || newSettings.navbarPadding || settings.navbarPadding,
+                    socials: updated.socials || newSettings.socials || settings.socials,
+                    version: settings.version
+                };
+                setSettings(newState);
+                // Immediately sync to localStorage to prevent inconsistencies
+                localStorage.setItem('portfolio_settings', JSON.stringify(newState));
                 return true;
             } else {
                 // Fallback: just update local state

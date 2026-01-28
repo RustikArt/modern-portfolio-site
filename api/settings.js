@@ -111,7 +111,7 @@ export default async function handler(req, res) {
             const { data: updated, error: getError } = await supabase
                 .from('portfolio_settings')
                 .select('*')
-                .order('id', { ascending: false })
+                .order('id', { ascending: true })
                 .limit(1);
 
             if (getError) {
