@@ -2235,12 +2235,21 @@ const Dashboard = () => {
                                         <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Témoignages Sélectionnés</h3>
                                         <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>Sélectionnez les avis qui apparaîtront sur la page d'accueil (Mis en avant).</p>
                                         <div style={{ display: 'grid', gap: '0.8rem', maxHeight: '300px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
-                                            {/* We need to get all reviews from DataContext. Dashboard uses reviews state. */}
-                                            {Object.keys(reviews).length > 0 ? Object.entries(reviews).map(([prodId, prodReviews]) => (
-                                                <div key={prodId}>
-                                                    <h4 style={{ fontSize: '0.75rem', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Produit: {products.find(p => p.id === parseInt(prodId))?.name || prodId}</h4>
-                                                    <div style={{ display: 'grid', gap: '0.5rem', marginLeft: '1rem' }}>
-                                                        {prodReviews.map((rev, revIdx) => {
+                                            {(() => {
+                                                // Filter products that actually have reviews with content
+                                                const productsWithReviews = Object.entries(reviews).filter(([prodId, prodReviews]) => 
+                                                    Array.isArray(prodReviews) && prodReviews.length > 0 && prodReviews.some(r => r.comment && r.comment.trim())
+                                                );
+                                                
+                                                if (productsWithReviews.length === 0) {
+                                                    return <p style={{ color: '#666', fontStyle: 'italic', textAlign: 'center', padding: '1rem' }}>Aucun avis client disponible pour le moment.</p>;
+                                                }
+                                                
+                                                return productsWithReviews.map(([prodId, prodReviews]) => (
+                                                    <div key={prodId}>
+                                                        <h4 style={{ fontSize: '0.75rem', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Produit: {products.find(p => p.id === parseInt(prodId))?.name || prodId}</h4>
+                                                        <div style={{ display: 'grid', gap: '0.5rem', marginLeft: '1rem' }}>
+                                                            {prodReviews.filter(r => r.comment && r.comment.trim()).map((rev, revIdx) => {
                                                             const revId = `${prodId}-${revIdx}`;
                                                             const isSelected = (homeContent.selectedTestimonials || []).includes(revId);
                                                             return (
@@ -2288,11 +2297,10 @@ const Dashboard = () => {
                                                                 </label>
                                                             );
                                                         })}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )) : (
-                                                <p style={{ color: '#444', fontStyle: 'italic', textAlign: 'center' }}>Aucun avis disponible pour le moment.</p>
-                                            )}
+                                                ));
+                                            })()}
                                         </div>
                                     </div>
 
