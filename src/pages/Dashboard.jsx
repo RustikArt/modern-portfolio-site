@@ -3,7 +3,6 @@ import { useData, AVAILABLE_PERMISSIONS } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
 import BlockEditor from '../components/BlockEditor';
-import AdminLoadingScreen from '../components/AdminLoadingScreen';
 import * as LucideIcons from 'lucide-react';
 import {
     LayoutDashboard,
