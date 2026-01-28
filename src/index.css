@@ -365,20 +365,27 @@ a:focus:not(:focus-visible) {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
-  color: var(--color-bg);
-  border: none;
+.btn-primary,
+.btn.btn-primary {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%) !important;
+  color: #0a0a0f !important;
+  border: none !important;
   font-weight: 700;
-  box-shadow: 0 4px 20px var(--color-accent-glow);
+  box-shadow: 0 4px 20px rgba(167, 139, 250, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-primary:hover {
-  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%);
-  color: var(--color-bg);
+.btn-primary:hover,
+.btn.btn-primary:hover {
+  background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%) !important;
+  color: #0a0a0f !important;
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 30px var(--color-accent-glow), 0 0 60px rgba(167, 139, 250, 0.15);
+  box-shadow: 0 8px 30px rgba(167, 139, 250, 0.4), 0 0 60px rgba(167, 139, 250, 0.15);
+}
+
+.btn-primary::before,
+.btn.btn-primary::before {
+  display: none !important;
 }
 
 .btn-outline {

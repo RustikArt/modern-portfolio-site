@@ -51,7 +51,8 @@ import {
     Sparkles,
     Ban,
     Code,
-    PenLine
+    PenLine,
+    DollarSign
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
