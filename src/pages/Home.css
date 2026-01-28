@@ -106,7 +106,7 @@
 .floating-bg.two {
     width: min(600px, 70vw);
     height: min(600px, 70vw);
-    background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+    background: radial-gradient(circle, #22d3ee 0%, transparent 70%);
     bottom: -20%;
     right: -15%;
     opacity: 0.06;

@@ -118,7 +118,7 @@ const Dashboard = () => {
 
     const [showVersionDetails, setShowVersionDetails] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
-    const [activeTab, setActiveTab] = useState(null); // Start null, will be set based on permissions
+    const [activeTab, setActiveTab] = useState('overview'); // Default to overview
     const [tabInitialized, setTabInitialized] = useState(false);
     const [expandedOrders, setExpandedOrders] = useState({});
     const navigate = useNavigate();
