@@ -1,6 +1,6 @@
-export const WEBSITE_VERSION = "Version 6.0.6 CYBER VIOLET EDITION";
-export const VERSION_DETAILS = `🎨 CHARTS & KPI POLISH
-• KPI cards: barres colorées par type
-• Graphiques: tooltips custom améliorés
-• Suppression contour blanc au clic
-• Couleurs cohérentes`;
+export const WEBSITE_VERSION = "Version 6.1.0 CYBER VIOLET EDITION";
+export const VERSION_DETAILS = `💳 STRIPE WEBHOOK & LOGOS
+• Webhook Stripe sécurisé ajouté
+• Logos mis à jour (version violette)
+• Favicon + manifest.json corrigés
+• Protection double commande`;
