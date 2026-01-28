@@ -94,6 +94,8 @@ const AnalyticsChart = ({ data, title }) => {
                         />
                         <Tooltip
                             cursor={{ stroke: '#a78bfa', strokeWidth: 1, strokeDasharray: '5 5' }}
+                            isAnimationActive={false}
+                            wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
                             content={({ active, payload, label }) => {
                                 if (active && payload && payload.length) {
                                     return (

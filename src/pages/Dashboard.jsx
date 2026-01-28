@@ -940,6 +940,8 @@ const Dashboard = () => {
                                                                 ))}
                                                             </Pie>
                                                             <Tooltip 
+                                                                isAnimationActive={false}
+                                                                wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
                                                                 content={({ active, payload }) => {
                                                                     if (active && payload && payload.length) {
                                                                         const data = payload[0].payload;
@@ -999,6 +1001,8 @@ const Dashboard = () => {
                                                             <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
                                                             <Tooltip 
                                                                 cursor={{ fill: 'rgba(167, 139, 250, 0.1)' }}
+                                                                isAnimationActive={false}
+                                                                wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
                                                                 content={({ active, payload }) => {
                                                                     if (active && payload && payload.length) {
                                                                         const data = payload[0].payload;
