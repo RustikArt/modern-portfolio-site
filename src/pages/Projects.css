@@ -16,7 +16,7 @@
 }
 
 .page-projects .page-title span {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     font-style: italic;
 }
 
@@ -36,7 +36,7 @@
 }
 
 .projects-header h1 span {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     font-style: italic;
 }
 
@@ -78,8 +78,8 @@
 }
 
 .filter-btn.active {
-    background: var(--color-accent, #d4af37);
-    border-color: var(--color-accent, #d4af37);
+    background: var(--color-accent, #a78bfa);
+    border-color: var(--color-accent, #a78bfa);
     color: var(--color-bg, #030303);
 }
 
@@ -109,9 +109,9 @@
 
 .project-card:hover {
     transform: translateY(-8px);
-    border-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(167, 139, 250, 0.15);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(212, 175, 55, 0.08);
+                0 0 0 1px rgba(167, 139, 250, 0.08);
 }
 
 .project-image-container {
@@ -181,8 +181,8 @@
 }
 
 .view-project:hover {
-    background: var(--color-accent, #d4af37);
-    border-color: var(--color-accent, #d4af37);
+    background: var(--color-accent, #a78bfa);
+    border-color: var(--color-accent, #a78bfa);
     color: var(--color-bg, #030303);
 }
 
@@ -200,7 +200,7 @@
 }
 
 .project-card:hover .project-info h3 {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .project-info span {
@@ -236,8 +236,8 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: var(--spacing-2xs, 0.25rem) var(--spacing-xs, 0.5rem);
-    background: rgba(212, 175, 55, 0.1);
-    color: var(--color-accent, #d4af37);
+    background: rgba(167, 139, 250, 0.1);
+    color: var(--color-accent, #a78bfa);
     border-radius: var(--radius-sm, 6px);
 }
 

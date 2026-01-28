@@ -19,7 +19,7 @@
     transform: translateX(-50%);
     width: min(600px, 80%);
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--color-accent-glow, rgba(212, 175, 55, 0.25)), transparent);
+    background: linear-gradient(90deg, transparent, var(--color-accent-glow, rgba(167, 139, 250, 0.25)), transparent);
 }
 
 .footer-grid {
@@ -54,11 +54,11 @@
 }
 
 .footer-brand .footer-logo:hover {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .footer-brand .footer-logo .dot {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .footer-col:first-child h4 {
@@ -100,7 +100,7 @@
 }
 
 .footer-col ul li a:hover {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     transform: translateX(4px);
 }
 
@@ -123,11 +123,11 @@
 }
 
 .social-links a:hover {
-    background: var(--color-accent, #d4af37);
-    border-color: var(--color-accent, #d4af37);
+    background: var(--color-accent, #a78bfa);
+    border-color: var(--color-accent, #a78bfa);
     color: var(--color-bg, #030303);
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.25);
+    box-shadow: 0 8px 20px rgba(167, 139, 250, 0.25);
 }
 
 .contact-list li {
@@ -139,7 +139,7 @@
 }
 
 .contact-list li svg {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     opacity: 0.7;
     flex-shrink: 0;
 }
@@ -176,9 +176,9 @@
 }
 
 .admin-link-icon:hover {
-    color: var(--color-accent, #d4af37);
-    border-color: rgba(212, 175, 55, 0.2);
-    background: rgba(212, 175, 55, 0.05);
+    color: var(--color-accent, #a78bfa);
+    border-color: rgba(167, 139, 250, 0.2);
+    background: rgba(167, 139, 250, 0.05);
 }
 
 /* ============================================

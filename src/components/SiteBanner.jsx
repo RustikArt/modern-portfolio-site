@@ -114,7 +114,7 @@ const SiteBanner = () => {
                 right: 0,
                 height: height,
                 backgroundColor: '#0a0a0a',
-                borderBottom: '1px solid rgba(212, 175, 55, 0.2)',
+                borderBottom: '1px solid rgba(167, 139, 250, 0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -137,7 +137,7 @@ const SiteBanner = () => {
             }}>
                 {/* Icon */}
                 {announcement.icon && announcement.icon !== 'none' && (
-                    <IconComponent size={18} style={{ color: '#d4af37', flexShrink: 0 }} />
+                    <IconComponent size={18} style={{ color: '#a78bfa', flexShrink: 0 }} />
                 )}
 
                 {/* Text */}
@@ -157,8 +157,8 @@ const SiteBanner = () => {
                 {/* Countdown */}
                 {countdown && (
                     <span style={{
-                        backgroundColor: 'rgba(212, 175, 55, 0.15)',
-                        color: '#d4af37',
+                        backgroundColor: 'rgba(167, 139, 250, 0.15)',
+                        color: '#a78bfa',
                         padding: '4px 10px',
                         borderRadius: '4px',
                         fontFamily: 'monospace',

@@ -71,7 +71,7 @@ export default async function handler(req, res) {
             const announcementData = {
                 text,
                 subtext: subtext || '',
-                bg_color: bgColor || '#d4af37',
+                bg_color: bgColor || '#a78bfa',
                 text_color: textColor || '#000000',
                 is_active: isActive !== undefined ? isActive : true,
                 link: link || '',

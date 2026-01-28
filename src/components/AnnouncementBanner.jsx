@@ -100,7 +100,7 @@ const AnnouncementBanner = () => {
         backgroundColor: 'rgba(5, 5, 5, 0.65)',
         backdropFilter: 'blur(12px) saturate(150%)',
         WebkitBackdropFilter: 'blur(12px) saturate(150%)',
-        borderBottom: '1px solid rgba(212, 175, 55, 0.15)',
+        borderBottom: '1px solid rgba(167, 139, 250, 0.15)',
         color: '#ffffff',
         height: announcement.height || '56px',
         width: '100%',
@@ -182,13 +182,13 @@ const AnnouncementBanner = () => {
                         gap: '0.5rem'
                     }}>
                         {icon && icon !== 'none' && (
-                            <span style={{ color: '#d4af37', display: 'flex' }}>{renderLucideIcon(icon, { size: 18 })}</span>
+                            <span style={{ color: '#a78bfa', display: 'flex' }}>{renderLucideIcon(icon, { size: 18 })}</span>
                         )}
                         {renderTextWithLink()}
                         {/* Timer inline si position = inline */}
                         {announcement.showTimer && timerPosition === 'inline' && timeLeft !== 'EXPIRE' && (
                             <span style={{ 
-                                color: '#d4af37',
+                                color: '#a78bfa',
                                 fontFamily: 'monospace',
                                 fontSize: '0.85rem',
                                 marginLeft: '0.5rem'
@@ -220,13 +220,13 @@ const AnnouncementBanner = () => {
                 {announcement.showTimer && timerPosition === 'right' && timeLeft !== 'EXPIRE' && (
                     <div style={{ 
                         background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(212, 175, 55, 0.15)',
+                        border: '1px solid rgba(167, 139, 250, 0.15)',
                         padding: '0.35rem 0.75rem', 
                         borderRadius: '6px', 
                         fontWeight: '500', 
                         fontFamily: 'monospace', 
                         fontSize: '0.8rem',
-                        color: '#d4af37'
+                        color: '#a78bfa'
                     }}>
                         {timeLeft}
                     </div>
@@ -234,11 +234,11 @@ const AnnouncementBanner = () => {
 
                 {announcement.link && (
                     <a href={announcement.link} style={{ 
-                        background: 'rgba(212, 175, 55, 0.1)',
-                        border: '1px solid rgba(212, 175, 55, 0.25)',
+                        background: 'rgba(167, 139, 250, 0.1)',
+                        border: '1px solid rgba(167, 139, 250, 0.25)',
                         padding: '0.4rem 1rem', 
                         borderRadius: '6px', 
-                        color: '#d4af37', 
+                        color: '#a78bfa', 
                         textDecoration: 'none', 
                         fontWeight: '600',
                         fontSize: '0.8rem',
@@ -247,12 +247,12 @@ const AnnouncementBanner = () => {
                         whiteSpace: 'nowrap'
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(212, 175, 55, 0.15)';
-                        e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.35)';
+                        e.currentTarget.style.background = 'rgba(167, 139, 250, 0.15)';
+                        e.currentTarget.style.borderColor = 'rgba(167, 139, 250, 0.35)';
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
-                        e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.25)';
+                        e.currentTarget.style.background = 'rgba(167, 139, 250, 0.1)';
+                        e.currentTarget.style.borderColor = 'rgba(167, 139, 250, 0.25)';
                     }}>
                         Lire Plus
                     </a>

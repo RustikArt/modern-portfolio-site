@@ -27,7 +27,7 @@
     transform: translate(-50%, -50%);
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%);
     pointer-events: none;
 }
 
@@ -40,7 +40,7 @@
 }
 
 .about-hero h1 span {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     font-style: italic;
 }
 
@@ -105,14 +105,14 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, transparent, var(--color-accent, #d4af37), transparent);
+    background: linear-gradient(90deg, transparent, var(--color-accent, #a78bfa), transparent);
     opacity: 0;
     transition: opacity var(--transition-base, 250ms);
 }
 
 .value-card:hover {
     transform: translateY(-8px);
-    border-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(167, 139, 250, 0.15);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
 }
 
@@ -124,12 +124,12 @@
     width: 70px;
     height: 70px;
     margin: 0 auto var(--spacing-lg, 1.5rem);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(167, 139, 250, 0.05));
     border-radius: var(--radius-lg, 16px);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .value-card h3 {
@@ -184,7 +184,7 @@
 .member-avatar {
     width: 120px;
     height: 120px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05));
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -192,9 +192,9 @@
     font-family: var(--font-display, 'Playfair Display', serif);
     font-size: 2.5rem;
     font-weight: 600;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     margin-bottom: var(--spacing-lg, 1.5rem);
-    border: 2px solid rgba(212, 175, 55, 0.3);
+    border: 2px solid rgba(167, 139, 250, 0.3);
     transition: all var(--transition-base, 250ms);
     overflow: hidden;
 }
@@ -207,8 +207,8 @@
 
 .team-member:hover .member-avatar {
     transform: scale(1.05);
-    border-color: var(--color-accent, #d4af37);
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+    border-color: var(--color-accent, #a78bfa);
+    box-shadow: 0 0 30px rgba(167, 139, 250, 0.2);
 }
 
 .team-member h4 {
@@ -222,7 +222,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 /* ============================================

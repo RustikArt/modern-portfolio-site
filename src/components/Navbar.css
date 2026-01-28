@@ -41,7 +41,7 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
                 inset 0 0 0 1px rgba(255, 255, 255, 0.08),
                 0 1px 0 rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+    border-bottom: 1px solid rgba(167, 139, 250, 0.12);
 }
 
 /* Scrolled state keeps same padding as non-scrolled */
@@ -90,7 +90,7 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--color-accent, #d4af37), transparent);
+    background: linear-gradient(90deg, var(--color-accent, #a78bfa), transparent);
     transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -108,16 +108,16 @@
     width: auto;
     object-fit: contain;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.2));
+    filter: drop-shadow(0 2px 8px rgba(167, 139, 250, 0.2));
 }
 
 .logo:hover .logo-image {
     transform: scale(1.08) rotate(-3deg);
-    filter: drop-shadow(0 6px 16px rgba(212, 175, 55, 0.4));
+    filter: drop-shadow(0 6px 16px rgba(167, 139, 250, 0.4));
 }
 
 .dot {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     font-weight: 800;
     /* Static dot - no animation */
 }
@@ -140,7 +140,7 @@
 }
 
 .nav-links:hover {
-    border-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(167, 139, 250, 0.15);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
@@ -168,7 +168,7 @@
     left: 50%;
     width: 0;
     height: 1px;
-    background: var(--color-accent, #d4af37);
+    background: var(--color-accent, #a78bfa);
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     transform: translateX(-50%);
 }
@@ -185,9 +185,9 @@
 
 .nav-links a.active {
     color: var(--color-bg, #030303);
-    background: linear-gradient(135deg, var(--color-accent, #d4af37) 0%, #e6c556 100%);
+    background: linear-gradient(135deg, var(--color-accent, #a78bfa) 0%, #22d3ee 100%);
     font-weight: 600;
-    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3),
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
@@ -196,9 +196,9 @@
 }
 
 .nav-links a.active:hover {
-    background: linear-gradient(135deg, #e6c556 0%, var(--color-accent, #d4af37) 100%);
+    background: linear-gradient(135deg, #22d3ee 0%, var(--color-accent, #a78bfa) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4),
+    box-shadow: 0 8px 25px rgba(167, 139, 250, 0.4),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
@@ -223,7 +223,7 @@
 }
 
 .action-link:hover {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .icon-link {
@@ -238,10 +238,10 @@
 }
 
 .icon-link:hover {
-    background: rgba(212, 175, 55, 0.1);
-    border-color: rgba(212, 175, 55, 0.2);
+    background: rgba(167, 139, 250, 0.1);
+    border-color: rgba(167, 139, 250, 0.2);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
+    box-shadow: 0 8px 20px rgba(167, 139, 250, 0.15);
 }
 
 /* Admin Dashboard Button - same style as other icons */
@@ -256,14 +256,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--color-accent, #d4af37) 0%, #e6c556 100%);
+    background: linear-gradient(135deg, var(--color-accent, #a78bfa) 0%, #22d3ee 100%);
     color: var(--color-bg, #030303);
     font-size: 0.65rem;
     font-weight: 700;
     border-radius: var(--radius-full, 9999px);
     border: 2px solid var(--color-bg, #030303);
     line-height: 1;
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 2px 8px rgba(167, 139, 250, 0.4);
 }
 
 /* ============================================
@@ -352,12 +352,12 @@
 
     .nav-links a:hover,
     .nav-links a.active {
-        background: rgba(212, 175, 55, 0.1);
-        color: var(--color-accent, #d4af37);
+        background: rgba(167, 139, 250, 0.1);
+        color: var(--color-accent, #a78bfa);
     }
 
     .nav-links a.active {
-        border: 1px solid rgba(212, 175, 55, 0.2);
+        border: 1px solid rgba(167, 139, 250, 0.2);
     }
 
     /* Keep logo and actions visible */
@@ -461,7 +461,7 @@
 .nav-links a:focus-visible,
 .icon-link:focus-visible,
 .mobile-menu-btn:focus-visible {
-    outline: 2px solid var(--color-accent, #d4af37);
+    outline: 2px solid var(--color-accent, #a78bfa);
     outline-offset: 2px;
 }
 

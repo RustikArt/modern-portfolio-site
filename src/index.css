@@ -1,35 +1,32 @@
 /* ============================================
-   GLOBAL DESIGN SYSTEM - MODERN ARTISTIC THEME
-   Premium, Cross-Browser Compatible & Responsive
+   GLOBAL DESIGN SYSTEM - CYBER VIOLET THEME
+   Professional, Technical & Artistic
    ============================================ */
 
 /* ============================================
-   SCROLLBAR - Orange Glassmorphism Style
+   SCROLLBAR - Cyber Violet Glassmorphism Style
    ============================================ */
 
 /* Webkit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(10, 10, 15, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(212, 175, 55, 0.6) 0%, rgba(212, 175, 55, 0.4) 100%);
-  border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.7) 0%, rgba(34, 211, 238, 0.4) 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(212, 175, 55, 0.8) 0%, rgba(212, 175, 55, 0.6) 100%);
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.9) 0%, rgba(34, 211, 238, 0.6) 100%);
 }
 
 ::-webkit-scrollbar-corner {
@@ -39,44 +36,51 @@
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(212, 175, 55, 0.5) rgba(255, 255, 255, 0.02);
+  scrollbar-color: rgba(167, 139, 250, 0.6) rgba(10, 10, 15, 0.8);
 }
 
 :root {
-  /* Core Colors - Luxurious Dark Theme */
-  --color-bg: #030303;
-  --color-bg-alt: #080808;
-  --color-surface: #0d0d0d;
-  --color-surface-elevated: #141414;
-  --color-surface-hover: #1a1a1a;
+  /* Core Colors - Deep Space Dark Theme */
+  --color-bg: #0a0a0f;
+  --color-bg-alt: #0d0d14;
+  --color-surface: #12121a;
+  --color-surface-elevated: #1a1a24;
+  --color-surface-hover: #22222e;
   
   /* Text Hierarchy */
-  --color-text-primary: #fafafa;
-  --color-text-secondary: #a0a0a0;
-  --color-text-muted: #666666;
-  --color-text-disabled: #444444;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-text-disabled: #475569;
   
-  /* Accent - Metallic Gold */
-  --color-accent: #d4af37;
-  --color-accent-light: #e6c556;
-  --color-accent-dark: #b8942f;
-  --color-accent-glow: rgba(212, 175, 55, 0.25);
-  --color-accent-subtle: rgba(212, 175, 55, 0.08);
+  /* Accent - Cyber Violet */
+  --color-accent: #a78bfa;
+  --color-accent-light: #c4b5fd;
+  --color-accent-dark: #8b5cf6;
+  --color-accent-glow: rgba(167, 139, 250, 0.3);
+  --color-accent-subtle: rgba(167, 139, 250, 0.1);
+  
+  /* Secondary - Electric Cyan */
+  --color-secondary: #22d3ee;
+  --color-secondary-glow: rgba(34, 211, 238, 0.3);
+  
+  /* Tertiary - Warm Rose */
+  --color-tertiary: #fb7185;
   
   /* Semantic Colors */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-info: #60a5fa;
 
-  /* Glass Morphism - Cross-browser */
-  --glass-bg: rgba(255, 255, 255, 0.02);
-  --glass-bg-hover: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-border-hover: rgba(255, 255, 255, 0.12);
+  /* Glass Morphism - Cyber Style */
+  --glass-bg: rgba(167, 139, 250, 0.03);
+  --glass-bg-hover: rgba(167, 139, 250, 0.08);
+  --glass-border: rgba(167, 139, 250, 0.1);
+  --glass-border-hover: rgba(167, 139, 250, 0.2);
   --glass-blur: 20px;
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-  --glass-shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --glass-shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
   /* Typography - System Font Stack for Performance */
   --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -373,7 +377,7 @@ a:focus:not(:focus-visible) {
   background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%);
   color: var(--color-bg);
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 30px var(--color-accent-glow), 0 0 60px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 8px 30px var(--color-accent-glow), 0 0 60px rgba(167, 139, 250, 0.15);
 }
 
 .btn-outline {
@@ -440,7 +444,7 @@ a:focus:not(:focus-visible) {
   position: absolute;
   inset: 0;
   background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-              rgba(212, 175, 55, 0.06), transparent 40%);
+              rgba(167, 139, 250, 0.06), transparent 40%);
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
@@ -481,7 +485,7 @@ a:focus:not(:focus-visible) {
   position: absolute;
   inset: 0;
   background: radial-gradient(500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-              rgba(212, 175, 55, 0.08), transparent 40%);
+              rgba(167, 139, 250, 0.08), transparent 40%);
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
@@ -1022,9 +1026,9 @@ input[type="radio"] {
 }
 
 .toggle-switch.active {
-  background: linear-gradient(135deg, var(--color-accent, #d4af37) 0%, #e6c556 100%);
-  border-color: var(--color-accent, #d4af37);
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  background: linear-gradient(135deg, var(--color-accent, #a78bfa) 0%, #22d3ee 100%);
+  border-color: var(--color-accent, #a78bfa);
+  box-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
 }
 
 .toggle-switch.active.danger {
@@ -1067,9 +1071,9 @@ input[type="radio"] {
 }
 
 .dashboard-checkbox:checked {
-  background: linear-gradient(135deg, var(--color-accent, #d4af37) 0%, #e6c556 100%);
-  border-color: var(--color-accent, #d4af37);
-  box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+  background: linear-gradient(135deg, var(--color-accent, #a78bfa) 0%, #22d3ee 100%);
+  border-color: var(--color-accent, #a78bfa);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
 }
 
 .dashboard-checkbox:checked::after {
@@ -1084,7 +1088,7 @@ input[type="radio"] {
 }
 
 .dashboard-checkbox:hover {
-  border-color: var(--color-accent, #d4af37);
+  border-color: var(--color-accent, #a78bfa);
 }
 
 /* Print Styles */

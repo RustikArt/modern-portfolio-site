@@ -73,8 +73,8 @@ const AnalyticsChart = ({ data, title }) => {
                     >
                         <defs>
                             <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#d4af37" stopOpacity={0.8} />
-                                <stop offset="95%" stopColor="#d4af37" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#a78bfa" stopOpacity={0.8} />
+                                <stop offset="95%" stopColor="#a78bfa" stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
@@ -99,12 +99,12 @@ const AnalyticsChart = ({ data, title }) => {
                                 borderRadius: '8px',
                                 color: '#fff'
                             }}
-                            itemStyle={{ color: '#d4af37' }}
+                            itemStyle={{ color: '#a78bfa' }}
                         />
                         <Area
                             type="monotone"
                             dataKey="value"
-                            stroke="#d4af37"
+                            stroke="#a78bfa"
                             fillOpacity={1}
                             fill="url(#colorValue)"
                             strokeWidth={2}

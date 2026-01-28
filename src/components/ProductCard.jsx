@@ -78,7 +78,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: isLucideIcon ? 'linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(20, 20, 20, 0.95) 100%)' : undefined
+                    background: isLucideIcon ? 'linear-gradient(135deg, rgba(167, 139, 250, 0.1) 0%, rgba(20, 20, 20, 0.95) 100%)' : undefined
                 }}>
                     {isLucideIcon ? (
                         <div style={{
@@ -91,7 +91,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                         }}>
                             {renderLucideIcon(lucideIconName, { 
                                 size: isGrid ? 80 : 60, 
-                                color: '#d4af37',
+                                color: '#a78bfa',
                                 strokeWidth: 1.5
                             })}
                         </div>

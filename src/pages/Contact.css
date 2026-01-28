@@ -31,7 +31,7 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(400px circle at var(--mouse-x, -100px) var(--mouse-y, -100px), 
-                rgba(212, 175, 55, 0.1), transparent 40%);
+                rgba(167, 139, 250, 0.1), transparent 40%);
     opacity: 1;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -64,7 +64,7 @@
 }
 
 .contact-header h1 span {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     font-style: italic;
 }
 
@@ -127,7 +127,7 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(350px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-                rgba(212, 175, 55, 0.08), transparent 40%);
+                rgba(167, 139, 250, 0.08), transparent 40%);
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
@@ -139,19 +139,19 @@
 }
 
 .contact-item:hover {
-    border-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(167, 139, 250, 0.15);
     transform: translateX(8px);
 }
 
 .contact-icon {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(167, 139, 250, 0.05));
     border-radius: var(--radius-md, 10px);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     flex-shrink: 0;
 }
 
@@ -176,7 +176,7 @@
 }
 
 .contact-item-content a:hover {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .social-links {
@@ -199,8 +199,8 @@
 }
 
 .social-link:hover {
-    background: var(--color-accent, #d4af37);
-    border-color: var(--color-accent, #d4af37);
+    background: var(--color-accent, #a78bfa);
+    border-color: var(--color-accent, #a78bfa);
     color: var(--color-bg, #030303);
     transform: translateY(-4px);
 }
@@ -265,8 +265,8 @@
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: var(--color-accent, #d4af37);
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    border-color: var(--color-accent, #a78bfa);
+    box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.1);
 }
 
 .form-group textarea {
@@ -276,7 +276,7 @@
 
 .btn-submit {
     width: 100%;
-    background: var(--color-accent, #d4af37);
+    background: var(--color-accent, #a78bfa);
     color: var(--color-bg, #030303);
     border: none;
     padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
@@ -293,7 +293,7 @@
 
 .btn-submit:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 30px -10px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 15px 30px -10px rgba(167, 139, 250, 0.4);
 }
 
 .btn-submit:disabled {

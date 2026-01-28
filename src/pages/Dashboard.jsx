@@ -3,6 +3,7 @@ import { useData, AVAILABLE_PERMISSIONS } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
 import BlockEditor from '../components/BlockEditor';
+import './Dashboard.css';
 import * as LucideIcons from 'lucide-react';
 import {
     LayoutDashboard,
@@ -510,17 +511,23 @@ const Dashboard = () => {
     };
 
     const sideBtnStyle = (isActive) => ({
-        ...btnModern,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
         width: '100%',
-        marginBottom: '0.8rem',
-        background: isActive ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.02)',
-        color: isActive ? 'var(--color-accent)' : '#888',
+        padding: '0.75rem 1rem',
+        marginBottom: '4px',
+        background: isActive ? 'linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(34, 211, 238, 0.08) 100%)' : 'transparent',
         border: '1px solid',
-        borderColor: isActive ? 'var(--color-accent-glow)' : 'rgba(255,255,255,0.05)',
-        fontWeight: isActive ? 'bold' : 'normal',
-        borderLeft: isActive ? '4px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.05)',
-        paddingLeft: isActive ? '1.2rem' : '1.5rem',
-        boxShadow: isActive ? '0 4px 15px rgba(212, 175, 55, 0.1)' : 'none'
+        borderColor: isActive ? 'rgba(167, 139, 250, 0.25)' : 'transparent',
+        borderRadius: '8px',
+        color: isActive ? '#a78bfa' : '#94a3b8',
+        fontSize: '0.875rem',
+        fontWeight: isActive ? '600' : '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        textAlign: 'left',
+        position: 'relative'
     });
 
     const stats = {
@@ -554,97 +561,72 @@ const Dashboard = () => {
     }));
 
     const inputStyle = {
-        padding: '0.8rem',
-        background: '#121212',
-        border: '1px solid #222',
-        color: 'white',
+        padding: '0.75rem 1rem',
+        background: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(167, 139, 250, 0.15)',
+        color: '#f8fafc',
         borderRadius: '8px',
         width: '100%',
-        transition: 'border-color 0.3s'
+        fontSize: '0.9rem',
+        transition: 'all 0.2s ease'
     };
 
     const cardStyle = {
-        background: 'rgba(255, 255, 255, 0.03)',
+        background: 'rgba(18, 18, 26, 0.8)',
         backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '24px',
-        padding: '2rem',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(167, 139, 250, 0.1)',
+        borderRadius: '16px',
+        padding: '1.5rem',
+        transition: 'all 0.3s ease'
     };
 
     const btnModern = {
-        padding: '0.8rem 1.5rem',
-        borderRadius: '12px',
-        border: '1px solid rgba(255,255,255,0.1)',
-        background: 'rgba(255,255,255,0.02)',
-        color: '#888',
+        padding: '0.75rem 1.25rem',
+        borderRadius: '8px',
+        border: '1px solid rgba(167, 139, 250, 0.15)',
+        background: 'rgba(167, 139, 250, 0.08)',
+        color: '#94a3b8',
         cursor: 'pointer',
-        fontSize: '0.85rem',
-        transition: 'all 0.3s ease',
+        fontSize: '0.875rem',
+        fontWeight: '500',
+        transition: 'all 0.2s ease',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.8rem',
+        gap: '0.5rem',
         textAlign: 'left'
     };
 
     const btnPrimaryModern = {
         ...btnModern,
-        background: 'rgba(255,255,255,0.9)',
+        background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
         borderColor: 'transparent',
-        color: '#000',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        letterSpacing: '1px'
+        color: '#fff',
+        fontWeight: '600'
     };
 
 
     return (
-        <div className="page" style={{ paddingTop: '140px', paddingBottom: '4rem', minHeight: '100vh', background: '#050505', color: '#eee' }}>
-            <div className="container" style={{ maxWidth: '1400px' }}>
-                {/* Header V2.2 */}
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid #222', paddingBottom: '1.5rem' }}>
-                    <div>
-                        <h1 style={{ fontSize: '2.5rem', margin: 0, fontWeight: '900', letterSpacing: '-2px', textTransform: 'uppercase' }}>
-                            Admin <span style={{ color: 'var(--color-accent)' }}>Panel</span>
-                        </h1>
+        <div className="dashboard-page">
+            <div className="container" style={{ maxWidth: '1600px', padding: '0 1rem' }}>
+                {/* Header */}
+                <header className="dashboard-header">
+                    <div className="dashboard-brand">
+                        <h1>Admin Panel</h1>
                         <p
+                            className="dashboard-version"
                             onClick={() => setShowVersionDetails(!showVersionDetails)}
-                            style={{
-                                color: '#444',
-                                margin: '5px 0 0',
-                                textTransform: 'uppercase',
-                                letterSpacing: '2px',
-                                fontSize: '0.7rem',
-                                cursor: 'help',
-                                userSelect: 'none',
-                                transition: 'color 0.3s'
-                            }}
-                            onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
-                            onMouseLeave={(e) => e.target.style.color = '#444'}
                         >
                             {WEBSITE_VERSION} {showVersionDetails ? '▴' : '▾'}
                         </p>
                         {showVersionDetails && (
-                            <div className="animate-in" style={{
-                                marginTop: '12px',
-                                padding: '12px 16px',
-                                background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.02) 100%)',
-                                borderRadius: '6px',
-                                borderLeft: '3px solid var(--color-accent)',
-                                fontSize: '0.75rem',
-                                color: 'rgba(212, 175, 55, 0.8)',
-                                whiteSpace: 'pre-line',
-                                lineHeight: '1.6',
-                                fontFamily: 'monospace',
-                                letterSpacing: '0.5px'
-                            }}>
+                            <div className="dashboard-version-details animate-in">
                                 {VERSION_DETAILS}
                             </div>
                         )}
                     </div>
 
-
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                    <div className="dashboard-header-actions">
                         {/* Notification Bell */}
                         <div style={{ position: 'relative' }} ref={notificationRef}>
                             <button
@@ -743,7 +725,7 @@ const Dashboard = () => {
                                                                 {n.count > 1 && (
                                                                     <span style={{ 
                                                                         marginLeft: '0.5rem',
-                                                                        background: 'rgba(212, 175, 55, 0.2)',
+                                                                        background: 'rgba(167, 139, 250, 0.2)',
                                                                         color: 'var(--color-accent)',
                                                                         padding: '0.1rem 0.4rem',
                                                                         borderRadius: '10px',
@@ -777,103 +759,131 @@ const Dashboard = () => {
                             )}
                         </div>
 
-                        <div style={{ padding: '0.5rem 1rem', background: '#111', borderRadius: '30px', border: '1px solid #333', fontSize: '0.85rem' }}>
-                            <span style={{ color: '#666' }}>{currentUser?.name || 'root'}@</span><strong>{settings.siteTitle?.toLowerCase() || 'rustikop'}</strong>
+                        <div className="dashboard-user-info">
+                            <span className="user-role">{currentUser?.name || 'root'}@</span>
+                            <span className="user-site">{settings.siteTitle?.toLowerCase() || 'rustikop'}</span>
                         </div>
-                        <button onClick={handleLogout} className="btn btn-primary" style={{ padding: '0.5rem 1.2rem', borderRadius: '30px' }}>Logout</button>
+                        <button onClick={handleLogout} className="btn-modern btn-secondary" style={{ padding: '0.5rem 1rem' }}>
+                            <LogOut size={16} /> Logout
+                        </button>
                     </div>
                 </header>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '3rem' }}>
-                    {/* SIDE PANEL */}
-                    <div style={{ marginBottom: '2rem' }}>
-                        {/* Gestion */}
+                <div className="dashboard-layout">
+                    {/* SIDEBAR */}
+                    <aside className="dashboard-sidebar">
+                        {/* Section Gestion */}
                         {(checkPermission('tab_overview') || checkPermission('tab_orders') || checkPermission('tab_clients')) && (
-                            <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Gestion</h3>
-                        )}
-                        {checkPermission('tab_overview') && (
-                            <button onClick={() => setActiveTab('overview')} style={sideBtnStyle(activeTab === 'overview')}><LayoutDashboard size={18} /> Vue d'ensemble</button>
-                        )}
-                        {checkPermission('tab_orders') && (
-                            <button onClick={() => setActiveTab('orders')} style={sideBtnStyle(activeTab === 'orders')}><ShoppingBag size={18} /> Commandes</button>
-                        )}
-                        {checkPermission('tab_clients') && (
-                            <button onClick={() => setActiveTab('clients')} style={sideBtnStyle(activeTab === 'clients')}><Users size={18} /> Clients</button>
+                            <div className="sidebar-section">
+                                <div className="sidebar-section-title">Gestion</div>
+                                <nav className="sidebar-nav">
+                                    {checkPermission('tab_overview') && (
+                                        <button onClick={() => setActiveTab('overview')} style={sideBtnStyle(activeTab === 'overview')}><LayoutDashboard size={18} /> Vue d'ensemble</button>
+                                    )}
+                                    {checkPermission('tab_orders') && (
+                                        <button onClick={() => setActiveTab('orders')} style={sideBtnStyle(activeTab === 'orders')}><ShoppingBag size={18} /> Commandes</button>
+                                    )}
+                                    {checkPermission('tab_clients') && (
+                                        <button onClick={() => setActiveTab('clients')} style={sideBtnStyle(activeTab === 'clients')}><Users size={18} /> Clients</button>
+                                    )}
+                                </nav>
+                            </div>
                         )}
 
-                        {/* Boutique */}
+                        {/* Section Boutique */}
                         {(checkPermission('tab_products') || checkPermission('tab_promos') || checkPermission('tab_reviews')) && (
-                            <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Boutique</h3>
-                        )}
-                        {checkPermission('tab_products') && (
-                            <button onClick={() => setActiveTab('products')} style={sideBtnStyle(activeTab === 'products')}><Plus size={18} /> Produits</button>
-                        )}
-                        {checkPermission('tab_promos') && (
-                            <button onClick={() => setActiveTab('promos')} style={sideBtnStyle(activeTab === 'promos')}><Zap size={18} /> Codes Promo</button>
-                        )}
-                        {checkPermission('tab_reviews') && (
-                            <button onClick={() => setActiveTab('reviews')} style={sideBtnStyle(activeTab === 'reviews')}><Star size={18} /> Avis Clients</button>
+                            <div className="sidebar-section">
+                                <div className="sidebar-section-title">Boutique</div>
+                                <nav className="sidebar-nav">
+                                    {checkPermission('tab_products') && (
+                                        <button onClick={() => setActiveTab('products')} style={sideBtnStyle(activeTab === 'products')}><Package size={18} /> Produits</button>
+                                    )}
+                                    {checkPermission('tab_promos') && (
+                                        <button onClick={() => setActiveTab('promos')} style={sideBtnStyle(activeTab === 'promos')}><Percent size={18} /> Codes Promo</button>
+                                    )}
+                                    {checkPermission('tab_reviews') && (
+                                        <button onClick={() => setActiveTab('reviews')} style={sideBtnStyle(activeTab === 'reviews')}><Star size={18} /> Avis Clients</button>
+                                    )}
+                                </nav>
+                            </div>
                         )}
 
-                        {/* Contenu */}
+                        {/* Section Contenu */}
                         {(checkPermission('tab_projects') || checkPermission('tab_homeEditor')) && (
-                            <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Contenu</h3>
-                        )}
-                        {checkPermission('tab_projects') && (
-                            <button onClick={() => setActiveTab('projects')} style={sideBtnStyle(activeTab === 'projects')}><FileCode size={18} /> Projets / Portfolio</button>
-                        )}
-                        {checkPermission('tab_homeEditor') && (
-                            <button onClick={() => setActiveTab('homeEditor')} style={sideBtnStyle(activeTab === 'homeEditor')}><Layers size={18} /> Editeur Accueil</button>
+                            <div className="sidebar-section">
+                                <div className="sidebar-section-title">Contenu</div>
+                                <nav className="sidebar-nav">
+                                    {checkPermission('tab_projects') && (
+                                        <button onClick={() => setActiveTab('projects')} style={sideBtnStyle(activeTab === 'projects')}><FileCode size={18} /> Projets</button>
+                                    )}
+                                    {checkPermission('tab_homeEditor') && (
+                                        <button onClick={() => setActiveTab('homeEditor')} style={sideBtnStyle(activeTab === 'homeEditor')}><Layers size={18} /> Éditeur Accueil</button>
+                                    )}
+                                </nav>
+                            </div>
                         )}
 
-                        {/* Système */}
+                        {/* Section Système */}
                         {(checkPermission('tab_security') || checkPermission('tab_settings')) && (
-                            <h3 style={{ fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '2rem 0 1rem 1.5rem', fontWeight: 'bold' }}>Système</h3>
+                            <div className="sidebar-section">
+                                <div className="sidebar-section-title">Système</div>
+                                <nav className="sidebar-nav">
+                                    {checkPermission('tab_security') && (
+                                        <button onClick={() => setActiveTab('security')} style={sideBtnStyle(activeTab === 'security')}><Shield size={18} /> Sécurité</button>
+                                    )}
+                                    {checkPermission('tab_settings') && (
+                                        <button onClick={() => setActiveTab('settings')} style={sideBtnStyle(activeTab === 'settings')}><Settings size={18} /> Paramètres</button>
+                                    )}
+                                </nav>
+                            </div>
                         )}
-                        {checkPermission('tab_security') && (
-                            <button onClick={() => setActiveTab('security')} style={sideBtnStyle(activeTab === 'security')}><Shield size={18} /> Sécurité</button>
-                        )}
-                        {checkPermission('tab_settings') && (
-                            <button onClick={() => setActiveTab('settings')} style={sideBtnStyle(activeTab === 'settings')}><Globe size={18} /> Paramètres</button>
-                        )}
-                    </div>
+                    </aside>
 
                     {/* MAIN CONTENT */}
-                    <main style={{ minWidth: 0 }}>
+                    <main className="dashboard-main">
                         {/* --- OVERVIEW TAB --- */}
                         {activeTab === 'overview' && (
                             <div className="animate-in">
-                                <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Vue d'ensemble</h2>
+                                <h2 className="section-title">Vue d'ensemble</h2>
 
                                 {/* KPI CARDS */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                                    <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)' }}>
-                                        <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Chiffre d'Affaires</div>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-accent)' }}>{stats.totalRevenue} €</div>
+                                <div className="kpi-grid">
+                                    <div className="kpi-card kpi-card--primary">
+                                        <div className="kpi-card__icon"><DollarSign size={24} /></div>
+                                        <div className="kpi-card__content">
+                                            <div className="kpi-card__label">Chiffre d'Affaires</div>
+                                            <div className="kpi-card__value">{stats.totalRevenue} €</div>
+                                        </div>
                                     </div>
-                                    <div style={cardStyle}>
-                                        <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Commandes Totales</div>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalOrders}</div>
+                                    <div className="kpi-card kpi-card--secondary">
+                                        <div className="kpi-card__icon"><ShoppingBag size={24} /></div>
+                                        <div className="kpi-card__content">
+                                            <div className="kpi-card__label">Commandes Totales</div>
+                                            <div className="kpi-card__value">{stats.totalOrders}</div>
+                                        </div>
                                     </div>
-                                    <div style={cardStyle}>
-                                        <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Utilisateurs</div>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalUsers}</div>
+                                    <div className="kpi-card kpi-card--tertiary">
+                                        <div className="kpi-card__icon"><Users size={24} /></div>
+                                        <div className="kpi-card__content">
+                                            <div className="kpi-card__label">Utilisateurs</div>
+                                            <div className="kpi-card__value">{stats.totalUsers}</div>
+                                        </div>
                                     </div>
                                     {/* QUICK ACTION CARD */}
-                                    <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
-                                        <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Accès Rapide</div>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button onClick={() => setActiveTab('products')} style={{ ...btnModern, flex: 1, padding: '0.5rem', justifyContent: 'center' }}><Plus size={16} /> Produit</button>
-                                            <button onClick={() => setActiveTab('projects')} style={{ ...btnModern, flex: 1, padding: '0.5rem', justifyContent: 'center' }}><FileCode size={16} /> Projet</button>
+                                    <div className="kpi-card kpi-card--actions">
+                                        <div className="kpi-card__label">Accès Rapide</div>
+                                        <div className="quick-actions">
+                                            <button onClick={() => setActiveTab('products')} className="btn-modern btn-modern--sm"><Plus size={16} /> Produit</button>
+                                            <button onClick={() => setActiveTab('projects')} className="btn-modern btn-modern--sm"><FileCode size={16} /> Projet</button>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* CHARTS ROW - Order Status Pie & Category Bar */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                                <div className="charts-grid">
                                     {/* Order Status Pie Chart */}
-                                    <div style={cardStyle}>
-                                        <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Statuts des Commandes</h3>
+                                    <div className="dashboard-card">
+                                        <h3 className="card-title">Statuts des Commandes</h3>
                                         {(() => {
                                             const statusCounts = { 'Réception': 0, 'En cours': 0, 'Terminé': 0, 'En attente': 0 };
                                             orders.filter(o => !isArchived(o)).forEach(o => {
@@ -883,11 +893,11 @@ const Dashboard = () => {
                                             const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name, value })).filter(d => d.value > 0);
                                             
                                             if (pieData.length === 0) {
-                                                return <p style={{ color: '#555', fontSize: '0.85rem', textAlign: 'center', padding: '3rem 0' }}>Aucune commande à afficher</p>;
+                                                return <p className="empty-state">Aucune commande à afficher</p>;
                                             }
                                             
                                             return (
-                                                <div style={{ width: '100%', height: '220px', minHeight: '220px', minWidth: '200px', position: 'relative' }}>
+                                                <div className="chart-container">
                                                     <ResponsiveContainer width="100%" height={220}>
                                                         <RechartsPie>
                                                             <Pie
@@ -902,27 +912,27 @@ const Dashboard = () => {
                                                                 labelLine={false}
                                                             >
                                                                 {pieData.map((entry, index) => {
-                                                                    const colors = { 'Réception': '#ff4d4d', 'En cours': '#ffd700', 'Terminé': '#4caf50', 'En attente': '#ff8c00' };
+                                                                    const colors = { 'Réception': '#fb7185', 'En cours': '#fbbf24', 'Terminé': '#22d3ee', 'En attente': '#a78bfa' };
                                                                     return <Cell key={`cell-${index}`} fill={colors[entry.name] || '#888'} />;
                                                                 })}
                                                             </Pie>
-                                                            <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} />
+                                                            <Tooltip contentStyle={{ background: '#0f0f17', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '12px' }} />
                                                         </RechartsPie>
                                                     </ResponsiveContainer>
                                                 </div>
                                             );
                                         })()}
-                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-                                            <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff4d4d' }}></span> Réception</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffd700' }}></span> En cours</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4caf50' }}></span> Terminé</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff8c00' }}></span> En attente</span>
+                                        <div className="chart-legend">
+                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#fb7185' }}></span> Réception</span>
+                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#fbbf24' }}></span> En cours</span>
+                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#22d3ee' }}></span> Terminé</span>
+                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#a78bfa' }}></span> En attente</span>
                                         </div>
                                     </div>
 
                                     {/* Category Sales Bar Chart */}
-                                    <div style={cardStyle}>
-                                        <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Ventes par Catégorie</h3>
+                                    <div className="dashboard-card">
+                                        <h3 className="card-title">Ventes par Catégorie</h3>
                                         {(() => {
                                             const catSales = {};
                                             orders.filter(o => o.status === 'Terminé' || isArchived(o)).forEach(order => {
@@ -935,18 +945,24 @@ const Dashboard = () => {
                                             const barData = Object.entries(catSales).map(([name, total]) => ({ name, total: Math.round(total) })).sort((a, b) => b.total - a.total).slice(0, 5);
                                             
                                             if (barData.length === 0) {
-                                                return <p style={{ color: '#555', fontSize: '0.85rem', textAlign: 'center', padding: '3rem 0' }}>Aucune vente terminée</p>;
+                                                return <p className="empty-state">Aucune vente terminée</p>;
                                             }
                                             
                                             return (
-                                                <div style={{ width: '100%', height: '250px', minHeight: '250px', minWidth: '200px', position: 'relative' }}>
+                                                <div className="chart-container chart-container--tall">
                                                     <ResponsiveContainer width="100%" height={250}>
                                                         <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
-                                                            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(167,139,250,0.1)" />
                                                             <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
                                                             <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
-                                                            <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
-                                                            <Bar dataKey="total" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+                                                            <Tooltip contentStyle={{ background: '#0f0f17', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '12px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
+                                                            <Bar dataKey="total" fill="url(#colorGradient)" radius={[8, 8, 0, 0]} />
+                                                            <defs>
+                                                                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                                                                    <stop offset="0%" stopColor="#a78bfa" />
+                                                                    <stop offset="100%" stopColor="#22d3ee" />
+                                                                </linearGradient>
+                                                            </defs>
                                                         </BarChart>
                                                     </ResponsiveContainer>
                                                 </div>
@@ -955,58 +971,54 @@ const Dashboard = () => {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0 }}>
+                                <div className="dashboard-grid-2-1">
+                                    <div className="dashboard-column">
                                         <AnalyticsChart
                                             data={chartData}
                                             title="Revenus Mensuels (€)"
                                         />
 
                                         {/* ADMIN NOTEPAD WIDGET */}
-                                        <div style={cardStyle}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                <h3 style={{ fontSize: '1rem' }}>Bloc-notes Admin</h3>
-                                                <Save size={16} color="#888" />
+                                        <div className="dashboard-card">
+                                            <div className="card-header">
+                                                <h3 className="card-title">Bloc-notes Admin</h3>
+                                                <Save size={16} className="card-icon" />
                                             </div>
                                             <textarea
+                                                className="input-modern input-modern--textarea"
                                                 placeholder="Notes rapides, idées, tâches à faire..."
-                                                style={{
-                                                    width: '100%', minHeight: '120px', background: '#111', border: 'none',
-                                                    color: '#ccc', padding: '1rem', borderRadius: '8px', resize: 'vertical',
-                                                    fontSize: '0.9rem', lineHeight: '1.5'
-                                                }}
                                                 defaultValue={localStorage.getItem('admin_notes') || ''}
                                                 onChange={(e) => localStorage.setItem('admin_notes', e.target.value)}
                                             />
                                         </div>
                                     </div>
 
-                                    <div style={cardStyle}>
-                                        <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Dernière Activité</h3>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    <div className="dashboard-card">
+                                        <h3 className="card-title">Dernière Activité</h3>
+                                        <div className="activity-list">
                                             {recentActivity.slice(0, 5).map(log => (
-                                                <div key={log.id} style={{ display: 'flex', gap: '1rem', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                                    <div style={{ color: 'var(--color-accent)', minWidth: '40px' }}>
+                                                <div key={log.id} className="activity-item">
+                                                    <div className="activity-icon">
                                                         <Timer size={14} />
                                                     </div>
-                                                    <div style={{ fontSize: '0.8rem' }}>
-                                                        <div style={{ color: '#eee' }}>{log.message}</div>
-                                                        <div style={{ color: '#444', fontSize: '0.7rem' }}>{new Date(log.date).toLocaleTimeString()}</div>
+                                                    <div className="activity-content">
+                                                        <div className="activity-message">{log.message}</div>
+                                                        <div className="activity-time">{new Date(log.date).toLocaleTimeString()}</div>
                                                     </div>
                                                 </div>
                                             ))}
-                                            {recentActivity.length === 0 && <p style={{ fontSize: '0.8rem', color: '#444' }}>Aucune activité récente.</p>}
+                                            {recentActivity.length === 0 && <p className="empty-state--sm">Aucune activité récente.</p>}
                                         </div>
 
-                                        <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #222' }}>
-                                            <h4 style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Système</h4>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>
+                                        <div className="system-info">
+                                            <h4 className="system-info__title">Système</h4>
+                                            <div className="system-info__row">
                                                 <span>Version</span>
-                                                <span style={{ color: 'var(--color-accent)' }}>{WEBSITE_VERSION}</span>
+                                                <span className="system-info__value">{WEBSITE_VERSION}</span>
                                             </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#888' }}>
+                                            <div className="system-info__row">
                                                 <span>Status DB</span>
-                                                <span style={{ color: '#4caf50' }}>Connecté</span>
+                                                <span className="system-info__status system-info__status--ok">Connecté</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1019,11 +1031,11 @@ const Dashboard = () => {
                             <div className="animate-in">
                                 {/* Header with Simulate Button */}
                                 {activeTab === 'orders' && checkPermission('manage_orders') && (
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                        <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Gestion des Commandes</h2>
+                                    <div className="section-header">
+                                        <h2 className="section-title">Gestion des Commandes</h2>
                                         <button
                                             onClick={() => setShowSimulateOrderForm(!showSimulateOrderForm)}
-                                            style={{ ...btnModern, background: showSimulateOrderForm ? '#333' : 'var(--color-accent)', color: showSimulateOrderForm ? '#888' : '#000', fontWeight: showSimulateOrderForm ? 'normal' : 'bold' }}
+                                            className={`btn-modern ${showSimulateOrderForm ? 'btn-modern--ghost' : 'btn-modern--primary'}`}
                                         >
                                             {showSimulateOrderForm ? <X size={16} /> : <Plus size={16} />}
                                             {showSimulateOrderForm ? 'Annuler' : 'Simuler une Commande'}
@@ -1508,8 +1520,8 @@ const Dashboard = () => {
                                                     </select>
                                                     {productForm.lucideIcon && (
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#181818', borderRadius: '8px' }}>
-                                                            <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05))', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                {renderLucideIcon(productForm.lucideIcon, { size: 32, color: '#d4af37' })}
+                                                            <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05))', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {renderLucideIcon(productForm.lucideIcon, { size: 32, color: '#a78bfa' })}
                                                             </div>
                                                             <span style={{ color: '#888', fontSize: '0.85rem' }}>Prévisualisation de l'icône</span>
                                                         </div>
@@ -1996,7 +2008,7 @@ const Dashboard = () => {
                                                             fontSize: '0.9rem',
                                                             padding: '0.5rem 0.8rem',
                                                             borderRadius: '6px',
-                                                            background: isChecked ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                                                            background: isChecked ? 'rgba(167, 139, 250, 0.1)' : 'transparent',
                                                             transition: 'background 0.2s'
                                                         }}
                                                     >
@@ -2188,7 +2200,7 @@ const Dashboard = () => {
                                     {/* Login History */}
                                     <div style={cardStyle}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                                            <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--color-accent)' }}>
+                                            <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--color-accent)' }}>
                                                 <Shield size={24} />
                                             </div>
                                             <div>
@@ -2546,7 +2558,7 @@ const Dashboard = () => {
                                                                 ...btnModern,
                                                                 flex: 1,
                                                                 justifyContent: 'center',
-                                                                background: announcementTextAlign === 'left' ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.02)',
+                                                                background: announcementTextAlign === 'left' ? 'rgba(167, 139, 250, 0.2)' : 'rgba(255,255,255,0.02)',
                                                                 borderColor: announcementTextAlign === 'left' ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)'
                                                             }}
                                                         >
@@ -2558,7 +2570,7 @@ const Dashboard = () => {
                                                                 ...btnModern,
                                                                 flex: 1,
                                                                 justifyContent: 'center',
-                                                                background: announcementTextAlign === 'center' ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.02)',
+                                                                background: announcementTextAlign === 'center' ? 'rgba(167, 139, 250, 0.2)' : 'rgba(255,255,255,0.02)',
                                                                 borderColor: announcementTextAlign === 'center' ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)'
                                                             }}
                                                         >
@@ -2619,15 +2631,15 @@ const Dashboard = () => {
                                                     borderRadius: '8px',
                                                     fontSize: '0.85rem',
                                                     gap: '1rem',
-                                                    border: '1px solid rgba(212, 175, 55, 0.15)'
+                                                    border: '1px solid rgba(167, 139, 250, 0.15)'
                                                 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: announcementTextAlign === 'center' ? 'none' : 1 }}>
                                                         {announcementIcon && announcementIcon !== 'none' && (
-                                                            <span style={{ color: '#d4af37', display: 'flex' }}>{renderLucideIcon(announcementIcon, { size: 18 })}</span>
+                                                            <span style={{ color: '#a78bfa', display: 'flex' }}>{renderLucideIcon(announcementIcon, { size: 18 })}</span>
                                                         )}
                                                         <span>{announcementText || 'Texte de votre annonce...'}</span>
                                                         {announcementShowTimer && announcementTimerPosition === 'inline' && (
-                                                            <span style={{ color: '#d4af37', fontFamily: 'monospace', marginLeft: '0.5rem' }}>00h 00m 00s</span>
+                                                            <span style={{ color: '#a78bfa', fontFamily: 'monospace', marginLeft: '0.5rem' }}>00h 00m 00s</span>
                                                         )}
                                                     </div>
                                                     {announcementShowTimer && announcementTimerPosition === 'right' && (
@@ -2635,7 +2647,7 @@ const Dashboard = () => {
                                                             background: 'rgba(255, 255, 255, 0.05)',
                                                             padding: '0.35rem 0.75rem', 
                                                             borderRadius: '6px',
-                                                            color: '#d4af37',
+                                                            color: '#a78bfa',
                                                             fontFamily: 'monospace',
                                                             fontSize: '0.8rem'
                                                         }}>
@@ -2855,7 +2867,7 @@ const Dashboard = () => {
                                             );
                                         }) : (
                                         <div style={{ ...cardStyle, textAlign: 'center', padding: '4rem', background: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                                            <div style={{ width: '80px', height: '80px', margin: '0 auto 1.5rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <div style={{ width: '80px', height: '80px', margin: '0 auto 1.5rem', background: 'rgba(167, 139, 250, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 <Star size={36} style={{ color: 'var(--color-accent)', opacity: 0.6 }} />
                                             </div>
                                             <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#888' }}>Aucun avis client</h3>

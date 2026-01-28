@@ -28,12 +28,12 @@
 .cart-icon {
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(167, 139, 250, 0.05));
     border-radius: var(--radius-lg, 16px);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .cart-header h1 {
@@ -45,7 +45,7 @@
 }
 
 .cart-header h1 span {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     font-style: italic;
 }
 
@@ -67,13 +67,13 @@
 .cart-empty .empty-icon {
     width: 100px;
     height: 100px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.03));
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(167, 139, 250, 0.03));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto var(--spacing-xl, 2rem);
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .cart-empty h3 {
@@ -191,7 +191,7 @@
 }
 
 .qty-btn:hover {
-    background: var(--color-accent, #d4af37);
+    background: var(--color-accent, #a78bfa);
     color: var(--color-bg, #030303);
 }
 
@@ -205,7 +205,7 @@
 .cart-item-price {
     font-size: 1.125rem;
     font-weight: 700;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     min-width: 80px;
     text-align: right;
 }
@@ -289,7 +289,7 @@
 .summary-total .total-value {
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .checkout-btn {
@@ -316,7 +316,7 @@
 }
 
 .summary-features .feature svg {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     opacity: 0.7;
 }
 

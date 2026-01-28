@@ -98,7 +98,7 @@ const MaintenancePage = () => {
         <div style={{ 
           width: '80px', 
           height: '80px', 
-          background: 'rgba(212, 175, 55, 0.1)', 
+          background: 'rgba(167, 139, 250, 0.1)', 
           borderRadius: '50%', 
           display: 'flex', 
           alignItems: 'center', 

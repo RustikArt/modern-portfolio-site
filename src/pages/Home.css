@@ -66,8 +66,8 @@
     position: absolute;
     inset: 0;
     background-image: 
-        linear-gradient(rgba(212, 175, 55, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
+        linear-gradient(rgba(167, 139, 250, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(167, 139, 250, 0.02) 1px, transparent 1px);
     background-size: 60px 60px;
     opacity: 0.5;
     z-index: 1;
@@ -96,7 +96,7 @@
 .floating-bg.one {
     width: min(800px, 90vw);
     height: min(800px, 90vw);
-    background: radial-gradient(circle, var(--color-accent, #d4af37) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--color-accent, #a78bfa) 0%, transparent 70%);
     top: -30%;
     left: -20%;
     opacity: 0.12;
@@ -227,7 +227,7 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-                rgba(212, 175, 55, 0.08), transparent 40%);
+                rgba(167, 139, 250, 0.08), transparent 40%);
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
@@ -235,9 +235,9 @@
 
 .service-card:hover {
     background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
-    border-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(167, 139, 250, 0.15);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(212, 175, 55, 0.1);
+                0 0 0 1px rgba(167, 139, 250, 0.1);
 }
 
 .service-card:hover::before {
@@ -251,15 +251,15 @@
     width: 56px;
     height: 56px;
     margin-bottom: var(--spacing-lg, 1.5rem);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(167, 139, 250, 0.05) 100%);
     border-radius: var(--radius-lg, 16px);
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     transition: all 0.4s ease;
 }
 
 .service-card:hover .service-icon {
     transform: scale(1.1) rotate(-5deg);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(167, 139, 250, 0.1) 100%);
 }
 
 .service-card h3 {
@@ -313,7 +313,7 @@
 }
 
 .btn-link:hover {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     gap: var(--spacing-sm, 0.75rem);
 }
 
@@ -387,7 +387,7 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-                rgba(212, 175, 55, 0.12), transparent 40%);
+                rgba(167, 139, 250, 0.12), transparent 40%);
     z-index: 3;
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -434,7 +434,7 @@
     font-weight: 600;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     margin-bottom: var(--spacing-sm, 0.75rem);
     display: block;
     opacity: 0.8;
@@ -476,9 +476,9 @@
 }
 
 .project-card:hover .project-image {
-    border-color: rgba(212, 175, 55, 0.2);
+    border-color: rgba(167, 139, 250, 0.2);
     box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6),
-                0 0 0 1px rgba(212, 175, 55, 0.1);
+                0 0 0 1px rgba(167, 139, 250, 0.1);
 }
 
 .project-card:hover .project-image img {
@@ -487,17 +487,17 @@
 }
 
 .project-card:hover .project-number {
-    color: rgba(212, 175, 55, 0.06);
+    color: rgba(167, 139, 250, 0.06);
     transform: translate(8px, -8px);
 }
 
 .project-card:hover .project-content {
-    border-left-color: var(--color-accent, #d4af37);
+    border-left-color: var(--color-accent, #a78bfa);
     padding-left: var(--spacing-lg, 1.5rem);
 }
 
 .project-card:hover .project-title {
-    background: linear-gradient(135deg, var(--color-accent, #d4af37) 0%, #fff 100%);
+    background: linear-gradient(135deg, var(--color-accent, #a78bfa) 0%, #fff 100%);
     -webkit-background-clip: text;
     background-clip: text;
 }
@@ -505,7 +505,7 @@
 .project-card:hover .project-view-more {
     opacity: 1;
     transform: translateX(0);
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .project-view-more svg {
@@ -565,12 +565,12 @@
 
 .testimonial-card:hover {
     background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(167, 139, 250, 0.15);
     transform: translateY(-4px);
 }
 
 .quote-icon {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     opacity: 0.2;
     margin-bottom: var(--spacing-md, 1rem);
 }
@@ -594,7 +594,7 @@
     height: 48px;
     border-radius: var(--radius-full, 9999px);
     padding: 2px;
-    background: linear-gradient(135deg, var(--color-accent, #d4af37), rgba(212, 175, 55, 0.3));
+    background: linear-gradient(135deg, var(--color-accent, #a78bfa), rgba(167, 139, 250, 0.3));
     flex-shrink: 0;
 }
 
@@ -659,7 +659,7 @@
     font-size: clamp(2.5rem, 6vw, 4rem);
     font-weight: 800;
     font-family: var(--font-display, 'Playfair Display', serif);
-    background: linear-gradient(135deg, var(--color-accent, #d4af37), var(--color-accent-light, #e6c556));
+    background: linear-gradient(135deg, var(--color-accent, #a78bfa), var(--color-accent-light, #22d3ee));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -695,7 +695,7 @@
     transform: translate(-50%, -50%);
     width: min(800px, 100vw);
     height: min(800px, 100vw);
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.08) 0%, transparent 60%);
     pointer-events: none;
 }
 
@@ -711,7 +711,7 @@
     font-size: clamp(2rem, 5vw, 3.5rem);
     margin-bottom: var(--spacing-lg, 1.5rem);
     line-height: 1.15;
-    background: linear-gradient(135deg, #fff 0%, var(--color-accent, #d4af37) 100%);
+    background: linear-gradient(135deg, #fff 0%, var(--color-accent, #a78bfa) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;

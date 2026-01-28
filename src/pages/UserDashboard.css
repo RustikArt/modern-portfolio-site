@@ -35,13 +35,13 @@
 .profile-avatar {
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-accent, #d4af37);
-    border: 2px solid rgba(212, 175, 55, 0.3);
+    color: var(--color-accent, #a78bfa);
+    border: 2px solid rgba(167, 139, 250, 0.3);
 }
 
 .profile-info h1 {
@@ -52,7 +52,7 @@
 }
 
 .profile-info h1 span {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .profile-info p {
@@ -118,12 +118,12 @@
 }
 
 .tab-btn.active {
-    background: rgba(212, 175, 55, 0.1);
-    color: var(--color-accent, #d4af37);
+    background: rgba(167, 139, 250, 0.1);
+    color: var(--color-accent, #a78bfa);
 }
 
 .tab-badge {
-    background: var(--color-accent, #d4af37);
+    background: var(--color-accent, #a78bfa);
     color: var(--color-bg, #030303);
     font-size: 0.7rem;
     font-weight: 700;
@@ -147,7 +147,7 @@
 .orders-empty .empty-icon {
     width: 100px;
     height: 100px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.03));
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(167, 139, 250, 0.03));
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -264,8 +264,8 @@
 }
 
 .progress-step.completed {
-    background: var(--color-accent, #d4af37);
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+    background: var(--color-accent, #a78bfa);
+    box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
 }
 
 .progress-steps {
@@ -307,7 +307,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-2xs, 0.25rem);
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     font-size: 0.75rem;
 }
 
@@ -388,7 +388,7 @@
 }
 
 .security-header svg {
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     flex-shrink: 0;
 }
 
@@ -442,8 +442,8 @@
 
 .password-form input:focus {
     outline: none;
-    border-color: var(--color-accent, #d4af37);
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    border-color: var(--color-accent, #a78bfa);
+    box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.1);
 }
 
 .password-form input::placeholder {
@@ -478,8 +478,8 @@
 .profile-help {
     margin-top: var(--spacing-4xl, 6rem);
     padding: var(--spacing-2xl, 3rem);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-    border: 1px solid rgba(212, 175, 55, 0.15);
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(167, 139, 250, 0.15);
     border-radius: var(--radius-2xl, 32px);
     position: relative;
     overflow: hidden;
@@ -492,7 +492,7 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.3), transparent);
 }
 
 .profile-help .help-content {
@@ -506,12 +506,12 @@
 .profile-help .help-icon {
     width: 64px;
     height: 64px;
-    background: rgba(212, 175, 55, 0.1);
+    background: rgba(167, 139, 250, 0.1);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
 }
 
 .profile-help .help-text {
@@ -538,19 +538,19 @@
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-sm, 0.75rem);
-    color: var(--color-accent, #d4af37);
+    color: var(--color-accent, #a78bfa);
     font-weight: 600;
     text-decoration: none;
     font-size: 1rem;
     margin-top: var(--spacing-sm, 0.75rem);
     padding: 0.6rem 1.5rem;
-    background: rgba(212, 175, 55, 0.1);
+    background: rgba(167, 139, 250, 0.1);
     border-radius: 100px;
     transition: all var(--transition-fast, 150ms);
 }
 
 .profile-help .help-link:hover {
-    background: rgba(212, 175, 55, 0.2);
+    background: rgba(167, 139, 250, 0.2);
     transform: translateY(-2px);
 }
 

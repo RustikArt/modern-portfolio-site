@@ -58,7 +58,7 @@ const ProductReviews = ({ reviews = [], averageRating = 0, onAddReview, currentU
                         </button>
                     </div>
                 ) : (
-                    <div style={{ background: 'rgba(212, 175, 55, 0.05)', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid rgba(212, 175, 55, 0.1)', textAlign: 'center' }}>
+                    <div style={{ background: 'rgba(167, 139, 250, 0.05)', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid rgba(167, 139, 250, 0.1)', textAlign: 'center' }}>
                         <p style={{ margin: 0, color: 'var(--color-accent)', fontSize: '0.9rem' }}>
                             Vous devez avoir acheté ce produit pour laisser un avis.
                         </p>
