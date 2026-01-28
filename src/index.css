@@ -1043,8 +1043,8 @@ input[type="radio"] {
 }
 
 .toggle-switch.active {
-  background: linear-gradient(135deg, var(--color-accent, #a78bfa) 0%, #22d3ee 100%);
-  border-color: var(--color-accent, #a78bfa);
+  background: #a78bfa;
+  border-color: #a78bfa;
   box-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
 }
 
@@ -1088,8 +1088,8 @@ input[type="radio"] {
 }
 
 .dashboard-checkbox:checked {
-  background: linear-gradient(135deg, var(--color-accent, #a78bfa) 0%, #22d3ee 100%);
-  border-color: var(--color-accent, #a78bfa);
+  background: #a78bfa;
+  border-color: #a78bfa;
   box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
 }
 

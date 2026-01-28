@@ -117,8 +117,6 @@
     position: sticky;
     top: 160px;
     height: fit-content;
-    max-height: calc(100vh - 180px);
-    overflow-y: auto;
 }
 
 .sidebar-section {
@@ -141,7 +139,7 @@
     content: '';
     width: 8px;
     height: 2px;
-    background: linear-gradient(90deg, #a78bfa, #22d3ee);
+    background: #a78bfa;
     border-radius: 1px;
 }
 
@@ -175,7 +173,7 @@
 }
 
 .sidebar-btn.active {
-    background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(34, 211, 238, 0.08) 100%);
+    background: rgba(167, 139, 250, 0.15);
     color: #a78bfa;
     border-color: rgba(167, 139, 250, 0.25);
     font-weight: 600;
@@ -187,7 +185,7 @@
     left: 0;
     width: 3px;
     height: 60%;
-    background: linear-gradient(180deg, #a78bfa, #22d3ee);
+    background: #a78bfa;
     border-radius: 0 2px 2px 0;
 }
 
@@ -211,6 +209,37 @@
 .dashboard-main > .animate-in {
     max-height: none;
     overflow: visible;
+}
+
+/* ============================================
+   OVERVIEW SECTIONS
+   ============================================ */
+
+.overview-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.08);
+}
+
+.overview-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.overview-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #a78bfa;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.overview-section-title svg {
+    opacity: 0.8;
 }
 
 .dashboard-section-header {
@@ -249,6 +278,40 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
+}
+
+/* ============================================
+   ORDER STATUS SELECT
+   ============================================ */
+
+.order-status-select {
+    background: rgba(18, 18, 26, 0.9);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    color: #f8fafc;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.order-status-select:hover {
+    border-color: rgba(167, 139, 250, 0.4);
+    background: rgba(26, 26, 36, 0.9);
+}
+
+.order-status-select:focus {
+    outline: none;
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+}
+
+.order-status-select option {
+    background: #0f0f17;
+    color: #f8fafc;
+    padding: 0.5rem;
 }
 
 /* ============================================
@@ -309,7 +372,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #a78bfa, #22d3ee);
+    background: #a78bfa;
     opacity: 0;
     transition: opacity 0.3s;
 }
@@ -336,7 +399,7 @@
 }
 
 .kpi-card-value.accent {
-    background: linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%);
+    background: #a78bfa;
     -webkit-background-clip: text;
     background-clip: text;
 }

@@ -857,41 +857,47 @@ const Dashboard = () => {
                             <div className="animate-in">
                                 <h2 className="section-title">Vue d'ensemble</h2>
 
-                                {/* KPI CARDS */}
-                                <div className="kpi-grid">
-                                    <div className="kpi-card kpi-card--primary">
-                                        <div className="kpi-card__icon"><DollarSign size={24} /></div>
-                                        <div className="kpi-card__content">
-                                            <div className="kpi-card__label">Chiffre d'Affaires</div>
-                                            <div className="kpi-card__value">{stats.totalRevenue} €</div>
+                                {/* ========== SECTION 1: STATISTIQUES CLÉS ========== */}
+                                <div className="overview-section">
+                                    <h3 className="overview-section-title"><TrendingUp size={18} /> Statistiques Clés</h3>
+                                    
+                                    <div className="kpi-grid">
+                                        <div className="kpi-card kpi-card--primary">
+                                            <div className="kpi-card__icon"><DollarSign size={24} /></div>
+                                            <div className="kpi-card__content">
+                                                <div className="kpi-card__label">Chiffre d'Affaires</div>
+                                                <div className="kpi-card__value">{stats.totalRevenue} €</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="kpi-card kpi-card--secondary">
-                                        <div className="kpi-card__icon"><ShoppingBag size={24} /></div>
-                                        <div className="kpi-card__content">
-                                            <div className="kpi-card__label">Commandes Totales</div>
-                                            <div className="kpi-card__value">{stats.totalOrders}</div>
+                                        <div className="kpi-card kpi-card--secondary">
+                                            <div className="kpi-card__icon"><ShoppingBag size={24} /></div>
+                                            <div className="kpi-card__content">
+                                                <div className="kpi-card__label">Commandes Totales</div>
+                                                <div className="kpi-card__value">{stats.totalOrders}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="kpi-card kpi-card--tertiary">
-                                        <div className="kpi-card__icon"><Users size={24} /></div>
-                                        <div className="kpi-card__content">
-                                            <div className="kpi-card__label">Utilisateurs</div>
-                                            <div className="kpi-card__value">{stats.totalUsers}</div>
+                                        <div className="kpi-card kpi-card--tertiary">
+                                            <div className="kpi-card__icon"><Users size={24} /></div>
+                                            <div className="kpi-card__content">
+                                                <div className="kpi-card__label">Utilisateurs</div>
+                                                <div className="kpi-card__value">{stats.totalUsers}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    {/* QUICK ACTION CARD */}
-                                    <div className="kpi-card kpi-card--actions">
-                                        <div className="kpi-card__label">Accès Rapide</div>
-                                        <div className="quick-actions">
-                                            <button onClick={() => setActiveTab('products')} className="btn-modern btn-modern--sm"><Plus size={16} /> Produit</button>
-                                            <button onClick={() => setActiveTab('projects')} className="btn-modern btn-modern--sm"><FileCode size={16} /> Projet</button>
+                                        <div className="kpi-card kpi-card--actions">
+                                            <div className="kpi-card__label">Accès Rapide</div>
+                                            <div className="quick-actions">
+                                                <button onClick={() => setActiveTab('products')} className="btn-modern btn-modern--sm"><Plus size={16} /> Produit</button>
+                                                <button onClick={() => setActiveTab('projects')} className="btn-modern btn-modern--sm"><FileCode size={16} /> Projet</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* CHARTS ROW - Order Status Pie & Category Bar */}
-                                <div className="charts-grid">
+                                {/* ========== SECTION 2: GRAPHIQUES ========== */}
+                                <div className="overview-section">
+                                    <h3 className="overview-section-title"><BarChart3 size={18} /> Graphiques</h3>
+                                    
+                                    <div className="charts-grid">
                                     {/* Order Status Pie Chart */}
                                     <div className="dashboard-card">
                                         <h3 className="card-title">Statuts des Commandes</h3>
@@ -967,28 +973,27 @@ const Dashboard = () => {
                                                             <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
                                                             <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
                                                             <Tooltip contentStyle={{ background: '#0f0f17', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '12px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
-                                                            <Bar dataKey="total" fill="url(#colorGradient)" radius={[8, 8, 0, 0]} />
-                                                            <defs>
-                                                                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                                                                    <stop offset="0%" stopColor="#a78bfa" />
-                                                                    <stop offset="100%" stopColor="#22d3ee" />
-                                                                </linearGradient>
-                                                            </defs>
+                                                            <Bar dataKey="total" fill="#a78bfa" radius={[8, 8, 0, 0]} />
                                                         </BarChart>
                                                     </ResponsiveContainer>
                                                 </div>
                                             );
                                         })()}
                                     </div>
+
+                                    {/* Revenue Analytics Chart */}
+                                    <AnalyticsChart
+                                        data={chartData}
+                                        title="Revenus Mensuels (€)"
+                                    />
+                                </div>
                                 </div>
 
-                                <div className="dashboard-grid-2-1">
-                                    <div className="dashboard-column">
-                                        <AnalyticsChart
-                                            data={chartData}
-                                            title="Revenus Mensuels (€)"
-                                        />
-
+                                {/* ========== SECTION 3: SUIVI GÉNÉRAL ========== */}
+                                <div className="overview-section">
+                                    <h3 className="overview-section-title"><Clock size={18} /> Suivi Général</h3>
+                                    
+                                    <div className="dashboard-grid-2-1">
                                         {/* ADMIN NOTEPAD WIDGET */}
                                         <div className="dashboard-card">
                                             <div className="card-header">
@@ -1002,34 +1007,34 @@ const Dashboard = () => {
                                                 onChange={(e) => localStorage.setItem('admin_notes', e.target.value)}
                                             />
                                         </div>
-                                    </div>
 
-                                    <div className="dashboard-card">
-                                        <h3 className="card-title">Dernière Activité</h3>
-                                        <div className="activity-list">
-                                            {recentActivity.slice(0, 5).map(log => (
-                                                <div key={log.id} className="activity-item">
-                                                    <div className="activity-icon">
-                                                        <Timer size={14} />
+                                        <div className="dashboard-card">
+                                            <h3 className="card-title">Dernière Activité</h3>
+                                            <div className="activity-list">
+                                                {recentActivity.slice(0, 5).map(log => (
+                                                    <div key={log.id} className="activity-item">
+                                                        <div className="activity-icon">
+                                                            <Timer size={14} />
+                                                        </div>
+                                                        <div className="activity-content">
+                                                            <div className="activity-message">{log.message}</div>
+                                                            <div className="activity-time">{new Date(log.date).toLocaleTimeString()}</div>
+                                                        </div>
                                                     </div>
-                                                    <div className="activity-content">
-                                                        <div className="activity-message">{log.message}</div>
-                                                        <div className="activity-time">{new Date(log.date).toLocaleTimeString()}</div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {recentActivity.length === 0 && <p className="empty-state--sm">Aucune activité récente.</p>}
-                                        </div>
-
-                                        <div className="system-info">
-                                            <h4 className="system-info__title">Système</h4>
-                                            <div className="system-info__row">
-                                                <span>Version</span>
-                                                <span className="system-info__value">{WEBSITE_VERSION}</span>
+                                                ))}
+                                                {recentActivity.length === 0 && <p className="empty-state--sm">Aucune activité récente.</p>}
                                             </div>
-                                            <div className="system-info__row">
-                                                <span>Status DB</span>
-                                                <span className="system-info__status system-info__status--ok">Connecté</span>
+
+                                            <div className="system-info">
+                                                <h4 className="system-info__title">Système</h4>
+                                                <div className="system-info__row">
+                                                    <span>Version</span>
+                                                    <span className="system-info__value">{WEBSITE_VERSION}</span>
+                                                </div>
+                                                <div className="system-info__row">
+                                                    <span>Status DB</span>
+                                                    <span className="system-info__status system-info__status--ok">Connecté</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1275,7 +1280,7 @@ const Dashboard = () => {
 
                                                                 {isExpanded && (
                                                                     <div className="animate-in" style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '2rem', marginBottom: '2rem', alignItems: 'start' }}>
                                                                             <div>
                                                                                 <div style={{ color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>Contact & Livraison</div>
                                                                                 <div style={{ color: '#ccc', fontSize: '0.9rem' }}>{order.email}</div>
@@ -1285,12 +1290,12 @@ const Dashboard = () => {
                                                                                     </div>
                                                                                 )}
                                                                             </div>
-                                                                            <div style={{ textAlign: 'right' }}>
-                                                                                <div style={{ color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '1px' }}>Action</div>
+                                                                            <div>
+                                                                                <div style={{ color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '1px' }}>Statut</div>
                                                                                 <select
+                                                                                    className="order-status-select"
                                                                                     value={order.status}
                                                                                     onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                                                                    style={{ background: '#111', border: '1px solid #222', color: 'white', padding: '0.5rem', borderRadius: '8px', fontSize: '0.85rem' }}
                                                                                 >
                                                                                     <option value="Réception">Réception</option>
                                                                                     <option value="En cours">En cours</option>
@@ -2076,17 +2081,17 @@ const Dashboard = () => {
                         {activeTab === 'homeEditor' && homeContent && (
                             <div className="animate-in">
                                 <section style={cardStyle}>
-                                    <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Home Page Configuration</h2>
+                                    <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Configuration de la Page d'Accueil</h2>
 
                                     {/* HERO SECTION */}
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Hero Section</h3>
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Section Hero</h3>
                                         <div style={{ display: 'grid', gap: '1rem' }}>
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                                 <input type="text" placeholder="Titre ligne 1" value={homeContent.hero.titleLine1} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine1: e.target.value } })} style={inputStyle} />
                                                 <input type="text" placeholder="Titre ligne 2" value={homeContent.hero.titleLine2} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine2: e.target.value } })} style={inputStyle} />
                                             </div>
-                                            <input type="text" placeholder="Subtitle" value={homeContent.hero.subtitle} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, subtitle: e.target.value } })} style={inputStyle} />
+                                            <input type="text" placeholder="Sous-titre" value={homeContent.hero.subtitle} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, subtitle: e.target.value } })} style={inputStyle} />
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                                 <input type="text" placeholder="Texte du bouton" value={homeContent.hero.buttonText} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonText: e.target.value } })} style={inputStyle} />
                                                 <input type="text" placeholder="Lien du bouton" value={homeContent.hero.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonLink: e.target.value } })} style={inputStyle} />
@@ -2096,7 +2101,7 @@ const Dashboard = () => {
 
                                     {/* FEATURED PROJECTS */}
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Projets mis en avant</h3>
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Projets Mis en Avant</h3>
                                         <input type="text" placeholder="Titre de la section" value={homeContent.featuredProjects.title} onChange={(e) => setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, title: e.target.value } })} style={{ ...inputStyle, marginBottom: '1rem' }} />
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
                                             {projects.map(p => {
@@ -2150,14 +2155,14 @@ const Dashboard = () => {
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                             <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Services</h3>
-                                            <button onClick={() => setHomeContent({ ...homeContent, services: [...homeContent.services, { id: Date.now(), title: 'New Service', icon: 'Star', description: 'Description' }] })} style={btnModern}><Plus size={14} /> Add</button>
+                                            <button onClick={() => setHomeContent({ ...homeContent, services: [...homeContent.services, { id: Date.now(), title: 'Nouveau Service', icon: 'Star', description: 'Description' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
                                         </div>
                                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                                             {homeContent.services.map((service, idx) => (
                                                 <div key={service.id} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
                                                     <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
                                                         <div style={{ flex: 1 }}>
-                                                            <label style={{ fontSize: '0.7rem', color: '#666' }}>Icon (Lucide name)</label>
+                                                            <label style={{ fontSize: '0.7rem', color: '#666' }}>Icône (nom Lucide)</label>
                                                             <input type="text" value={service.icon} onChange={(e) => {
                                                                 const newServices = [...homeContent.services];
                                                                 newServices[idx].icon = e.target.value;
@@ -2165,7 +2170,7 @@ const Dashboard = () => {
                                                             }} style={inputStyle} />
                                                         </div>
                                                         <div style={{ flex: 2 }}>
-                                                            <label style={{ fontSize: '0.7rem', color: '#666' }}>Title</label>
+                                                            <label style={{ fontSize: '0.7rem', color: '#666' }}>Titre</label>
                                                             <input type="text" value={service.title} onChange={(e) => {
                                                                 const newServices = [...homeContent.services];
                                                                 newServices[idx].title = e.target.value;
@@ -2186,13 +2191,13 @@ const Dashboard = () => {
 
                                     {/* CTA */}
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Call to Action</h3>
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Appel à l'Action</h3>
                                         <div style={{ display: 'grid', gap: '1rem' }}>
-                                            <input type="text" placeholder="Title" value={homeContent.cta.title} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, title: e.target.value } })} style={inputStyle} />
-                                            <input type="text" placeholder="Text" value={homeContent.cta.text} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, text: e.target.value } })} style={inputStyle} />
+                                            <input type="text" placeholder="Titre" value={homeContent.cta.title} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, title: e.target.value } })} style={inputStyle} />
+                                            <input type="text" placeholder="Texte" value={homeContent.cta.text} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, text: e.target.value } })} style={inputStyle} />
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <input type="text" placeholder="Button Text" value={homeContent.cta.buttonText} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonText: e.target.value } })} style={inputStyle} />
-                                                <input type="text" placeholder="Button Link" value={homeContent.cta.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonLink: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Texte du bouton" value={homeContent.cta.buttonText} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonText: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Lien du bouton" value={homeContent.cta.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonLink: e.target.value } })} style={inputStyle} />
                                             </div>
                                         </div>
                                     </div>
@@ -2200,8 +2205,8 @@ const Dashboard = () => {
                                     {/* STATS SECTION */}
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Statistics (Bottom section)</h3>
-                                            <button onClick={() => setHomeContent({ ...homeContent, stats: [...(homeContent.stats || []), { id: Date.now(), label: 'New Stat', value: '100+' }] })} style={btnModern}><Plus size={14} /> Add</button>
+                                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Statistiques (Section du bas)</h3>
+                                            <button onClick={() => setHomeContent({ ...homeContent, stats: [...(homeContent.stats || []), { id: Date.now(), label: 'Nouvelle Stat', value: '100+' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                                             {(homeContent.stats || []).map((stat, idx) => (
@@ -2210,12 +2215,12 @@ const Dashboard = () => {
                                                         <label style={{ fontSize: '0.7rem', color: '#666' }}>Stat #{idx + 1}</label>
                                                         <button onClick={() => setHomeContent({ ...homeContent, stats: homeContent.stats.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer' }}><Trash2 size={14} /></button>
                                                     </div>
-                                                    <input type="text" placeholder="Label (e.g. Clients Satisfaits)" value={stat.label} onChange={(e) => {
+                                                    <input type="text" placeholder="Libellé (ex: Clients Satisfaits)" value={stat.label} onChange={(e) => {
                                                         const newStats = [...homeContent.stats];
                                                         newStats[idx].label = e.target.value;
                                                         setHomeContent({ ...homeContent, stats: newStats });
                                                     }} style={{ ...inputStyle, marginBottom: '0.5rem' }} />
-                                                    <input type="text" placeholder="Value (e.g. 250+)" value={stat.value} onChange={(e) => {
+                                                    <input type="text" placeholder="Valeur (ex: 250+)" value={stat.value} onChange={(e) => {
                                                         const newStats = [...homeContent.stats];
                                                         newStats[idx].value = e.target.value;
                                                         setHomeContent({ ...homeContent, stats: newStats });
@@ -2227,13 +2232,13 @@ const Dashboard = () => {
 
                                     {/* TESTIMONIALS SECTION */}
                                     <div>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Selected Testimonials</h3>
+                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Témoignages Sélectionnés</h3>
                                         <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>Sélectionnez les avis qui apparaîtront sur la page d'accueil (Mis en avant).</p>
                                         <div style={{ display: 'grid', gap: '0.8rem', maxHeight: '300px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
                                             {/* We need to get all reviews from DataContext. Dashboard uses reviews state. */}
                                             {Object.keys(reviews).length > 0 ? Object.entries(reviews).map(([prodId, prodReviews]) => (
                                                 <div key={prodId}>
-                                                    <h4 style={{ fontSize: '0.75rem', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Product: {products.find(p => p.id === parseInt(prodId))?.name || prodId}</h4>
+                                                    <h4 style={{ fontSize: '0.75rem', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Produit: {products.find(p => p.id === parseInt(prodId))?.name || prodId}</h4>
                                                     <div style={{ display: 'grid', gap: '0.5rem', marginLeft: '1rem' }}>
                                                         {prodReviews.map((rev, revIdx) => {
                                                             const revId = `${prodId}-${revIdx}`;
@@ -2286,7 +2291,7 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                             )) : (
-                                                <p style={{ color: '#444', fontStyle: 'italic', textAlign: 'center' }}>No reviews available yet.</p>
+                                                <p style={{ color: '#444', fontStyle: 'italic', textAlign: 'center' }}>Aucun avis disponible pour le moment.</p>
                                             )}
                                         </div>
                                     </div>
