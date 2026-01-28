@@ -222,13 +222,11 @@
 .dashboard-main {
     padding: 2rem;
     min-width: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: calc(100vh - 160px);
-    scroll-behavior: smooth;
+    overflow: visible;
+    height: auto;
 }
 
-/* Prevent nested scrolling - single scroll for main content */
+/* Content flows naturally without nested scroll */
 .dashboard-main > .animate-in {
     max-height: none;
     overflow: visible;
