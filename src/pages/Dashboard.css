@@ -3,6 +3,26 @@
    Ergonomic, Clean & Professional
    ============================================ */
 
+/* Custom Scrollbar - Violet Theme */
+.dashboard-page ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dashboard-page ::-webkit-scrollbar-track {
+    background: rgba(15, 15, 23, 0.5);
+    border-radius: 3px;
+}
+
+.dashboard-page ::-webkit-scrollbar-thumb {
+    background: rgba(167, 139, 250, 0.4);
+    border-radius: 3px;
+}
+
+.dashboard-page ::-webkit-scrollbar-thumb:hover {
+    background: rgba(167, 139, 250, 0.6);
+}
+
 .dashboard-page {
     min-height: 100vh;
     background: linear-gradient(135deg, #0a0a0f 0%, #0d0d14 100%);
@@ -205,6 +225,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     height: calc(100vh - 160px);
+    scroll-behavior: smooth;
 }
 
 /* Prevent nested scrolling - single scroll for main content */
