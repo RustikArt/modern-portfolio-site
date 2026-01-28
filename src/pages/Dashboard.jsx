@@ -632,15 +632,17 @@ const Dashboard = () => {
                         </p>
                         {showVersionDetails && (
                             <div className="animate-in" style={{
-                                marginTop: '10px',
-                                padding: '10px 15px',
-                                background: 'rgba(255,255,255,0.03)',
-                                borderRadius: '8px',
-                                border: '1px solid rgba(255,255,255,0.05)',
+                                marginTop: '12px',
+                                padding: '12px 16px',
+                                background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.02) 100%)',
+                                borderRadius: '6px',
+                                borderLeft: '3px solid var(--color-accent)',
                                 fontSize: '0.75rem',
-                                color: '#888',
+                                color: 'rgba(212, 175, 55, 0.8)',
                                 whiteSpace: 'pre-line',
-                                lineHeight: '1.6'
+                                lineHeight: '1.6',
+                                fontFamily: 'monospace',
+                                letterSpacing: '0.5px'
                             }}>
                                 {VERSION_DETAILS}
                             </div>

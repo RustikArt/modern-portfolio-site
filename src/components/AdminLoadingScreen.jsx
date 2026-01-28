@@ -26,9 +26,12 @@ const AdminLoadingScreen = ({ children }) => {
     // Faster loading time for smoother UX
     const MIN_LOADING_TIME = 1000;
 
+    // Check if loading should be skipped immediately
+    const shouldSkip = settingsLoaded && settings?.showAdminLoading === false;
+
     useEffect(() => {
-        // Quick check - if settings loaded and disabled, skip immediately
-        if (settingsLoaded && settings?.showAdminLoading === false) {
+        // Skip immediately if disabled in settings
+        if (shouldSkip) {
             setIsLoading(false);
             return;
         }
@@ -95,9 +98,10 @@ const AdminLoadingScreen = ({ children }) => {
             clearInterval(progressInterval);
             clearInterval(stepInterval);
         };
-    }, [settingsLoaded, settings?.showAdminLoading, currentUser]);
+    }, [settingsLoaded, shouldSkip, currentUser]);
 
-    if (!isLoading) {
+    // Skip rendering loading screen entirely if disabled
+    if (shouldSkip || !isLoading) {
         return children;
     }
 

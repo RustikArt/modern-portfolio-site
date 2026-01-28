@@ -12,19 +12,21 @@ const LoadingScreen = ({ children }) => {
     // Skip loading screen for admin routes (they have their own)
     const isAdminRoute = location.pathname.startsWith('/admin');
 
+    // Check if loading should be skipped immediately
+    const shouldSkip = isAdminRoute || (settingsLoaded && settings?.showLoadingScreen === false);
+
     // Minimum display time for smooth UX
     const MIN_LOADING_TIME = 800;
 
     useEffect(() => {
-        // Skip for admin routes
-        if (isAdminRoute) {
+        // Skip immediately if conditions are met
+        if (shouldSkip) {
             setIsLoading(false);
             return;
         }
 
-        // If loading screen is disabled in settings, skip it immediately
-        if (settingsLoaded && settings?.showLoadingScreen === false) {
-            setIsLoading(false);
+        // If settings not loaded yet, wait
+        if (!settingsLoaded) {
             return;
         }
 
@@ -63,9 +65,10 @@ const LoadingScreen = ({ children }) => {
             clearInterval(interval);
             clearInterval(progressInterval);
         };
-    }, [settingsLoaded, announcementLoaded, settings?.showLoadingScreen, isAdminRoute]);
+    }, [settingsLoaded, announcementLoaded, shouldSkip]);
 
-    if (!isLoading) {
+    // If should skip or not loading, render children immediately
+    if (shouldSkip || !isLoading) {
         return children;
     }
 
