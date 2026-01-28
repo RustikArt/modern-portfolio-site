@@ -213,8 +213,6 @@ const Dashboard = () => {
     const [localSiteTitle, setLocalSiteTitle] = useState('');
     const [localMaintenanceMode, setLocalMaintenanceMode] = useState(false);
     const [localGrainEffect, setLocalGrainEffect] = useState(false);
-    const [localShowLoadingScreen, setLocalShowLoadingScreen] = useState(true);
-    const [localShowAdminLoading, setLocalShowAdminLoading] = useState(true);
     const [localContactEmail, setLocalContactEmail] = useState('');
     const [localSocials, setLocalSocials] = useState({ instagram: '', twitter: '', discord: '' });
     const [localNavbarPadding, setLocalNavbarPadding] = useState('normal');
@@ -227,8 +225,6 @@ const Dashboard = () => {
             setLocalSiteTitle(settings.siteTitle || '');
             setLocalMaintenanceMode(Boolean(settings.maintenanceMode));
             setLocalGrainEffect(Boolean(settings.grainEffect));
-            setLocalShowLoadingScreen(settings.showLoadingScreen !== false);
-            setLocalShowAdminLoading(settings.showAdminLoading !== false);
             setLocalContactEmail(settings.contactEmail || '');
             setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
             setLocalNavbarPadding(settings.navbarPadding || 'normal');
@@ -604,7 +600,6 @@ const Dashboard = () => {
 
 
     return (
-        <AdminLoadingScreen>
         <div className="page" style={{ paddingTop: '140px', paddingBottom: '4rem', minHeight: '100vh', background: '#050505', color: '#eee' }}>
             <div className="container" style={{ maxWidth: '1400px' }}>
                 {/* Header V2.2 */}
@@ -2352,28 +2347,6 @@ const Dashboard = () => {
 
                                             <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                                    <span style={{ fontWeight: 'bold' }}>Écran de Chargement</span>
-                                                    <div
-                                                        onClick={() => setLocalShowLoadingScreen(!localShowLoadingScreen)}
-                                                        className={`toggle-switch ${localShowLoadingScreen ? 'active' : ''}`}
-                                                    ></div>
-                                                </div>
-                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Affiche un écran de chargement animé au démarrage du site.</p>
-                                            </div>
-
-                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                                    <span style={{ fontWeight: 'bold' }}>Chargement Admin</span>
-                                                    <div
-                                                        onClick={() => setLocalShowAdminLoading(!localShowAdminLoading)}
-                                                        className={`toggle-switch ${localShowAdminLoading ? 'active' : ''}`}
-                                                    ></div>
-                                                </div>
-                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Affiche un écran de chargement lors de l'accès au dashboard admin.</p>
-                                            </div>
-
-                                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                     <span style={{ fontWeight: 'bold' }}>Épaisseur de la Navbar</span>
                                                 </div>
                                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: '0 0 1rem 0' }}>Ajuste l'espacement vertical de la barre de navigation.</p>
@@ -2457,8 +2430,6 @@ const Dashboard = () => {
                                                         siteTitle: localSiteTitle,
                                                         maintenanceMode: localMaintenanceMode,
                                                         grainEffect: localGrainEffect,
-                                                        showLoadingScreen: localShowLoadingScreen,
-                                                        showAdminLoading: localShowAdminLoading,
                                                         contactEmail: localContactEmail,
                                                         socials: localSocials,
                                                         navbarPadding: localNavbarPadding
@@ -2467,8 +2438,6 @@ const Dashboard = () => {
                                                         siteTitle: localSiteTitle,
                                                         maintenanceMode: localMaintenanceMode,
                                                         grainEffect: localGrainEffect,
-                                                        showLoadingScreen: localShowLoadingScreen,
-                                                        showAdminLoading: localShowAdminLoading,
                                                         contactEmail: localContactEmail,
                                                         socials: localSocials,
                                                         navbarPadding: localNavbarPadding
@@ -2901,7 +2870,6 @@ const Dashboard = () => {
                 </div>
             </div >
         </div >
-        </AdminLoadingScreen>
     );
 };
 

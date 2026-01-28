@@ -5,7 +5,6 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SiteBanner from './components/SiteBanner';
 import GrainOverlay from './components/GrainOverlay';
-import LoadingScreen from './components/LoadingScreen';
 import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
@@ -267,7 +266,7 @@ function App() {
 
 const AppContent = () => {
   return (
-    <LoadingScreen>
+    <>
       <ScrollToTop />
       <GrainOverlay />
       <SiteBanner />
@@ -313,7 +312,7 @@ const AppContent = () => {
         </Routes>
       </main>
       <Footer />
-    </LoadingScreen>
+    </>
   );
 };
 
