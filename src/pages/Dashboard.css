@@ -383,6 +383,38 @@
     opacity: 1;
 }
 
+/* KPI Card Color Variants */
+.kpi-card--primary::before {
+    background: #a78bfa;
+}
+
+.kpi-card--primary .kpi-card__icon {
+    background: rgba(167, 139, 250, 0.15);
+    color: #a78bfa;
+}
+
+.kpi-card--secondary::before {
+    background: #22d3ee;
+}
+
+.kpi-card--secondary .kpi-card__icon {
+    background: rgba(34, 211, 238, 0.15);
+    color: #22d3ee;
+}
+
+.kpi-card--tertiary::before {
+    background: #fb7185;
+}
+
+.kpi-card--tertiary .kpi-card__icon {
+    background: rgba(251, 113, 133, 0.15);
+    color: #fb7185;
+}
+
+.kpi-card--actions::before {
+    background: #fbbf24;
+}
+
 .kpi-card-label {
     font-size: 0.75rem;
     color: #64748b;
@@ -965,6 +997,23 @@ textarea.input-modern {
     border: 1px solid rgba(167, 139, 250, 0.1);
     border-radius: 16px;
     padding: 1.5rem;
+}
+
+/* Remove focus outline on chart elements */
+.chart-container svg,
+.chart-container svg path,
+.chart-container svg rect,
+.chart-container .recharts-pie,
+.chart-container .recharts-pie-sector,
+.chart-container .recharts-sector,
+.recharts-pie-sector:focus,
+.recharts-sector:focus {
+    outline: none !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+    outline: none !important;
 }
 
 .chart-title {

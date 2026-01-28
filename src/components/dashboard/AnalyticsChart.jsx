@@ -93,13 +93,24 @@ const AnalyticsChart = ({ data, title }) => {
                             tickFormatter={(value) => `${value}€`}
                         />
                         <Tooltip
-                            contentStyle={{
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                border: '1px solid #333',
-                                borderRadius: '8px',
-                                color: '#fff'
+                            cursor={{ stroke: '#a78bfa', strokeWidth: 1, strokeDasharray: '5 5' }}
+                            content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                    return (
+                                        <div style={{
+                                            background: 'rgba(15, 15, 23, 0.95)',
+                                            border: '2px solid #a78bfa',
+                                            borderRadius: '10px',
+                                            padding: '10px 14px',
+                                            boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                                        }}>
+                                            <p style={{ margin: 0, fontWeight: 600, color: '#a78bfa' }}>{label}</p>
+                                            <p style={{ margin: '4px 0 0', color: '#f8fafc', fontSize: '1.1rem' }}>{payload[0].value} €</p>
+                                        </div>
+                                    );
+                                }
+                                return null;
                             }}
-                            itemStyle={{ color: '#a78bfa' }}
                         />
                         <Area
                             type="monotone"

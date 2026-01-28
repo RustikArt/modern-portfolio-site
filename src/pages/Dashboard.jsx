@@ -908,6 +908,7 @@ const Dashboard = () => {
                                                 else if (statusCounts[o.status] !== undefined) statusCounts[o.status]++;
                                             });
                                             const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name, value })).filter(d => d.value > 0);
+                                            const COLORS = { 'Réception': '#fb7185', 'En cours': '#fbbf24', 'Terminé': '#a78bfa', 'En attente': '#64748b' };
                                             
                                             if (pieData.length === 0) {
                                                 return <p className="empty-state">Aucune commande à afficher</p>;
@@ -927,13 +928,37 @@ const Dashboard = () => {
                                                                 dataKey="value"
                                                                 label={({ name, value }) => `${name}: ${value}`}
                                                                 labelLine={false}
+                                                                stroke="none"
+                                                                style={{ outline: 'none' }}
                                                             >
-                                                                {pieData.map((entry, index) => {
-                                                                    const colors = { 'Réception': '#fb7185', 'En cours': '#fbbf24', 'Terminé': '#22d3ee', 'En attente': '#a78bfa' };
-                                                                    return <Cell key={`cell-${index}`} fill={colors[entry.name] || '#888'} />;
-                                                                })}
+                                                                {pieData.map((entry, index) => (
+                                                                    <Cell 
+                                                                        key={`cell-${index}`} 
+                                                                        fill={COLORS[entry.name] || '#888'}
+                                                                        style={{ outline: 'none', cursor: 'pointer' }}
+                                                                    />
+                                                                ))}
                                                             </Pie>
-                                                            <Tooltip contentStyle={{ background: '#0f0f17', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '12px' }} />
+                                                            <Tooltip 
+                                                                content={({ active, payload }) => {
+                                                                    if (active && payload && payload.length) {
+                                                                        const data = payload[0].payload;
+                                                                        return (
+                                                                            <div style={{
+                                                                                background: 'rgba(15, 15, 23, 0.95)',
+                                                                                border: `2px solid ${COLORS[data.name]}`,
+                                                                                borderRadius: '10px',
+                                                                                padding: '10px 14px',
+                                                                                boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                                                                            }}>
+                                                                                <p style={{ margin: 0, fontWeight: 600, color: COLORS[data.name] }}>{data.name}</p>
+                                                                                <p style={{ margin: '4px 0 0', color: '#f8fafc', fontSize: '1.1rem' }}>{data.value} commande{data.value > 1 ? 's' : ''}</p>
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    return null;
+                                                                }}
+                                                            />
                                                         </RechartsPie>
                                                     </ResponsiveContainer>
                                                 </div>
@@ -942,8 +967,8 @@ const Dashboard = () => {
                                         <div className="chart-legend">
                                             <span className="legend-item"><span className="legend-dot" style={{ background: '#fb7185' }}></span> Réception</span>
                                             <span className="legend-item"><span className="legend-dot" style={{ background: '#fbbf24' }}></span> En cours</span>
-                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#22d3ee' }}></span> Terminé</span>
-                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#a78bfa' }}></span> En attente</span>
+                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#a78bfa' }}></span> Terminé</span>
+                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#64748b' }}></span> En attente</span>
                                         </div>
                                     </div>
 
@@ -972,8 +997,28 @@ const Dashboard = () => {
                                                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(167,139,250,0.1)" />
                                                             <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
                                                             <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
-                                                            <Tooltip contentStyle={{ background: '#0f0f17', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '12px' }} formatter={(v) => [`${v} €`, 'Revenus']} />
-                                                            <Bar dataKey="total" fill="#a78bfa" radius={[8, 8, 0, 0]} />
+                                                            <Tooltip 
+                                                                cursor={{ fill: 'rgba(167, 139, 250, 0.1)' }}
+                                                                content={({ active, payload }) => {
+                                                                    if (active && payload && payload.length) {
+                                                                        const data = payload[0].payload;
+                                                                        return (
+                                                                            <div style={{
+                                                                                background: 'rgba(15, 15, 23, 0.95)',
+                                                                                border: '2px solid #a78bfa',
+                                                                                borderRadius: '10px',
+                                                                                padding: '10px 14px',
+                                                                                boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                                                                            }}>
+                                                                                <p style={{ margin: 0, fontWeight: 600, color: '#a78bfa' }}>{data.name}</p>
+                                                                                <p style={{ margin: '4px 0 0', color: '#f8fafc', fontSize: '1.1rem' }}>{data.total} €</p>
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    return null;
+                                                                }}
+                                                            />
+                                                            <Bar dataKey="total" fill="#a78bfa" radius={[8, 8, 0, 0]} style={{ cursor: 'pointer' }} />
                                                         </BarChart>
                                                     </ResponsiveContainer>
                                                 </div>
