@@ -1,4 +1,4 @@
-import { setCorsHeaders, handleCorsPreFlight, checkRateLimit, handleError } from './middleware.js';
+import { setCorsHeaders, handleCorsPreFlight, checkRateLimit, handleError } from '../lib/middleware.js';
 
 export default async function handler(req, res) {
     // Configurer les headers CORS

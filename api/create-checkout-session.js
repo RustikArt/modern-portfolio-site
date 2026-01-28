@@ -7,7 +7,7 @@ import {
     validateRedirectUrl,
     checkRateLimit,
     handleError
-} from './middleware.js';
+} from '../lib/middleware.js';
 
 // Validate Stripe configuration
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;

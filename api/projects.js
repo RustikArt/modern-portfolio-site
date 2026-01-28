@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { setCorsHeaders, handleCorsPreFlight, handleError, requireAdminAuth } from './middleware.js';
+import { setCorsHeaders, handleCorsPreFlight, handleError, requireAdminAuth } from '../lib/middleware.js';
 
 // Configuration Supabase - NEVER hardcode keys
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;

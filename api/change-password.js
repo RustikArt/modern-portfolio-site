@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { setCorsHeaders, handleCorsPreFlight, handleError } from './middleware.js';
+import { setCorsHeaders, handleCorsPreFlight, handleError } from '../lib/middleware.js';
 import bcrypt from 'bcryptjs';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
