@@ -367,25 +367,34 @@ a:focus:not(:focus-visible) {
 
 .btn-primary,
 .btn.btn-primary {
-  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%) !important;
+  background: #a78bfa !important;
   color: #0a0a0f !important;
   border: none !important;
   font-weight: 700;
   box-shadow: 0 4px 20px rgba(167, 139, 250, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: visible;
 }
 
 .btn-primary:hover,
 .btn.btn-primary:hover {
-  background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%) !important;
+  background: #c4b5fd !important;
   color: #0a0a0f !important;
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 30px rgba(167, 139, 250, 0.4), 0 0 60px rgba(167, 139, 250, 0.15);
+  box-shadow: 0 8px 30px rgba(167, 139, 250, 0.4);
 }
 
 .btn-primary::before,
 .btn.btn-primary::before {
   display: none !important;
+  content: none !important;
+}
+
+.btn-primary::after,
+.btn.btn-primary::after {
+  display: none !important;
+  content: none !important;
 }
 
 .btn-outline {

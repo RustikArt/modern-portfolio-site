@@ -193,7 +193,7 @@ const Dashboard = () => {
     };
 
     // --- FORMS STATES ---
-    const [projectForm, setProjectForm] = useState({ editId: null, title: '', category: '', image: '', content: '', blocks: [] });
+    const [projectForm, setProjectForm] = useState({ editId: null, title: '', category: '', image: '', imageType: 'url', lucideIcon: '', content: '', blocks: [] });
 
     const [productForm, setProductForm] = useState({
         editId: null,
@@ -445,10 +445,17 @@ const Dashboard = () => {
     const handleProjectSubmit = (e) => {
         e.preventDefault();
         if (!projectForm.title) return;
+        
+        // Determine image value based on type
+        let imageValue = projectForm.image || 'https://placehold.co/600x400/333?text=Project';
+        if (projectForm.imageType === 'lucide' && projectForm.lucideIcon) {
+            imageValue = `lucide:${projectForm.lucideIcon}`;
+        }
+        
         const projectData = {
             title: projectForm.title,
             category: projectForm.category,
-            image: projectForm.image || 'https://placehold.co/600x400/333?text=Project',
+            image: imageValue,
             content: projectForm.content || '',
             blocks: projectForm.blocks || []
         };
@@ -457,15 +464,18 @@ const Dashboard = () => {
         } else {
             addProject(projectData);
         }
-        setProjectForm({ editId: null, title: '', category: '', image: '', content: '', blocks: [] });
+        setProjectForm({ editId: null, title: '', category: '', image: '', imageType: 'url', lucideIcon: '', content: '', blocks: [] });
     };
 
     const handleEditProject = (project) => {
+        const isLucideIcon = project.image && project.image.startsWith('lucide:');
         setProjectForm({
             editId: project.id,
             title: project.title,
             category: project.category,
-            image: project.image,
+            image: isLucideIcon ? '' : project.image,
+            imageType: isLucideIcon ? 'lucide' : 'url',
+            lucideIcon: isLucideIcon ? project.image.replace('lucide:', '') : '',
             content: project.content || '',
             blocks: project.blocks || []
         });
@@ -1641,7 +1651,81 @@ const Dashboard = () => {
                                             <input type="text" placeholder="Titre du projet" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} required />
                                             <input type="text" placeholder="Category" value={projectForm.category} onChange={e => setProjectForm({ ...projectForm, category: e.target.value })} style={inputStyle} />
                                         </div>
-                                        <input type="text" placeholder="URL de la couverture" value={projectForm.image} onChange={e => setProjectForm({ ...projectForm, image: e.target.value })} style={inputStyle} />
+                                        
+                                        {/* Image Type Selector for Projects */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1.5rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Image de couverture</p>
+                                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                    <input 
+                                                        type="radio" 
+                                                        name="projectImageType" 
+                                                        value="url" 
+                                                        checked={projectForm.imageType === 'url'} 
+                                                        onChange={() => setProjectForm({ ...projectForm, imageType: 'url', lucideIcon: '' })}
+                                                    />
+                                                    URL d'image
+                                                </label>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                    <input 
+                                                        type="radio" 
+                                                        name="projectImageType" 
+                                                        value="lucide" 
+                                                        checked={projectForm.imageType === 'lucide'} 
+                                                        onChange={() => setProjectForm({ ...projectForm, imageType: 'lucide', image: '' })}
+                                                    />
+                                                    Icône Lucide (HD)
+                                                </label>
+                                            </div>
+                                            
+                                            {projectForm.imageType === 'url' ? (
+                                                <input type="text" placeholder="URL de la couverture" value={projectForm.image} onChange={e => setProjectForm({ ...projectForm, image: e.target.value })} style={inputStyle} />
+                                            ) : (
+                                                <div>
+                                                    <select 
+                                                        value={projectForm.lucideIcon} 
+                                                        onChange={e => setProjectForm({ ...projectForm, lucideIcon: e.target.value })}
+                                                        style={{ ...inputStyle, marginBottom: '1rem' }}
+                                                    >
+                                                        <option value="">Choisir une icône...</option>
+                                                        <option value="Code">Code</option>
+                                                        <option value="FileCode">FileCode (Fichier Code)</option>
+                                                        <option value="Layers">Layers (Calques)</option>
+                                                        <option value="Layout">Layout (Mise en page)</option>
+                                                        <option value="Palette">Palette (Design)</option>
+                                                        <option value="Brush">Brush (Pinceau)</option>
+                                                        <option value="PenTool">PenTool (Stylo)</option>
+                                                        <option value="Figma">Figma</option>
+                                                        <option value="Globe">Globe (Web)</option>
+                                                        <option value="Smartphone">Smartphone (Mobile)</option>
+                                                        <option value="Monitor">Monitor (Desktop)</option>
+                                                        <option value="Server">Server</option>
+                                                        <option value="Database">Database</option>
+                                                        <option value="Cloud">Cloud</option>
+                                                        <option value="Rocket">Rocket (Lancement)</option>
+                                                        <option value="Zap">Zap (Performance)</option>
+                                                        <option value="Sparkles">Sparkles (Créatif)</option>
+                                                        <option value="Wand2">Wand2 (Magie)</option>
+                                                        <option value="Image">Image</option>
+                                                        <option value="Video">Video</option>
+                                                        <option value="Music">Music</option>
+                                                        <option value="Gamepad2">Gamepad2 (Jeu)</option>
+                                                        <option value="Bot">Bot (IA)</option>
+                                                        <option value="Brain">Brain (ML)</option>
+                                                        <option value="Terminal">Terminal (CLI)</option>
+                                                        <option value="Git">Git (Version Control)</option>
+                                                    </select>
+                                                    {projectForm.lucideIcon && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: '#181818', borderRadius: '12px' }}>
+                                                            <div style={{ width: '80px', height: '80px', background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05))', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {renderLucideIcon(projectForm.lucideIcon, { size: 48, color: '#a78bfa', strokeWidth: 1.5 })}
+                                                            </div>
+                                                            <span style={{ color: '#888', fontSize: '0.85rem' }}>Prévisualisation haute définition</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
 
                                         <div style={{ background: '#0a0a0a', padding: '1.5rem', borderRadius: '12px', border: '1px solid #111' }}>
                                             <h4 style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: '#555', textTransform: 'uppercase' }}>Advanced Block Editor</h4>
@@ -1658,9 +1742,27 @@ const Dashboard = () => {
                                 </section>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                                    {projects.map(p => (
+                                    {projects.map(p => {
+                                        const isProjectLucideIcon = p.image && p.image.startsWith('lucide:');
+                                        const projectIconName = isProjectLucideIcon ? p.image.replace('lucide:', '') : null;
+                                        return (
                                         <div key={p.id} style={cardStyle}>
-                                            <img src={`${p.image}?v=${WEBSITE_VERSION}`} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                            {isProjectLucideIcon ? (
+                                                <div style={{ 
+                                                    width: '100%', 
+                                                    height: '200px', 
+                                                    background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(18, 18, 26, 0.95) 100%)',
+                                                    borderRadius: '12px', 
+                                                    marginBottom: '1rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}>
+                                                    {renderLucideIcon(projectIconName, { size: 64, color: '#a78bfa', strokeWidth: 1.5 })}
+                                                </div>
+                                            ) : (
+                                                <img src={`${p.image}?v=${WEBSITE_VERSION}`} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                            )}
                                             <h4 style={{ margin: '0 0 0.5rem' }}>{p.title}</h4>
                                             <p style={{ fontSize: '0.75rem', color: '#555', textTransform: 'uppercase', marginBottom: '1.5rem' }}>{p.category}</p>
                                             <div style={{ display: 'flex', gap: '1rem' }}>
@@ -1672,7 +1774,8 @@ const Dashboard = () => {
                                                 </button>
                                             </div>
                                         </div>
-                                    ))}
+                                    );
+                                    })}
                                 </div>
                             </div>
                         )}

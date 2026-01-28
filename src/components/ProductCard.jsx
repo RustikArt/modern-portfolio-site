@@ -113,9 +113,8 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                     )}
                 </div>
 
-                <div style={{ marginBottom: '0.5rem' }}>
-                    <StarRating rating={rating} readonly />
-                    <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '0.5rem' }}>({reviewCount})</span>
+                <div style={{ marginBottom: '0.75rem' }}>
+                    <StarRating rating={rating} readonly showCount count={reviewCount} />
                 </div>
 
                 {product.promoPrice && product.promoPrice < product.price ? (
