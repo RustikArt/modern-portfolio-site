@@ -93,26 +93,25 @@ const AnalyticsChart = ({ data, title }) => {
                             tickFormatter={(value) => `${value}€`}
                         />
                         <Tooltip
-                            cursor={{ stroke: '#a78bfa', strokeWidth: 1, strokeDasharray: '5 5' }}
+                            cursor={{ stroke: '#a78bfa', strokeWidth: 1, strokeDasharray: '3 3' }}
                             isAnimationActive={false}
-                            wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
                             content={({ active, payload, label }) => {
                                 if (active && payload && payload.length) {
                                     return (
                                         <div style={{
-                                            background: 'rgba(15, 15, 23, 0.95)',
-                                            border: '2px solid #a78bfa',
-                                            borderRadius: '10px',
-                                            padding: '10px 14px',
-                                            boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                                            background: 'rgba(10, 10, 15, 0.9)',
+                                            border: '1px solid rgba(167, 139, 250, 0.3)',
+                                            borderRadius: '6px',
+                                            padding: '6px 10px',
+                                            fontSize: '0.75rem'
                                         }}>
-                                            <p style={{ margin: 0, fontWeight: 600, color: '#a78bfa' }}>{label}</p>
-                                            <p style={{ margin: '4px 0 0', color: '#f8fafc', fontSize: '1.1rem' }}>{payload[0].value} €</p>
+                                            <span style={{ color: '#a78bfa', fontWeight: 500 }}>{label}</span>
+                                            <span style={{ color: '#94a3b8', marginLeft: '6px' }}>{payload[0].value} €</span>
                                         </div>
                                     );
                                 }
                                 return null;
-                            }}
+                                }}
                         />
                         <Area
                             type="monotone"

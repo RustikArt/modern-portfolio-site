@@ -941,20 +941,19 @@ const Dashboard = () => {
                                                             </Pie>
                                                             <Tooltip 
                                                                 isAnimationActive={false}
-                                                                wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
                                                                 content={({ active, payload }) => {
                                                                     if (active && payload && payload.length) {
                                                                         const data = payload[0].payload;
                                                                         return (
                                                                             <div style={{
-                                                                                background: 'rgba(15, 15, 23, 0.95)',
-                                                                                border: `2px solid ${COLORS[data.name]}`,
-                                                                                borderRadius: '10px',
-                                                                                padding: '10px 14px',
-                                                                                boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                                                                                background: 'rgba(10, 10, 15, 0.9)',
+                                                                                border: `1px solid ${COLORS[data.name]}40`,
+                                                                                borderRadius: '6px',
+                                                                                padding: '6px 10px',
+                                                                                fontSize: '0.75rem'
                                                                             }}>
-                                                                                <p style={{ margin: 0, fontWeight: 600, color: COLORS[data.name] }}>{data.name}</p>
-                                                                                <p style={{ margin: '4px 0 0', color: '#f8fafc', fontSize: '1.1rem' }}>{data.value} commande{data.value > 1 ? 's' : ''}</p>
+                                                                                <span style={{ color: COLORS[data.name], fontWeight: 500 }}>{data.name}</span>
+                                                                                <span style={{ color: '#94a3b8', marginLeft: '6px' }}>{data.value}</span>
                                                                             </div>
                                                                         );
                                                                     }
@@ -1000,22 +999,21 @@ const Dashboard = () => {
                                                             <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
                                                             <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
                                                             <Tooltip 
-                                                                cursor={{ fill: 'rgba(167, 139, 250, 0.1)' }}
+                                                                cursor={{ fill: 'rgba(167, 139, 250, 0.08)' }}
                                                                 isAnimationActive={false}
-                                                                wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
                                                                 content={({ active, payload }) => {
                                                                     if (active && payload && payload.length) {
                                                                         const data = payload[0].payload;
                                                                         return (
                                                                             <div style={{
-                                                                                background: 'rgba(15, 15, 23, 0.95)',
-                                                                                border: '2px solid #a78bfa',
-                                                                                borderRadius: '10px',
-                                                                                padding: '10px 14px',
-                                                                                boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                                                                                background: 'rgba(10, 10, 15, 0.9)',
+                                                                                border: '1px solid rgba(167, 139, 250, 0.3)',
+                                                                                borderRadius: '6px',
+                                                                                padding: '6px 10px',
+                                                                                fontSize: '0.75rem'
                                                                             }}>
-                                                                                <p style={{ margin: 0, fontWeight: 600, color: '#a78bfa' }}>{data.name}</p>
-                                                                                <p style={{ margin: '4px 0 0', color: '#f8fafc', fontSize: '1.1rem' }}>{data.total} €</p>
+                                                                                <span style={{ color: '#a78bfa', fontWeight: 500 }}>{data.name}</span>
+                                                                                <span style={{ color: '#94a3b8', marginLeft: '6px' }}>{data.total} €</span>
                                                                             </div>
                                                                         );
                                                                     }
