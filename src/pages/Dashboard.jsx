@@ -217,21 +217,26 @@ const Dashboard = () => {
 
     // Get all available Lucide icons (filter out non-icon exports)
     const allLucideIcons = useMemo(() => {
-        return Object.keys(LucideIcons).filter(key => 
-            typeof LucideIcons[key] === 'function' && 
-            key[0] === key[0].toUpperCase() && 
-            !key.includes('Icon') &&
-            key !== 'createLucideIcon' &&
-            key !== 'default'
-        ).sort();
+        const icons = Object.keys(LucideIcons).filter(key => {
+            // Only keep components (functions) that start with uppercase
+            // Exclude duplicates ending with 'Icon' and utility functions
+            if (typeof LucideIcons[key] !== 'function') return false;
+            if (key[0] !== key[0].toUpperCase()) return false;
+            if (key.endsWith('Icon')) return false;
+            if (key === 'createLucideIcon' || key === 'default' || key === 'icons') return false;
+            return true;
+        }).sort();
+        console.log('Lucide icons loaded:', icons.length);
+        return icons;
     }, []);
 
     // Filtered icons based on search
     const filteredIcons = useMemo(() => {
-        if (!iconSearch) return allLucideIcons.slice(0, 50); // Show first 50 by default
+        if (!iconSearch.trim()) return allLucideIcons.slice(0, 60); // Show first 60 by default
+        const search = iconSearch.toLowerCase().trim();
         return allLucideIcons.filter(icon => 
-            icon.toLowerCase().includes(iconSearch.toLowerCase())
-        ).slice(0, 100); // Limit to 100 results
+            icon.toLowerCase().includes(search)
+        ).slice(0, 120); // Limit to 120 results
     }, [iconSearch, allLucideIcons]);
 
     // --- GENERAL SETTINGS STATES (local before apply) ---
@@ -1562,104 +1567,93 @@ const Dashboard = () => {
                                             {productForm.imageType === 'url' ? (
                                                 <input type="text" placeholder="URL de l'image" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} style={inputStyle} />
                                             ) : (
-                                                <div style={{ position: 'relative' }}>
-                                                    {/* Search input for icons */}
-                                                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                                                        <div style={{ position: 'relative', flex: 1 }}>
-                                                            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#555' }} />
-                                                            <input 
-                                                                type="text"
-                                                                placeholder="Rechercher une icône... (ex: heart, star, code)"
-                                                                value={iconSearch}
-                                                                onChange={e => { setIconSearch(e.target.value); setShowIconPicker(true); setIconPickerTarget('product'); }}
-                                                                onFocus={() => { setShowIconPicker(true); setIconPickerTarget('product'); }}
-                                                                style={{ ...inputStyle, paddingLeft: '32px', fontSize: '0.85rem' }}
-                                                            />
-                                                        </div>
-                                                        {productForm.lucideIcon && (
+                                                <div>
+                                                    {/* Preview selected icon at top */}
+                                                    {productForm.lucideIcon && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#181818', borderRadius: '8px', marginBottom: '1rem' }}>
+                                                            <div style={{ width: '50px', height: '50px', background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05))', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {renderLucideIcon(productForm.lucideIcon, { size: 28, color: '#a78bfa' })}
+                                                            </div>
+                                                            <div style={{ flex: 1 }}>
+                                                                <span style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>{productForm.lucideIcon}</span>
+                                                                <p style={{ color: '#666', fontSize: '0.75rem', margin: 0 }}>Icône sélectionnée</p>
+                                                            </div>
                                                             <button 
                                                                 type="button"
                                                                 onClick={() => setProductForm({ ...productForm, lucideIcon: '' })}
                                                                 style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }}
-                                                                title="Effacer"
+                                                                title="Supprimer"
                                                             >
                                                                 <X size={16} />
                                                             </button>
-                                                        )}
-                                                    </div>
-                                                    
-                                                    {/* Icon picker dropdown */}
-                                                    {showIconPicker && iconPickerTarget === 'product' && (
-                                                        <div style={{ 
-                                                            position: 'absolute', 
-                                                            top: '100%', 
-                                                            left: 0, 
-                                                            right: 0, 
-                                                            background: '#1a1a1a', 
-                                                            border: '1px solid #333', 
-                                                            borderRadius: '8px', 
-                                                            maxHeight: '250px', 
-                                                            overflowY: 'auto', 
-                                                            zIndex: 1000,
-                                                            boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-                                                        }}>
-                                                            <div style={{ padding: '0.5rem', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                <span style={{ fontSize: '0.75rem', color: '#666' }}>{filteredIcons.length} icônes trouvées ({allLucideIcons.length} total)</span>
-                                                                <button type="button" onClick={() => setShowIconPicker(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}><X size={14} /></button>
-                                                            </div>
-                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '4px', padding: '0.5rem' }}>
-                                                                {filteredIcons.map(iconName => {
-                                                                    const IconComp = LucideIcons[iconName];
-                                                                    return (
-                                                                        <button
-                                                                            key={iconName}
-                                                                            type="button"
-                                                                            onClick={() => {
-                                                                                setProductForm({ ...productForm, lucideIcon: iconName });
-                                                                                setShowIconPicker(false);
-                                                                                setIconSearch('');
-                                                                            }}
-                                                                            style={{
-                                                                                display: 'flex',
-                                                                                flexDirection: 'column',
-                                                                                alignItems: 'center',
-                                                                                gap: '4px',
-                                                                                padding: '8px 4px',
-                                                                                background: productForm.lucideIcon === iconName ? 'rgba(167, 139, 250, 0.2)' : 'transparent',
-                                                                                border: productForm.lucideIcon === iconName ? '1px solid var(--color-accent)' : '1px solid transparent',
-                                                                                borderRadius: '6px',
-                                                                                cursor: 'pointer',
-                                                                                transition: 'all 0.2s'
-                                                                            }}
-                                                                            onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.05)'}
-                                                                            onMouseLeave={e => e.target.style.background = productForm.lucideIcon === iconName ? 'rgba(167, 139, 250, 0.2)' : 'transparent'}
-                                                                        >
-                                                                            {IconComp && <IconComp size={20} color="var(--color-accent)" />}
-                                                                            <span style={{ fontSize: '0.6rem', color: '#888', textAlign: 'center', wordBreak: 'break-all' }}>{iconName}</span>
-                                                                        </button>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                            {filteredIcons.length === 0 && (
-                                                                <div style={{ padding: '1rem', textAlign: 'center', color: '#666', fontSize: '0.85rem' }}>
-                                                                    Aucune icône trouvée pour "{iconSearch}"
-                                                                </div>
-                                                            )}
                                                         </div>
                                                     )}
 
-                                                    {/* Preview selected icon */}
-                                                    {productForm.lucideIcon && (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#181818', borderRadius: '8px', marginTop: '0.5rem' }}>
-                                                            <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05))', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                {renderLucideIcon(productForm.lucideIcon, { size: 32, color: '#a78bfa' })}
-                                                            </div>
-                                                            <div>
-                                                                <span style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>{productForm.lucideIcon}</span>
-                                                                <p style={{ color: '#666', fontSize: '0.75rem', margin: 0 }}>Icône sélectionnée</p>
-                                                            </div>
+                                                    {/* Search input */}
+                                                    <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                                                        <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#555', zIndex: 1 }} />
+                                                        <input 
+                                                            type="text"
+                                                            placeholder="Rechercher parmi 1500+ icônes... (heart, star, arrow...)"
+                                                            value={iconSearch}
+                                                            onChange={e => setIconSearch(e.target.value)}
+                                                            style={{ ...inputStyle, paddingLeft: '36px', fontSize: '0.85rem' }}
+                                                        />
+                                                    </div>
+                                                    
+                                                    {/* Icon grid - always visible */}
+                                                    <div style={{ 
+                                                        background: '#111', 
+                                                        border: '1px solid #222', 
+                                                        borderRadius: '8px', 
+                                                        maxHeight: '200px', 
+                                                        overflowY: 'auto',
+                                                        padding: '0.5rem'
+                                                    }}>
+                                                        <div style={{ padding: '0.25rem 0.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #222' }}>
+                                                            <span style={{ fontSize: '0.7rem', color: '#555' }}>
+                                                                {filteredIcons.length} icônes {iconSearch ? `pour "${iconSearch}"` : ''} • {allLucideIcons.length} total
+                                                            </span>
                                                         </div>
-                                                    )}
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(65px, 1fr))', gap: '4px' }}>
+                                                            {filteredIcons.map(iconName => {
+                                                                const IconComp = LucideIcons[iconName];
+                                                                if (!IconComp) return null;
+                                                                return (
+                                                                    <button
+                                                                        key={iconName}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setProductForm({ ...productForm, lucideIcon: iconName });
+                                                                            setIconSearch('');
+                                                                        }}
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            alignItems: 'center',
+                                                                            gap: '2px',
+                                                                            padding: '6px 2px',
+                                                                            background: productForm.lucideIcon === iconName ? 'rgba(167, 139, 250, 0.25)' : 'rgba(255,255,255,0.02)',
+                                                                            border: productForm.lucideIcon === iconName ? '1px solid var(--color-accent)' : '1px solid transparent',
+                                                                            borderRadius: '6px',
+                                                                            cursor: 'pointer',
+                                                                            transition: 'all 0.15s'
+                                                                        }}
+                                                                        onMouseOver={e => { if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                                                                        onMouseOut={e => { if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                                                                    >
+                                                                        <IconComp size={18} color={productForm.lucideIcon === iconName ? 'var(--color-accent)' : '#888'} />
+                                                                        <span style={{ fontSize: '0.55rem', color: productForm.lucideIcon === iconName ? 'var(--color-accent)' : '#555', textAlign: 'center', lineHeight: 1.1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>{iconName}</span>
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        {filteredIcons.length === 0 && (
+                                                            <div style={{ padding: '1rem', textAlign: 'center', color: '#555', fontSize: '0.8rem' }}>
+                                                                Aucune icône pour "{iconSearch}"
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
@@ -1814,104 +1808,93 @@ const Dashboard = () => {
                                             {projectForm.imageType === 'url' ? (
                                                 <input type="text" placeholder="URL de la couverture" value={projectForm.image} onChange={e => setProjectForm({ ...projectForm, image: e.target.value })} style={inputStyle} />
                                             ) : (
-                                                <div style={{ position: 'relative' }}>
-                                                    {/* Search input for icons */}
-                                                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                                                        <div style={{ position: 'relative', flex: 1 }}>
-                                                            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#555' }} />
-                                                            <input 
-                                                                type="text"
-                                                                placeholder="Rechercher une icône... (ex: code, design, web)"
-                                                                value={iconSearch}
-                                                                onChange={e => { setIconSearch(e.target.value); setShowIconPicker(true); setIconPickerTarget('project'); }}
-                                                                onFocus={() => { setShowIconPicker(true); setIconPickerTarget('project'); }}
-                                                                style={{ ...inputStyle, paddingLeft: '32px', fontSize: '0.85rem' }}
-                                                            />
-                                                        </div>
-                                                        {projectForm.lucideIcon && (
+                                                <div>
+                                                    {/* Preview selected icon at top */}
+                                                    {projectForm.lucideIcon && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#181818', borderRadius: '8px', marginBottom: '1rem' }}>
+                                                            <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05))', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {renderLucideIcon(projectForm.lucideIcon, { size: 36, color: '#a78bfa', strokeWidth: 1.5 })}
+                                                            </div>
+                                                            <div style={{ flex: 1 }}>
+                                                                <span style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>{projectForm.lucideIcon}</span>
+                                                                <p style={{ color: '#666', fontSize: '0.75rem', margin: 0 }}>Icône HD sélectionnée</p>
+                                                            </div>
                                                             <button 
                                                                 type="button"
                                                                 onClick={() => setProjectForm({ ...projectForm, lucideIcon: '' })}
                                                                 style={{ ...btnModern, padding: '0.5rem', color: '#ff4d4d' }}
-                                                                title="Effacer"
+                                                                title="Supprimer"
                                                             >
                                                                 <X size={16} />
                                                             </button>
-                                                        )}
-                                                    </div>
-                                                    
-                                                    {/* Icon picker dropdown */}
-                                                    {showIconPicker && iconPickerTarget === 'project' && (
-                                                        <div style={{ 
-                                                            position: 'absolute', 
-                                                            top: '100%', 
-                                                            left: 0, 
-                                                            right: 0, 
-                                                            background: '#1a1a1a', 
-                                                            border: '1px solid #333', 
-                                                            borderRadius: '8px', 
-                                                            maxHeight: '250px', 
-                                                            overflowY: 'auto', 
-                                                            zIndex: 1000,
-                                                            boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-                                                        }}>
-                                                            <div style={{ padding: '0.5rem', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                <span style={{ fontSize: '0.75rem', color: '#666' }}>{filteredIcons.length} icônes ({allLucideIcons.length} total)</span>
-                                                                <button type="button" onClick={() => setShowIconPicker(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}><X size={14} /></button>
-                                                            </div>
-                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '4px', padding: '0.5rem' }}>
-                                                                {filteredIcons.map(iconName => {
-                                                                    const IconComp = LucideIcons[iconName];
-                                                                    return (
-                                                                        <button
-                                                                            key={iconName}
-                                                                            type="button"
-                                                                            onClick={() => {
-                                                                                setProjectForm({ ...projectForm, lucideIcon: iconName });
-                                                                                setShowIconPicker(false);
-                                                                                setIconSearch('');
-                                                                            }}
-                                                                            style={{
-                                                                                display: 'flex',
-                                                                                flexDirection: 'column',
-                                                                                alignItems: 'center',
-                                                                                gap: '4px',
-                                                                                padding: '8px 4px',
-                                                                                background: projectForm.lucideIcon === iconName ? 'rgba(167, 139, 250, 0.2)' : 'transparent',
-                                                                                border: projectForm.lucideIcon === iconName ? '1px solid var(--color-accent)' : '1px solid transparent',
-                                                                                borderRadius: '6px',
-                                                                                cursor: 'pointer',
-                                                                                transition: 'all 0.2s'
-                                                                            }}
-                                                                            onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.05)'}
-                                                                            onMouseLeave={e => e.target.style.background = projectForm.lucideIcon === iconName ? 'rgba(167, 139, 250, 0.2)' : 'transparent'}
-                                                                        >
-                                                                            {IconComp && <IconComp size={20} color="var(--color-accent)" />}
-                                                                            <span style={{ fontSize: '0.6rem', color: '#888', textAlign: 'center', wordBreak: 'break-all' }}>{iconName}</span>
-                                                                        </button>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                            {filteredIcons.length === 0 && (
-                                                                <div style={{ padding: '1rem', textAlign: 'center', color: '#666', fontSize: '0.85rem' }}>
-                                                                    Aucune icône trouvée pour "{iconSearch}"
-                                                                </div>
-                                                            )}
                                                         </div>
                                                     )}
 
-                                                    {/* Preview selected icon */}
-                                                    {projectForm.lucideIcon && (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: '#181818', borderRadius: '12px', marginTop: '0.5rem' }}>
-                                                            <div style={{ width: '80px', height: '80px', background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05))', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                {renderLucideIcon(projectForm.lucideIcon, { size: 48, color: '#a78bfa', strokeWidth: 1.5 })}
-                                                            </div>
-                                                            <div>
-                                                                <span style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>{projectForm.lucideIcon}</span>
-                                                                <p style={{ color: '#666', fontSize: '0.75rem', margin: 0 }}>Icône HD sélectionnée</p>
-                                                            </div>
+                                                    {/* Search input */}
+                                                    <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                                                        <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#555', zIndex: 1 }} />
+                                                        <input 
+                                                            type="text"
+                                                            placeholder="Rechercher parmi 1500+ icônes... (code, web, design...)"
+                                                            value={iconSearch}
+                                                            onChange={e => setIconSearch(e.target.value)}
+                                                            style={{ ...inputStyle, paddingLeft: '36px', fontSize: '0.85rem' }}
+                                                        />
+                                                    </div>
+                                                    
+                                                    {/* Icon grid - always visible */}
+                                                    <div style={{ 
+                                                        background: '#111', 
+                                                        border: '1px solid #222', 
+                                                        borderRadius: '8px', 
+                                                        maxHeight: '200px', 
+                                                        overflowY: 'auto',
+                                                        padding: '0.5rem'
+                                                    }}>
+                                                        <div style={{ padding: '0.25rem 0.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #222' }}>
+                                                            <span style={{ fontSize: '0.7rem', color: '#555' }}>
+                                                                {filteredIcons.length} icônes {iconSearch ? `pour "${iconSearch}"` : ''} • {allLucideIcons.length} total
+                                                            </span>
                                                         </div>
-                                                    )}
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(65px, 1fr))', gap: '4px' }}>
+                                                            {filteredIcons.map(iconName => {
+                                                                const IconComp = LucideIcons[iconName];
+                                                                if (!IconComp) return null;
+                                                                return (
+                                                                    <button
+                                                                        key={iconName}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setProjectForm({ ...projectForm, lucideIcon: iconName });
+                                                                            setIconSearch('');
+                                                                        }}
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            alignItems: 'center',
+                                                                            gap: '2px',
+                                                                            padding: '6px 2px',
+                                                                            background: projectForm.lucideIcon === iconName ? 'rgba(167, 139, 250, 0.25)' : 'rgba(255,255,255,0.02)',
+                                                                            border: projectForm.lucideIcon === iconName ? '1px solid var(--color-accent)' : '1px solid transparent',
+                                                                            borderRadius: '6px',
+                                                                            cursor: 'pointer',
+                                                                            transition: 'all 0.15s'
+                                                                        }}
+                                                                        onMouseOver={e => { if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                                                                        onMouseOut={e => { if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                                                                    >
+                                                                        <IconComp size={18} color={projectForm.lucideIcon === iconName ? 'var(--color-accent)' : '#888'} />
+                                                                        <span style={{ fontSize: '0.55rem', color: projectForm.lucideIcon === iconName ? 'var(--color-accent)' : '#555', textAlign: 'center', lineHeight: 1.1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>{iconName}</span>
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        {filteredIcons.length === 0 && (
+                                                            <div style={{ padding: '1rem', textAlign: 'center', color: '#555', fontSize: '0.8rem' }}>
+                                                                Aucune icône pour "{iconSearch}"
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
