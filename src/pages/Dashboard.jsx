@@ -2975,10 +2975,20 @@ const Dashboard = () => {
                                         .filter(([_, prodReviews]) => prodReviews && prodReviews.length > 0)
                                         .map(([prodId, prodReviews]) => {
                                             const product = products.find(p => p.id === parseInt(prodId));
+                                            const isLucideIcon = product?.image && product.image.startsWith('lucide:');
+                                            const LucideIcon = isLucideIcon ? LucideIcons[product.image.replace('lucide:', '')] : null;
                                             return (
                                                 <div key={prodId} style={cardStyle}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
-                                                        {product?.image && <img src={product.image} alt="" style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                                        {product?.image && (
+                                                            isLucideIcon && LucideIcon ? (
+                                                                <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: 'rgba(var(--color-accent-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    <LucideIcon size={24} color="var(--color-accent)" />
+                                                                </div>
+                                                            ) : (
+                                                                <img src={product.image} alt="" style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }} />
+                                                            )
+                                                        )}
                                                         <div>
                                                             <h3 style={{ margin: 0, fontSize: '1rem' }}>{product?.name || `Produit #${prodId}`}</h3>
                                                             <span style={{ fontSize: '0.75rem', color: '#666' }}>{prodReviews.length} avis</span>
