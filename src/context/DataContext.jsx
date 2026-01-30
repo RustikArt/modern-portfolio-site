@@ -923,6 +923,7 @@ export const DataProvider = ({ children }) => {
                             customerName: o.customer_name || o.customerName,
                             userId: o.user_id || o.userId,
                             paymentId: o.payment_id || o.paymentId,
+                            promoCodeUsed: o.promo_code_used || o.promoCodeUsed || null,
                             items: typeof o.items === 'string' ? JSON.parse(o.items) : o.items,
                             shipping: typeof o.shipping === 'string' ? JSON.parse(o.shipping) : o.shipping,
                             checklist: typeof o.checklist === 'string' ? JSON.parse(o.checklist) : o.checklist
@@ -1220,13 +1221,18 @@ export const DataProvider = ({ children }) => {
         try {
             // Convert camelCase to snake_case for Supabase compatibility
             const productData = {
-                ...product,
-                promo_price: product.promoPrice,
-                is_featured: product.is_featured,
-                tags: product.tags || []
+                name: product.name,
+                price: product.price,
+                promo_price: product.promoPrice ?? product.promo_price ?? null,
+                image: product.image,
+                category: product.category,
+                tags: product.tags || [],
+                is_featured: product.isFeatured ?? product.is_featured ?? false,
+                alert_message: product.alertMessage ?? product.alert_message ?? null,
+                options: product.options || [],
+                description: product.description || null,
+                stock: product.stock ?? null
             };
-            delete productData.promoPrice; // Remove the frontend field
-            delete productData.is_featured; // Remove the frontend field
 
             console.log('Sending product data to API:', productData);
 
@@ -1282,12 +1288,18 @@ export const DataProvider = ({ children }) => {
         try {
             // Convert camelCase to snake_case for Supabase compatibility
             const productData = {
-                ...updatedProduct,
-                promo_price: updatedProduct.promoPrice,
-                is_featured: updatedProduct.is_featured
+                name: updatedProduct.name,
+                price: updatedProduct.price,
+                promo_price: updatedProduct.promoPrice ?? updatedProduct.promo_price ?? null,
+                image: updatedProduct.image,
+                category: updatedProduct.category,
+                tags: updatedProduct.tags,
+                is_featured: updatedProduct.isFeatured ?? updatedProduct.is_featured ?? false,
+                alert_message: updatedProduct.alertMessage ?? updatedProduct.alert_message ?? null,
+                options: updatedProduct.options,
+                description: updatedProduct.description,
+                stock: updatedProduct.stock
             };
-            delete productData.promoPrice; // Remove the frontend field
-            delete productData.is_featured; // Remove the frontend field
 
             const res = await fetch('/api/products', {
                 method: 'PUT',
@@ -1656,7 +1668,8 @@ export const DataProvider = ({ children }) => {
             date: new Date().toISOString(),
             shipping: shippingDetails,
             paymentId: paymentDetails ? paymentDetails.id : 'MANUAL_TEST',
-            notes: ''
+            notes: '',
+            promoCodeUsed: activePromo ? activePromo.code : null
         };
 
         try {
@@ -1664,7 +1677,8 @@ export const DataProvider = ({ children }) => {
                 ...newOrder,
                 user_id: newOrder.userId,
                 customer_name: newOrder.customerName,
-                payment_id: newOrder.paymentId
+                payment_id: newOrder.paymentId,
+                promo_code_used: newOrder.promoCodeUsed
             };
             // Keep original camelCase keys if DB is lax, but ensure snake_case are present
             // Or remove camelCase if DB is strict? Let's send both or just strict depending on DB.
@@ -1672,6 +1686,7 @@ export const DataProvider = ({ children }) => {
             delete orderData.userId;
             delete orderData.customerName;
             delete orderData.paymentId;
+            delete orderData.promoCodeUsed;
 
             const res = await fetch('/api/orders', {
                 method: 'POST',
@@ -1831,7 +1846,7 @@ export const DataProvider = ({ children }) => {
 
             const res = await fetch('/api/orders', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify({ id: orderId, ...updatedFields })
             });
 

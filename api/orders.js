@@ -75,7 +75,8 @@ export default async function handler(req, res) {
                 notes: body.notes || null,
                 checklist: body.checklist ? (typeof body.checklist === 'string' ? body.checklist : JSON.stringify(body.checklist)) : null,
                 archived: body.archived || false,
-                completion_date: body.completionDate || body.completion_date || null
+                completion_date: body.completionDate || body.completion_date || null,
+                promo_code_used: body.promoCodeUsed || body.promo_code_used || null
             };
 
             // Log the data being inserted for debugging
@@ -115,6 +116,22 @@ export default async function handler(req, res) {
             if (updatedOrder.items) cleanedUpdate.items = typeof updatedOrder.items === 'string' ? updatedOrder.items : JSON.stringify(updatedOrder.items);
             if (updatedOrder.shipping) cleanedUpdate.shipping = typeof updatedOrder.shipping === 'string' ? updatedOrder.shipping : JSON.stringify(updatedOrder.shipping);
             if (updatedOrder.archived !== undefined) cleanedUpdate.archived = !!updatedOrder.archived;
+            // Notes field
+            if (updatedOrder.notes !== undefined) cleanedUpdate.notes = updatedOrder.notes;
+            // Checklist field
+            if (updatedOrder.checklist !== undefined) {
+                cleanedUpdate.checklist = typeof updatedOrder.checklist === 'string' 
+                    ? updatedOrder.checklist 
+                    : JSON.stringify(updatedOrder.checklist);
+            }
+            // Completion date
+            if (updatedOrder.completionDate || updatedOrder.completion_date) {
+                cleanedUpdate.completion_date = updatedOrder.completionDate || updatedOrder.completion_date;
+            }
+            // Promo code used
+            if (updatedOrder.promoCodeUsed || updatedOrder.promo_code_used) {
+                cleanedUpdate.promo_code_used = updatedOrder.promoCodeUsed || updatedOrder.promo_code_used;
+            }
 
             const { error: updateError } = await supabase
                 .from('portfolio_orders')

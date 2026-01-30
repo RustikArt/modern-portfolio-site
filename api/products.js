@@ -53,7 +53,7 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'La catégorie doit être une chaîne' });
             }
 
-            // Normaliser les données
+            // Normaliser les données (camelCase -> snake_case pour Supabase)
             const productToInsert = {
                 name: newProduct.name,
                 price: newProduct.price,
@@ -61,8 +61,11 @@ export default async function handler(req, res) {
                 image: newProduct.image || null,
                 category: newProduct.category || null,
                 tags: Array.isArray(newProduct.tags) ? newProduct.tags : (newProduct.tags ? [newProduct.tags] : []),
-                is_featured: newProduct.is_featured || false,
-                options: newProduct.options || []
+                is_featured: newProduct.is_featured ?? newProduct.isFeatured ?? false,
+                alert_message: newProduct.alert_message || newProduct.alertMessage || null,
+                options: newProduct.options || [],
+                description: newProduct.description || null,
+                stock: newProduct.stock ?? null
             };
 
             console.log('Inserting product:', productToInsert);
@@ -109,16 +112,31 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'L\'ID du produit doit être un nombre' });
             }
 
-            // Normaliser les données
-            const productToUpdate = {
-                ...updatedProduct,
-                promo_price: updatedProduct.promo_price !== undefined ? updatedProduct.promo_price : updatedProduct.promoPrice,
-                is_featured: updatedProduct.is_featured !== undefined ? updatedProduct.is_featured : false
-            };
-
-            // Supprimer les champs non nécessaires
-            delete productToUpdate.promoPrice;
-            delete productToUpdate.id;
+            // Normaliser les données (camelCase -> snake_case pour Supabase)
+            const productToUpdate = {};
+            
+            // Mapper tous les champs possibles
+            if (updatedProduct.name !== undefined) productToUpdate.name = updatedProduct.name;
+            if (updatedProduct.price !== undefined) productToUpdate.price = updatedProduct.price;
+            if (updatedProduct.promo_price !== undefined || updatedProduct.promoPrice !== undefined) {
+                productToUpdate.promo_price = updatedProduct.promo_price ?? updatedProduct.promoPrice ?? null;
+            }
+            if (updatedProduct.image !== undefined) productToUpdate.image = updatedProduct.image;
+            if (updatedProduct.category !== undefined) productToUpdate.category = updatedProduct.category;
+            if (updatedProduct.tags !== undefined) {
+                productToUpdate.tags = Array.isArray(updatedProduct.tags) ? updatedProduct.tags : [];
+            }
+            if (updatedProduct.is_featured !== undefined || updatedProduct.isFeatured !== undefined) {
+                productToUpdate.is_featured = updatedProduct.is_featured ?? updatedProduct.isFeatured ?? false;
+            }
+            if (updatedProduct.alert_message !== undefined || updatedProduct.alertMessage !== undefined) {
+                productToUpdate.alert_message = updatedProduct.alert_message ?? updatedProduct.alertMessage ?? null;
+            }
+            if (updatedProduct.options !== undefined) {
+                productToUpdate.options = Array.isArray(updatedProduct.options) ? updatedProduct.options : [];
+            }
+            if (updatedProduct.description !== undefined) productToUpdate.description = updatedProduct.description;
+            if (updatedProduct.stock !== undefined) productToUpdate.stock = updatedProduct.stock;
 
             console.log('Updating product:', numId, productToUpdate);
 

@@ -154,7 +154,7 @@ const Contact = () => {
                                 <input
                                     type="tel"
                                     id="phone"
-                                    placeholder="06 12 34 56 78"
+                                    placeholder="06 99 99 99 99"
                                     value={formData.phone || ''}
                                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                 />
@@ -164,7 +164,7 @@ const Contact = () => {
                                 <textarea
                                     id="message"
                                     rows="5"
-                                    placeholder="Parlez-moi de votre projet..."
+                                    placeholder="Écrivez-nous votre message ici..."
                                     value={formData.message}
                                     onChange={e => setFormData({ ...formData, message: e.target.value })}
                                     required
