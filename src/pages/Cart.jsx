@@ -1,6 +1,7 @@
 import { useData } from '../context/DataContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, ArrowRight, Trash2, Plus, Minus, Sparkles, ShieldCheck, Truck, CreditCard } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import './Cart.css';
 
 const Cart = () => {
@@ -48,10 +49,19 @@ const Cart = () => {
                     <div className="cart-layout">
                         {/* Cart Items */}
                         <div className="cart-items">
-                            {cart.map((item, index) => (
+                            {cart.map((item, index) => {
+                                const isLucideIcon = item.image && item.image.startsWith('lucide:');
+                                const LucideIcon = isLucideIcon ? LucideIcons[item.image.replace('lucide:', '')] : null;
+                                return (
                                 <div key={index} className="cart-item">
                                     <div className="cart-item-image">
-                                        <img src={item.image} alt={item.name} />
+                                        {isLucideIcon && LucideIcon ? (
+                                            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.15) 0%, rgba(18, 18, 26, 0.95) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
+                                                <LucideIcon size={40} color="var(--color-accent)" />
+                                            </div>
+                                        ) : (
+                                            <img src={item.image} alt={item.name} />
+                                        )}
                                     </div>
                                     <div className="cart-item-details">
                                         <div className="cart-item-info">
@@ -93,7 +103,8 @@ const Cart = () => {
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {/* Cart Summary */}

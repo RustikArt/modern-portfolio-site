@@ -6,6 +6,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import StarRating from '../components/StarRating';
 import ProductReviews from '../components/ProductReviews';
 import { Heart } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -77,7 +78,17 @@ const ProductDetail = () => {
             <div className="container">
                 <Breadcrumbs lastItemName={product.name} />
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '4rem' }}>
-                    <img src={`${product.image}?v=${WEBSITE_VERSION}`} alt={product.name} style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
+                    {(() => {
+                        const isLucideIcon = product.image && product.image.startsWith('lucide:');
+                        const LucideIcon = isLucideIcon ? LucideIcons[product.image.replace('lucide:', '')] : null;
+                        return isLucideIcon && LucideIcon ? (
+                            <div style={{ width: '100%', aspectRatio: '1', background: 'linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.15) 0%, rgba(18, 18, 26, 0.95) 100%)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <LucideIcon size={120} color="var(--color-accent)" strokeWidth={1.5} />
+                            </div>
+                        ) : (
+                            <img src={`${product.image}?v=${WEBSITE_VERSION}`} alt={product.name} style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
+                        );
+                    })()}
                     <div className="product-info-detail">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <span style={{ color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{product.category}</span>

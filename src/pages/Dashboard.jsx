@@ -1657,14 +1657,23 @@ const Dashboard = () => {
                                             const matchSearch = !productFilter.search || p.name.toLowerCase().includes(productFilter.search.toLowerCase()) || p.tags?.some(t => t.toLowerCase().includes(productFilter.search.toLowerCase()));
                                             return matchCategory && matchPromo && matchSearch;
                                         })
-                                        .map(p => (
+                                        .map(p => {
+                                            const isProductLucideIcon = p.image && p.image.startsWith('lucide:');
+                                            const ProductIcon = isProductLucideIcon ? LucideIcons[p.image.replace('lucide:', '')] : null;
+                                            return (
                                             <div key={p.id} style={{ ...cardStyle, position: 'relative' }}>
                                                 {p.promoPrice && (
                                                     <span style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--color-accent)', color: 'black', padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 'bold' }}>
                                                         PROMO
                                                     </span>
                                                 )}
-                                                <img src={`${p.image}?v=${WEBSITE_VERSION}`} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                                {isProductLucideIcon && ProductIcon ? (
+                                                    <div style={{ width: '100%', height: '180px', background: 'linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.15) 0%, rgba(18, 18, 26, 0.95) 100%)', borderRadius: '12px', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <ProductIcon size={64} color="var(--color-accent)" strokeWidth={1.5} />
+                                                    </div>
+                                                ) : (
+                                                    <img src={`${p.image}?v=${WEBSITE_VERSION}`} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1rem' }} alt="" />
+                                                )}
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <div>
                                                         <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{p.name}</h4>
@@ -1686,7 +1695,8 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                 </div>
                             </div>
                         )}
