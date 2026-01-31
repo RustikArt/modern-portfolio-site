@@ -252,11 +252,13 @@ const Dashboard = () => {
     const [localBlackLogo, setLocalBlackLogo] = useState('PurpleLogo.png');
     const [settingsInitialized, setSettingsInitialized] = useState(false);
 
-    // Available logos from /Logos/ folder
+    // Available logos from /Logos/ folder - add all logos here
     const availableLogos = [
-        { file: 'PurpleLogoTransparent.png', label: 'Purple (Transparent)' },
-        { file: 'PurpleLogo.png', label: 'Purple (Fond Noir)' },
-        { file: 'OrangeNoir.png', label: 'Orange (Fond Noir)' }
+        { file: 'PurpleLogoTransparent.png', label: 'Purple Transparent' },
+        { file: 'PurpleLogo.png', label: 'Purple Fond Noir' },
+        { file: 'OrangeNoir.png', label: 'Orange Fond Noir' },
+        { file: 'PurpleLogoTransparentV2.png', label: 'Purple Transparent V2' },
+        { file: 'PurpleLogoV2.png', label: 'Purple Fond Noir V2' }
     ];
 
     // Sync local settings when settings change from context - only on initial load OR when settings object changes significantly
@@ -2692,11 +2694,9 @@ const Dashboard = () => {
                                                 <div>
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Logo Transparent (Navbar)</label>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                        {availableLogos.filter(l => l.file.toLowerCase().includes('transparent') || l.file === localTransparentLogo).concat(
-                                                            availableLogos.filter(l => !l.file.toLowerCase().includes('transparent') && l.file !== localTransparentLogo)
-                                                        ).map(logo => (
+                                                        {availableLogos.map(logo => (
                                                             <div 
-                                                                key={logo.file}
+                                                                key={`trans-${logo.file}`}
                                                                 onClick={() => setLocalTransparentLogo(logo.file)}
                                                                 style={{
                                                                     display: 'flex',
@@ -2714,6 +2714,7 @@ const Dashboard = () => {
                                                                     src={`/Logos/${logo.file}`} 
                                                                     alt={logo.label}
                                                                     style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
+                                                                    onError={(e) => { e.target.style.display = 'none'; }}
                                                                 />
                                                                 <span style={{ fontSize: '0.8rem', color: localTransparentLogo === logo.file ? 'var(--color-accent)' : '#888' }}>
                                                                     {logo.label}
@@ -2727,11 +2728,9 @@ const Dashboard = () => {
                                                 <div>
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Logo Fond Noir (Favicon, SEO)</label>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                        {availableLogos.filter(l => !l.file.toLowerCase().includes('transparent') || l.file === localBlackLogo).concat(
-                                                            availableLogos.filter(l => l.file.toLowerCase().includes('transparent') && l.file !== localBlackLogo)
-                                                        ).map(logo => (
+                                                        {availableLogos.map(logo => (
                                                             <div 
-                                                                key={logo.file}
+                                                                key={`black-${logo.file}`}
                                                                 onClick={() => setLocalBlackLogo(logo.file)}
                                                                 style={{
                                                                     display: 'flex',
@@ -2749,6 +2748,7 @@ const Dashboard = () => {
                                                                     src={`/Logos/${logo.file}`} 
                                                                     alt={logo.label}
                                                                     style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
+                                                                    onError={(e) => { e.target.style.display = 'none'; }}
                                                                 />
                                                                 <span style={{ fontSize: '0.8rem', color: localBlackLogo === logo.file ? 'var(--color-accent)' : '#888' }}>
                                                                     {logo.label}
