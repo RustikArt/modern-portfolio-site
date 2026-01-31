@@ -250,7 +250,9 @@ const Dashboard = () => {
     const [localNavbarPadding, setLocalNavbarPadding] = useState('normal');
     const [localTransparentLogo, setLocalTransparentLogo] = useState('PurpleLogoTransparent.png');
     const [localBlackLogo, setLocalBlackLogo] = useState('PurpleLogo.png');
+    const [localFavicon, setLocalFavicon] = useState('PurpleLogov2.png');
     const [settingsInitialized, setSettingsInitialized] = useState(false);
+    const [logoSizes, setLogoSizes] = useState({});
 
     // Auto-detect logos from /public/Logos/ folder at build time
     const availableLogos = useMemo(() => {
@@ -261,6 +263,24 @@ const Dashboard = () => {
             return { file, label };
         }).sort((a, b) => a.label.localeCompare(b.label));
     }, []);
+
+    // Fetch logo sizes for favicon warning
+    useEffect(() => {
+        const fetchSizes = async () => {
+            const sizes = {};
+            for (const logo of availableLogos) {
+                try {
+                    const response = await fetch(`/Logos/${logo.file}`, { method: 'HEAD' });
+                    const size = response.headers.get('content-length');
+                    sizes[logo.file] = size ? parseInt(size) : 0;
+                } catch (e) {
+                    sizes[logo.file] = 0;
+                }
+            }
+            setLogoSizes(sizes);
+        };
+        if (availableLogos.length > 0) fetchSizes();
+    }, [availableLogos]);
 
     // Sync local settings when settings change from context - only on initial load OR when settings object changes significantly
     useEffect(() => {
@@ -273,6 +293,7 @@ const Dashboard = () => {
             setLocalNavbarPadding(settings.navbarPadding || 'normal');
             setLocalTransparentLogo(settings.transparentLogo || 'PurpleLogoTransparent.png');
             setLocalBlackLogo(settings.blackLogo || 'PurpleLogo.png');
+            setLocalFavicon(settings.favicon || 'PurpleLogov2.png');
             setSettingsInitialized(true);
         }
     }, [settings, settingsInitialized]);
@@ -2760,6 +2781,71 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
 
+                                            {/* Favicon Selector */}
+                                            <div style={{ marginTop: '1rem' }}>
+                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>
+                                                    Favicon (icône onglet navigateur)
+                                                    <span style={{ fontSize: '0.7rem', color: '#555', marginLeft: '0.5rem' }}>Max recommandé: 500 KB</span>
+                                                </label>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                    {availableLogos.map(logo => {
+                                                        const sizeBytes = logoSizes[logo.file] || 0;
+                                                        const sizeKB = Math.round(sizeBytes / 1024);
+                                                        const sizeMB = (sizeBytes / (1024 * 1024)).toFixed(2);
+                                                        const isTooLarge = sizeBytes > 500 * 1024; // > 500KB
+                                                        const isSelected = localFavicon === logo.file;
+                                                        
+                                                        return (
+                                                            <div 
+                                                                key={`fav-${logo.file}`}
+                                                                onClick={() => !isTooLarge && setLocalFavicon(logo.file)}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center',
+                                                                    padding: '0.5rem',
+                                                                    background: isSelected ? 'rgba(167, 139, 250, 0.15)' : isTooLarge ? 'rgba(255,77,77,0.1)' : 'rgba(255,255,255,0.02)',
+                                                                    border: isSelected ? '2px solid var(--color-accent)' : isTooLarge ? '1px solid rgba(255,77,77,0.3)' : '1px solid rgba(255,255,255,0.1)',
+                                                                    borderRadius: '8px',
+                                                                    cursor: isTooLarge ? 'not-allowed' : 'pointer',
+                                                                    transition: 'all 0.2s',
+                                                                    opacity: isTooLarge ? 0.5 : 1,
+                                                                    minWidth: '80px'
+                                                                }}
+                                                                title={isTooLarge ? `Trop lourd: ${sizeMB} MB (max 500 KB)` : `${sizeKB} KB`}
+                                                            >
+                                                                <img 
+                                                                    src={`/Logos/${logo.file}`} 
+                                                                    alt={logo.label}
+                                                                    style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.5)' }}
+                                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                                />
+                                                                <span style={{ 
+                                                                    fontSize: '0.65rem', 
+                                                                    color: isTooLarge ? '#ff4d4d' : isSelected ? 'var(--color-accent)' : '#666',
+                                                                    marginTop: '0.25rem',
+                                                                    textAlign: 'center',
+                                                                    maxWidth: '70px',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap'
+                                                                }}>
+                                                                    {logo.label.split(' ')[0]}
+                                                                </span>
+                                                                <span style={{ 
+                                                                    fontSize: '0.6rem', 
+                                                                    color: isTooLarge ? '#ff4d4d' : '#555',
+                                                                    fontWeight: isTooLarge ? '600' : '400'
+                                                                }}>
+                                                                    {sizeKB > 1024 ? `${sizeMB} MB` : `${sizeKB} KB`}
+                                                                    {isTooLarge && ' ⚠️'}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
                                             <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Contact & Réseaux</h4>
 
                                             <div>
@@ -2816,7 +2902,8 @@ const Dashboard = () => {
                                                         socials: localSocials,
                                                         navbarPadding: localNavbarPadding,
                                                         transparentLogo: localTransparentLogo,
-                                                        blackLogo: localBlackLogo
+                                                        blackLogo: localBlackLogo,
+                                                        favicon: localFavicon
                                                     });
                                                     if (success) {
                                                         showToast("Configuration générale mise à jour !", "success");

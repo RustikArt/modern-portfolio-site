@@ -265,6 +265,27 @@ function App() {
 }
 
 const AppContent = () => {
+  const { settings } = useData();
+
+  // Dynamic favicon based on settings
+  useEffect(() => {
+    if (settings?.favicon) {
+      const link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+      link.type = 'image/png';
+      link.rel = 'icon';
+      link.href = `/Logos/${settings.favicon}?v=${Date.now()}`;
+      if (!document.querySelector("link[rel~='icon']")) {
+        document.head.appendChild(link);
+      }
+      
+      // Also update apple-touch-icon
+      const appleLink = document.querySelector("link[rel='apple-touch-icon']");
+      if (appleLink) {
+        appleLink.href = `/Logos/${settings.favicon}?v=${Date.now()}`;
+      }
+    }
+  }, [settings?.favicon]);
+
   return (
     <>
       <ScrollToTop />

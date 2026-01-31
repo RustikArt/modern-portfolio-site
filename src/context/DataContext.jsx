@@ -813,6 +813,7 @@ export const DataProvider = ({ children }) => {
             navbarPadding: 'normal',
             transparentLogo: 'PurpleLogoTransparent.png',
             blackLogo: 'PurpleLogo.png',
+            favicon: 'PurpleLogov2.png',
             socials: {
                 instagram: 'https://www.instagram.com/rustikop.art/',
                 twitter: 'https://x.com/rustikop',

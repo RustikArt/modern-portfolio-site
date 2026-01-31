@@ -47,7 +47,8 @@ export default async function handler(req, res) {
                 navbarPadding,
                 socials,
                 transparentLogo,
-                blackLogo
+                blackLogo,
+                favicon
             } = req.body;
 
             const { data: existing, error: fetchError } = await supabase
@@ -74,6 +75,7 @@ export default async function handler(req, res) {
                 socials: socials || existingSettings.socials || {},
                 transparent_logo: transparentLogo !== undefined ? transparentLogo : (existingSettings.transparent_logo || 'PurpleLogoTransparent.png'),
                 black_logo: blackLogo !== undefined ? blackLogo : (existingSettings.black_logo || 'PurpleLogo.png'),
+                favicon: favicon !== undefined ? favicon : (existingSettings.favicon || 'PurpleLogov2.png'),
                 updated_at: new Date().toISOString()
             };
 
