@@ -61,40 +61,6 @@ import ActivityLog from '../components/dashboard/ActivityLog';
 import { downloadCSV } from '../utils/export';
 import { sendShippingUpdate, sendVideoProof } from '../utils/emailService';
 
-// Liste des icônes Lucide populaires pour le sélecteur de banderole
-const BANNER_ICON_OPTIONS = [
-    { name: 'none', label: 'Aucune icône' },
-    { name: 'Sparkles', label: 'Sparkles (Étincelles)' },
-    { name: 'Star', label: 'Star (Étoile)' },
-    { name: 'Zap', label: 'Zap (Éclair)' },
-    { name: 'Bell', label: 'Bell (Cloche)' },
-    { name: 'Gift', label: 'Gift (Cadeau)' },
-    { name: 'Heart', label: 'Heart (Cœur)' },
-    { name: 'Tag', label: 'Tag (Étiquette)' },
-    { name: 'Percent', label: 'Percent (Pourcentage)' },
-    { name: 'ShoppingBag', label: 'ShoppingBag (Sac)' },
-    { name: 'Truck', label: 'Truck (Livraison)' },
-    { name: 'Clock', label: 'Clock (Horloge)' },
-    { name: 'AlertCircle', label: 'AlertCircle (Alerte)' },
-    { name: 'Info', label: 'Info (Information)' },
-    { name: 'Megaphone', label: 'Megaphone (Annonce)' },
-    { name: 'PartyPopper', label: 'PartyPopper (Fête)' },
-    { name: 'Flame', label: 'Flame (Flamme)' },
-    { name: 'Crown', label: 'Crown (Couronne)' },
-    { name: 'Trophy', label: 'Trophy (Trophée)' },
-    { name: 'Rocket', label: 'Rocket (Fusée)' },
-    { name: 'BadgePercent', label: 'BadgePercent (Badge %)' },
-    { name: 'CircleDollarSign', label: 'CircleDollarSign (Dollar)' },
-    { name: 'Banknote', label: 'Banknote (Billet)' },
-    { name: 'TicketPercent', label: 'TicketPercent (Promo)' },
-    { name: 'CalendarDays', label: 'CalendarDays (Calendrier)' },
-    { name: 'Timer', label: 'Timer (Minuteur)' },
-    { name: 'Mail', label: 'Mail (Email)' },
-    { name: 'MessageCircle', label: 'MessageCircle (Message)' },
-    { name: 'ThumbsUp', label: 'ThumbsUp (Pouce)' },
-    { name: 'Award', label: 'Award (Récompense)' },
-];
-
 // Helper pour rendre une icône Lucide par son nom
 const renderLucideIcon = (iconName, props = {}) => {
     if (!iconName || iconName === 'none') return null;
@@ -215,6 +181,7 @@ const Dashboard = () => {
     const [iconSearch, setIconSearch] = useState('');
     const [showIconPicker, setShowIconPicker] = useState(false);
     const [iconPickerTarget, setIconPickerTarget] = useState(null); // 'product' or 'project'
+    const [bannerIconSearch, setBannerIconSearch] = useState(''); // Separate search for banner icons
 
     // Get all available Lucide icons (filter out non-icon exports)
     const allLucideIcons = useMemo(() => {
@@ -242,6 +209,15 @@ const Dashboard = () => {
         ).slice(0, 120); // Limit to 120 results
     }, [iconSearch, allLucideIcons]);
 
+    // Filtered icons for banner picker
+    const filteredBannerIcons = useMemo(() => {
+        if (!bannerIconSearch.trim()) return allLucideIcons.slice(0, 60);
+        const search = bannerIconSearch.toLowerCase().trim();
+        return allLucideIcons.filter(icon => 
+            icon.toLowerCase().includes(search)
+        ).slice(0, 120);
+    }, [bannerIconSearch, allLucideIcons]);
+
     // --- GENERAL SETTINGS STATES (local before apply) ---
     const [localSiteTitle, setLocalSiteTitle] = useState('');
     const [localMaintenanceMode, setLocalMaintenanceMode] = useState(false);
@@ -253,7 +229,6 @@ const Dashboard = () => {
     const [localBlackLogo, setLocalBlackLogo] = useState('PurpleLogo.png');
     const [localFavicon, setLocalFavicon] = useState('PurpleLogov2.png');
     const [settingsInitialized, setSettingsInitialized] = useState(false);
-    const [logoSizes, setLogoSizes] = useState({});
 
     // Auto-detect logos from /public/Logos/ folder at build time
     const availableLogos = useMemo(() => {
@@ -264,24 +239,6 @@ const Dashboard = () => {
             return { file, label };
         }).sort((a, b) => a.label.localeCompare(b.label));
     }, []);
-
-    // Fetch logo sizes for favicon warning
-    useEffect(() => {
-        const fetchSizes = async () => {
-            const sizes = {};
-            for (const logo of availableLogos) {
-                try {
-                    const response = await fetch(`/Logos/${logo.file}`, { method: 'HEAD' });
-                    const size = response.headers.get('content-length');
-                    sizes[logo.file] = size ? parseInt(size) : 0;
-                } catch (e) {
-                    sizes[logo.file] = 0;
-                }
-            }
-            setLogoSizes(sizes);
-        };
-        if (availableLogos.length > 0) fetchSizes();
-    }, [availableLogos]);
 
     // Sync local settings when settings change from context - only on initial load OR when settings object changes significantly
     useEffect(() => {
@@ -2761,7 +2718,6 @@ const Dashboard = () => {
                                                 <div>
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>
                                                         Favicon
-                                                        <span style={{ fontSize: '0.65rem', color: '#555', marginLeft: '0.25rem' }}>(max 500KB)</span>
                                                     </label>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                         <img 
@@ -2772,30 +2728,14 @@ const Dashboard = () => {
                                                         />
                                                         <select
                                                             value={localFavicon}
-                                                            onChange={(e) => {
-                                                                const sizeBytes = logoSizes[e.target.value] || 0;
-                                                                if (sizeBytes > 500 * 1024) {
-                                                                    showToast(`Ce logo est trop lourd (${(sizeBytes / (1024 * 1024)).toFixed(2)} MB)`, 'error');
-                                                                    return;
-                                                                }
-                                                                setLocalFavicon(e.target.value);
-                                                            }}
+                                                            onChange={(e) => setLocalFavicon(e.target.value)}
                                                             style={{ ...inputStyle, flex: 1 }}
                                                         >
-                                                            {availableLogos.map(logo => {
-                                                                const sizeBytes = logoSizes[logo.file] || 0;
-                                                                const sizeKB = Math.round(sizeBytes / 1024);
-                                                                const isTooLarge = sizeBytes > 500 * 1024;
-                                                                return (
-                                                                    <option 
-                                                                        key={`fav-${logo.file}`} 
-                                                                        value={logo.file}
-                                                                        style={{ color: isTooLarge ? '#ff4d4d' : 'inherit' }}
-                                                                    >
-                                                                        {logo.label} ({sizeKB} KB){isTooLarge ? ' - Trop lourd!' : ''}
-                                                                    </option>
-                                                                );
-                                                            })}
+                                                            {availableLogos.map(logo => (
+                                                                <option key={`fav-${logo.file}`} value={logo.file}>
+                                                                    {logo.label}
+                                                                </option>
+                                                            ))}
                                                         </select>
                                                     </div>
                                                 </div>
@@ -2917,26 +2857,113 @@ const Dashboard = () => {
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                                 <div>
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Icône (à gauche)</label>
-                                                    <div style={{ position: 'relative' }}>
-                                                        <select
-                                                            value={announcementIcon}
-                                                            onChange={(e) => setAnnouncementIcon(e.target.value)}
-                                                            style={{ ...inputStyle, paddingLeft: '2.5rem' }}
-                                                        >
-                                                            {BANNER_ICON_OPTIONS.map(opt => (
-                                                                <option key={opt.name} value={opt.name}>{opt.label}</option>
-                                                            ))}
-                                                        </select>
-                                                        <div style={{ 
-                                                            position: 'absolute', 
-                                                            left: '0.75rem', 
-                                                            top: '50%', 
-                                                            transform: 'translateY(-50%)',
-                                                            color: announcementIcon === 'none' ? '#666' : 'var(--color-accent)',
-                                                            pointerEvents: 'none'
-                                                        }}>
-                                                            {announcementIcon === 'none' ? <Ban size={16} /> : renderLucideIcon(announcementIcon, { size: 16 })}
+                                                    
+                                                    {/* Preview selected icon */}
+                                                    {announcementIcon && announcementIcon !== 'none' && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: '#181818', borderRadius: '8px', marginBottom: '0.5rem' }}>
+                                                            <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05))', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {renderLucideIcon(announcementIcon, { size: 20, color: '#a78bfa' })}
+                                                            </div>
+                                                            <div style={{ flex: 1 }}>
+                                                                <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>{announcementIcon}</span>
+                                                            </div>
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => setAnnouncementIcon('none')}
+                                                                style={{ ...btnModern, padding: '0.4rem', color: '#ff4d4d' }}
+                                                                title="Supprimer"
+                                                            >
+                                                                <X size={14} />
+                                                            </button>
                                                         </div>
+                                                    )}
+                                                    
+                                                    {/* Search input */}
+                                                    <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+                                                        <Search size={12} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#555', zIndex: 1 }} />
+                                                        <input 
+                                                            type="text"
+                                                            placeholder="Rechercher... (star, heart...)"
+                                                            value={bannerIconSearch}
+                                                            onChange={e => setBannerIconSearch(e.target.value)}
+                                                            style={{ ...inputStyle, paddingLeft: '30px', fontSize: '0.8rem' }}
+                                                        />
+                                                    </div>
+                                                    
+                                                    {/* Icon grid */}
+                                                    <div style={{ 
+                                                        background: '#111', 
+                                                        border: '1px solid #222', 
+                                                        borderRadius: '6px', 
+                                                        maxHeight: '140px', 
+                                                        overflowY: 'auto',
+                                                        padding: '0.4rem'
+                                                    }}>
+                                                        <div style={{ padding: '0.2rem 0.4rem', marginBottom: '0.4rem', borderBottom: '1px solid #222' }}>
+                                                            <span style={{ fontSize: '0.65rem', color: '#555' }}>
+                                                                {filteredBannerIcons.length} icônes {bannerIconSearch ? `pour "${bannerIconSearch}"` : ''} • {allLucideIcons.length} total
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(50px, 1fr))', gap: '3px' }}>
+                                                            {/* None option */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => { setAnnouncementIcon('none'); setBannerIconSearch(''); }}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center',
+                                                                    gap: '2px',
+                                                                    padding: '4px 2px',
+                                                                    background: announcementIcon === 'none' ? 'rgba(167, 139, 250, 0.25)' : 'rgba(255,255,255,0.02)',
+                                                                    border: announcementIcon === 'none' ? '1px solid var(--color-accent)' : '1px solid transparent',
+                                                                    borderRadius: '5px',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'all 0.15s'
+                                                                }}
+                                                                onMouseOver={e => { if (announcementIcon !== 'none') e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                                                                onMouseOut={e => { if (announcementIcon !== 'none') e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                                                            >
+                                                                <Ban size={14} color={announcementIcon === 'none' ? 'var(--color-accent)' : '#666'} />
+                                                                <span style={{ fontSize: '0.5rem', color: announcementIcon === 'none' ? 'var(--color-accent)' : '#555' }}>Aucune</span>
+                                                            </button>
+                                                            {filteredBannerIcons.map(iconName => {
+                                                                const IconComp = LucideIcons[iconName];
+                                                                if (!IconComp) return null;
+                                                                return (
+                                                                    <button
+                                                                        key={iconName}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setAnnouncementIcon(iconName);
+                                                                            setBannerIconSearch('');
+                                                                        }}
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            alignItems: 'center',
+                                                                            gap: '2px',
+                                                                            padding: '4px 2px',
+                                                                            background: announcementIcon === iconName ? 'rgba(167, 139, 250, 0.25)' : 'rgba(255,255,255,0.02)',
+                                                                            border: announcementIcon === iconName ? '1px solid var(--color-accent)' : '1px solid transparent',
+                                                                            borderRadius: '5px',
+                                                                            cursor: 'pointer',
+                                                                            transition: 'all 0.15s'
+                                                                        }}
+                                                                        onMouseOver={e => { if (announcementIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                                                                        onMouseOut={e => { if (announcementIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                                                                    >
+                                                                        <IconComp size={14} color={announcementIcon === iconName ? 'var(--color-accent)' : '#888'} />
+                                                                        <span style={{ fontSize: '0.45rem', color: announcementIcon === iconName ? 'var(--color-accent)' : '#555', textAlign: 'center', lineHeight: 1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>{iconName}</span>
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        {filteredBannerIcons.length === 0 && (
+                                                            <div style={{ padding: '0.5rem', textAlign: 'center', color: '#555', fontSize: '0.7rem' }}>
+                                                                Aucune icône pour "{bannerIconSearch}"
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div>
