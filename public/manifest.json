@@ -7,12 +7,12 @@
     "theme_color": "#a78bfa",
     "icons": [
         {
-            "src": "/Logos/PurpleLogo.png",
+            "src": "/Logos/PurpleLogov2.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/Logos/PurpleLogo.png",
+            "src": "/Logos/PurpleLogov2.png",
             "sizes": "512x512",
             "type": "image/png"
         }
