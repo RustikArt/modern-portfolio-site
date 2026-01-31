@@ -218,12 +218,15 @@ const Dashboard = () => {
     // Get all available Lucide icons (filter out non-icon exports)
     const allLucideIcons = useMemo(() => {
         const icons = Object.keys(LucideIcons).filter(key => {
-            // Only keep components (functions) that start with uppercase
-            // Exclude duplicates ending with 'Icon' and utility functions
-            if (typeof LucideIcons[key] !== 'function') return false;
+            // Lucide exports React components as objects (not functions)
+            // Each icon has two versions: 'Heart' and 'HeartIcon' - we keep only the short version
+            if (!LucideIcons[key]) return false;
             if (key[0] !== key[0].toUpperCase()) return false;
             if (key.endsWith('Icon')) return false;
             if (key === 'createLucideIcon' || key === 'default' || key === 'icons') return false;
+            // Check if it's a valid React component (has $$typeof or render)
+            const comp = LucideIcons[key];
+            if (typeof comp !== 'object' && typeof comp !== 'function') return false;
             return true;
         }).sort();
         console.log('Lucide icons loaded:', icons.length);
