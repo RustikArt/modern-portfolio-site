@@ -257,8 +257,8 @@ const Dashboard = () => {
         { file: 'PurpleLogoTransparent.png', label: 'Purple Transparent' },
         { file: 'PurpleLogo.png', label: 'Purple Fond Noir' },
         { file: 'OrangeNoir.png', label: 'Orange Fond Noir' },
-        { file: 'PurpleLogoTransparentV2.png', label: 'Purple Transparent V2' },
-        { file: 'PurpleLogoV2.png', label: 'Purple Fond Noir V2' }
+        { file: 'PurpleLogoTransparentv2.png', label: 'Purple Transparent V2' },
+        { file: 'PurpleLogov2.png', label: 'Purple Fond Noir V2' }
     ];
 
     // Sync local settings when settings change from context - only on initial load OR when settings object changes significantly
