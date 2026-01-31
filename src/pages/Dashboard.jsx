@@ -22,6 +22,7 @@ import {
     Clock,
     Package,
     AlertCircle,
+    AlertTriangle,
     Search,
     LogOut,
     ExternalLink,
@@ -2835,10 +2836,13 @@ const Dashboard = () => {
                                                                 <span style={{ 
                                                                     fontSize: '0.6rem', 
                                                                     color: isTooLarge ? '#ff4d4d' : '#555',
-                                                                    fontWeight: isTooLarge ? '600' : '400'
+                                                                    fontWeight: isTooLarge ? '600' : '400',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '2px'
                                                                 }}>
                                                                     {sizeKB > 1024 ? `${sizeMB} MB` : `${sizeKB} KB`}
-                                                                    {isTooLarge && ' ⚠️'}
+                                                                    {isTooLarge && <AlertTriangle size={10} />}
                                                                 </span>
                                                             </div>
                                                         );
