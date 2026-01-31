@@ -29,7 +29,7 @@ See [docs/DEPLOYMENT_GUIDE.md](./docs/DEPLOYMENT_GUIDE.md) for:
 
 All environment variables, security settings, and integrations documented in:
 - [docs/CONFIGURATION.md](./docs/CONFIGURATION.md)
-- [docs/SUPABASE_SQL_INIT.sql](./docs/SUPABASE_SQL_INIT.sql)
+- [docs/SUPABASE_INIT.sql](./docs/SUPABASE_INIT.sql)
 
 ## Documentation
 
@@ -39,8 +39,7 @@ All project documentation is organized in the `/docs` folder:
 - `README.md` - Documentation index (start here)
 - `DEPLOYMENT_GUIDE.md` - How to deploy to production
 - `CONFIGURATION.md` - All settings and secrets
-- `SUPABASE_SQL_INIT.sql` - Database initialization
-- `WHAT_CHANGED.md` - Explanation of changes made
+- `SUPABASE_INIT.sql` - Database initialization
 
 ## Features
 
@@ -97,7 +96,7 @@ All project documentation is organized in the `/docs` folder:
 ## Next Steps
 
 1. **Review Documentation:** Read [docs/DEPLOYMENT_GUIDE.md](./docs/DEPLOYMENT_GUIDE.md)
-2. **Initialize Database:** Run SQL from [docs/SUPABASE_SQL_INIT.sql](./docs/SUPABASE_SQL_INIT.sql)
+2. **Initialize Database:** Run SQL from [docs/SUPABASE_INIT.sql](./docs/SUPABASE_INIT.sql)
 3. **Deploy to Vercel:** Push to GitHub and Vercel auto-deploys
 4. **Go Live:** Accept your first real customers!
 

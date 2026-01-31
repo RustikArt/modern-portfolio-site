@@ -252,14 +252,15 @@ const Dashboard = () => {
     const [localBlackLogo, setLocalBlackLogo] = useState('PurpleLogo.png');
     const [settingsInitialized, setSettingsInitialized] = useState(false);
 
-    // Available logos from /Logos/ folder - add all logos here
-    const availableLogos = [
-        { file: 'PurpleLogoTransparent.png', label: 'Purple Transparent' },
-        { file: 'PurpleLogo.png', label: 'Purple Fond Noir' },
-        { file: 'OrangeNoir.png', label: 'Orange Fond Noir' },
-        { file: 'PurpleLogoTransparentv2.png', label: 'Purple Transparent V2' },
-        { file: 'PurpleLogov2.png', label: 'Purple Fond Noir V2' }
-    ];
+    // Auto-detect logos from /public/Logos/ folder at build time
+    const availableLogos = useMemo(() => {
+        const logoFiles = import.meta.glob('/public/Logos/*.png', { eager: true, query: '?url', import: 'default' });
+        return Object.keys(logoFiles).map(path => {
+            const file = path.split('/').pop(); // Get filename
+            const label = file.replace('.png', '').replace(/([a-z])([A-Z])/g, '$1 $2'); // "PurpleLogoTransparent" → "Purple Logo Transparent"
+            return { file, label };
+        }).sort((a, b) => a.label.localeCompare(b.label));
+    }, []);
 
     // Sync local settings when settings change from context - only on initial load OR when settings object changes significantly
     useEffect(() => {

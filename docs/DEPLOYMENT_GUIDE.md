@@ -5,7 +5,7 @@
 ### Step 1: Initialize Supabase Configuration
 1. Go to: **Supabase Dashboard → SQL Editor**
 2. Create new query
-3. Copy-paste: `docs/SUPABASE_SQL_INIT.sql`
+3. Copy-paste: `docs/SUPABASE_INIT.sql`
 4. Execute query
 5. Verify: Settings appear in `portfolio_settings` table
 
