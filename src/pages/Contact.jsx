@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useData } from '../context/DataContext';
+import { notifyNewContactMessage } from '../utils/discordService';
 import './Contact.css';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -84,6 +85,9 @@ const Contact = () => {
             if (adminRes.ok) {
                 setStatus('success');
                 setFormData({ ...formData, message: '' });
+
+                // Send Discord notification
+                notifyNewContactMessage(formData.name, formData.email, formData.message);
 
                 // Notify Admin
                 addNotification('contact', `Nouveau message de ${formData.name}`);

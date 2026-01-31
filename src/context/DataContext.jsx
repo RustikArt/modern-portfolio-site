@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import Toast from '../components/Toast';
 import emailjs from '@emailjs/browser';
 import { createClient } from '@supabase/supabase-js';
+import { notifyNewReview } from '../utils/discordService';
 // BCrypt is handled backend-side in production, removed frontend import to fix build error
 
 const DataContext = createContext();
@@ -2091,7 +2092,7 @@ export const DataProvider = ({ children }) => {
         localStorage.setItem('portfolio_reviews', JSON.stringify(reviews));
     }, [reviews]);
 
-    const addReview = (productId, review, isAdmin = false) => {
+    const addReview = (productId, review, isAdmin = false, productName = null) => {
         // review: { user: string, rating: number, comment: string, date: string, isVerified?: boolean }
         const reviewWithMeta = {
             ...review,
@@ -2105,6 +2106,10 @@ export const DataProvider = ({ children }) => {
                 [productId]: [reviewWithMeta, ...productReviews]
             };
         });
+
+        // Send Discord notification for new review
+        const resolvedProductName = productName || products.find(p => p.id === productId)?.name || `Produit #${productId}`;
+        notifyNewReview(reviewWithMeta, resolvedProductName);
     };
 
     const getProductReviews = (productId) => reviews[productId] || [];

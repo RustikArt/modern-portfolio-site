@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { setCorsHeaders, handleCorsPreFlight, handleError } from '../lib/middleware.js';
 import bcrypt from 'bcryptjs';
+import { sendDiscordNotification, DiscordNotifications } from '../lib/discord.js';
 
 // Configuration Supabase - NEVER hardcode keys
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -94,6 +95,13 @@ export default async function handler(req, res) {
                     message: insertError.message,
                     details: insertError
                 });
+            }
+
+            // Send Discord notification for new user
+            try {
+                await sendDiscordNotification(DiscordNotifications.newUser(userToInsert));
+            } catch (discordError) {
+                console.warn('[api/users] Discord notification failed:', discordError.message);
             }
 
             const { data: allUsers, error: fetchError } = await supabase
