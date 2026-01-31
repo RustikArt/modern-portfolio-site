@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { ArrowRight, Palette, Code, Briefcase, TrendingUp, Star, Quote } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import './Home.css';
 import { WEBSITE_VERSION } from '../version';
 
@@ -184,7 +185,12 @@ const Home = () => {
 
                     <div className="featured-grid blur-reveal">
                         {featuredList.length > 0 ? (
-                            featuredList.map((project, index) => (
+                            featuredList.map((project, index) => {
+                                const isLucideIcon = project.image && project.image.startsWith('lucide:');
+                                const iconName = isLucideIcon ? project.image.replace('lucide:', '').split('?')[0] : null;
+                                const IconComponent = iconName ? LucideIcons[iconName] : null;
+                                
+                                return (
                                 <Link
                                     to={`/projects/${project.id}`}
                                     key={project.id}
@@ -195,11 +201,24 @@ const Home = () => {
                                     <div className="project-image-container">
                                         <div className="project-number">0{index + 1}</div>
                                         <div className="project-image">
-                                            <img
-                                                src={`${project.image}?v=${WEBSITE_VERSION}`}
-                                                alt={project.title}
-                                                loading="eager"
-                                            />
+                                            {isLucideIcon && IconComponent ? (
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    background: 'linear-gradient(135deg, var(--color-bg-dark) 0%, var(--color-bg) 100%)'
+                                                }}>
+                                                    <IconComponent size={120} color="var(--color-accent)" strokeWidth={1.5} />
+                                                </div>
+                                            ) : (
+                                                <img
+                                                    src={`${project.image}?v=${WEBSITE_VERSION}`}
+                                                    alt={project.title}
+                                                    loading="eager"
+                                                />
+                                            )}
                                         </div>
                                     </div>
                                     <div className="project-content">
@@ -211,7 +230,8 @@ const Home = () => {
                                         </div>
                                     </div>
                                 </Link>
-                            ))
+                            );
+                            })
                         ) : (
                             <div className="no-projects reveal">
                                 <p>Aucun projet mis en avant pour le moment.</p>
