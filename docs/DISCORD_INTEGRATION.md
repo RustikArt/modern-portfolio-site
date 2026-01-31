@@ -75,7 +75,7 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/VOTRE_ID/VOTRE_TOKEN
 lib/
   discord.js           # Utilitaire backend pour envoyer les webhooks
 api/
-  discord-notify.js    # Endpoint API pour les notifications frontend
+  send-email.js        # Modifié - gère aussi les notifications Discord (contact, avis)
   orders.js            # Modifié - notification nouvelle commande
   users.js             # Modifié - notification nouveau compte
 src/
@@ -86,6 +86,8 @@ src/
   pages/
     Contact.jsx        # Modifié - notification nouveau message
 ```
+
+> **Note**: Les notifications Discord sont fusionnées dans `send-email.js` pour respecter la limite de 12 fonctions serverless du plan Hobby Vercel.
 
 ### Utilisation dans le code
 

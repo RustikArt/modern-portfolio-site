@@ -1,22 +1,22 @@
 /**
  * Discord notification service for frontend
- * Sends notifications via the API endpoint
+ * Sends notifications via the send-email API endpoint (merged to save serverless functions)
  */
 
 /**
  * Send a Discord notification
- * @param {string} type - Notification type: 'order', 'user', 'review', 'contact'
+ * @param {string} type - Notification type: 'review', 'contact'
  * @param {Object} data - Data for the notification
  * @returns {Promise<boolean>} - Success status
  */
 export async function sendDiscordNotification(type, data) {
     try {
-        const response = await fetch('/api/discord-notify', {
+        const response = await fetch('/api/send-email', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ type, data }),
+            body: JSON.stringify({ discordNotify: true, type, data }),
         });
 
         if (!response.ok) {

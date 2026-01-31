@@ -1,8 +1,9 @@
 import { setCorsHeaders, handleCorsPreFlight, checkRateLimit, handleError } from '../lib/middleware.js';
+import { sendDiscordNotification, DiscordNotifications } from '../lib/discord.js';
 
 export default async function handler(req, res) {
     // Configurer les headers CORS
-    setCorsHeaders(res);
+    setCorsHeaders(res, req.headers.origin);
     
     // Gérer les requêtes OPTIONS
     if (handleCorsPreFlight(req, res)) {
@@ -20,6 +21,27 @@ export default async function handler(req, res) {
             return res.status(429).json({ error: 'Trop de requêtes. Veuillez réessayer plus tard.' });
         }
 
+        // Handle Discord notifications (merged from discord-notify.js)
+        const { discordNotify, type, data } = req.body;
+        if (discordNotify) {
+            let embed;
+            switch (type) {
+                case 'review':
+                    embed = DiscordNotifications.newReview(data.review, data.productName);
+                    break;
+                case 'contact':
+                    embed = DiscordNotifications.newContactMessage(data);
+                    break;
+                default:
+                    return res.status(400).json({ error: `Type de notification inconnu: ${type}` });
+            }
+            const success = await sendDiscordNotification(embed);
+            return res.status(success ? 200 : 500).json({ 
+                message: success ? 'Notification Discord envoyée' : 'Échec de l\'envoi' 
+            });
+        }
+
+        // Handle EmailJS requests
         const { serviceId, templateId, templateParams, publicKey } = req.body;
         const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
