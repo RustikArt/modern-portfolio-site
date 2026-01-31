@@ -2712,141 +2712,92 @@ const Dashboard = () => {
 
                                             <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Logos du Site</h4>
 
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                                                 {/* Logo Transparent (Navbar) */}
                                                 <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Logo Transparent (Navbar)</label>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                        {availableLogos.map(logo => (
-                                                            <div 
-                                                                key={`trans-${logo.file}`}
-                                                                onClick={() => setLocalTransparentLogo(logo.file)}
-                                                                style={{
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '0.75rem',
-                                                                    padding: '0.5rem',
-                                                                    background: localTransparentLogo === logo.file ? 'rgba(167, 139, 250, 0.15)' : 'rgba(255,255,255,0.02)',
-                                                                    border: localTransparentLogo === logo.file ? '2px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.1)',
-                                                                    borderRadius: '8px',
-                                                                    cursor: 'pointer',
-                                                                    transition: 'all 0.2s'
-                                                                }}
-                                                            >
-                                                                <img 
-                                                                    src={`/Logos/${logo.file}`} 
-                                                                    alt={logo.label}
-                                                                    style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
-                                                                    onError={(e) => { e.target.style.display = 'none'; }}
-                                                                />
-                                                                <span style={{ fontSize: '0.8rem', color: localTransparentLogo === logo.file ? 'var(--color-accent)' : '#888' }}>
-                                                                    {logo.label}
-                                                                </span>
-                                                            </div>
-                                                        ))}
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Logo Navbar</label>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <img 
+                                                            src={`/Logos/${localTransparentLogo}`} 
+                                                            alt="Logo actuel"
+                                                            style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
+                                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                                        />
+                                                        <select
+                                                            value={localTransparentLogo}
+                                                            onChange={(e) => setLocalTransparentLogo(e.target.value)}
+                                                            style={{ ...inputStyle, flex: 1 }}
+                                                        >
+                                                            {availableLogos.map(logo => (
+                                                                <option key={`trans-${logo.file}`} value={logo.file}>{logo.label}</option>
+                                                            ))}
+                                                        </select>
                                                     </div>
                                                 </div>
 
-                                                {/* Logo Fond Noir (Favicon, SEO) */}
+                                                {/* Logo Fond Noir (SEO) */}
                                                 <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Logo Fond Noir (Favicon, SEO)</label>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                        {availableLogos.map(logo => (
-                                                            <div 
-                                                                key={`black-${logo.file}`}
-                                                                onClick={() => setLocalBlackLogo(logo.file)}
-                                                                style={{
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '0.75rem',
-                                                                    padding: '0.5rem',
-                                                                    background: localBlackLogo === logo.file ? 'rgba(167, 139, 250, 0.15)' : 'rgba(255,255,255,0.02)',
-                                                                    border: localBlackLogo === logo.file ? '2px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.1)',
-                                                                    borderRadius: '8px',
-                                                                    cursor: 'pointer',
-                                                                    transition: 'all 0.2s'
-                                                                }}
-                                                            >
-                                                                <img 
-                                                                    src={`/Logos/${logo.file}`} 
-                                                                    alt={logo.label}
-                                                                    style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
-                                                                    onError={(e) => { e.target.style.display = 'none'; }}
-                                                                />
-                                                                <span style={{ fontSize: '0.8rem', color: localBlackLogo === logo.file ? 'var(--color-accent)' : '#888' }}>
-                                                                    {logo.label}
-                                                                </span>
-                                                            </div>
-                                                        ))}
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Logo SEO</label>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <img 
+                                                            src={`/Logos/${localBlackLogo}`} 
+                                                            alt="Logo actuel"
+                                                            style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
+                                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                                        />
+                                                        <select
+                                                            value={localBlackLogo}
+                                                            onChange={(e) => setLocalBlackLogo(e.target.value)}
+                                                            style={{ ...inputStyle, flex: 1 }}
+                                                        >
+                                                            {availableLogos.map(logo => (
+                                                                <option key={`black-${logo.file}`} value={logo.file}>{logo.label}</option>
+                                                            ))}
+                                                        </select>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            {/* Favicon Selector */}
-                                            <div style={{ marginTop: '1rem' }}>
-                                                <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>
-                                                    Favicon (icône onglet navigateur)
-                                                    <span style={{ fontSize: '0.7rem', color: '#555', marginLeft: '0.5rem' }}>Max recommandé: 500 KB</span>
-                                                </label>
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                                    {availableLogos.map(logo => {
-                                                        const sizeBytes = logoSizes[logo.file] || 0;
-                                                        const sizeKB = Math.round(sizeBytes / 1024);
-                                                        const sizeMB = (sizeBytes / (1024 * 1024)).toFixed(2);
-                                                        const isTooLarge = sizeBytes > 500 * 1024; // > 500KB
-                                                        const isSelected = localFavicon === logo.file;
-                                                        
-                                                        return (
-                                                            <div 
-                                                                key={`fav-${logo.file}`}
-                                                                onClick={() => !isTooLarge && setLocalFavicon(logo.file)}
-                                                                style={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'column',
-                                                                    alignItems: 'center',
-                                                                    padding: '0.5rem',
-                                                                    background: isSelected ? 'rgba(167, 139, 250, 0.15)' : isTooLarge ? 'rgba(255,77,77,0.1)' : 'rgba(255,255,255,0.02)',
-                                                                    border: isSelected ? '2px solid var(--color-accent)' : isTooLarge ? '1px solid rgba(255,77,77,0.3)' : '1px solid rgba(255,255,255,0.1)',
-                                                                    borderRadius: '8px',
-                                                                    cursor: isTooLarge ? 'not-allowed' : 'pointer',
-                                                                    transition: 'all 0.2s',
-                                                                    opacity: isTooLarge ? 0.5 : 1,
-                                                                    minWidth: '80px'
-                                                                }}
-                                                                title={isTooLarge ? `Trop lourd: ${sizeMB} MB (max 500 KB)` : `${sizeKB} KB`}
-                                                            >
-                                                                <img 
-                                                                    src={`/Logos/${logo.file}`} 
-                                                                    alt={logo.label}
-                                                                    style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.5)' }}
-                                                                    onError={(e) => { e.target.style.display = 'none'; }}
-                                                                />
-                                                                <span style={{ 
-                                                                    fontSize: '0.65rem', 
-                                                                    color: isTooLarge ? '#ff4d4d' : isSelected ? 'var(--color-accent)' : '#666',
-                                                                    marginTop: '0.25rem',
-                                                                    textAlign: 'center',
-                                                                    maxWidth: '70px',
-                                                                    overflow: 'hidden',
-                                                                    textOverflow: 'ellipsis',
-                                                                    whiteSpace: 'nowrap'
-                                                                }}>
-                                                                    {logo.label.split(' ')[0]}
-                                                                </span>
-                                                                <span style={{ 
-                                                                    fontSize: '0.6rem', 
-                                                                    color: isTooLarge ? '#ff4d4d' : '#555',
-                                                                    fontWeight: isTooLarge ? '600' : '400',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '2px'
-                                                                }}>
-                                                                    {sizeKB > 1024 ? `${sizeMB} MB` : `${sizeKB} KB`}
-                                                                    {isTooLarge && <AlertTriangle size={10} />}
-                                                                </span>
-                                                            </div>
-                                                        );
-                                                    })}
+                                                {/* Favicon Selector */}
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>
+                                                        Favicon
+                                                        <span style={{ fontSize: '0.65rem', color: '#555', marginLeft: '0.25rem' }}>(max 500KB)</span>
+                                                    </label>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <img 
+                                                            src={`/Logos/${localFavicon}`} 
+                                                            alt="Favicon actuel"
+                                                            style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
+                                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                                        />
+                                                        <select
+                                                            value={localFavicon}
+                                                            onChange={(e) => {
+                                                                const sizeBytes = logoSizes[e.target.value] || 0;
+                                                                if (sizeBytes > 500 * 1024) {
+                                                                    showToast(`Ce logo est trop lourd (${(sizeBytes / (1024 * 1024)).toFixed(2)} MB)`, 'error');
+                                                                    return;
+                                                                }
+                                                                setLocalFavicon(e.target.value);
+                                                            }}
+                                                            style={{ ...inputStyle, flex: 1 }}
+                                                        >
+                                                            {availableLogos.map(logo => {
+                                                                const sizeBytes = logoSizes[logo.file] || 0;
+                                                                const sizeKB = Math.round(sizeBytes / 1024);
+                                                                const isTooLarge = sizeBytes > 500 * 1024;
+                                                                return (
+                                                                    <option 
+                                                                        key={`fav-${logo.file}`} 
+                                                                        value={logo.file}
+                                                                        style={{ color: isTooLarge ? '#ff4d4d' : 'inherit' }}
+                                                                    >
+                                                                        {logo.label} ({sizeKB} KB){isTooLarge ? ' - Trop lourd!' : ''}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
 
