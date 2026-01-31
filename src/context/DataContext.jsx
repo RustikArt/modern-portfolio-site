@@ -1912,7 +1912,7 @@ export const DataProvider = ({ children }) => {
             completionDate: orderData.status === 'Terminé' ? new Date().toISOString() : null,
             shipping: orderData.shipping || { address: 'Adresse simulée', city: 'Ville', zip: '00000' },
             paymentId: 'SIMULATED_ADMIN',
-            notes: orderData.notes || '⚠️ Commande simulée par admin'
+            notes: orderData.notes || '[SIMULATION] Commande simulée par admin'
         };
 
         try {

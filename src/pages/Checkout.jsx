@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     CheckCircle2,
     AlertCircle,
+    AlertTriangle,
     CreditCard,
     Truck,
     ShoppingBag,
@@ -301,8 +302,8 @@ const Checkout = () => {
 
                         <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1rem', letterSpacing: '-1.5px' }}>PAIEMENT RÉUSSI</h2>
                         <p style={{ color: '#888', marginBottom: '1rem', fontSize: '1.1rem' }}>Votre commande a été enregistrée avec succès.</p>
-                        <p style={{ color: 'var(--color-accent)', marginBottom: '3rem', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                            ⚠️ PENSEZ À VÉRIFIER VOS MAILS (ET VOS SPAMS)
+                        <p style={{ color: 'var(--color-accent)', marginBottom: '3rem', fontSize: '0.9rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <AlertTriangle size={16} /> PENSEZ À VÉRIFIER VOS MAILS (ET VOS SPAMS)
                         </p>
 
                         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', textAlign: 'left', marginBottom: '3rem' }}>

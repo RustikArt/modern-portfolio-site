@@ -61,7 +61,7 @@ const MaintenancePage = () => {
         message: `[MESSAGE PENDANT MAINTENANCE]\n\n${formData.message}`,
         reply_to: formData.email,
         to_email: settings?.contactEmail || 'rustikop@outlook.fr',
-        title: '⚠️ Message reçu pendant maintenance'
+        title: '[MAINTENANCE] Message reçu pendant maintenance'
       };
 
       const res = await fetch('/api/send-email', {
