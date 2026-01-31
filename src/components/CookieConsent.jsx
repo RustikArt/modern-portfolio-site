@@ -1,15 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Shield } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 const CookieConsent = () => {
+    const { currentUser } = useData();
     const [isVisible, setIsVisible] = useState(false);
 
+    // Check if user is admin/editor
+    const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin' || currentUser.role === 'editor');
+
     useEffect(() => {
+        // Auto-accept for admins - they need analytics for site management
+        if (isAdmin) {
+            const consent = localStorage.getItem('cookie_consent');
+            if (consent !== 'accepted') {
+                localStorage.setItem('cookie_consent', 'accepted');
+                window.dispatchEvent(new Event('cookie_consent_changed'));
+            }
+            setIsVisible(false);
+            return;
+        }
+
+        // For regular users, show banner if no choice made
         const consent = localStorage.getItem('cookie_consent');
         if (!consent) {
             setIsVisible(true);
         }
-    }, []);
+    }, [isAdmin]);
 
     const handleAccept = () => {
         localStorage.setItem('cookie_consent', 'accepted');

@@ -54,6 +54,19 @@ const LegalMentions = () => {
                         de suppression et de portabilité de vos données personnelles. Pour exercer ces droits, contactez-nous à : <a href="mailto:rustikop@outlook.fr" style={{ color: 'var(--color-accent)' }}>rustikop@outlook.fr</a>.
                     </p>
                 </section>
+
+                <section style={{ marginBottom: '2.5rem' }}>
+                    <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-accent)' }}>Cookies et Analytics</h2>
+                    <p style={{ lineHeight: '1.8', color: '#aaa' }}>
+                        Ce site utilise des cookies d'analyse (Vercel Analytics) pour comprendre comment les visiteurs utilisent le site.
+                        Ces données sont anonymisées et ne permettent pas de vous identifier personnellement.<br /><br />
+                        <strong style={{ color: '#fff' }}>Consentement :</strong> Lors de votre première visite, une bannière vous permet d'accepter ou de refuser ces cookies.
+                        Votre choix est respecté et peut être modifié à tout moment via les paramètres de votre navigateur.<br /><br />
+                        <strong style={{ color: '#fff' }}>Note pour les administrateurs :</strong> Les utilisateurs ayant un rôle d'administration acceptent automatiquement
+                        les cookies d'analytics, nécessaires au bon fonctionnement du tableau de bord.<br /><br />
+                        Pour plus de détails, consultez notre <a href="/privacy" style={{ color: 'var(--color-accent)' }}>Politique de Confidentialité</a>.
+                    </p>
+                </section>
             </div>
         </div>
     );
