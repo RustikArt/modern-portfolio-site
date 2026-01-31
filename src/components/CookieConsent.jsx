@@ -13,11 +13,15 @@ const CookieConsent = () => {
 
     const handleAccept = () => {
         localStorage.setItem('cookie_consent', 'accepted');
+        // Dispatch event to enable analytics
+        window.dispatchEvent(new Event('cookie_consent_changed'));
         setIsVisible(false);
     };
 
     const handleDecline = () => {
         localStorage.setItem('cookie_consent', 'declined');
+        // Dispatch event to ensure analytics stays disabled
+        window.dispatchEvent(new Event('cookie_consent_changed'));
         setIsVisible(false);
     };
 
@@ -46,8 +50,9 @@ const CookieConsent = () => {
                 <div>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>Confidentialité et Cookies</h3>
                     <p style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: '1.5' }}>
-                        Nous utilisons des cookies essentiels pour sécuriser votre session et améliorer votre expérience.
-                        Nous ne vendons pas vos données. Pour en savoir plus, consultez notre <a href="/privacy" style={{ color: 'var(--color-accent)' }}>Politique de Confidentialité</a>.
+                        Nous utilisons des cookies d'analyse (Vercel Analytics) pour comprendre comment notre site est utilisé.
+                        Ces données sont anonymisées et ne sont jamais vendues. 
+                        <a href="/privacy" style={{ color: 'var(--color-accent)', marginLeft: '4px' }}>Politique de Confidentialité</a>
                     </p>
                 </div>
             </div>
