@@ -25,11 +25,6 @@ const AnnouncementBanner = () => {
     useEffect(() => {
         if (!announcementLoaded) return; // Wait for data to load
         
-        // Debug log for troubleshooting
-        console.log('AnnouncementBanner - announcement:', announcement);
-        console.log('AnnouncementBanner - isActive:', announcement?.isActive);
-        console.log('AnnouncementBanner - text:', announcement?.text);
-        
         // Check if announcement exists and is active
         const isActive = announcement?.isActive === true;
         const hasText = announcement?.text && announcement.text.trim().length > 0;
@@ -42,7 +37,6 @@ const AnnouncementBanner = () => {
         const key = getDismissalKey();
         if (key) {
             const wasDismissed = localStorage.getItem(key) === 'true';
-            console.log('AnnouncementBanner - dismissalKey:', key, 'wasDismissed:', wasDismissed);
             setIsVisible(!wasDismissed);
         } else {
             // No dismissal key means show the banner

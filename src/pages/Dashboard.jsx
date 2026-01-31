@@ -229,7 +229,6 @@ const Dashboard = () => {
             if (typeof comp !== 'object' && typeof comp !== 'function') return false;
             return true;
         }).sort();
-        console.log('Lucide icons loaded:', icons.length);
         return icons;
     }, []);
 
@@ -249,18 +248,28 @@ const Dashboard = () => {
     const [localContactEmail, setLocalContactEmail] = useState('');
     const [localSocials, setLocalSocials] = useState({ instagram: '', twitter: '', discord: '' });
     const [localNavbarPadding, setLocalNavbarPadding] = useState('normal');
+    const [localTransparentLogo, setLocalTransparentLogo] = useState('PurpleLogoTransparent.png');
+    const [localBlackLogo, setLocalBlackLogo] = useState('PurpleLogo.png');
     const [settingsInitialized, setSettingsInitialized] = useState(false);
+
+    // Available logos from /Logos/ folder
+    const availableLogos = [
+        { file: 'PurpleLogoTransparent.png', label: 'Purple (Transparent)' },
+        { file: 'PurpleLogo.png', label: 'Purple (Fond Noir)' },
+        { file: 'OrangeNoir.png', label: 'Orange (Fond Noir)' }
+    ];
 
     // Sync local settings when settings change from context - only on initial load OR when settings object changes significantly
     useEffect(() => {
         if (settings && !settingsInitialized) {
-            console.log('Dashboard: Initializing settings from context:', settings);
             setLocalSiteTitle(settings.siteTitle || '');
             setLocalMaintenanceMode(Boolean(settings.maintenanceMode));
             setLocalGrainEffect(Boolean(settings.grainEffect));
             setLocalContactEmail(settings.contactEmail || '');
             setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
             setLocalNavbarPadding(settings.navbarPadding || 'normal');
+            setLocalTransparentLogo(settings.transparentLogo || 'PurpleLogoTransparent.png');
+            setLocalBlackLogo(settings.blackLogo || 'PurpleLogo.png');
             setSettingsInitialized(true);
         }
     }, [settings, settingsInitialized]);
@@ -2676,6 +2685,80 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
 
+                                            <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Logos du Site</h4>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                {/* Logo Transparent (Navbar) */}
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Logo Transparent (Navbar)</label>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                        {availableLogos.filter(l => l.file.toLowerCase().includes('transparent') || l.file === localTransparentLogo).concat(
+                                                            availableLogos.filter(l => !l.file.toLowerCase().includes('transparent') && l.file !== localTransparentLogo)
+                                                        ).map(logo => (
+                                                            <div 
+                                                                key={logo.file}
+                                                                onClick={() => setLocalTransparentLogo(logo.file)}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '0.75rem',
+                                                                    padding: '0.5rem',
+                                                                    background: localTransparentLogo === logo.file ? 'rgba(167, 139, 250, 0.15)' : 'rgba(255,255,255,0.02)',
+                                                                    border: localTransparentLogo === logo.file ? '2px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.1)',
+                                                                    borderRadius: '8px',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'all 0.2s'
+                                                                }}
+                                                            >
+                                                                <img 
+                                                                    src={`/Logos/${logo.file}`} 
+                                                                    alt={logo.label}
+                                                                    style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
+                                                                />
+                                                                <span style={{ fontSize: '0.8rem', color: localTransparentLogo === logo.file ? 'var(--color-accent)' : '#888' }}>
+                                                                    {logo.label}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Logo Fond Noir (Favicon, SEO) */}
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Logo Fond Noir (Favicon, SEO)</label>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                        {availableLogos.filter(l => !l.file.toLowerCase().includes('transparent') || l.file === localBlackLogo).concat(
+                                                            availableLogos.filter(l => l.file.toLowerCase().includes('transparent') && l.file !== localBlackLogo)
+                                                        ).map(logo => (
+                                                            <div 
+                                                                key={logo.file}
+                                                                onClick={() => setLocalBlackLogo(logo.file)}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '0.75rem',
+                                                                    padding: '0.5rem',
+                                                                    background: localBlackLogo === logo.file ? 'rgba(167, 139, 250, 0.15)' : 'rgba(255,255,255,0.02)',
+                                                                    border: localBlackLogo === logo.file ? '2px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.1)',
+                                                                    borderRadius: '8px',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'all 0.2s'
+                                                                }}
+                                                            >
+                                                                <img 
+                                                                    src={`/Logos/${logo.file}`} 
+                                                                    alt={logo.label}
+                                                                    style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.3)' }}
+                                                                />
+                                                                <span style={{ fontSize: '0.8rem', color: localBlackLogo === logo.file ? 'var(--color-accent)' : '#888' }}>
+                                                                    {logo.label}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Contact & Réseaux</h4>
 
                                             <div>
@@ -2724,21 +2807,15 @@ const Dashboard = () => {
                                             {/* APPLY BUTTON */}
                                             <button
                                                 onClick={async () => {
-                                                    console.log('Saving settings with:', {
-                                                        siteTitle: localSiteTitle,
-                                                        maintenanceMode: localMaintenanceMode,
-                                                        grainEffect: localGrainEffect,
-                                                        contactEmail: localContactEmail,
-                                                        socials: localSocials,
-                                                        navbarPadding: localNavbarPadding
-                                                    });
                                                     const success = await updateSettings({
                                                         siteTitle: localSiteTitle,
                                                         maintenanceMode: localMaintenanceMode,
                                                         grainEffect: localGrainEffect,
                                                         contactEmail: localContactEmail,
                                                         socials: localSocials,
-                                                        navbarPadding: localNavbarPadding
+                                                        navbarPadding: localNavbarPadding,
+                                                        transparentLogo: localTransparentLogo,
+                                                        blackLogo: localBlackLogo
                                                     });
                                                     if (success) {
                                                         showToast("Configuration générale mise à jour !", "success");
@@ -2946,11 +3023,6 @@ const Dashboard = () => {
 
                                             <button
                                                 onClick={async () => {
-                                                    console.log('Saving announcement with:', {
-                                                        id: announcement?.id,
-                                                        text: announcementText,
-                                                        isActive: announcementIsActive,
-                                                    });
                                                     const success = await updateAnnouncement({
                                                         id: announcement?.id,
                                                         text: announcementText,

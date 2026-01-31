@@ -46,16 +46,11 @@ export default async function handler(req, res) {
             event = stripe.webhooks.constructEvent(rawBody, signature, STRIPE_WEBHOOK_SECRET);
         } else {
             // Development mode - parse without verification (NOT RECOMMENDED FOR PRODUCTION)
-            console.warn('[Webhook] No webhook secret configured - skipping signature verification');
             event = JSON.parse(rawBody.toString());
         }
     } catch (err) {
-        console.error('[Webhook] Signature verification failed:', err.message);
         return res.status(400).json({ error: `Webhook Error: ${err.message}` });
     }
-
-    // Handle the event
-    console.log(`[Webhook] Received event: ${event.type}`);
 
     try {
         switch (event.type) {
@@ -64,24 +59,18 @@ export default async function handler(req, res) {
                 break;
 
             case 'checkout.session.expired':
-                console.log('[Webhook] Checkout session expired:', event.data.object.id);
-                break;
-
             case 'payment_intent.succeeded':
-                console.log('[Webhook] Payment intent succeeded:', event.data.object.id);
-                break;
-
             case 'payment_intent.payment_failed':
-                console.log('[Webhook] Payment failed:', event.data.object.id);
+                // Events handled silently
                 break;
 
             default:
-                console.log(`[Webhook] Unhandled event type: ${event.type}`);
+                // Unhandled event types
+                break;
         }
 
         res.status(200).json({ received: true });
     } catch (err) {
-        console.error('[Webhook] Error processing event:', err);
         res.status(500).json({ error: 'Webhook processing failed' });
     }
 }

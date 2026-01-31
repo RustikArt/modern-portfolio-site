@@ -15,7 +15,6 @@ const GrainOverlay = () => {
         if (!settingsLoaded) return;
         
         const shouldEnable = settings?.grainEffect === true;
-        console.log('[GrainOverlay] Settings loaded, grainEffect:', settings?.grainEffect, 'enabling:', shouldEnable);
         setIsEnabled(shouldEnable);
     }, [settings?.grainEffect, settingsLoaded]);
 

@@ -28,17 +28,13 @@ export default async function handler(req, res) {
                 .limit(1);
 
             if (error) {
-                console.error('Settings GET error:', error);
                 throw error;
             }
             
-            console.log('Settings fetched:', settings);
             res.status(200).json(settings && settings.length > 0 ? settings[0] : {});
         } else if (req.method === 'PUT') {
             // Admin only: update settings
             if (!requireAdminAuth(req, res)) return;
-
-            console.log('Settings PUT received body:', JSON.stringify(req.body, null, 2));
 
             const { 
                 maintenanceMode, 
@@ -49,7 +45,9 @@ export default async function handler(req, res) {
                 contactEmail, 
                 supportPhone,
                 navbarPadding,
-                socials 
+                socials,
+                transparentLogo,
+                blackLogo
             } = req.body;
 
             const { data: existing, error: fetchError } = await supabase
@@ -58,13 +56,11 @@ export default async function handler(req, res) {
                 .limit(1);
 
             if (fetchError) {
-                console.error('Settings fetch existing error:', fetchError);
                 throw fetchError;
             }
 
             // Merge with existing data to preserve fields not being updated
             const existingSettings = existing && existing.length > 0 ? existing[0] : {};
-            console.log('Existing settings:', existingSettings);
             
             const settingsData = {
                 maintenance_mode: maintenanceMode !== undefined ? Boolean(maintenanceMode) : Boolean(existingSettings.maintenance_mode),
@@ -76,35 +72,30 @@ export default async function handler(req, res) {
                 support_phone: supportPhone !== undefined ? supportPhone : (existingSettings.support_phone || ''),
                 navbar_padding: navbarPadding !== undefined ? navbarPadding : (existingSettings.navbar_padding || 'normal'),
                 socials: socials || existingSettings.socials || {},
+                transparent_logo: transparentLogo !== undefined ? transparentLogo : (existingSettings.transparent_logo || 'PurpleLogoTransparent.png'),
+                black_logo: blackLogo !== undefined ? blackLogo : (existingSettings.black_logo || 'PurpleLogo.png'),
                 updated_at: new Date().toISOString()
             };
-
-            console.log('Settings data to save:', settingsData);
 
             let error;
             let result;
 
             if (existing && existing.length > 0) {
-                console.log('Updating existing settings with id:', existing[0].id);
                 result = await supabase
                     .from('portfolio_settings')
                     .update(settingsData)
                     .eq('id', existing[0].id)
                     .select();
                 error = result.error;
-                console.log('Update result:', result);
             } else {
-                console.log('Inserting new settings');
                 result = await supabase
                     .from('portfolio_settings')
                     .insert([settingsData])
                     .select();
                 error = result.error;
-                console.log('Insert result:', result);
             }
 
             if (error) {
-                console.error('Settings save error:', error);
                 throw error;
             }
 
@@ -115,18 +106,15 @@ export default async function handler(req, res) {
                 .limit(1);
 
             if (getError) {
-                console.error('Settings refetch error:', getError);
                 throw getError;
             }
 
-            console.log('Final updated settings:', updated);
             res.status(200).json(updated && updated.length > 0 ? updated[0] : settingsData);
         } else {
             res.setHeader('Allow', ['GET', 'PUT']);
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
     } catch (error) {
-        console.error('Settings API error:', error);
         handleError(res, error, 500);
     }
 }

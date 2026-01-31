@@ -811,6 +811,8 @@ export const DataProvider = ({ children }) => {
             contactEmail: 'rustikop@outlook.fr',
             supportPhone: '',
             navbarPadding: 'normal',
+            transparentLogo: 'PurpleLogoTransparent.png',
+            blackLogo: 'PurpleLogo.png',
             socials: {
                 instagram: 'https://www.instagram.com/rustikop.art/',
                 twitter: 'https://x.com/rustikop',
@@ -952,13 +954,11 @@ export const DataProvider = ({ children }) => {
                 const localOrders = localStorage.getItem('portfolio_orders');
 
                 if (localProjects) {
-                    console.log('Recovering all data from local storage');
                     setProjects(JSON.parse(localProjects));
                     setProducts(JSON.parse(localProducts || '[]'));
                     setPromoCodes(JSON.parse(localPromos || '[]'));
                     if (localOrders) setOrders(JSON.parse(localOrders));
                 } else {
-                    console.log('No local data found, using fallbacks');
                     setProjects(fallbackProjects);
                     setProducts(fallbackProducts);
                     setPromoCodes([
@@ -978,7 +978,6 @@ export const DataProvider = ({ children }) => {
                 const res = await fetch('/api/settings');
                 if (res.ok) {
                     const data = await res.json();
-                    console.log('Fetched settings from API:', data);
                     // Completely replace settings with API data to prevent localStorage conflicts
                     setSettings(prev => {
                         const newSettings = {
@@ -990,6 +989,8 @@ export const DataProvider = ({ children }) => {
                             contactEmail: data.contact_email !== undefined ? data.contact_email : prev.contactEmail,
                             supportPhone: data.support_phone !== undefined ? data.support_phone : prev.supportPhone,
                             navbarPadding: data.navbar_padding || prev.navbarPadding,
+                            transparentLogo: data.transparent_logo || prev.transparentLogo,
+                            blackLogo: data.black_logo || prev.blackLogo,
                             socials: data.socials || prev.socials,
                             version: prev.version
                         };
@@ -999,7 +1000,6 @@ export const DataProvider = ({ children }) => {
                     });
                 }
             } catch (error) {
-                console.error('Failed to fetch settings from API:', error);
             } finally {
                 setSettingsLoaded(true);
             }
@@ -1013,7 +1013,6 @@ export const DataProvider = ({ children }) => {
                     const data = await res.json();
                     if (data) {
                         const normalized = normalizeAnnouncement(data);
-                        console.log('Initial announcement loaded:', normalized);
                         setAnnouncement(normalized);
                     } else {
                         // No active announcement
@@ -1023,7 +1022,6 @@ export const DataProvider = ({ children }) => {
                     setAnnouncement(null);
                 }
             } catch (error) {
-                console.error('Failed to fetch announcement from API:', error);
                 setAnnouncement(null);
             } finally {
                 setAnnouncementLoaded(true);
@@ -1042,14 +1040,12 @@ export const DataProvider = ({ children }) => {
                 const data = await res.json();
                 if (data) {
                     const normalized = normalizeAnnouncement(data);
-                    console.log('Admin announcement loaded:', normalized);
                     setAnnouncement(normalized);
                     return normalized;
                 }
             }
             return null;
         } catch (error) {
-            console.error('Failed to fetch announcement for admin:', error);
             return null;
         }
     };
@@ -1234,33 +1230,20 @@ export const DataProvider = ({ children }) => {
                 stock: product.stock ?? null
             };
 
-            console.log('Sending product data to API:', productData);
-
             const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: getAdminHeaders(),
                 body: JSON.stringify(productData)
             });
-            console.log('API response status:', res.status);
 
             if (res.ok) {
                 const updatedProducts = await res.json();
-                console.log('Product added successfully:', updatedProducts);
                 setProducts(updatedProducts);
             } else {
                 const errorText = await res.text();
-                console.error('Failed to add product, response:', errorText);
-                // Try to parse JSON error for more details
-                try {
-                    const errorObj = JSON.parse(errorText);
-                    console.error('Detailed error:', errorObj);
-                } catch (e) {
-                    console.error('Error parsing JSON response');
-                }
                 throw new Error(`Add failed: ${errorText}`);
             }
         } catch (error) {
-            console.error('Failed to add product, error:', error);
             throw error;
         }
     };
@@ -1827,14 +1810,11 @@ export const DataProvider = ({ children }) => {
                 })
             });
 
-            if (response.ok) {
-                console.log('Order confirmation email sent successfully via Serverless function.');
-            } else {
-                const error = await response.json();
-                console.error('Failed to send order confirmation:', error.error);
+            if (!response.ok) {
+                // Silently fail - email is not critical
             }
         } catch (err) {
-            console.error('Error triggering order confirmation email:', err);
+            // Silently fail - email is not critical
         }
     };
 
@@ -1951,19 +1931,14 @@ export const DataProvider = ({ children }) => {
                 user_id: simulatedOrder.userId
             };
 
-            console.log('[DataContext] Sending order to API:', orderApiData);
-
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: getAdminHeaders(),
                 body: JSON.stringify(orderApiData)
             });
 
-            console.log('[DataContext] API response status:', res.status);
-
             if (res.ok) {
                 const updatedOrders = await res.json();
-                console.log('[DataContext] Orders received from API:', updatedOrders.length);
                 const normalizedOrders = updatedOrders.map(o => ({
                     ...o,
                     customerName: o.customer_name || o.customerName,
@@ -2171,8 +2146,6 @@ export const DataProvider = ({ children }) => {
                     ? { id: announcement.id, ...config }
                     : config;
 
-                console.log('Updating announcement with method:', method, 'body:', body);
-
                 const res = await fetch(url, {
                     method,
                     headers: getAdminHeaders(),
@@ -2180,16 +2153,11 @@ export const DataProvider = ({ children }) => {
                 });
 
                 if (!res.ok) {
-                    const error = await res.json();
-                    console.error('Error updating announcement:', error);
                     return false;
                 }
 
                 const data = await res.json();
-                console.log('Announcement API response:', data);
-                
                 const normalized = normalizeAnnouncement(data);
-                console.log('Normalized announcement:', normalized);
                 setAnnouncement(normalized);
                 return true;
             } else {
@@ -2216,29 +2184,24 @@ export const DataProvider = ({ children }) => {
                     contactEmail: newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail,
                     supportPhone: newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone,
                     navbarPadding: newSettings.navbarPadding !== undefined ? newSettings.navbarPadding : settings.navbarPadding,
+                    transparentLogo: newSettings.transparentLogo !== undefined ? newSettings.transparentLogo : settings.transparentLogo,
+                    blackLogo: newSettings.blackLogo !== undefined ? newSettings.blackLogo : settings.blackLogo,
                     socials: newSettings.socials || settings.socials
                 };
-                
-                console.log('Updating settings - payload:', payload);
-                console.log('Admin secret configured:', import.meta.env.VITE_ADMIN_SECRET ? 'YES' : 'NO');
                 
                 const res = await fetch('/api/settings', {
                     method: 'PUT',
                     headers: getAdminHeaders(),
                     body: JSON.stringify(payload)
                 });
-
-                console.log('Settings API response status:', res.status);
                 
                 if (!res.ok) {
                     const errorData = await res.json();
-                    console.error('Error updating settings:', errorData);
                     addNotification('error', `Erreur: ${errorData.error || 'impossible de sauvegarder les paramètres'}`);
                     return false;
                 }
 
                 const updated = await res.json();
-                console.log('Settings updated response:', updated);
                 // Update local state with the response from API - use Boolean to ensure type consistency
                 const newState = {
                     maintenanceMode: updated.maintenance_mode !== undefined ? Boolean(updated.maintenance_mode) : Boolean(newSettings.maintenanceMode),
@@ -2249,6 +2212,8 @@ export const DataProvider = ({ children }) => {
                     contactEmail: updated.contact_email !== undefined ? updated.contact_email : (newSettings.contactEmail !== undefined ? newSettings.contactEmail : settings.contactEmail),
                     supportPhone: updated.support_phone !== undefined ? updated.support_phone : (newSettings.supportPhone !== undefined ? newSettings.supportPhone : settings.supportPhone),
                     navbarPadding: updated.navbar_padding || newSettings.navbarPadding || settings.navbarPadding,
+                    transparentLogo: updated.transparent_logo || newSettings.transparentLogo || settings.transparentLogo,
+                    blackLogo: updated.black_logo || newSettings.blackLogo || settings.blackLogo,
                     socials: updated.socials || newSettings.socials || settings.socials,
                     version: settings.version
                 };
@@ -2262,7 +2227,6 @@ export const DataProvider = ({ children }) => {
                 return true;
             }
         } catch (error) {
-            console.error('Failed to update settings:', error);
             addNotification('error', 'Erreur: impossible de sauvegarder les paramètres');
             return false;
         }

@@ -36,22 +36,17 @@ const SiteBanner = () => {
     // Check visibility on mount and when announcement changes
     useEffect(() => {
         if (!announcementLoaded) {
-            console.log('[SiteBanner] Waiting for announcement data...');
             return;
         }
 
-        console.log('[SiteBanner] Announcement data:', announcement);
-
         // Validate announcement
         if (!announcement || announcement.isActive !== true || !announcement.text?.trim()) {
-            console.log('[SiteBanner] Banner not active or no text');
             setVisible(false);
             document.documentElement.style.setProperty('--banner-height', '0px');
             return;
         }
 
         // Banner is active and valid - show it
-        console.log('[SiteBanner] Showing banner');
         setVisible(true);
         document.documentElement.style.setProperty('--banner-height', announcement.height || '50px');
     }, [announcement, announcementLoaded]);

@@ -1,10 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { ShoppingCart, User, Menu, X, Search, Heart, LayoutDashboard } from 'lucide-react';
-
-// Import Logo
-import logoSrc from '../assets/Logos/PurpleLogoTransparent.png';
 
 import './Navbar.css';
 
@@ -22,6 +19,12 @@ const Navbar = () => {
 
   // Get navbar padding class
   const navbarPaddingClass = settings?.navbarPadding || 'normal';
+
+  // Get dynamic logo from settings
+  const logoSrc = useMemo(() => {
+    const logoFile = settings?.transparentLogo || 'PurpleLogoTransparent.png';
+    return `/Logos/${logoFile}`;
+  }, [settings?.transparentLogo]);
 
   useEffect(() => {
     const handleScroll = () => {

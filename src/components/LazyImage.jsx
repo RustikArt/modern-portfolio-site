@@ -10,8 +10,7 @@ const LazyImage = ({ src, alt, placeholder, style, className }) => {
     };
 
     const onError = () => {
-        // Fallback or retry logic could go here
-        console.warn(`Failed to load image: ${src}`);
+        // Fallback silently - image not found
     };
 
     useEffect(() => {
