@@ -1154,8 +1154,28 @@ export const DataProvider = ({ children }) => {
         try {
             // Convert camelCase to snake_case for Supabase compatibility
             const projectData = {
-                ...project,
-                blocks: project.blocks || []
+                title: project.title,
+                category: project.category,
+                image: project.image,
+                content: project.content || '',
+                blocks: project.blocks || [],
+                is_featured: project.isFeatured ?? project.is_featured ?? false,
+                // New fields
+                description: project.description || null,
+                client: project.client || null,
+                date_completed: project.dateCompleted || null,
+                duration: project.duration || null,
+                technologies: project.technologies || [],
+                is_visible: project.isVisible !== false,
+                external_link: project.externalLink || null,
+                github_link: project.githubLink || null,
+                thumbnail: project.thumbnail || null,
+                gallery: project.gallery || [],
+                testimonial: project.testimonial || null,
+                testimonial_author: project.testimonialAuthor || null,
+                order_position: project.orderPosition || 0,
+                seo_title: project.seoTitle || null,
+                seo_description: project.seoDescription || null
             };
 
             const res = await fetch('/api/projects', {
@@ -1165,7 +1185,20 @@ export const DataProvider = ({ children }) => {
             });
             if (res.ok) {
                 const updatedProjects = await res.json();
-                setProjects(updatedProjects);
+                // Normalize snake_case to camelCase
+                const normalized = updatedProjects.map(p => ({
+                    ...p,
+                    dateCompleted: p.date_completed,
+                    isVisible: p.is_visible,
+                    externalLink: p.external_link,
+                    githubLink: p.github_link,
+                    testimonialAuthor: p.testimonial_author,
+                    orderPosition: p.order_position,
+                    seoTitle: p.seo_title,
+                    seoDescription: p.seo_description,
+                    isFeatured: p.is_featured
+                }));
+                setProjects(normalized);
             } else {
                 const errorText = await res.text();
                 console.error('Failed to add project, response:', errorText);
@@ -1185,7 +1218,20 @@ export const DataProvider = ({ children }) => {
             });
             if (res.ok) {
                 const updatedProjects = await res.json();
-                setProjects(updatedProjects);
+                // Normalize snake_case to camelCase
+                const normalized = updatedProjects.map(p => ({
+                    ...p,
+                    dateCompleted: p.date_completed,
+                    isVisible: p.is_visible,
+                    externalLink: p.external_link,
+                    githubLink: p.github_link,
+                    testimonialAuthor: p.testimonial_author,
+                    orderPosition: p.order_position,
+                    seoTitle: p.seo_title,
+                    seoDescription: p.seo_description,
+                    isFeatured: p.is_featured
+                }));
+                setProjects(normalized);
             } else {
                 const errorText = await res.text();
                 console.error('Failed to delete project, response:', errorText);
@@ -1200,8 +1246,28 @@ export const DataProvider = ({ children }) => {
         try {
             // Convert camelCase to snake_case for Supabase compatibility
             const projectData = {
-                ...updatedProject,
-                blocks: updatedProject.blocks || []
+                title: updatedProject.title,
+                category: updatedProject.category,
+                image: updatedProject.image,
+                content: updatedProject.content || '',
+                blocks: updatedProject.blocks || [],
+                is_featured: updatedProject.isFeatured ?? updatedProject.is_featured ?? false,
+                // New fields
+                description: updatedProject.description || null,
+                client: updatedProject.client || null,
+                date_completed: updatedProject.dateCompleted || null,
+                duration: updatedProject.duration || null,
+                technologies: updatedProject.technologies || [],
+                is_visible: updatedProject.isVisible !== false,
+                external_link: updatedProject.externalLink || null,
+                github_link: updatedProject.githubLink || null,
+                thumbnail: updatedProject.thumbnail || null,
+                gallery: updatedProject.gallery || [],
+                testimonial: updatedProject.testimonial || null,
+                testimonial_author: updatedProject.testimonialAuthor || null,
+                order_position: updatedProject.orderPosition || 0,
+                seo_title: updatedProject.seoTitle || null,
+                seo_description: updatedProject.seoDescription || null
             };
 
             const res = await fetch('/api/projects', {
@@ -1211,7 +1277,20 @@ export const DataProvider = ({ children }) => {
             });
             if (res.ok) {
                 const updatedProjects = await res.json();
-                setProjects(updatedProjects);
+                // Normalize snake_case to camelCase
+                const normalized = updatedProjects.map(p => ({
+                    ...p,
+                    dateCompleted: p.date_completed,
+                    isVisible: p.is_visible,
+                    externalLink: p.external_link,
+                    githubLink: p.github_link,
+                    testimonialAuthor: p.testimonial_author,
+                    orderPosition: p.order_position,
+                    seoTitle: p.seo_title,
+                    seoDescription: p.seo_description,
+                    isFeatured: p.is_featured
+                }));
+                setProjects(normalized);
             } else {
                 const errorText = await res.text();
                 console.error('Failed to update project, response:', errorText);

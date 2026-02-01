@@ -165,7 +165,32 @@ const Dashboard = () => {
     };
 
     // --- FORMS STATES ---
-    const [projectForm, setProjectForm] = useState({ editId: null, title: '', category: '', image: '', imageType: 'url', lucideIcon: '', content: '', blocks: [] });
+    const [projectForm, setProjectForm] = useState({ 
+        editId: null, 
+        title: '', 
+        category: '', 
+        image: '', 
+        imageType: 'url', 
+        lucideIcon: '', 
+        content: '', 
+        blocks: [],
+        // New fields
+        description: '',
+        client: '',
+        dateCompleted: '',
+        duration: '',
+        technologies: [],
+        isVisible: true,
+        externalLink: '',
+        githubLink: '',
+        thumbnail: '',
+        gallery: [],
+        testimonial: '',
+        testimonialAuthor: '',
+        orderPosition: 0,
+        seoTitle: '',
+        seoDescription: ''
+    });
 
     const [productForm, setProductForm] = useState({
         editId: null,
@@ -549,14 +574,35 @@ const Dashboard = () => {
             category: projectForm.category,
             image: imageValue,
             content: projectForm.content || '',
-            blocks: projectForm.blocks || []
+            blocks: projectForm.blocks || [],
+            // New fields
+            description: projectForm.description || '',
+            client: projectForm.client || '',
+            dateCompleted: projectForm.dateCompleted || null,
+            duration: projectForm.duration || '',
+            technologies: projectForm.technologies || [],
+            isVisible: projectForm.isVisible !== false,
+            externalLink: projectForm.externalLink || '',
+            githubLink: projectForm.githubLink || '',
+            thumbnail: projectForm.thumbnail || '',
+            gallery: projectForm.gallery || [],
+            testimonial: projectForm.testimonial || '',
+            testimonialAuthor: projectForm.testimonialAuthor || '',
+            orderPosition: projectForm.orderPosition || 0,
+            seoTitle: projectForm.seoTitle || '',
+            seoDescription: projectForm.seoDescription || ''
         };
         if (projectForm.editId) {
             updateProject(projectForm.editId, projectData);
         } else {
             addProject(projectData);
         }
-        setProjectForm({ editId: null, title: '', category: '', image: '', imageType: 'url', lucideIcon: '', content: '', blocks: [] });
+        setProjectForm({ 
+            editId: null, title: '', category: '', image: '', imageType: 'url', lucideIcon: '', content: '', blocks: [],
+            description: '', client: '', dateCompleted: '', duration: '', technologies: [], isVisible: true,
+            externalLink: '', githubLink: '', thumbnail: '', gallery: [], testimonial: '', testimonialAuthor: '',
+            orderPosition: 0, seoTitle: '', seoDescription: ''
+        });
     };
 
     const handleEditProject = (project) => {
@@ -569,7 +615,23 @@ const Dashboard = () => {
             imageType: isLucideIcon ? 'lucide' : 'url',
             lucideIcon: isLucideIcon ? project.image.replace('lucide:', '') : '',
             content: project.content || '',
-            blocks: project.blocks || []
+            blocks: project.blocks || [],
+            // New fields
+            description: project.description || '',
+            client: project.client || '',
+            dateCompleted: project.dateCompleted || project.date_completed || '',
+            duration: project.duration || '',
+            technologies: project.technologies || [],
+            isVisible: project.isVisible !== false && project.is_visible !== false,
+            externalLink: project.externalLink || project.external_link || '',
+            githubLink: project.githubLink || project.github_link || '',
+            thumbnail: project.thumbnail || '',
+            gallery: project.gallery || [],
+            testimonial: project.testimonial || '',
+            testimonialAuthor: project.testimonialAuthor || project.testimonial_author || '',
+            orderPosition: project.orderPosition || project.order_position || 0,
+            seoTitle: project.seoTitle || project.seo_title || '',
+            seoDescription: project.seoDescription || project.seo_description || ''
         });
         setActiveTab('projects');
         window.scrollTo(0, 0);
@@ -1965,6 +2027,47 @@ const Dashboard = () => {
                                             </div>
                                         </div>
 
+                                        {/* Section Galerie */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>📷 Galerie d'images</p>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>
+                                                    URLs des images (une par ligne)
+                                                </label>
+                                                <textarea
+                                                    placeholder="https://exemple.com/image1.jpg&#10;https://exemple.com/image2.jpg&#10;https://exemple.com/image3.jpg"
+                                                    value={(productForm.gallery || []).join('\n')}
+                                                    onChange={e => setProductForm({ 
+                                                        ...productForm, 
+                                                        gallery: e.target.value.split('\n').map(url => url.trim()).filter(url => url) 
+                                                    })}
+                                                    style={{ ...inputStyle, minHeight: '100px', fontFamily: 'monospace', fontSize: '0.8rem' }}
+                                                />
+                                                <span style={{ fontSize: '0.65rem', color: '#555' }}>
+                                                    {(productForm.gallery || []).length} image(s) • Utilisez Imgur, Cloudinary ou tout hébergeur d'images
+                                                </span>
+                                            </div>
+                                            {(productForm.gallery || []).length > 0 && (
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                                                    {productForm.gallery.map((url, idx) => (
+                                                        <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #333' }}>
+                                                            <img src={url} alt={`Gallery ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => e.target.src = 'https://placehold.co/60x60/222/666?text=Err'} />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setProductForm({
+                                                                    ...productForm,
+                                                                    gallery: productForm.gallery.filter((_, i) => i !== idx)
+                                                                })}
+                                                                style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(255,0,0,0.8)', border: 'none', borderRadius: '50%', width: '16px', height: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+                                                            >
+                                                                <X size={10} color="white" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
                                         {/* Section SEO */}
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>🔍 SEO (Référencement)</p>
@@ -2449,6 +2552,215 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                             )}
+                                        </div>
+
+                                        {/* Description courte */}
+                                        <div>
+                                            <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Description courte (pour les cards)</label>
+                                            <textarea
+                                                placeholder="Résumé du projet en 2-3 lignes..."
+                                                value={projectForm.description}
+                                                onChange={e => setProjectForm({ ...projectForm, description: e.target.value })}
+                                                style={{ ...inputStyle, minHeight: '80px' }}
+                                            />
+                                        </div>
+
+                                        {/* Client & Durée */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Client</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Nom du client"
+                                                    value={projectForm.client}
+                                                    onChange={e => setProjectForm({ ...projectForm, client: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Durée</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="2 semaines, 3 mois..."
+                                                    value={projectForm.duration}
+                                                    onChange={e => setProjectForm({ ...projectForm, duration: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Date de fin</label>
+                                                <input
+                                                    type="date"
+                                                    value={projectForm.dateCompleted}
+                                                    onChange={e => setProjectForm({ ...projectForm, dateCompleted: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Technologies */}
+                                        <div>
+                                            <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Technologies (séparées par des virgules)</label>
+                                            <input
+                                                type="text"
+                                                placeholder="React, Node.js, PostgreSQL, Figma..."
+                                                value={(projectForm.technologies || []).join(', ')}
+                                                onChange={e => setProjectForm({ 
+                                                    ...projectForm, 
+                                                    technologies: e.target.value.split(',').map(t => t.trim()).filter(t => t) 
+                                                })}
+                                                style={inputStyle}
+                                            />
+                                            {(projectForm.technologies || []).length > 0 && (
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                                                    {projectForm.technologies.map((tech, idx) => (
+                                                        <span key={idx} style={{ 
+                                                            fontSize: '0.75rem', 
+                                                            background: 'rgba(167, 139, 250, 0.15)', 
+                                                            color: 'var(--color-accent)', 
+                                                            padding: '4px 10px', 
+                                                            borderRadius: '20px',
+                                                            border: '1px solid rgba(167, 139, 250, 0.3)'
+                                                        }}>
+                                                            {tech}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Liens externes */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>🔗 Lien externe (site live)</label>
+                                                <input
+                                                    type="url"
+                                                    placeholder="https://projet-live.com"
+                                                    value={projectForm.externalLink}
+                                                    onChange={e => setProjectForm({ ...projectForm, externalLink: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>🐙 Lien GitHub</label>
+                                                <input
+                                                    type="url"
+                                                    placeholder="https://github.com/user/repo"
+                                                    value={projectForm.githubLink}
+                                                    onChange={e => setProjectForm({ ...projectForm, githubLink: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Testimonial */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>💬 Témoignage client</p>
+                                            <textarea
+                                                placeholder="Citation ou retour du client..."
+                                                value={projectForm.testimonial}
+                                                onChange={e => setProjectForm({ ...projectForm, testimonial: e.target.value })}
+                                                style={{ ...inputStyle, minHeight: '80px' }}
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Auteur du témoignage (ex: Jean Dupont, CEO)"
+                                                value={projectForm.testimonialAuthor}
+                                                onChange={e => setProjectForm({ ...projectForm, testimonialAuthor: e.target.value })}
+                                                style={{ ...inputStyle, marginTop: '0.5rem' }}
+                                            />
+                                        </div>
+
+                                        {/* Galerie */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>📷 Galerie d'images</p>
+                                            <textarea
+                                                placeholder="https://exemple.com/image1.jpg&#10;https://exemple.com/image2.jpg"
+                                                value={(projectForm.gallery || []).join('\n')}
+                                                onChange={e => setProjectForm({ 
+                                                    ...projectForm, 
+                                                    gallery: e.target.value.split('\n').map(url => url.trim()).filter(url => url) 
+                                                })}
+                                                style={{ ...inputStyle, minHeight: '80px', fontFamily: 'monospace', fontSize: '0.8rem' }}
+                                            />
+                                            <span style={{ fontSize: '0.65rem', color: '#555' }}>
+                                                {(projectForm.gallery || []).length} image(s) • Une URL par ligne
+                                            </span>
+                                            {(projectForm.gallery || []).length > 0 && (
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                                                    {projectForm.gallery.map((url, idx) => (
+                                                        <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #333' }}>
+                                                            <img src={url} alt={`Gallery ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => e.target.src = 'https://placehold.co/60x60/222/666?text=Err'} />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setProjectForm({
+                                                                    ...projectForm,
+                                                                    gallery: projectForm.gallery.filter((_, i) => i !== idx)
+                                                                })}
+                                                                style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(255,0,0,0.8)', border: 'none', borderRadius: '50%', width: '16px', height: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+                                                            >
+                                                                <X size={10} color="white" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Options */}
+                                        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={projectForm.isVisible}
+                                                    onChange={e => setProjectForm({ ...projectForm, isVisible: e.target.checked })}
+                                                />
+                                                <Eye size={16} /> Visible sur le site
+                                            </label>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <label style={{ fontSize: '0.75rem', color: '#555' }}>Position d'affichage:</label>
+                                                <input
+                                                    type="number"
+                                                    value={projectForm.orderPosition}
+                                                    onChange={e => setProjectForm({ ...projectForm, orderPosition: parseInt(e.target.value) || 0 })}
+                                                    style={{ ...inputStyle, width: '80px', padding: '0.4rem' }}
+                                                    min="0"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* SEO */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>🔍 SEO</p>
+                                            <div style={{ display: 'grid', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Titre SEO (max 60)</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder={projectForm.title || "Titre pour Google"}
+                                                        value={projectForm.seoTitle}
+                                                        onChange={e => setProjectForm({ ...projectForm, seoTitle: e.target.value })}
+                                                        style={inputStyle}
+                                                        maxLength={60}
+                                                    />
+                                                    <span style={{ fontSize: '0.65rem', color: (projectForm.seoTitle || '').length > 55 ? '#ff4d4d' : '#555' }}>
+                                                        {(projectForm.seoTitle || '').length}/60
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Description SEO (max 160)</label>
+                                                    <textarea
+                                                        placeholder="Description pour les moteurs de recherche..."
+                                                        value={projectForm.seoDescription}
+                                                        onChange={e => setProjectForm({ ...projectForm, seoDescription: e.target.value })}
+                                                        style={{ ...inputStyle, minHeight: '60px' }}
+                                                        maxLength={160}
+                                                    />
+                                                    <span style={{ fontSize: '0.65rem', color: (projectForm.seoDescription || '').length > 150 ? '#ff4d4d' : '#555' }}>
+                                                        {(projectForm.seoDescription || '').length}/160
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div style={{ background: '#0a0a0a', padding: '1.5rem', borderRadius: '12px', border: '1px solid #111' }}>

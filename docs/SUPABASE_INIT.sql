@@ -194,8 +194,89 @@ CREATE TABLE IF NOT EXISTS public.portfolio_projects (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Ajouter les nouveaux champs projets (V2.1)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'description') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN description TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'client') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN client VARCHAR(255);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'date_completed') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN date_completed DATE;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'duration') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN duration VARCHAR(100);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'technologies') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN technologies JSONB DEFAULT '[]'::jsonb;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'is_visible') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN is_visible BOOLEAN DEFAULT TRUE;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'external_link') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN external_link TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'github_link') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN github_link TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'thumbnail') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN thumbnail TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'gallery') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN gallery JSONB DEFAULT '[]'::jsonb;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'testimonial') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN testimonial TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'testimonial_author') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN testimonial_author VARCHAR(255);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'order_position') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN order_position INTEGER DEFAULT 0;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'seo_title') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN seo_title VARCHAR(200);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_projects' AND column_name = 'seo_description') THEN
+        ALTER TABLE public.portfolio_projects ADD COLUMN seo_description TEXT;
+    END IF;
+END $$;
+
 -- Index pour filtrage par catégorie
 CREATE INDEX IF NOT EXISTS idx_projects_category ON public.portfolio_projects(category);
+CREATE INDEX IF NOT EXISTS idx_projects_visible ON public.portfolio_projects(is_visible);
+CREATE INDEX IF NOT EXISTS idx_projects_order ON public.portfolio_projects(order_position);
 
 -- ============================================================
 -- TABLE 5: portfolio_promo_codes (Codes Promotionnels)
