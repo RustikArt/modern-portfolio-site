@@ -53,7 +53,9 @@ import {
     Ban,
     Code,
     PenLine,
-    DollarSign
+    DollarSign,
+    Eye,
+    EyeOff
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
