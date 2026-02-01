@@ -1966,17 +1966,16 @@ export const DataProvider = ({ children }) => {
     };
 
     const getUserCustomOrders = async (userId) => {
-        if (!supabase) return [];
+        if (!userId) return [];
         
         try {
-            const { data, error } = await supabase
-                .from('custom_orders')
-                .select('*')
-                .eq('user_id', userId)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            return data || [];
+            const res = await fetch(`/api/orders?type=custom&userId=${userId}`);
+            
+            if (res.ok) {
+                const data = await res.json();
+                return data || [];
+            }
+            return [];
         } catch (error) {
             console.error('Get user custom orders error:', error);
             return [];
