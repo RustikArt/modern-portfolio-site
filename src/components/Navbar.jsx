@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { ShoppingCart, User, Menu, X, Search, Heart, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Search, Heart, LayoutDashboard, Moon, Sun } from 'lucide-react';
 
 import './Navbar.css';
 
@@ -9,6 +9,14 @@ const Navbar = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
   const { cart, currentUser, settings } = useData();
 
   // Check if current user is admin
@@ -25,6 +33,14 @@ const Navbar = () => {
     const logoFile = settings?.transparentLogo || 'PurpleLogoTransparent.png';
     return `/Logos/${logoFile}`;
   }, [settings?.transparentLogo]);
+
+  // Apply theme on mount and change
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode(prev => !prev);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -95,6 +111,16 @@ const Navbar = () => {
 
         {/* RIGHT ACTIONS */}
         <div className="nav-actions">
+          {/* Theme Toggle */}
+          <button 
+            className="action-link icon-link theme-toggle" 
+            onClick={toggleTheme}
+            title={isDarkMode ? 'Mode clair' : 'Mode sombre'}
+            aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}
+          >
+            {isDarkMode ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />}
+          </button>
+
           {/* Admin Dashboard Button */}
           {isAdmin && (
             <Link to="/admin" className="action-link icon-link" title="Dashboard Admin" aria-label="Accéder au Dashboard Admin">

@@ -1,11 +1,12 @@
 /* ============================================
-   FAQ PAGE - Clean Accordion Design
+   FAQ PAGE - Light Artistic Theme
    ============================================ */
 
 .page-faq {
     padding-top: 140px;
     min-height: 100vh;
     padding-bottom: var(--spacing-4xl, 6rem);
+    background: var(--color-bg, #fafafa);
 }
 
 .faq-header {
@@ -21,16 +22,17 @@
     font-size: clamp(2.5rem, 6vw, 4rem);
     font-weight: 600;
     margin-bottom: var(--spacing-md, 1rem);
+    color: var(--color-text-primary, #1a1a1a);
 }
 
 .faq-header h1 span {
-    color: var(--color-accent, #a78bfa);
+    color: var(--color-accent, #c97d60);
     font-style: italic;
 }
 
 .faq-header p {
     font-size: 1.125rem;
-    color: var(--color-text-secondary, #a0a0a0);
+    color: var(--color-text-secondary, #52525b);
     line-height: 1.7;
 }
 
@@ -43,26 +45,29 @@
 }
 
 .faq-category-btn {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: var(--color-text-secondary, #a0a0a0);
+    background: var(--color-surface, #ffffff);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--color-text-secondary, #52525b);
     padding: var(--spacing-sm, 0.75rem) var(--spacing-lg, 1.5rem);
     border-radius: 100px;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-base, 250ms);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .faq-category-btn:hover {
-    border-color: rgba(255, 255, 255, 0.12);
-    color: var(--color-text-primary, #fff);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: var(--color-text-primary, #1a1a1a);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .faq-category-btn.active {
-    background: var(--color-accent, #a78bfa);
-    border-color: var(--color-accent, #a78bfa);
-    color: var(--color-bg, #030303);
+    background: var(--color-accent, #c97d60);
+    border-color: var(--color-accent, #c97d60);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(201, 125, 96, 0.3);
 }
 
 .faq-list {
@@ -74,38 +79,23 @@
 }
 
 .faq-item {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: var(--color-surface, #ffffff);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: var(--radius-lg, 16px);
     overflow: hidden;
-    transition: all var(--transition-base, 250ms);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
-}
-
-/* Cursor glow effect */
-.faq-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-                rgba(167, 139, 250, 0.06), transparent 40%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.faq-item:hover::before {
-    opacity: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .faq-item:hover {
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .faq-item.active {
-    border-color: rgba(167, 139, 250, 0.2);
-    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(201, 125, 96, 0.3);
+    box-shadow: 0 8px 24px rgba(201, 125, 96, 0.1);
 }
 
 .faq-question {
@@ -117,28 +107,28 @@
     gap: var(--spacing-md, 1rem);
     background: none;
     border: none;
-    color: var(--color-text-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
     font-family: var(--font-display, 'Playfair Display', serif);
     font-size: 1.125rem;
     font-weight: 500;
     cursor: pointer;
     text-align: left;
-    transition: color var(--transition-fast, 150ms);
+    transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .faq-question:hover {
-    color: var(--color-accent, #a78bfa);
+    color: var(--color-accent, #c97d60);
 }
 
 .faq-question svg {
     flex-shrink: 0;
-    color: var(--color-text-muted, #666);
-    transition: all var(--transition-base, 250ms);
+    color: var(--color-text-muted, #a1a1aa);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .faq-item.active .faq-question svg {
     transform: rotate(180deg);
-    color: var(--color-accent, #a78bfa);
+    color: var(--color-accent, #c97d60);
 }
 
 .faq-answer {
@@ -155,7 +145,7 @@
 }
 
 .faq-answer p {
-    color: var(--color-text-secondary, #a0a0a0);
+    color: var(--color-text-secondary, #52525b);
     line-height: 1.8;
     margin: 0;
     font-size: 0.95rem;
@@ -167,7 +157,7 @@
 }
 
 .faq-answer li {
-    color: var(--color-text-secondary, #a0a0a0);
+    color: var(--color-text-secondary, #52525b);
     line-height: 1.7;
     margin-bottom: var(--spacing-xs, 0.5rem);
 }
