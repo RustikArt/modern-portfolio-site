@@ -994,6 +994,7 @@ export const DataProvider = ({ children }) => {
                             navbarPadding: data.navbar_padding || prev.navbarPadding,
                             transparentLogo: data.transparent_logo || prev.transparentLogo,
                             blackLogo: data.black_logo || prev.blackLogo,
+                            favicon: data.favicon || prev.favicon,
                             socials: data.socials || prev.socials,
                             version: prev.version
                         };

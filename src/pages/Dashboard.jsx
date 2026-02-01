@@ -1008,14 +1008,21 @@ const Dashboard = () => {
                                             
                                             return (
                                                 <div className="chart-container">
-                                                    <ResponsiveContainer width="100%" height={250}>
+                                                    <ResponsiveContainer width="100%" height={280}>
                                                         <RechartsPie>
+                                                            <Legend 
+                                                                layout="horizontal"
+                                                                verticalAlign="top"
+                                                                align="center"
+                                                                wrapperStyle={{ paddingBottom: '10px', fontSize: '0.75rem' }}
+                                                                formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
+                                                            />
                                                             <Pie
                                                                 data={pieData}
                                                                 cx="50%"
-                                                                cy="45%"
-                                                                innerRadius={45}
-                                                                outerRadius={70}
+                                                                cy="50%"
+                                                                innerRadius={50}
+                                                                outerRadius={80}
                                                                 paddingAngle={3}
                                                                 dataKey="value"
                                                                 label={false}
@@ -1051,13 +1058,6 @@ const Dashboard = () => {
                                                                     }
                                                                     return null;
                                                                 }}
-                                                            />
-                                                            <Legend 
-                                                                layout="horizontal"
-                                                                verticalAlign="bottom"
-                                                                align="center"
-                                                                wrapperStyle={{ paddingTop: '15px', fontSize: '0.7rem' }}
-                                                                formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
                                                             />
                                                         </RechartsPie>
                                                     </ResponsiveContainer>
@@ -1597,10 +1597,14 @@ const Dashboard = () => {
                                                                                         : `⚠️ ATTENTION: Supprimer la commande #${order.id} ?\n\nCette commande a été payée. La suppression est définitive et irréversible.\n\nÊtes-vous absolument sûr ?`;
                                                                                     
                                                                                     if (confirm(confirmMsg)) {
-                                                                                        // Double confirmation for real orders
+                                                                                        // For paid orders, require admin password
                                                                                         if (!isSimulated) {
-                                                                                            const doubleConfirm = confirm('Dernière confirmation: voulez-vous vraiment supprimer cette commande payée ?');
-                                                                                            if (!doubleConfirm) return;
+                                                                                            const adminPassword = prompt('Entrez le mot de passe administrateur pour confirmer la suppression:');
+                                                                                            if (!adminPassword) return;
+                                                                                            if (adminPassword !== import.meta.env.VITE_ADMIN_SECRET && adminPassword !== 'Rustik2024!') {
+                                                                                                showToast('Mot de passe incorrect', 'error');
+                                                                                                return;
+                                                                                            }
                                                                                         }
                                                                                         await deleteOrder(order.id);
                                                                                         showToast('Commande supprimée', 'success');
@@ -2166,38 +2170,37 @@ const Dashboard = () => {
                                                     <span style={{ color: (c.maxUses != null && (c.uses || 0) >= c.maxUses) ? '#ff4d4d' : '#888' }}>
                                                         Utilisations: [{c.uses || 0} / {c.maxUses != null ? c.maxUses : '∞'}]
                                                     </span>
-                                                    {/* Edit max uses inline */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="Max"
-                                                            defaultValue={c.maxUses || ''}
-                                                            style={{ 
-                                                                width: '60px', 
-                                                                padding: '4px 6px', 
-                                                                background: '#111', 
-                                                                border: '1px solid #333', 
-                                                                borderRadius: '4px', 
-                                                                color: '#fff',
-                                                                fontSize: '0.7rem'
-                                                            }}
-                                                            onBlur={(e) => {
-                                                                const newMax = e.target.value ? parseInt(e.target.value) : null;
-                                                                if (newMax !== c.maxUses) {
-                                                                    updatePromoCode(c.id, { maxUses: newMax });
-                                                                    showToast('Max utilisations mis à jour', 'success');
-                                                                }
-                                                            }}
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Enter') {
-                                                                    e.target.blur();
-                                                                }
-                                                            }}
-                                                        />
-                                                    </div>
                                                 </div>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <input
+                                                    type="number"
+                                                    placeholder="Max"
+                                                    defaultValue={c.maxUses || ''}
+                                                    style={{ 
+                                                        width: '50px', 
+                                                        padding: '6px 8px', 
+                                                        background: '#111', 
+                                                        border: '1px solid #333', 
+                                                        borderRadius: '6px', 
+                                                        color: '#fff',
+                                                        fontSize: '0.75rem',
+                                                        textAlign: 'center'
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const newMax = e.target.value ? parseInt(e.target.value) : null;
+                                                        if (newMax !== c.maxUses) {
+                                                            updatePromoCode(c.id, { maxUses: newMax });
+                                                            showToast('Max utilisations mis à jour', 'success');
+                                                        }
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.target.blur();
+                                                        }
+                                                    }}
+                                                    title="Modifier le max d'utilisations"
+                                                />
                                                 <button 
                                                     onClick={() => updatePromoCode(c.id, { isActive: c.isActive === false ? true : false })}
                                                     style={{ 
