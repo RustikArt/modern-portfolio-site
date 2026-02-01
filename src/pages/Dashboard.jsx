@@ -72,6 +72,27 @@ const renderLucideIcon = (iconName, props = {}) => {
     return IconComponent ? <IconComponent {...props} /> : null;
 };
 
+// Composant Toggle Switch réutilisable
+const ToggleSwitch = ({ checked, onChange, color = 'var(--color-accent)' }) => (
+    <div 
+        onClick={() => onChange(!checked)}
+        style={{
+            width: '40px', height: '22px', borderRadius: '11px', cursor: 'pointer',
+            background: checked ? color : '#333',
+            position: 'relative', transition: 'background 0.2s',
+            flexShrink: 0
+        }}
+    >
+        <div style={{
+            position: 'absolute', top: '3px',
+            left: checked ? '21px' : '3px',
+            width: '16px', height: '16px', borderRadius: '50%',
+            background: 'white', transition: 'left 0.2s',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+        }} />
+    </div>
+);
+
 const Dashboard = () => {
     const {
         projects, products, orders, users, promoCodes,
@@ -214,7 +235,7 @@ const Dashboard = () => {
         seoDescription: ''
     });
 
-    const [optionBuilder, setOptionBuilder] = useState({ name: '', type: 'select', valuesInput: '' });
+    const [optionBuilder, setOptionBuilder] = useState({ name: '', type: 'select', valuesInput: '', multiSelect: false, required: false });
     const [promoForm, setPromoForm] = useState({ code: '', type: 'percent', value: '', minAmount: '', maxUses: '', expirationDate: '' });
 
     // Product Filters
@@ -430,11 +451,13 @@ const Dashboard = () => {
                 id: Date.now(),
                 name: optionBuilder.name,
                 type: optionBuilder.type,
-                requiresQuote: optionBuilder.requiresQuote || false, // New field for free text
+                multiSelect: optionBuilder.multiSelect || false, // Permet sélection multiple
+                required: optionBuilder.required || false, // Option obligatoire
+                requiresQuote: optionBuilder.requiresQuote || false,
                 values: parsedValues
             }]
         }));
-        setOptionBuilder({ name: '', type: 'select', valuesInput: '' });
+        setOptionBuilder({ name: '', type: 'select', valuesInput: '', multiSelect: false, required: false });
     };
 
     const handleRemoveOption = (id) => {
@@ -1810,54 +1833,99 @@ const Dashboard = () => {
                                         </div>
 
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px dashed #222' }}>
-                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Advanced Option Builder</p>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Options du produit</p>
 
                                             {/* Options List */}
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
                                                 {productForm.options.map(opt => (
-                                                    <div key={opt.id} style={{ padding: '0.5rem 1rem', background: '#181818', borderRadius: '30px', border: '1px solid #333', display: 'flex', alignItems: 'center', gap: '0.8rem', fontSize: '0.8rem' }}>
-                                                        <strong>{opt.name}</strong>
-                                                        <span style={{ color: '#555' }}>|</span>
-                                                        <span style={{ color: 'var(--color-accent)' }}>{opt.type === 'select' ? `${opt.values.length} choix` : 'Texte libre'}</span>
-                                                        <button onClick={() => handleRemoveOption(opt.id)} style={{ border: 'none', background: 'none', color: '#ff4d4d', cursor: 'pointer', padding: 0 }}>✕</button>
+                                                    <div key={opt.id} style={{ padding: '0.75rem 1rem', background: '#181818', borderRadius: '8px', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                            <strong>{opt.name}</strong>
+                                                            <span style={{ color: 'var(--color-accent)', fontSize: '0.75rem' }}>
+                                                                {opt.type === 'select' ? `${opt.values.length} choix` : 'Texte libre'}
+                                                            </span>
+                                                            {opt.multiSelect && <span style={{ fontSize: '0.65rem', background: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', padding: '2px 6px', borderRadius: '4px' }}>Multi</span>}
+                                                            {opt.required && <span style={{ fontSize: '0.65rem', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '2px 6px', borderRadius: '4px' }}>Requis</span>}
+                                                        </div>
+                                                        <button onClick={() => handleRemoveOption(opt.id)} style={{ border: 'none', background: 'rgba(255,77,77,0.1)', color: '#ff4d4d', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>Supprimer</button>
                                                     </div>
                                                 ))}
+                                                {productForm.options.length === 0 && (
+                                                    <p style={{ color: '#555', fontSize: '0.8rem', fontStyle: 'italic' }}>Aucune option. Ajoutez des options comme Taille, Couleur, etc.</p>
+                                                )}
                                             </div>
 
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'flex-end' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                                                 <div>
-                                                    <label style={{ fontSize: '0.7rem', color: '#555' }}>Option Name (ex: Taille)</label>
-                                                    <input type="text" value={optionBuilder.name} onChange={e => setOptionBuilder({ ...optionBuilder, name: e.target.value })} style={inputStyle} placeholder="Label" />
+                                                    <label style={{ fontSize: '0.7rem', color: '#555' }}>Nom de l'option (ex: Taille)</label>
+                                                    <input type="text" value={optionBuilder.name} onChange={e => setOptionBuilder({ ...optionBuilder, name: e.target.value })} style={inputStyle} placeholder="Taille, Couleur, Format..." />
                                                 </div>
                                                 <div>
                                                     <label style={{ fontSize: '0.7rem', color: '#555' }}>Type</label>
                                                     <select value={optionBuilder.type} onChange={e => setOptionBuilder({ ...optionBuilder, type: e.target.value })} style={inputStyle}>
-                                                        <option value="select">Dropdown (Select)</option>
-                                                        <option value="text">Text Input (Client Brief)</option>
+                                                        <option value="select">Liste de choix</option>
+                                                        <option value="text">Champ texte libre</option>
                                                     </select>
                                                 </div>
-                                                {optionBuilder.type === 'text' && (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', paddingBottom: '0.5rem' }}>
-                                                        <input
-                                                             type="checkbox"
-                                                             checked={announcementIsActive}
-                                                             onChange={(e) => setAnnouncementIsActive(e.target.checked)}
-                                                        />
-
-                                                        <label htmlFor="reqQuote" style={{ fontSize: '0.75rem', color: '#ffcc00', cursor: 'pointer' }}>Demande de devis ?</label>
-                                                    </div>
-                                                )}
-                                                <button type="button" onClick={handleAddOption} style={{ ...btnModern, padding: '0.8rem' }}>Ajouter</button>
                                             </div>
+
                                             {optionBuilder.type === 'select' && (
-                                                <input
-                                                    type="text"
-                                                    placeholder="Values: Label:PriceModifier, Label (ex: S:0, XL:5, XXL:10)"
-                                                    value={optionBuilder.valuesInput}
-                                                    onChange={e => setOptionBuilder({ ...optionBuilder, valuesInput: e.target.value })}
-                                                    style={{ ...inputStyle, marginTop: '1rem' }}
-                                                />
+                                                <>
+                                                    <div style={{ marginBottom: '1rem' }}>
+                                                        <label style={{ fontSize: '0.7rem', color: '#555' }}>Valeurs (Label:Supplément, séparées par virgules)</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="S:0, M:0, L:+5, XL:+10"
+                                                            value={optionBuilder.valuesInput}
+                                                            onChange={e => setOptionBuilder({ ...optionBuilder, valuesInput: e.target.value })}
+                                                            style={inputStyle}
+                                                        />
+                                                        <span style={{ fontSize: '0.65rem', color: '#555' }}>Format: Label:Prix ou Label seul (prix = 0)</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem' }}>
+                                                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.8rem', color: '#888' }}>
+                                                            <div 
+                                                                onClick={() => setOptionBuilder({ ...optionBuilder, multiSelect: !optionBuilder.multiSelect })}
+                                                                style={{
+                                                                    width: '36px', height: '20px', borderRadius: '10px', cursor: 'pointer',
+                                                                    background: optionBuilder.multiSelect ? 'var(--color-accent)' : '#333',
+                                                                    position: 'relative', transition: 'background 0.2s'
+                                                                }}
+                                                            >
+                                                                <div style={{
+                                                                    position: 'absolute', top: '2px',
+                                                                    left: optionBuilder.multiSelect ? '18px' : '2px',
+                                                                    width: '16px', height: '16px', borderRadius: '50%',
+                                                                    background: 'white', transition: 'left 0.2s'
+                                                                }} />
+                                                            </div>
+                                                            Sélection multiple
+                                                        </label>
+                                                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.8rem', color: '#888' }}>
+                                                            <div 
+                                                                onClick={() => setOptionBuilder({ ...optionBuilder, required: !optionBuilder.required })}
+                                                                style={{
+                                                                    width: '36px', height: '20px', borderRadius: '10px', cursor: 'pointer',
+                                                                    background: optionBuilder.required ? '#ef4444' : '#333',
+                                                                    position: 'relative', transition: 'background 0.2s'
+                                                                }}
+                                                            >
+                                                                <div style={{
+                                                                    position: 'absolute', top: '2px',
+                                                                    left: optionBuilder.required ? '18px' : '2px',
+                                                                    width: '16px', height: '16px', borderRadius: '50%',
+                                                                    background: 'white', transition: 'left 0.2s'
+                                                                }} />
+                                                            </div>
+                                                            Obligatoire
+                                                        </label>
+                                                    </div>
+                                                </>
                                             )}
+
+                                            <button type="button" onClick={handleAddOption} style={{ ...btnModern, padding: '0.8rem', width: '100%' }}>
+                                                + Ajouter cette option
+                                            </button>
                                         </div>
 
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -2009,18 +2077,17 @@ const Dashboard = () => {
                                             </div>
                                             <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                    <input 
-                                                        type="checkbox" 
+                                                    <ToggleSwitch 
                                                         checked={productForm.isVisible}
-                                                        onChange={e => setProductForm({ ...productForm, isVisible: e.target.checked })}
+                                                        onChange={(val) => setProductForm({ ...productForm, isVisible: val })}
                                                     />
                                                     <Eye size={16} /> Visible sur le site
                                                 </label>
                                                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                    <input 
-                                                        type="checkbox" 
+                                                    <ToggleSwitch 
                                                         checked={productForm.is_featured}
-                                                        onChange={e => setProductForm({ ...productForm, is_featured: e.target.checked })}
+                                                        onChange={(val) => setProductForm({ ...productForm, is_featured: val })}
+                                                        color="#fbbf24"
                                                     />
                                                     <Star size={16} /> Produit vedette
                                                 </label>
@@ -2604,11 +2671,16 @@ const Dashboard = () => {
                                             <input
                                                 type="text"
                                                 placeholder="React, Node.js, PostgreSQL, Figma..."
-                                                value={(projectForm.technologies || []).join(', ')}
+                                                value={projectForm.technologiesInput !== undefined ? projectForm.technologiesInput : (projectForm.technologies || []).join(', ')}
                                                 onChange={e => setProjectForm({ 
                                                     ...projectForm, 
-                                                    technologies: e.target.value.split(',').map(t => t.trim()).filter(t => t) 
+                                                    technologiesInput: e.target.value,
+                                                    technologies: e.target.value.split(',').map(t => t.trim()).filter(t => t)
                                                 })}
+                                                onBlur={e => setProjectForm(prev => ({
+                                                    ...prev,
+                                                    technologiesInput: undefined
+                                                }))}
                                                 style={inputStyle}
                                             />
                                             {(projectForm.technologies || []).length > 0 && (
@@ -2710,10 +2782,9 @@ const Dashboard = () => {
                                         {/* Options */}
                                         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
                                             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                <input 
-                                                    type="checkbox" 
+                                                <ToggleSwitch 
                                                     checked={projectForm.isVisible}
-                                                    onChange={e => setProjectForm({ ...projectForm, isVisible: e.target.checked })}
+                                                    onChange={(val) => setProjectForm({ ...projectForm, isVisible: val })}
                                                 />
                                                 <Eye size={16} /> Visible sur le site
                                             </label>
@@ -2726,40 +2797,6 @@ const Dashboard = () => {
                                                     style={{ ...inputStyle, width: '80px', padding: '0.4rem' }}
                                                     min="0"
                                                 />
-                                            </div>
-                                        </div>
-
-                                        {/* SEO */}
-                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
-                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>🔍 SEO</p>
-                                            <div style={{ display: 'grid', gap: '1rem' }}>
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Titre SEO (max 60)</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder={projectForm.title || "Titre pour Google"}
-                                                        value={projectForm.seoTitle}
-                                                        onChange={e => setProjectForm({ ...projectForm, seoTitle: e.target.value })}
-                                                        style={inputStyle}
-                                                        maxLength={60}
-                                                    />
-                                                    <span style={{ fontSize: '0.65rem', color: (projectForm.seoTitle || '').length > 55 ? '#ff4d4d' : '#555' }}>
-                                                        {(projectForm.seoTitle || '').length}/60
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Description SEO (max 160)</label>
-                                                    <textarea
-                                                        placeholder="Description pour les moteurs de recherche..."
-                                                        value={projectForm.seoDescription}
-                                                        onChange={e => setProjectForm({ ...projectForm, seoDescription: e.target.value })}
-                                                        style={{ ...inputStyle, minHeight: '60px' }}
-                                                        maxLength={160}
-                                                    />
-                                                    <span style={{ fontSize: '0.65rem', color: (projectForm.seoDescription || '').length > 150 ? '#ff4d4d' : '#555' }}>
-                                                        {(projectForm.seoDescription || '').length}/160
-                                                    </span>
-                                                </div>
                                             </div>
                                         </div>
 
@@ -4122,14 +4159,11 @@ const Dashboard = () => {
 
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    id="announcementIsActive"
+                                                <ToggleSwitch
                                                     checked={announcementIsActive}
-                                                    onChange={(e) => setAnnouncementIsActive(e.target.checked)}
-                                                    className="dashboard-checkbox"
+                                                    onChange={(val) => setAnnouncementIsActive(val)}
                                                 />
-                                                <label htmlFor="announcementIsActive" style={{ cursor: 'pointer', fontWeight: announcementIsActive ? 'bold' : 'normal', color: announcementIsActive ? 'var(--color-accent)' : '#888' }}>Activer la banderole</label>
+                                                <label style={{ cursor: 'pointer', fontWeight: announcementIsActive ? 'bold' : 'normal', color: announcementIsActive ? 'var(--color-accent)' : '#888' }}>Activer la banderole</label>
                                             </div>
 
                                             <div>
@@ -4363,14 +4397,11 @@ const Dashboard = () => {
 
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', paddingBottom: '0.8rem' }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        id="announcementShowTimer"
+                                                    <ToggleSwitch
                                                         checked={announcementShowTimer}
-                                                        onChange={(e ) => setAnnouncementShowTimer(e.target.checked)}
-                                                        className="dashboard-checkbox"
+                                                        onChange={(val) => setAnnouncementShowTimer(val)}
                                                     />
-                                                    <label htmlFor="announcementShowTimer" style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: announcementShowTimer ? 'var(--color-accent)' : '#888' }}>
+                                                    <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: announcementShowTimer ? 'var(--color-accent)' : '#888' }}>
                                                         <Timer size={14} /> Compte à rebours
                                                     </label>
                                                 </div>

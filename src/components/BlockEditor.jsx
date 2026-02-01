@@ -19,7 +19,18 @@ import {
     ArrowUp,
     ArrowDown,
     Trash2,
-    Plus
+    Plus,
+    Code,
+    BarChart2,
+    Grid,
+    Users,
+    Award,
+    MapPin,
+    MessageCircle,
+    Zap,
+    AlertTriangle,
+    Lightbulb,
+    Sparkles
 } from 'lucide-react';
 
 // --- BLOCK CONFIG ---
@@ -41,6 +52,18 @@ const BLOCK_TYPES = [
     { type: 'note', label: 'Note / Encadré', icon: <Info size={16} /> },
     { type: 'download', label: 'Fichier', icon: <Download size={16} /> },
     { type: 'separator', label: 'Séparateur', icon: <Minus size={16} /> },
+    // New blocks
+    { type: 'code', label: 'Bloc de Code', icon: <Code size={16} /> },
+    { type: 'stats', label: 'Statistiques', icon: <BarChart2 size={16} /> },
+    { type: 'features', label: 'Fonctionnalités', icon: <Grid size={16} /> },
+    { type: 'team', label: 'Équipe / Crédits', icon: <Users size={16} /> },
+    { type: 'testimonial', label: 'Témoignage Client', icon: <MessageCircle size={16} /> },
+    { type: 'award', label: 'Récompense / Badge', icon: <Award size={16} /> },
+    { type: 'location', label: 'Localisation', icon: <MapPin size={16} /> },
+    { type: 'callout', label: 'Callout / Mise en avant', icon: <Zap size={16} /> },
+    { type: 'warning', label: 'Avertissement', icon: <AlertTriangle size={16} /> },
+    { type: 'tip', label: 'Astuce / Conseil', icon: <Lightbulb size={16} /> },
+    { type: 'highlight', label: 'Mise en lumière', icon: <Sparkles size={16} /> },
 ];
 
 const BlockEditor = ({ blocks, onChange }) => {
@@ -138,6 +161,18 @@ const getDefaultContent = (type) => {
         case 'before-after': return { before: '', after: '' };
         case 'note': return { title: '', text: '', type: 'info' };
         case 'download': return { label: 'Télécharger', url: '', info: 'PDF, 2MB' };
+        // New blocks
+        case 'code': return { language: 'javascript', code: '' };
+        case 'stats': return { stats: [] }; // { value, label, suffix }
+        case 'features': return { features: [] }; // { icon, title, description }
+        case 'team': return { members: [] }; // { name, role, image }
+        case 'testimonial': return { text: '', author: '', company: '', avatar: '' };
+        case 'award': return { title: '', description: '', image: '', year: '' };
+        case 'location': return { address: '', mapUrl: '' };
+        case 'callout': return { title: '', text: '', color: 'accent' };
+        case 'warning': return { title: 'Attention', text: '' };
+        case 'tip': return { title: 'Astuce', text: '' };
+        case 'highlight': return { title: '', text: '', image: '' };
         default: return {};
     }
 };
@@ -318,6 +353,170 @@ const BlockInput = ({ block, onChange }) => {
                     <input type="text" value={block.content.label} onChange={e => onChange({ ...block.content, label: e.target.value })} style={inputStyle} placeholder="Label (ex: Télécharger PDF)" />
                     <input type="text" value={block.content.info} onChange={e => onChange({ ...block.content, info: e.target.value })} style={inputStyle} placeholder="Info (ex: 2.5MB)" />
                     <input type="text" value={block.content.url} onChange={e => onChange({ ...block.content, url: e.target.value })} style={inputStyle} placeholder="URL du fichier" />
+                </div>
+            );
+
+        // === NEW BLOCKS ===
+
+        case 'code':
+            return (
+                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                    <select value={block.content.language} onChange={e => onChange({ ...block.content, language: e.target.value })} style={inputStyle}>
+                        <option value="javascript">JavaScript</option>
+                        <option value="python">Python</option>
+                        <option value="html">HTML</option>
+                        <option value="css">CSS</option>
+                        <option value="bash">Bash / Terminal</option>
+                        <option value="json">JSON</option>
+                        <option value="sql">SQL</option>
+                        <option value="other">Autre</option>
+                    </select>
+                    <textarea rows="8" value={block.content.code} onChange={e => onChange({ ...block.content, code: e.target.value })} style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.85rem' }} placeholder="// Votre code ici..." />
+                </div>
+            );
+
+        case 'stats':
+            const addStat = () => onChange({ ...block.content, stats: [...(block.content.stats || []), { value: '', label: '', suffix: '' }] });
+            const updateStat = (idx, field, val) => {
+                const newItems = [...block.content.stats];
+                newItems[idx] = { ...newItems[idx], [field]: val };
+                onChange({ ...block.content, stats: newItems });
+            };
+            const removeStat = (idx) => onChange({ ...block.content, stats: block.content.stats.filter((_, i) => i !== idx) });
+
+            return (
+                <div>
+                    {(block.content.stats || []).map((stat, i) => (
+                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', padding: '0.5rem', background: '#222' }}>
+                            <input type="text" value={stat.value} onChange={e => updateStat(i, 'value', e.target.value)} style={inputStyle} placeholder="42" />
+                            <input type="text" value={stat.label} onChange={e => updateStat(i, 'label', e.target.value)} style={inputStyle} placeholder="Clients satisfaits" />
+                            <input type="text" value={stat.suffix} onChange={e => updateStat(i, 'suffix', e.target.value)} style={inputStyle} placeholder="+" />
+                            <button type="button" onClick={() => removeStat(i)} style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+                        </div>
+                    ))}
+                    <button type="button" onClick={addStat} style={{ fontSize: '0.8rem', color: 'var(--color-accent)', background: 'none', border: 'none', cursor: 'pointer' }}>+ Ajouter statistique</button>
+                </div>
+            );
+
+        case 'features':
+            const addFeature = () => onChange({ ...block.content, features: [...(block.content.features || []), { icon: '✓', title: '', description: '' }] });
+            const updateFeature = (idx, field, val) => {
+                const newItems = [...block.content.features];
+                newItems[idx] = { ...newItems[idx], [field]: val };
+                onChange({ ...block.content, features: newItems });
+            };
+            const removeFeature = (idx) => onChange({ ...block.content, features: block.content.features.filter((_, i) => i !== idx) });
+
+            return (
+                <div>
+                    {(block.content.features || []).map((feat, i) => (
+                        <div key={i} style={{ padding: '0.75rem', background: '#222', marginBottom: '0.5rem', borderRadius: '4px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                <input type="text" value={feat.icon} onChange={e => updateFeature(i, 'icon', e.target.value)} style={inputStyle} placeholder="🚀" />
+                                <input type="text" value={feat.title} onChange={e => updateFeature(i, 'title', e.target.value)} style={inputStyle} placeholder="Fonctionnalité" />
+                            </div>
+                            <textarea rows="2" value={feat.description} onChange={e => updateFeature(i, 'description', e.target.value)} style={inputStyle} placeholder="Description..." />
+                            <button type="button" onClick={() => removeFeature(i)} style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.2rem', background: 'none', border: 'none', cursor: 'pointer' }}>Supprimer</button>
+                        </div>
+                    ))}
+                    <button type="button" onClick={addFeature} style={{ fontSize: '0.8rem', color: 'var(--color-accent)', background: 'none', border: 'none', cursor: 'pointer' }}>+ Ajouter fonctionnalité</button>
+                </div>
+            );
+
+        case 'team':
+            const addMember = () => onChange({ ...block.content, members: [...(block.content.members || []), { name: '', role: '', image: '' }] });
+            const updateMember = (idx, field, val) => {
+                const newItems = [...block.content.members];
+                newItems[idx] = { ...newItems[idx], [field]: val };
+                onChange({ ...block.content, members: newItems });
+            };
+            const removeMember = (idx) => onChange({ ...block.content, members: block.content.members.filter((_, i) => i !== idx) });
+
+            return (
+                <div>
+                    {(block.content.members || []).map((mem, i) => (
+                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr auto', gap: '0.5rem', marginBottom: '0.5rem', padding: '0.5rem', background: '#222' }}>
+                            <input type="text" value={mem.name} onChange={e => updateMember(i, 'name', e.target.value)} style={inputStyle} placeholder="Nom" />
+                            <input type="text" value={mem.role} onChange={e => updateMember(i, 'role', e.target.value)} style={inputStyle} placeholder="Rôle" />
+                            <input type="text" value={mem.image} onChange={e => updateMember(i, 'image', e.target.value)} style={inputStyle} placeholder="URL avatar" />
+                            <button type="button" onClick={() => removeMember(i)} style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+                        </div>
+                    ))}
+                    <button type="button" onClick={addMember} style={{ fontSize: '0.8rem', color: 'var(--color-accent)', background: 'none', border: 'none', cursor: 'pointer' }}>+ Ajouter membre</button>
+                </div>
+            );
+
+        case 'testimonial':
+            return (
+                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                    <textarea rows="3" value={block.content.text} onChange={e => onChange({ ...block.content, text: e.target.value })} style={inputStyle} placeholder="Témoignage du client..." />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+                        <input type="text" value={block.content.author} onChange={e => onChange({ ...block.content, author: e.target.value })} style={inputStyle} placeholder="Nom du client" />
+                        <input type="text" value={block.content.company} onChange={e => onChange({ ...block.content, company: e.target.value })} style={inputStyle} placeholder="Entreprise" />
+                        <input type="text" value={block.content.avatar} onChange={e => onChange({ ...block.content, avatar: e.target.value })} style={inputStyle} placeholder="URL avatar" />
+                    </div>
+                </div>
+            );
+
+        case 'award':
+            return (
+                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.5rem' }}>
+                        <input type="text" value={block.content.title} onChange={e => onChange({ ...block.content, title: e.target.value })} style={inputStyle} placeholder="Nom du prix / badge" />
+                        <input type="text" value={block.content.year} onChange={e => onChange({ ...block.content, year: e.target.value })} style={inputStyle} placeholder="Année" />
+                    </div>
+                    <textarea rows="2" value={block.content.description} onChange={e => onChange({ ...block.content, description: e.target.value })} style={inputStyle} placeholder="Description..." />
+                    <input type="text" value={block.content.image} onChange={e => onChange({ ...block.content, image: e.target.value })} style={inputStyle} placeholder="URL image/logo" />
+                </div>
+            );
+
+        case 'location':
+            return (
+                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                    <input type="text" value={block.content.address} onChange={e => onChange({ ...block.content, address: e.target.value })} style={inputStyle} placeholder="Adresse ou lieu" />
+                    <input type="text" value={block.content.mapUrl} onChange={e => onChange({ ...block.content, mapUrl: e.target.value })} style={inputStyle} placeholder="URL Google Maps embed" />
+                </div>
+            );
+
+        case 'callout':
+            return (
+                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.5rem' }}>
+                        <input type="text" value={block.content.title} onChange={e => onChange({ ...block.content, title: e.target.value })} style={inputStyle} placeholder="Titre" />
+                        <select value={block.content.color} onChange={e => onChange({ ...block.content, color: e.target.value })} style={inputStyle}>
+                            <option value="accent">Accent (Principal)</option>
+                            <option value="green">Vert (Succès)</option>
+                            <option value="blue">Bleu (Info)</option>
+                            <option value="orange">Orange (Alerte)</option>
+                            <option value="red">Rouge (Danger)</option>
+                        </select>
+                    </div>
+                    <textarea rows="3" value={block.content.text} onChange={e => onChange({ ...block.content, text: e.target.value })} style={inputStyle} placeholder="Contenu de la mise en avant..." />
+                </div>
+            );
+
+        case 'warning':
+            return (
+                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                    <input type="text" value={block.content.title} onChange={e => onChange({ ...block.content, title: e.target.value })} style={inputStyle} placeholder="Titre (ex: Attention)" />
+                    <textarea rows="3" value={block.content.text} onChange={e => onChange({ ...block.content, text: e.target.value })} style={inputStyle} placeholder="Message d'avertissement..." />
+                </div>
+            );
+
+        case 'tip':
+            return (
+                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                    <input type="text" value={block.content.title} onChange={e => onChange({ ...block.content, title: e.target.value })} style={inputStyle} placeholder="Titre (ex: Astuce)" />
+                    <textarea rows="3" value={block.content.text} onChange={e => onChange({ ...block.content, text: e.target.value })} style={inputStyle} placeholder="Votre conseil..." />
+                </div>
+            );
+
+        case 'highlight':
+            return (
+                <div style={{ display: 'grid', gap: '0.5rem' }}>
+                    <input type="text" value={block.content.title} onChange={e => onChange({ ...block.content, title: e.target.value })} style={inputStyle} placeholder="Titre" />
+                    <textarea rows="3" value={block.content.text} onChange={e => onChange({ ...block.content, text: e.target.value })} style={inputStyle} placeholder="Texte mis en lumière..." />
+                    <input type="text" value={block.content.image} onChange={e => onChange({ ...block.content, image: e.target.value })} style={inputStyle} placeholder="URL image (optionnel)" />
                 </div>
             );
 

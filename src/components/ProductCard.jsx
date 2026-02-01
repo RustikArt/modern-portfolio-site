@@ -78,23 +78,25 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             </button>
 
             {/* Badges Digital / Précommande */}
-            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {isDigital && (
                     <span style={{
-                        display: 'flex', alignItems: 'center', gap: '4px',
-                        background: 'rgba(59, 130, 246, 0.9)', color: 'white',
-                        padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600'
+                        display: 'flex', alignItems: 'center', gap: '3px',
+                        background: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255,255,255,0.7)',
+                        padding: '3px 6px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: '500',
+                        backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.1)'
                     }}>
-                        <Monitor size={12} /> Digital
+                        <Monitor size={10} /> Digital
                     </span>
                 )}
                 {isPreorder && (
                     <span style={{
-                        display: 'flex', alignItems: 'center', gap: '4px',
-                        background: 'rgba(245, 158, 11, 0.9)', color: 'white',
-                        padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600'
+                        display: 'flex', alignItems: 'center', gap: '3px',
+                        background: 'rgba(245, 158, 11, 0.15)', color: 'rgba(245, 158, 11, 0.9)',
+                        padding: '3px 6px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: '500',
+                        backdropFilter: 'blur(4px)', border: '1px solid rgba(245, 158, 11, 0.2)'
                     }}>
-                        <Clock size={12} /> Précommande
+                        <Clock size={10} /> Précommande
                     </span>
                 )}
             </div>

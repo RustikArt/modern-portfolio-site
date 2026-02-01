@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, ExternalLink, Download } from 'lucide-react';
+import { Check, ExternalLink, Download, AlertTriangle, Lightbulb, Award, MapPin, Zap, Code as CodeIcon, Sparkles } from 'lucide-react';
 
 // STYLES
 const sectionStyle = {
@@ -175,6 +175,160 @@ const DownloadBlock = ({ block }) => (
         </a>
     </div>
 );
+
+// === NEW BLOCKS ===
+
+const CodeBlock = ({ block }) => (
+    <div style={sectionStyle}>
+        <div style={{ background: '#0a0a0a', border: '1px solid #333', borderRadius: '8px', overflow: 'hidden' }}>
+            <div style={{ padding: '0.75rem 1rem', background: '#151515', borderBottom: '1px solid #333', fontSize: '0.8rem', color: '#666' }}>
+                <CodeIcon size={14} style={{ display: 'inline', marginRight: '0.5rem' }} />
+                {block.content.language}
+            </div>
+            <pre style={{ padding: '1.5rem', margin: 0, overflow: 'auto', fontSize: '0.9rem', lineHeight: 1.5, fontFamily: 'monospace' }}>
+                <code>{block.content.code}</code>
+            </pre>
+        </div>
+    </div>
+);
+
+const StatsBlock = ({ block }) => (
+    <div style={{ ...sectionStyle, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '2rem', textAlign: 'center' }}>
+        {block.content.stats && block.content.stats.map((stat, i) => (
+            <div key={i} style={{ padding: '2rem' }}>
+                <div style={{ fontSize: '3rem', fontWeight: 'bold', color: 'var(--color-accent)', lineHeight: 1 }}>
+                    {stat.value}{stat.suffix}
+                </div>
+                <div style={{ marginTop: '0.5rem', color: '#888', fontSize: '0.9rem', textTransform: 'uppercase' }}>{stat.label}</div>
+            </div>
+        ))}
+    </div>
+);
+
+const FeaturesBlock = ({ block }) => (
+    <div style={{ ...sectionStyle, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+        {block.content.features && block.content.features.map((feat, i) => (
+            <div key={i} style={{ padding: '2rem', background: '#0a0a0a', border: '1px solid #222', borderRadius: '8px' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{feat.icon}</div>
+                <h4 style={{ marginBottom: '0.75rem' }}>{feat.title}</h4>
+                <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: 1.5 }}>{feat.description}</p>
+            </div>
+        ))}
+    </div>
+);
+
+const TeamBlock = ({ block }) => (
+    <div style={{ ...sectionStyle, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
+        {block.content.members && block.content.members.map((mem, i) => (
+            <div key={i} style={{ textAlign: 'center' }}>
+                {mem.image && <img src={mem.image} alt={mem.name} style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />}
+                <h4 style={{ marginBottom: '0.25rem' }}>{mem.name}</h4>
+                <p style={{ color: '#888', fontSize: '0.9rem' }}>{mem.role}</p>
+            </div>
+        ))}
+    </div>
+);
+
+const TestimonialBlock = ({ block }) => (
+    <div style={{ ...sectionStyle, background: '#0a0a0a', padding: '3rem', borderRadius: '8px', textAlign: 'center' }}>
+        <p style={{ fontSize: '1.3rem', fontStyle: 'italic', marginBottom: '2rem', lineHeight: 1.6 }}>"{block.content.text}"</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+            {block.content.avatar && <img src={block.content.avatar} alt={block.content.author} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />}
+            <div style={{ textAlign: 'left' }}>
+                <strong>{block.content.author}</strong>
+                {block.content.company && <span style={{ display: 'block', color: '#666', fontSize: '0.85rem' }}>{block.content.company}</span>}
+            </div>
+        </div>
+    </div>
+);
+
+const AwardBlock = ({ block }) => (
+    <div style={{ ...sectionStyle, display: 'flex', alignItems: 'center', gap: '2rem', padding: '2rem', background: 'linear-gradient(135deg, #111 0%, #0a0a0a 100%)', border: '1px solid #333', borderRadius: '8px' }}>
+        {block.content.image ? (
+            <img src={block.content.image} alt={block.content.title} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+        ) : (
+            <Award size={60} style={{ color: 'var(--color-accent)' }} />
+        )}
+        <div>
+            <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.25rem' }}>{block.content.year}</div>
+            <h4 style={{ marginBottom: '0.5rem' }}>{block.content.title}</h4>
+            <p style={{ color: '#888', fontSize: '0.9rem' }}>{block.content.description}</p>
+        </div>
+    </div>
+);
+
+const LocationBlock = ({ block }) => (
+    <div style={sectionStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: '#888' }}>
+            <MapPin size={18} /> {block.content.address}
+        </div>
+        {block.content.mapUrl && (
+            <div style={{ position: 'relative', paddingBottom: '40%', height: 0 }}>
+                <iframe
+                    src={block.content.mapUrl}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0, borderRadius: '8px', filter: 'grayscale(1) invert(1)' }}
+                    allowFullScreen
+                    loading="lazy"
+                    title="Location"
+                />
+            </div>
+        )}
+    </div>
+);
+
+const CalloutBlock = ({ block }) => {
+    const colors = {
+        accent: 'var(--color-accent)',
+        green: '#22c55e',
+        blue: '#3b82f6',
+        orange: '#f97316',
+        red: '#ef4444'
+    };
+    const color = colors[block.content.color] || colors.accent;
+    return (
+        <div style={{ ...sectionStyle, padding: '2rem', background: `linear-gradient(135deg, ${color}15 0%, transparent 100%)`, border: `1px solid ${color}40`, borderRadius: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <Zap size={20} style={{ color }} />
+                <h4 style={{ color, margin: 0 }}>{block.content.title}</h4>
+            </div>
+            <p style={{ color: '#ccc', lineHeight: 1.6 }}>{block.content.text}</p>
+        </div>
+    );
+};
+
+const WarningBlock = ({ block }) => (
+    <div style={{ ...sectionStyle, padding: '2rem', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+            <AlertTriangle size={20} style={{ color: '#f59e0b' }} />
+            <h4 style={{ color: '#f59e0b', margin: 0 }}>{block.content.title}</h4>
+        </div>
+        <p style={{ color: '#ccc', lineHeight: 1.6 }}>{block.content.text}</p>
+    </div>
+);
+
+const TipBlock = ({ block }) => (
+    <div style={{ ...sectionStyle, padding: '2rem', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+            <Lightbulb size={20} style={{ color: '#22c55e' }} />
+            <h4 style={{ color: '#22c55e', margin: 0 }}>{block.content.title}</h4>
+        </div>
+        <p style={{ color: '#ccc', lineHeight: 1.6 }}>{block.content.text}</p>
+    </div>
+);
+
+const HighlightBlock = ({ block }) => (
+    <div style={{ ...sectionStyle, display: 'grid', gridTemplateColumns: block.content.image ? '1fr 1fr' : '1fr', gap: '2rem', alignItems: 'center', padding: '3rem', background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)', borderRadius: '8px' }}>
+        <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <Sparkles size={20} style={{ color: 'var(--color-accent)' }} />
+                <h3 style={{ margin: 0 }}>{block.content.title}</h3>
+            </div>
+            <p style={{ color: '#aaa', lineHeight: 1.7 }}>{block.content.text}</p>
+        </div>
+        {block.content.image && <img src={block.content.image} alt={block.content.title} style={{ width: '100%', borderRadius: '8px' }} />}
+    </div>
+);
+
 const UnknownBlock = ({ type }) => (
     <div style={{ padding: '1rem', border: '1px solid red', color: 'red' }}>Unknown block type: {type}</div>
 );
@@ -202,6 +356,18 @@ const BlockRenderer = ({ blocks }) => {
                     case 'before-after': return <BeforeAfterBlock key={block.id || index} block={block} />;
                     case 'note': return <NoteBlock key={block.id || index} block={block} />;
                     case 'download': return <DownloadBlock key={block.id || index} block={block} />;
+                    // New blocks
+                    case 'code': return <CodeBlock key={block.id || index} block={block} />;
+                    case 'stats': return <StatsBlock key={block.id || index} block={block} />;
+                    case 'features': return <FeaturesBlock key={block.id || index} block={block} />;
+                    case 'team': return <TeamBlock key={block.id || index} block={block} />;
+                    case 'testimonial': return <TestimonialBlock key={block.id || index} block={block} />;
+                    case 'award': return <AwardBlock key={block.id || index} block={block} />;
+                    case 'location': return <LocationBlock key={block.id || index} block={block} />;
+                    case 'callout': return <CalloutBlock key={block.id || index} block={block} />;
+                    case 'warning': return <WarningBlock key={block.id || index} block={block} />;
+                    case 'tip': return <TipBlock key={block.id || index} block={block} />;
+                    case 'highlight': return <HighlightBlock key={block.id || index} block={block} />;
                     default: return <UnknownBlock key={block.id || index} type={block.type} />;
                 }
             })}
