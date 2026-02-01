@@ -718,7 +718,7 @@ const Dashboard = () => {
 
                     <div className="dashboard-header-actions">
                         {/* Notification Bell */}
-                        <div style={{ position: 'relative' }} ref={notificationRef}>
+                        <div style={{ position: 'relative', zIndex: 10000 }} ref={notificationRef}>
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
                                 style={{
@@ -1577,28 +1577,36 @@ const Dashboard = () => {
                                                                             </button>
                                                                         </div>
 
-                                                                        {/* Delete button for simulated/admin orders */}
-                                                                        {(order.paymentId === 'SIMULATED_ADMIN' || order.payment_id === 'SIMULATED_ADMIN') && (
-                                                                            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,77,77,0.2)' }}>
-                                                                                <button
-                                                                                    onClick={async () => {
-                                                                                        if (confirm('Supprimer cette commande simulée ? Cette action est irréversible.')) {
-                                                                                            await deleteOrder(order.id);
-                                                                                            showToast('Commande supprimée', 'success');
+                                                                        {/* Delete button for any order (with extra confirmation) */}
+                                                                        <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,77,77,0.2)' }}>
+                                                                            <button
+                                                                                onClick={async () => {
+                                                                                    const isSimulated = order.paymentId === 'SIMULATED_ADMIN' || order.payment_id === 'SIMULATED_ADMIN';
+                                                                                    const confirmMsg = isSimulated 
+                                                                                        ? 'Supprimer cette commande simulée ? Cette action est irréversible.'
+                                                                                        : `⚠️ ATTENTION: Supprimer la commande #${order.id} ?\n\nCette commande a été payée. La suppression est définitive et irréversible.\n\nÊtes-vous absolument sûr ?`;
+                                                                                    
+                                                                                    if (confirm(confirmMsg)) {
+                                                                                        // Double confirmation for real orders
+                                                                                        if (!isSimulated) {
+                                                                                            const doubleConfirm = confirm('Dernière confirmation: voulez-vous vraiment supprimer cette commande payée ?');
+                                                                                            if (!doubleConfirm) return;
                                                                                         }
-                                                                                    }}
-                                                                                    style={{
-                                                                                        ...btnModern,
-                                                                                        background: 'rgba(255, 77, 77, 0.1)',
-                                                                                        border: '1px solid rgba(255, 77, 77, 0.3)',
-                                                                                        color: '#ff4d4d',
-                                                                                        width: '100%'
-                                                                                    }}
-                                                                                >
-                                                                                    <Trash2 size={16} /> Supprimer cette commande simulée
-                                                                                </button>
-                                                                            </div>
-                                                                        )}
+                                                                                        await deleteOrder(order.id);
+                                                                                        showToast('Commande supprimée', 'success');
+                                                                                    }
+                                                                                }}
+                                                                                style={{
+                                                                                    ...btnModern,
+                                                                                    background: 'rgba(255, 77, 77, 0.1)',
+                                                                                    border: '1px solid rgba(255, 77, 77, 0.3)',
+                                                                                    color: '#ff4d4d',
+                                                                                    width: '100%'
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 size={16} /> Supprimer cette commande
+                                                                            </button>
+                                                                        </div>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -2142,12 +2150,41 @@ const Dashboard = () => {
                                                     <span style={{ color: '#fff', fontWeight: 'bold' }}>-{c.value}{c.type === 'percent' ? '%' : '€'}</span>
                                                     {c.isActive === false && <span style={{ fontSize: '0.7rem', color: '#ff6b6b', background: 'rgba(255,107,107,0.1)', padding: '2px 8px', borderRadius: '4px' }}>Désactivé</span>}
                                                 </div>
-                                                <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                                <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                                                     {c.minAmount != null && c.minAmount > 0 && <span style={{ color: '#a78bfa' }}>Min: {c.minAmount}€</span>}
                                                     {c.expirationDate && <span>Exp: {new Date(c.expirationDate).toLocaleDateString()}</span>}
                                                     <span style={{ color: (c.maxUses != null && (c.uses || 0) >= c.maxUses) ? '#ff4d4d' : '#888' }}>
                                                         Utilisations: [{c.uses || 0} / {c.maxUses != null ? c.maxUses : '∞'}]
                                                     </span>
+                                                    {/* Edit max uses inline */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Max"
+                                                            defaultValue={c.maxUses || ''}
+                                                            style={{ 
+                                                                width: '60px', 
+                                                                padding: '4px 6px', 
+                                                                background: '#111', 
+                                                                border: '1px solid #333', 
+                                                                borderRadius: '4px', 
+                                                                color: '#fff',
+                                                                fontSize: '0.7rem'
+                                                            }}
+                                                            onBlur={(e) => {
+                                                                const newMax = e.target.value ? parseInt(e.target.value) : null;
+                                                                if (newMax !== c.maxUses) {
+                                                                    updatePromoCode(c.id, { maxUses: newMax });
+                                                                    showToast('Max utilisations mis à jour', 'success');
+                                                                }
+                                                            }}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    e.target.blur();
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

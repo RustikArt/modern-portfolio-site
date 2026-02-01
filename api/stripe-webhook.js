@@ -117,8 +117,16 @@ async function handleCheckoutCompleted(session) {
         }));
 
         // Create order in database
+        const customerName = session.customer_details?.name || customerEmail?.split('@')[0] || 'Client';
+        
+        // Validate minimum required data
+        if (!customerEmail || !items.length) {
+            console.error('[Webhook] Invalid order data - missing email or items');
+            return;
+        }
+        
         const orderData = {
-            customer_name: session.customer_details?.name || 'Client',
+            customer_name: customerName,
             email: customerEmail,
             total: amountTotal,
             status: 'Payé',

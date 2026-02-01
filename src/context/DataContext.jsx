@@ -1373,21 +1373,26 @@ export const DataProvider = ({ children }) => {
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 const msg = err.error || err.message || 'Identifiants ou mot de passe incorrects.';
-                try { addNotification('account', `Échec connexion : ${msg}`); } catch (e) { console.warn('addNotification unavailable', e); }
                 
-                // Record failed login attempt
-                const failedEntry = {
-                    attemptEmail: attemptEmail,
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent,
-                    success: false,
-                    failureReason: msg
-                };
-                setLoginHistory(prev => {
-                    const updated = [failedEntry, ...prev].slice(0, 100);
-                    localStorage.setItem('portfolio_login_history', JSON.stringify(updated));
-                    return updated;
-                });
+                // Only record failed login if the email exists in the system
+                const emailExists = users.some(u => u.email?.toLowerCase() === attemptEmail);
+                if (emailExists) {
+                    try { addNotification('account', `Échec connexion : ${msg}`); } catch (e) { console.warn('addNotification unavailable', e); }
+                    
+                    // Record failed login attempt only for existing accounts
+                    const failedEntry = {
+                        attemptEmail: attemptEmail,
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        success: false,
+                        failureReason: msg
+                    };
+                    setLoginHistory(prev => {
+                        const updated = [failedEntry, ...prev].slice(0, 100);
+                        localStorage.setItem('portfolio_login_history', JSON.stringify(updated));
+                        return updated;
+                    });
+                }
                 
                 return { success: false, message: msg };
             }
@@ -1446,6 +1451,11 @@ export const DataProvider = ({ children }) => {
         
         const promo = promoCodes.find(p => p.code === code);
         if (promo) {
+            // 0. Check if promo is active
+            if (promo.isActive === false || promo.is_active === false) {
+                alert("Ce code promo est désactivé.");
+                return false;
+            }
             // 1. Check Expiration
             if (promo.expirationDate && new Date(promo.expirationDate) < new Date()) {
                 alert("Ce code promo a expiré.");
