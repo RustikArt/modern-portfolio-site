@@ -1,12 +1,46 @@
+import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, ArrowRight, Trash2, Plus, Minus, Sparkles, ShieldCheck, Truck, CreditCard } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Trash2, Plus, Minus, Sparkles, ShieldCheck, Truck, CreditCard, Zap, Clock, Crown, Check, Info } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import './Cart.css';
 
+// Delivery tiers configuration
+const DELIVERY_TIERS = [
+    {
+        id: 'standard',
+        name: 'Livraison Normale',
+        description: 'Délai standard de traitement',
+        delay: '5-7 jours ouvrés',
+        price: 0,
+        icon: Clock,
+        color: '#888'
+    },
+    {
+        id: 'priority',
+        name: 'Livraison Prioritaire',
+        description: 'Traitement accéléré',
+        delay: '2-3 jours ouvrés',
+        price: 9.99,
+        icon: Zap,
+        color: '#f0a'
+    },
+    {
+        id: 'professional',
+        name: 'Livraison Pro',
+        description: 'Priorité maximale + support dédié',
+        delay: '24-48h',
+        price: 24.99,
+        icon: Crown,
+        color: 'var(--color-accent)',
+        badge: 'Recommandé'
+    }
+];
+
 const Cart = () => {
-    const { cart, removeFromCart, updateCartQuantity, getCartTotal } = useData();
+    const { cart, removeFromCart, updateCartQuantity, getCartTotal, selectedDelivery, setSelectedDelivery } = useData();
     const navigate = useNavigate();
+    const [showDeliveryInfo, setShowDeliveryInfo] = useState(false);
 
     const handleQuantityChange = (index, delta) => {
         const item = cart[index];
@@ -17,6 +51,10 @@ const Cart = () => {
             removeFromCart(index);
         }
     };
+
+    const currentDelivery = DELIVERY_TIERS.find(t => t.id === selectedDelivery) || DELIVERY_TIERS[0];
+    const subtotal = getCartTotal();
+    const total = subtotal + currentDelivery.price;
 
     return (
         <div className="page-cart">
@@ -112,20 +150,77 @@ const Cart = () => {
                             <div className="cart-summary">
                                 <h3>Récapitulatif</h3>
                                 
+                                {/* Delivery Tier Selector */}
+                                <div className="delivery-selector">
+                                    <div className="delivery-header">
+                                        <h4>
+                                            <Truck size={16} />
+                                            Mode de livraison
+                                        </h4>
+                                        <button 
+                                            className="info-btn"
+                                            onClick={() => setShowDeliveryInfo(!showDeliveryInfo)}
+                                            aria-label="Informations livraison"
+                                        >
+                                            <Info size={14} />
+                                        </button>
+                                    </div>
+                                    
+                                    {showDeliveryInfo && (
+                                        <div className="delivery-info-tooltip">
+                                            <p>Les délais sont indicatifs et peuvent varier selon la complexité de votre commande.</p>
+                                        </div>
+                                    )}
+                                    
+                                    <div className="delivery-options">
+                                        {DELIVERY_TIERS.map(tier => {
+                                            const Icon = tier.icon;
+                                            const isSelected = selectedDelivery === tier.id;
+                                            return (
+                                                <button
+                                                    key={tier.id}
+                                                    className={`delivery-option ${isSelected ? 'selected' : ''}`}
+                                                    onClick={() => setSelectedDelivery(tier.id)}
+                                                    style={{ '--tier-color': tier.color }}
+                                                >
+                                                    <div className="option-radio">
+                                                        {isSelected && <Check size={12} />}
+                                                    </div>
+                                                    <div className="option-icon">
+                                                        <Icon size={18} />
+                                                    </div>
+                                                    <div className="option-content">
+                                                        <div className="option-header">
+                                                            <span className="option-name">{tier.name}</span>
+                                                            {tier.badge && <span className="option-badge">{tier.badge}</span>}
+                                                        </div>
+                                                        <span className="option-delay">{tier.delay}</span>
+                                                    </div>
+                                                    <div className="option-price">
+                                                        {tier.price === 0 ? 'Gratuit' : `+${tier.price.toFixed(2)}€`}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
                                 <div className="summary-lines">
                                     <div className="summary-line">
                                         <span>Sous-total</span>
-                                        <span>{getCartTotal().toFixed(2)}€</span>
+                                        <span>{subtotal.toFixed(2)}€</span>
                                     </div>
                                     <div className="summary-line">
-                                        <span>Livraison</span>
-                                        <span className="free">Gratuite</span>
+                                        <span>Livraison ({currentDelivery.name})</span>
+                                        <span className={currentDelivery.price === 0 ? 'free' : ''}>
+                                            {currentDelivery.price === 0 ? 'Gratuite' : `${currentDelivery.price.toFixed(2)}€`}
+                                        </span>
                                     </div>
                                 </div>
 
                                 <div className="summary-total">
                                     <span>Total</span>
-                                    <span className="total-value">{getCartTotal().toFixed(2)}€</span>
+                                    <span className="total-value">{total.toFixed(2)}€</span>
                                 </div>
 
                                 <button
@@ -142,13 +237,27 @@ const Cart = () => {
                                     </div>
                                     <div className="feature">
                                         <Truck size={18} />
-                                        <span>Livraison rapide</span>
+                                        <span>Suivi en temps réel</span>
                                     </div>
                                     <div className="feature">
                                         <CreditCard size={18} />
                                         <span>CB, PayPal acceptés</span>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            {/* Custom Order CTA */}
+                            <div className="custom-order-cta">
+                                <div className="cta-icon">
+                                    <Sparkles size={20} />
+                                </div>
+                                <div className="cta-content">
+                                    <h4>Besoin d'un projet sur-mesure ?</h4>
+                                    <p>Décrivez votre projet et recevez un devis personnalisé</p>
+                                </div>
+                                <Link to="/custom-order" className="btn btn-outline-accent">
+                                    Demander un devis
+                                </Link>
                             </div>
                         </div>
                     </div>

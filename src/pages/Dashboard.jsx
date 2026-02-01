@@ -65,11 +65,440 @@ import ActivityLog from '../components/dashboard/ActivityLog';
 import { downloadCSV } from '../utils/export';
 import { sendShippingUpdate, sendVideoProof } from '../utils/emailService';
 
+import React, { useState, useEffect, useMemo } from 'react';
+import { useData, AVAILABLE_PERMISSIONS } from '../context/DataContext';
+import { useNavigate } from 'react-router-dom';
+import { WEBSITE_VERSION, VERSION_DETAILS } from '../version';
+import BlockEditor from '../components/BlockEditor';
+import './Dashboard.css';
+import * as LucideIcons from 'lucide-react';
+import {
+    LayoutDashboard,
+    ShoppingBag,
+    Users,
+    Plus,
+    Zap,
+    FileCode,
+    Layers,
+    Shield,
+    Globe,
+    Save,
+    Edit,
+    Trash2,
+    CheckCircle,
+    Clock,
+    Package,
+    AlertCircle,
+    AlertTriangle,
+    Search,
+    LogOut,
+    ExternalLink,
+    Timer,
+    Star,
+    FolderArchive,
+    Ticket,
+    Palette,
+    ChevronDown,
+    ChevronUp,
+    Bell,
+    Settings,
+    X,
+    Mail,
+    UserPlus,
+    ShoppingCart,
+    RotateCcw,
+    Percent,
+    MapPin,
+    Check,
+    User,
+    TrendingUp,
+    AlignLeft,
+    AlignCenter,
+    PieChart,
+    BarChart3,
+    Sparkles,
+    Ban,
+    Code,
+    PenLine,
+    DollarSign,
+    Eye,
+    EyeOff,
+    Circle,
+    CheckCircle2,
+    MessageSquare,
+    Send,
+    RefreshCw
+} from 'lucide-react';
+import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import AnalyticsChart from '../components/dashboard/AnalyticsChart';
+import ActivityLog from '../components/dashboard/ActivityLog';
+import { downloadCSV } from '../utils/export';
+import { sendShippingUpdate, sendVideoProof } from '../utils/emailService';
+
 // Helper pour rendre une icône Lucide par son nom
 const renderLucideIcon = (iconName, props = {}) => {
     if (!iconName || iconName === 'none') return null;
     const IconComponent = LucideIcons[iconName];
     return IconComponent ? <IconComponent {...props} /> : null;
+};
+
+// Service types labels
+const SERVICE_TYPE_LABELS = {
+    website: 'Site Web / Application',
+    design: 'Design / Graphisme',
+    video: 'Vidéo / Animation',
+    illustration: 'Illustration',
+    marketing: 'Marketing / Réseaux',
+    content: 'Rédaction / Contenu',
+    other: 'Autre projet'
+};
+
+const BUDGET_LABELS = {
+    small: '< 100€',
+    medium: '100€ - 300€',
+    large: '300€ - 1000€',
+    premium: '> 1000€',
+    unknown: 'À définir'
+};
+
+const TIMELINE_LABELS = {
+    urgent: '< 1 semaine',
+    normal: '1-2 semaines',
+    relaxed: '2-4 semaines',
+    planning: '> 1 mois'
+};
+
+const STATUS_COLORS = {
+    pending: { bg: 'rgba(255, 190, 77, 0.15)', color: '#ffbe4d', label: 'En attente' },
+    reviewed: { bg: 'rgba(77, 148, 255, 0.15)', color: '#4d94ff', label: 'En cours d\'analyse' },
+    quoted: { bg: 'rgba(167, 139, 250, 0.15)', color: '#a78bfa', label: 'Devis envoyé' },
+    accepted: { bg: 'rgba(76, 175, 80, 0.15)', color: '#4caf50', label: 'Accepté' },
+    rejected: { bg: 'rgba(255, 77, 77, 0.15)', color: '#ff4d4d', label: 'Refusé' },
+    completed: { bg: 'rgba(76, 175, 80, 0.15)', color: '#4caf50', label: 'Terminé' }
+};
+
+// Custom Orders Tab Component
+const CustomOrdersTab = ({ customOrders, fetchCustomOrders, updateCustomOrder, showToast, cardStyle, inputStyle }) => {
+    const [loading, setLoading] = useState(true);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [responseForm, setResponseForm] = useState({ adminResponse: '', quotedPrice: '', status: '' });
+    const [filter, setFilter] = useState('all');
+
+    useEffect(() => {
+        const loadOrders = async () => {
+            setLoading(true);
+            await fetchCustomOrders();
+            setLoading(false);
+        };
+        loadOrders();
+    }, []);
+
+    const filteredOrders = useMemo(() => {
+        if (filter === 'all') return customOrders;
+        return customOrders.filter(o => o.status === filter);
+    }, [customOrders, filter]);
+
+    const handleSelectOrder = (order) => {
+        setSelectedOrder(order);
+        setResponseForm({
+            adminResponse: order.admin_response || '',
+            quotedPrice: order.quoted_price || '',
+            status: order.status
+        });
+    };
+
+    const handleUpdateOrder = async () => {
+        if (!selectedOrder) return;
+        
+        try {
+            await updateCustomOrder(selectedOrder.id, {
+                status: responseForm.status,
+                adminResponse: responseForm.adminResponse,
+                quotedPrice: responseForm.quotedPrice ? parseFloat(responseForm.quotedPrice) : null
+            });
+            showToast('Demande mise à jour avec succès', 'success');
+            setSelectedOrder(null);
+            fetchCustomOrders();
+        } catch (error) {
+            showToast('Erreur lors de la mise à jour', 'error');
+        }
+    };
+
+    const formatDate = (dateStr) => {
+        return new Date(dateStr).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    return (
+        <div className="animate-in">
+            <div className="section-header" style={{ marginBottom: '2rem' }}>
+                <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Sparkles size={24} style={{ color: 'var(--color-accent)' }} />
+                    Demandes Sur-Mesure
+                </h2>
+                <button 
+                    onClick={() => { setLoading(true); fetchCustomOrders().then(() => setLoading(false)); }}
+                    className="btn-modern btn-modern--ghost"
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                    <RefreshCw size={16} /> Actualiser
+                </button>
+            </div>
+
+            {/* Filters */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                {['all', 'pending', 'reviewed', 'quoted', 'accepted', 'rejected', 'completed'].map(status => (
+                    <button
+                        key={status}
+                        onClick={() => setFilter(status)}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            background: filter === status ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: filter === status ? '#000' : '#888',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            fontWeight: filter === status ? '600' : '400'
+                        }}
+                    >
+                        {status === 'all' ? 'Toutes' : STATUS_COLORS[status]?.label || status}
+                        {status !== 'all' && (
+                            <span style={{ 
+                                marginLeft: '0.5rem', 
+                                background: 'rgba(0,0,0,0.2)', 
+                                padding: '0.1rem 0.4rem', 
+                                borderRadius: '4px',
+                                fontSize: '0.75rem'
+                            }}>
+                                {customOrders.filter(o => o.status === status).length}
+                            </span>
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>
+                    <RefreshCw className="spin" size={32} style={{ marginBottom: '1rem' }} />
+                    <p>Chargement des demandes...</p>
+                </div>
+            ) : filteredOrders.length === 0 ? (
+                <div style={{ ...cardStyle, textAlign: 'center', padding: '3rem' }}>
+                    <Sparkles size={48} style={{ color: '#333', marginBottom: '1rem' }} />
+                    <h3 style={{ marginBottom: '0.5rem' }}>Aucune demande</h3>
+                    <p style={{ color: '#666' }}>Les demandes de projets sur-mesure apparaîtront ici.</p>
+                </div>
+            ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: selectedOrder ? '1fr 1fr' : '1fr', gap: '1.5rem' }}>
+                    {/* Orders List */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {filteredOrders.map(order => {
+                            const statusInfo = STATUS_COLORS[order.status] || STATUS_COLORS.pending;
+                            return (
+                                <div
+                                    key={order.id}
+                                    onClick={() => handleSelectOrder(order)}
+                                    style={{
+                                        ...cardStyle,
+                                        cursor: 'pointer',
+                                        borderColor: selectedOrder?.id === order.id ? 'var(--color-accent)' : 'transparent',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                        <div>
+                                            <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>{order.title}</h3>
+                                            <p style={{ fontSize: '0.85rem', color: '#888' }}>{order.user_name} • {order.user_email}</p>
+                                        </div>
+                                        <span style={{
+                                            padding: '0.3rem 0.8rem',
+                                            background: statusInfo.bg,
+                                            color: statusInfo.color,
+                                            borderRadius: '6px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: '600'
+                                        }}>
+                                            {statusInfo.label}
+                                        </span>
+                                    </div>
+                                    
+                                    <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: '#666' }}>
+                                        <span>{SERVICE_TYPE_LABELS[order.service_type] || order.service_type}</span>
+                                        <span>Budget: {BUDGET_LABELS[order.budget_range] || order.budget_range}</span>
+                                        <span>Délai: {TIMELINE_LABELS[order.timeline] || order.timeline}</span>
+                                    </div>
+                                    
+                                    <div style={{ fontSize: '0.75rem', color: '#555', marginTop: '0.75rem' }}>
+                                        {formatDate(order.created_at)}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Order Detail Panel */}
+                    {selectedOrder && (
+                        <div style={{ ...cardStyle, position: 'sticky', top: '1rem', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Détail de la demande</h3>
+                                <button onClick={() => setSelectedOrder(null)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}>
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                {/* Client Info */}
+                                <div>
+                                    <label style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Client</label>
+                                    <p style={{ marginTop: '0.25rem' }}>{selectedOrder.user_name}</p>
+                                    <a href={`mailto:${selectedOrder.user_email}`} style={{ color: 'var(--color-accent)', fontSize: '0.9rem' }}>
+                                        {selectedOrder.user_email}
+                                    </a>
+                                </div>
+
+                                {/* Project Info */}
+                                <div>
+                                    <label style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Projet</label>
+                                    <h4 style={{ marginTop: '0.25rem', fontWeight: '600' }}>{selectedOrder.title}</h4>
+                                    <p style={{ fontSize: '0.9rem', color: '#aaa', marginTop: '0.5rem', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                                        {selectedOrder.description}
+                                    </p>
+                                </div>
+
+                                {/* Details Grid */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', color: '#666' }}>Type</label>
+                                        <p style={{ marginTop: '0.25rem' }}>{SERVICE_TYPE_LABELS[selectedOrder.service_type]}</p>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', color: '#666' }}>Budget</label>
+                                        <p style={{ marginTop: '0.25rem' }}>{BUDGET_LABELS[selectedOrder.budget_range]}</p>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', color: '#666' }}>Délai souhaité</label>
+                                        <p style={{ marginTop: '0.25rem' }}>{TIMELINE_LABELS[selectedOrder.timeline]}</p>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', color: '#666' }}>Contact préféré</label>
+                                        <p style={{ marginTop: '0.25rem' }}>{selectedOrder.contact_preference === 'email' ? 'Email' : 'Téléphone'}</p>
+                                    </div>
+                                </div>
+
+                                {/* References */}
+                                {selectedOrder.references && (
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Références / Inspirations</label>
+                                        <p style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#aaa', whiteSpace: 'pre-wrap' }}>
+                                            {selectedOrder.references}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Attachments */}
+                                {selectedOrder.attachments && selectedOrder.attachments.length > 0 && (
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fichiers joints</label>
+                                        <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {selectedOrder.attachments.map((file, idx) => (
+                                                <a 
+                                                    key={idx}
+                                                    href={file.data}
+                                                    download={file.name}
+                                                    style={{
+                                                        padding: '0.5rem 1rem',
+                                                        background: 'rgba(255,255,255,0.05)',
+                                                        borderRadius: '6px',
+                                                        fontSize: '0.85rem',
+                                                        color: 'var(--color-accent)',
+                                                        textDecoration: 'none'
+                                                    }}
+                                                >
+                                                    {file.name}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Admin Response Form */}
+                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                                    <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <MessageSquare size={18} style={{ color: 'var(--color-accent)' }} />
+                                        Réponse Admin
+                                    </h4>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div>
+                                            <label style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Statut</label>
+                                            <select
+                                                value={responseForm.status}
+                                                onChange={(e) => setResponseForm({ ...responseForm, status: e.target.value })}
+                                                style={{ ...inputStyle, width: '100%' }}
+                                            >
+                                                <option value="pending">En attente</option>
+                                                <option value="reviewed">En cours d'analyse</option>
+                                                <option value="quoted">Devis envoyé</option>
+                                                <option value="accepted">Accepté</option>
+                                                <option value="rejected">Refusé</option>
+                                                <option value="completed">Terminé</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Prix proposé (€)</label>
+                                            <input
+                                                type="number"
+                                                placeholder="ex: 299.00"
+                                                value={responseForm.quotedPrice}
+                                                onChange={(e) => setResponseForm({ ...responseForm, quotedPrice: e.target.value })}
+                                                style={inputStyle}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Message / Détails du devis</label>
+                                            <textarea
+                                                placeholder="Détaillez votre proposition, les étapes, le délai estimé..."
+                                                value={responseForm.adminResponse}
+                                                onChange={(e) => setResponseForm({ ...responseForm, adminResponse: e.target.value })}
+                                                rows={5}
+                                                style={{ ...inputStyle, resize: 'vertical' }}
+                                            />
+                                        </div>
+
+                                        <button
+                                            onClick={handleUpdateOrder}
+                                            className="btn-modern btn-modern--primary"
+                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                        >
+                                            <Send size={16} /> Enregistrer la réponse
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <style>{`
+                .spin {
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
+        </div>
+    );
 };
 
 // Composant Toggle Switch réutilisable
@@ -96,6 +525,7 @@ const ToggleSwitch = ({ checked, onChange, color = 'var(--color-accent)' }) => (
 const Dashboard = () => {
     const {
         projects, products, orders, users, promoCodes,
+        customOrders, fetchCustomOrders, updateCustomOrder,
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
         updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode, updatePromoCode,
@@ -1013,6 +1443,9 @@ const Dashboard = () => {
                                     {checkPermission('tab_orders') && (
                                         <button onClick={() => setActiveTab('orders')} style={sideBtnStyle(activeTab === 'orders')}><ShoppingBag size={18} /> Commandes</button>
                                     )}
+                                    {checkPermission('tab_orders') && (
+                                        <button onClick={() => setActiveTab('customOrders')} style={sideBtnStyle(activeTab === 'customOrders')}><Sparkles size={18} /> Demandes Sur-Mesure</button>
+                                    )}
                                     {checkPermission('tab_clients') && (
                                         <button onClick={() => setActiveTab('clients')} style={sideBtnStyle(activeTab === 'clients')}><Users size={18} /> Clients</button>
                                     )}
@@ -1774,6 +2207,18 @@ const Dashboard = () => {
                                     );
                                 })}
                             </div>
+                        )}
+
+                        {/* --- CUSTOM ORDERS TAB --- */}
+                        {activeTab === 'customOrders' && (
+                            <CustomOrdersTab 
+                                customOrders={customOrders}
+                                fetchCustomOrders={fetchCustomOrders}
+                                updateCustomOrder={updateCustomOrder}
+                                showToast={showToast}
+                                cardStyle={cardStyle}
+                                inputStyle={inputStyle}
+                            />
                         )}
 
                         {/* --- PRODUCTS TAB --- */}

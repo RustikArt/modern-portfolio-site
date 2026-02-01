@@ -1,6 +1,7 @@
 import { useData } from '../context/DataContext';
 import { useState, useMemo } from 'react';
-import { Grid, List, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Grid, List, Filter, ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import './Shop.css';
 
@@ -72,6 +73,23 @@ const Shop = () => {
     return (
         <div className="page page-shop">
             <div className="container">
+                {/* Custom Order Banner */}
+                <div className="custom-order-banner">
+                    <div className="banner-glow"></div>
+                    <div className="banner-content">
+                        <div className="banner-icon">
+                            <Sparkles size={28} />
+                        </div>
+                        <div className="banner-text">
+                            <h3>Besoin d'un projet <span>sur-mesure</span> ?</h3>
+                            <p>Décrivez votre projet et recevez un devis personnalisé sous 24-48h. Gratuit et sans engagement.</p>
+                        </div>
+                        <Link to="/custom-order" className="btn btn-accent">
+                            Demander un devis <ArrowRight size={18} />
+                        </Link>
+                    </div>
+                </div>
+
                 <div className="shop-header">
                     <h1 className="page-title">Boutique</h1>
                     <div className="shop-controls">

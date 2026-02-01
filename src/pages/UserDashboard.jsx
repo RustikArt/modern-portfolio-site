@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
     Diamond,
     Zap,
@@ -18,12 +18,15 @@ import {
     Eye,
     EyeOff,
     Lock,
-    Star
+    Star,
+    Sparkles,
+    MessageSquare,
+    ArrowRight
 } from 'lucide-react';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
-    const { currentUser, orders, logout, sendOrderConfirmation, showToast } = useData();
+    const { currentUser, orders, logout, sendOrderConfirmation, showToast, getUserCustomOrders } = useData();
     const navigate = useNavigate();
     const [oldPwd, setOldPwd] = useState('');
     const [newPwd, setNewPwd] = useState('');
@@ -32,6 +35,21 @@ const UserDashboard = () => {
     const [showOldPwd, setShowOldPwd] = useState(false);
     const [showNewPwd, setShowNewPwd] = useState(false);
     const [activeTab, setActiveTab] = useState('orders');
+    const [customOrders, setCustomOrders] = useState([]);
+    const [loadingCustomOrders, setLoadingCustomOrders] = useState(true);
+
+    // Load custom orders
+    useEffect(() => {
+        const loadCustomOrders = async () => {
+            if (currentUser && getUserCustomOrders) {
+                setLoadingCustomOrders(true);
+                const data = await getUserCustomOrders(currentUser.id);
+                setCustomOrders(data);
+                setLoadingCustomOrders(false);
+            }
+        };
+        loadCustomOrders();
+    }, [currentUser, getUserCustomOrders]);
 
     if (!currentUser) {
         navigate('/login');
@@ -141,6 +159,14 @@ const UserDashboard = () => {
                         {myOrders.length > 0 && <span className="tab-badge">{myOrders.length}</span>}
                     </button>
                     <button 
+                        className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('custom')}
+                    >
+                        <Sparkles size={18} />
+                        Projets Sur-Mesure
+                        {customOrders.length > 0 && <span className="tab-badge">{customOrders.length}</span>}
+                    </button>
+                    <button 
                         className={`tab-btn ${activeTab === 'security' ? 'active' : ''}`}
                         onClick={() => setActiveTab('security')}
                     >
@@ -233,6 +259,87 @@ const UserDashboard = () => {
                                             </div>
                                         );
                                     })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Custom Orders Tab */}
+                    {activeTab === 'custom' && (
+                        <div className="custom-orders-section">
+                            {loadingCustomOrders ? (
+                                <div className="orders-empty">
+                                    <div className="empty-icon">
+                                        <Sparkles size={48} className="spin" />
+                                    </div>
+                                    <p>Chargement de vos demandes...</p>
+                                </div>
+                            ) : customOrders.length === 0 ? (
+                                <div className="orders-empty">
+                                    <div className="empty-icon">
+                                        <Sparkles size={48} />
+                                    </div>
+                                    <h3>Aucune demande en cours</h3>
+                                    <p>Vous n'avez pas encore fait de demande de projet personnalisé</p>
+                                    <Link to="/custom-order" className="btn btn-primary">
+                                        Créer une demande
+                                        <ArrowRight size={18} />
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="custom-orders-list">
+                                    {customOrders.map(order => {
+                                        const statusLabels = {
+                                            pending: { label: 'En attente', color: '#ffbe4d' },
+                                            reviewed: { label: 'En analyse', color: '#4d94ff' },
+                                            quoted: { label: 'Devis envoyé', color: '#a78bfa' },
+                                            accepted: { label: 'Accepté', color: '#4caf50' },
+                                            rejected: { label: 'Refusé', color: '#ff4d4d' },
+                                            completed: { label: 'Terminé', color: '#4caf50' }
+                                        };
+                                        const status = statusLabels[order.status] || statusLabels.pending;
+                                        
+                                        return (
+                                            <div key={order.id} className="custom-order-card">
+                                                <div className="custom-order-header">
+                                                    <div>
+                                                        <h3>{order.title}</h3>
+                                                        <p className="custom-order-date">
+                                                            <Clock size={14} />
+                                                            {new Date(order.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                        </p>
+                                                    </div>
+                                                    <span className="custom-order-status" style={{ '--status-color': status.color }}>
+                                                        {status.label}
+                                                    </span>
+                                                </div>
+                                                
+                                                <p className="custom-order-description">{order.description.slice(0, 150)}...</p>
+                                                
+                                                {order.quoted_price && (
+                                                    <div className="custom-order-quote">
+                                                        <span>Prix proposé :</span>
+                                                        <strong>{order.quoted_price.toFixed(2)}€</strong>
+                                                    </div>
+                                                )}
+                                                
+                                                {order.admin_response && (
+                                                    <div className="custom-order-response">
+                                                        <div className="response-header">
+                                                            <MessageSquare size={16} />
+                                                            <span>Réponse</span>
+                                                        </div>
+                                                        <p>{order.admin_response}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                    
+                                    <Link to="/custom-order" className="new-custom-order-btn">
+                                        <Sparkles size={20} />
+                                        Nouvelle demande
+                                    </Link>
                                 </div>
                             )}
                         </div>

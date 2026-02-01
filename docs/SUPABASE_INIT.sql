@@ -449,6 +449,42 @@ CREATE INDEX IF NOT EXISTS idx_logs_date ON public.portfolio_activity_logs(creat
 CREATE INDEX IF NOT EXISTS idx_logs_action ON public.portfolio_activity_logs(action);
 
 -- ============================================================
+-- TABLE 10: custom_orders (Commandes Personnalisées)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.custom_orders (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES public.portfolio_users(id) ON DELETE CASCADE,
+    user_email VARCHAR(255) NOT NULL,
+    user_name VARCHAR(255),
+    service_type VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    budget_range VARCHAR(50) NOT NULL,
+    timeline VARCHAR(50) NOT NULL,
+    references TEXT,
+    attachments JSONB DEFAULT '[]'::jsonb,
+    contact_preference VARCHAR(20) DEFAULT 'email',
+    additional_notes TEXT,
+    status VARCHAR(50) DEFAULT 'pending',
+    admin_response TEXT,
+    quoted_price DECIMAL(10,2),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Index pour récupérer les commandes par utilisateur et statut
+CREATE INDEX IF NOT EXISTS idx_custom_orders_user ON public.custom_orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_custom_orders_status ON public.custom_orders(status);
+CREATE INDEX IF NOT EXISTS idx_custom_orders_date ON public.custom_orders(created_at DESC);
+
+-- Commentaires pour la documentation
+COMMENT ON TABLE public.custom_orders IS 'Demandes de projets personnalisés soumis par les utilisateurs';
+COMMENT ON COLUMN public.custom_orders.status IS 'pending, reviewed, quoted, accepted, rejected, completed';
+COMMENT ON COLUMN public.custom_orders.service_type IS 'website, design, video, illustration, marketing, content, other';
+COMMENT ON COLUMN public.custom_orders.budget_range IS 'small, medium, large, premium, unknown';
+COMMENT ON COLUMN public.custom_orders.timeline IS 'urgent, normal, relaxed, planning';
+
+-- ============================================================
 -- DONNÉES INITIALES
 -- ============================================================
 

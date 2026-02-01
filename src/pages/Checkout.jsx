@@ -11,15 +11,33 @@ import {
     Tag,
     ArrowRight,
     Loader2,
-    Monitor
+    Monitor,
+    Clock,
+    Zap,
+    Crown
 } from 'lucide-react';
 
 const Checkout = () => {
-    const { cart, currentUser, getCartTotal, promoCodes, applyPromoCode, activePromo, clearCart } = useData();
+    const { 
+        cart, 
+        currentUser, 
+        getCartTotal, 
+        promoCodes, 
+        applyPromoCode, 
+        activePromo, 
+        clearCart,
+        selectedDelivery,
+        getDeliveryPrice,
+        getDeliveryInfo
+    } = useData();
     const navigate = useNavigate();
     const [shipping, setShipping] = useState({ address: '', city: '', zip: '', country: '' });
     const [isProcessing, setIsProcessing] = useState(false);
     const hasProcessed = useRef(false);
+
+    // Get delivery info
+    const deliveryInfo = getDeliveryInfo();
+    const deliveryPrice = getDeliveryPrice();
 
     // Check if all products are digital (skip shipping step)
     const allDigital = useMemo(() => {
@@ -88,6 +106,13 @@ const Checkout = () => {
 
     const calculateTotal = () => {
         let total = getCartTotal();
+        
+        // Add delivery price (free for digital products)
+        if (!allDigital) {
+            total += deliveryPrice;
+        }
+        
+        // Apply promo code
         if (activePromo) {
             if (activePromo.type === 'percent') {
                 total -= total * (activePromo.value / 100);
@@ -132,6 +157,11 @@ const Checkout = () => {
                         quantity: item.quantity,
                         image: item.image
                     })),
+                    delivery: !allDigital ? {
+                        tier: selectedDelivery,
+                        name: deliveryInfo.name,
+                        price: deliveryPrice
+                    } : null,
                     promo: activePromo ? {
                         code: activePromo.code,
                         type: activePromo.type,
@@ -229,10 +259,25 @@ const Checkout = () => {
 
                                 <hr style={{ borderColor: '#222', margin: '1rem 0' }} />
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>
                                     <span>Sous-total</span>
                                     <span>{getCartTotal().toFixed(2)}€</span>
                                 </div>
+
+                                {/* Delivery Info */}
+                                {!allDigital && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666', marginBottom: '1rem', alignItems: 'center' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                            {selectedDelivery === 'professional' ? <Crown size={14} style={{ color: 'var(--color-accent)' }} /> : 
+                                             selectedDelivery === 'priority' ? <Zap size={14} style={{ color: '#f0a' }} /> : 
+                                             <Clock size={14} />}
+                                            {deliveryInfo.name}
+                                        </span>
+                                        <span style={{ color: deliveryPrice === 0 ? '#22c55e' : 'inherit' }}>
+                                            {deliveryPrice === 0 ? 'Gratuit' : `+${deliveryPrice.toFixed(2)}€`}
+                                        </span>
+                                    </div>
+                                )}
 
                                 {!activePromo ? (
                                     <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>

@@ -639,6 +639,20 @@ export const DataProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : [];
     });
 
+    // Delivery tier state
+    const [selectedDelivery, setSelectedDelivery] = useState(() => {
+        const saved = localStorage.getItem('portfolio_delivery_tier');
+        return saved || 'standard';
+    });
+
+    // Custom orders state
+    const [customOrders, setCustomOrders] = useState([]);
+
+    // Save delivery tier to localStorage
+    useEffect(() => {
+        localStorage.setItem('portfolio_delivery_tier', selectedDelivery);
+    }, [selectedDelivery]);
+
     const [orders, setOrders] = useState(() => {
         // Initially load empty - will be populated from API
         // localStorage is only a fallback if API fails
@@ -1868,6 +1882,7 @@ export const DataProvider = ({ children }) => {
 
     const clearCart = () => {
         setCart([]);
+        setSelectedDelivery('standard'); // Reset delivery on cart clear
         
         // Sync to Supabase if user is authenticated
         if (currentUser && supabase) {
@@ -1876,6 +1891,97 @@ export const DataProvider = ({ children }) => {
     };
 
     const getCartTotal = () => cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+    // Delivery tier pricing
+    const DELIVERY_TIERS = {
+        standard: { price: 0, name: 'Livraison Normale', delay: '5-7 jours ouvrés' },
+        priority: { price: 9.99, name: 'Livraison Prioritaire', delay: '2-3 jours ouvrés' },
+        professional: { price: 24.99, name: 'Livraison Pro', delay: '24-48h' }
+    };
+
+    const getDeliveryPrice = () => DELIVERY_TIERS[selectedDelivery]?.price || 0;
+    const getDeliveryInfo = () => DELIVERY_TIERS[selectedDelivery] || DELIVERY_TIERS.standard;
+    const getTotalWithDelivery = () => getCartTotal() + getDeliveryPrice();
+
+    // Custom Orders Functions
+    const submitCustomOrder = async (orderData) => {
+        try {
+            const res = await fetch('/api/custom-orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Erreur lors de l\'envoi de la demande');
+            }
+
+            const result = await res.json();
+            
+            // Add notification
+            addNotification('custom_order', `Nouvelle demande: ${orderData.title}`);
+            
+            return result.data;
+        } catch (error) {
+            console.error('Submit custom order error:', error);
+            throw error;
+        }
+    };
+
+    const fetchCustomOrders = async () => {
+        try {
+            const res = await fetch('/api/custom-orders', {
+                headers: getAdminHeaders()
+            });
+
+            if (res.ok) {
+                const result = await res.json();
+                setCustomOrders(result.data || []);
+                return result.data;
+            }
+        } catch (error) {
+            console.error('Fetch custom orders error:', error);
+        }
+        return [];
+    };
+
+    const updateCustomOrder = async (id, updates) => {
+        try {
+            const res = await fetch('/api/custom-orders', {
+                method: 'PUT',
+                headers: getAdminHeaders(),
+                body: JSON.stringify({ id, ...updates })
+            });
+
+            if (res.ok) {
+                const result = await res.json();
+                setCustomOrders(prev => prev.map(o => o.id === id ? result.data : o));
+                return result.data;
+            }
+        } catch (error) {
+            console.error('Update custom order error:', error);
+            throw error;
+        }
+    };
+
+    const getUserCustomOrders = async (userId) => {
+        if (!supabase) return [];
+        
+        try {
+            const { data, error } = await supabase
+                .from('custom_orders')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.error('Get user custom orders error:', error);
+            return [];
+        }
+    };
 
     // Orders
     // Phase 3: Added verification that payment was successful (status checking)
@@ -2568,9 +2674,15 @@ export const DataProvider = ({ children }) => {
             // Cart
             cart, addToCart, removeFromCart, updateCartQuantity, clearCart, getCartTotal,
 
+            // Delivery
+            selectedDelivery, setSelectedDelivery, getDeliveryPrice, getDeliveryInfo, getTotalWithDelivery,
+
             // Orders
             orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes,
             sendOrderConfirmation, simulateOrder, deleteOrder,
+
+            // Custom Orders
+            customOrders, submitCustomOrder, fetchCustomOrders, updateCustomOrder, getUserCustomOrders,
 
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode, updatePromoCode, applyPromoCode, activePromo,

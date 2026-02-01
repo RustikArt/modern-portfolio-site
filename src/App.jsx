@@ -31,6 +31,7 @@ const Blog = lazy(() => import('./pages/Blog'));
 const LegalMentions = lazy(() => import('./pages/LegalMentions'));
 const CGV = lazy(() => import('./pages/CGV'));
 const Sitemap = lazy(() => import('./pages/Sitemap'));
+const CustomOrder = lazy(() => import('./pages/CustomOrder'));
 
 // Page de maintenance avec formulaire de contact
 const MaintenancePage = () => {
@@ -309,6 +310,7 @@ const AppContent = () => {
 
           <Route path="/cart" element={<RouteGuard element={<Cart />} />} />
           <Route path="/checkout" element={<RouteGuard element={<Checkout />} />} />
+          <Route path="/custom-order" element={<RouteGuard element={<CustomOrder />} />} />
           <Route path="/profile" element={<RouteGuard element={<UserDashboard />} />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/about" element={<About />} />

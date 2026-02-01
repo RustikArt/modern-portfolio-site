@@ -50,7 +50,7 @@ export default async function handler(req, res) {
             return res.status(429).json({ error: 'Trop de requêtes. Veuillez réessayer plus tard.' });
         }
 
-        const { cart, promo, success_url, cancel_url } = req.body;
+        const { cart, delivery, promo, success_url, cancel_url } = req.body;
 
         // Validation des données
         if (!Array.isArray(cart) || cart.length === 0) {
@@ -78,17 +78,22 @@ export default async function handler(req, res) {
             // Calculer la remise totale
             let totalDiscountCents = 0;
             const subtotalCents = cart.reduce((acc, item) => acc + (Math.round(item.price * 100) * item.quantity), 0);
+            
+            // Add delivery price
+            const deliveryCents = delivery ? Math.round(delivery.price * 100) : 0;
 
             if (promo) {
+                // Apply promo to subtotal + delivery
+                const totalBeforePromo = subtotalCents + deliveryCents;
                 if (promo.type === 'percent') {
-                    totalDiscountCents = Math.round(subtotalCents * (promo.value / 100));
+                    totalDiscountCents = Math.round(totalBeforePromo * (promo.value / 100));
                 } else if (promo.type === 'fixed') {
                     totalDiscountCents = Math.round(promo.value * 100);
                 }
             }
 
             // S'assurer que la remise ne dépasse pas le total
-            totalDiscountCents = Math.min(totalDiscountCents, subtotalCents);
+            totalDiscountCents = Math.min(totalDiscountCents, subtotalCents + deliveryCents);
 
             // Préparer les articles avec les prix ajustés
             let remainingDiscount = totalDiscountCents;
@@ -121,6 +126,30 @@ export default async function handler(req, res) {
                 };
             });
 
+            // Add delivery as a line item if present
+            if (delivery && deliveryCents > 0) {
+                // Apply remaining discount to delivery
+                let deliveryFinalCents = deliveryCents;
+                if (remainingDiscount > 0) {
+                    const deduction = Math.min(remainingDiscount, deliveryCents);
+                    deliveryFinalCents -= deduction;
+                    remainingDiscount -= deduction;
+                }
+
+                if (deliveryFinalCents > 0) {
+                    line_items.push({
+                        price_data: {
+                            currency: 'eur',
+                            product_data: {
+                                name: delivery.name || 'Frais de livraison',
+                            },
+                            unit_amount: deliveryFinalCents,
+                        },
+                        quantity: 1,
+                    });
+                }
+            }
+
         // Préparer la configuration de session
         const sessionConfig = {
             payment_method_types: ['card'],
@@ -131,6 +160,8 @@ export default async function handler(req, res) {
             // Ajouter des métadonnées pour le suivi
             metadata: {
                 promo_code: promo?.code || 'none',
+                delivery_tier: delivery?.tier || 'none',
+                delivery_price: delivery?.price?.toString() || '0',
                 timestamp: new Date().toISOString()
             }
         };
