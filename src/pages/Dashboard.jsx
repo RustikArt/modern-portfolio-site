@@ -171,9 +171,22 @@ const Dashboard = () => {
         editId: null,
         name: '', price: '', discountType: 'none', discountValue: '',
         image: '', imageType: 'url', lucideIcon: '', category: '', tags: '', is_featured: false,
-        alertMessage: '', // New field
-        stock: '', // Stock management
-        options: []
+        alertMessage: '',
+        stock: '',
+        options: [],
+        // Nouveaux champs
+        description: '',
+        sku: '',
+        isDigital: true, // true = digital, false = physique
+        weight: '',
+        dimensions: { length: '', width: '', height: '' },
+        gallery: [], // URLs d'images supplémentaires
+        isVisible: true, // false = brouillon
+        availableDate: '', // date de disponibilité
+        maxPerOrder: '', // limite par commande
+        relatedProducts: [], // IDs de produits liés
+        seoTitle: '',
+        seoDescription: ''
     });
 
     const [optionBuilder, setOptionBuilder] = useState({ name: '', type: 'select', valuesInput: '' });
@@ -429,7 +442,20 @@ const Dashboard = () => {
             is_featured: product.is_featured || false,
             alertMessage: product.alertMessage || '',
             stock: product.stock !== null && product.stock !== undefined ? product.stock.toString() : '',
-            options: product.options || []
+            options: product.options || [],
+            // Nouveaux champs
+            description: product.description || '',
+            sku: product.sku || '',
+            isDigital: product.isDigital !== false, // défaut true
+            weight: product.weight ? product.weight.toString() : '',
+            dimensions: product.dimensions || { length: '', width: '', height: '' },
+            gallery: product.gallery || [],
+            isVisible: product.isVisible !== false, // défaut true
+            availableDate: product.availableDate || '',
+            maxPerOrder: product.maxPerOrder ? product.maxPerOrder.toString() : '',
+            relatedProducts: product.relatedProducts || [],
+            seoTitle: product.seoTitle || '',
+            seoDescription: product.seoDescription || ''
         });
         window.scrollTo(0, 0);
     };
@@ -464,7 +490,20 @@ const Dashboard = () => {
             is_featured: productForm.is_featured || false,
             alertMessage: productForm.alertMessage,
             stock: productForm.stock !== '' ? parseInt(productForm.stock) : 0,
-            options: productForm.options || []
+            options: productForm.options || [],
+            // Nouveaux champs
+            description: productForm.description || '',
+            sku: productForm.sku || '',
+            isDigital: productForm.isDigital,
+            weight: productForm.isDigital ? null : (productForm.weight ? parseFloat(productForm.weight) : null),
+            dimensions: productForm.isDigital ? null : productForm.dimensions,
+            gallery: productForm.gallery || [],
+            isVisible: productForm.isVisible,
+            availableDate: productForm.availableDate || null,
+            maxPerOrder: productForm.maxPerOrder ? parseInt(productForm.maxPerOrder) : null,
+            relatedProducts: productForm.relatedProducts || [],
+            seoTitle: productForm.seoTitle || '',
+            seoDescription: productForm.seoDescription || ''
         };
         if (productForm.editId) {
             updateProduct(productForm.editId, productData);
@@ -473,7 +512,11 @@ const Dashboard = () => {
         }
         setProductForm({
             editId: null, name: '', price: '', discountType: 'none', discountValue: '',
-            image: '', imageType: 'url', lucideIcon: '', category: '', tags: '', is_featured: false, alertMessage: '', stock: '', options: []
+            image: '', imageType: 'url', lucideIcon: '', category: '', tags: '', is_featured: false, 
+            alertMessage: '', stock: '', options: [],
+            description: '', sku: '', isDigital: true, weight: '', dimensions: { length: '', width: '', height: '' },
+            gallery: [], isVisible: true, availableDate: '', maxPerOrder: '', relatedProducts: [],
+            seoTitle: '', seoDescription: ''
         });
     };
 
@@ -1759,12 +1802,237 @@ const Dashboard = () => {
                                             <input type="text" placeholder="Category" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} style={inputStyle} />
                                             <input type="text" placeholder="Tags (séparés par virgule)" value={productForm.tags} onChange={e => setProductForm({ ...productForm, tags: e.target.value })} style={inputStyle} />
                                         </div>
+
+                                        {/* Description du produit */}
+                                        <div>
+                                            <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Description du produit</label>
+                                            <textarea
+                                                placeholder="Décrivez votre produit en détail..."
+                                                value={productForm.description}
+                                                onChange={e => setProductForm({ ...productForm, description: e.target.value })}
+                                                style={{ ...inputStyle, minHeight: '120px', borderRadius: '8px' }}
+                                            />
+                                        </div>
+
                                         <textarea
                                             placeholder="Message d'alerte / Note importante (ex: Délais rallongés)"
                                             value={productForm.alertMessage}
                                             onChange={e => setProductForm({ ...productForm, alertMessage: e.target.value })}
                                             style={{ ...inputStyle, minHeight: '60px', borderRadius: '8px' }}
                                         />
+
+                                        {/* Section Type de produit & Livraison */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Type de produit</p>
+                                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setProductForm({ ...productForm, isDigital: true, weight: '', dimensions: { length: '', width: '', height: '' } })}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        padding: '0.6rem 1rem',
+                                                        background: productForm.isDigital ? 'rgba(167, 139, 250, 0.15)' : 'transparent',
+                                                        border: `1px solid ${productForm.isDigital ? 'var(--color-accent)' : '#333'}`,
+                                                        borderRadius: '8px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.85rem',
+                                                        color: productForm.isDigital ? 'var(--color-accent)' : '#888',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    {productForm.isDigital ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+                                                    🖥️ Produit Digital
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setProductForm({ ...productForm, isDigital: false })}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        padding: '0.6rem 1rem',
+                                                        background: !productForm.isDigital ? 'rgba(167, 139, 250, 0.15)' : 'transparent',
+                                                        border: `1px solid ${!productForm.isDigital ? 'var(--color-accent)' : '#333'}`,
+                                                        borderRadius: '8px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.85rem',
+                                                        color: !productForm.isDigital ? 'var(--color-accent)' : '#888',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    {!productForm.isDigital ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+                                                    📦 Produit Physique
+                                                </button>
+                                            </div>
+                                            {!productForm.isDigital && (
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1rem', marginTop: '1rem', padding: '1rem', background: '#111', borderRadius: '8px' }}>
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Poids (kg)</label>
+                                                        <input 
+                                                            type="number" 
+                                                            placeholder="0.5"
+                                                            value={productForm.weight}
+                                                            onChange={e => setProductForm({ ...productForm, weight: e.target.value })}
+                                                            style={inputStyle}
+                                                            step="0.01"
+                                                            min="0"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Dimensions (cm)</label>
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+                                                            <input 
+                                                                type="number" 
+                                                                placeholder="Long."
+                                                                value={productForm.dimensions.length}
+                                                                onChange={e => setProductForm({ ...productForm, dimensions: { ...productForm.dimensions, length: e.target.value } })}
+                                                                style={inputStyle}
+                                                            />
+                                                            <input 
+                                                                type="number" 
+                                                                placeholder="Larg."
+                                                                value={productForm.dimensions.width}
+                                                                onChange={e => setProductForm({ ...productForm, dimensions: { ...productForm.dimensions, width: e.target.value } })}
+                                                                style={inputStyle}
+                                                            />
+                                                            <input 
+                                                                type="number" 
+                                                                placeholder="Haut."
+                                                                value={productForm.dimensions.height}
+                                                                onChange={e => setProductForm({ ...productForm, dimensions: { ...productForm.dimensions, height: e.target.value } })}
+                                                                style={inputStyle}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Section Paramètres avancés */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Paramètres avancés</p>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>SKU / Référence</label>
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="REF-001"
+                                                        value={productForm.sku}
+                                                        onChange={e => setProductForm({ ...productForm, sku: e.target.value })}
+                                                        style={inputStyle}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Limite par commande</label>
+                                                    <input 
+                                                        type="number" 
+                                                        placeholder="Illimité"
+                                                        value={productForm.maxPerOrder}
+                                                        onChange={e => setProductForm({ ...productForm, maxPerOrder: e.target.value })}
+                                                        style={inputStyle}
+                                                        min="1"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Date disponibilité</label>
+                                                    <input 
+                                                        type="date" 
+                                                        value={productForm.availableDate}
+                                                        onChange={e => setProductForm({ ...productForm, availableDate: e.target.value })}
+                                                        style={inputStyle}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={productForm.isVisible}
+                                                        onChange={e => setProductForm({ ...productForm, isVisible: e.target.checked })}
+                                                    />
+                                                    <Eye size={16} /> Visible sur le site
+                                                </label>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={productForm.is_featured}
+                                                        onChange={e => setProductForm({ ...productForm, is_featured: e.target.checked })}
+                                                    />
+                                                    <Star size={16} /> Produit vedette
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        {/* Section SEO */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>🔍 SEO (Référencement)</p>
+                                            <div style={{ display: 'grid', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Titre SEO (max 60 caractères)</label>
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder={productForm.name || "Titre pour Google"}
+                                                        value={productForm.seoTitle}
+                                                        onChange={e => setProductForm({ ...productForm, seoTitle: e.target.value })}
+                                                        style={inputStyle}
+                                                        maxLength={60}
+                                                    />
+                                                    <span style={{ fontSize: '0.65rem', color: productForm.seoTitle.length > 55 ? '#ff4d4d' : '#555' }}>
+                                                        {productForm.seoTitle.length}/60
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Description SEO (max 160 caractères)</label>
+                                                    <textarea 
+                                                        placeholder="Description pour les moteurs de recherche..."
+                                                        value={productForm.seoDescription}
+                                                        onChange={e => setProductForm({ ...productForm, seoDescription: e.target.value })}
+                                                        style={{ ...inputStyle, minHeight: '60px' }}
+                                                        maxLength={160}
+                                                    />
+                                                    <span style={{ fontSize: '0.65rem', color: productForm.seoDescription.length > 150 ? '#ff4d4d' : '#555' }}>
+                                                        {productForm.seoDescription.length}/160
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Section Produits liés */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>🔗 Produits liés (Cross-selling)</p>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                                                {productForm.relatedProducts.map(relId => {
+                                                    const relProd = products.find(p => p.id === relId);
+                                                    return relProd ? (
+                                                        <div key={relId} style={{ padding: '0.4rem 0.8rem', background: '#181818', borderRadius: '20px', border: '1px solid #333', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}>
+                                                            {relProd.name}
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => setProductForm({ ...productForm, relatedProducts: productForm.relatedProducts.filter(id => id !== relId) })}
+                                                                style={{ border: 'none', background: 'none', color: '#ff4d4d', cursor: 'pointer', padding: 0 }}
+                                                            >✕</button>
+                                                        </div>
+                                                    ) : null;
+                                                })}
+                                            </div>
+                                            <select 
+                                                onChange={e => {
+                                                    const id = parseInt(e.target.value);
+                                                    if (id && !productForm.relatedProducts.includes(id) && id !== productForm.editId) {
+                                                        setProductForm({ ...productForm, relatedProducts: [...productForm.relatedProducts, id] });
+                                                    }
+                                                    e.target.value = '';
+                                                }}
+                                                style={inputStyle}
+                                            >
+                                                <option value="">+ Ajouter un produit lié...</option>
+                                                {products.filter(p => p.id !== productForm.editId && !productForm.relatedProducts.includes(p.id)).map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
                                         
                                         {/* Image Type Selector */}
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1.5rem' }}>

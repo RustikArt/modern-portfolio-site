@@ -16,6 +16,7 @@ const ProductDetail = () => {
 
     const [selectedOptions, setSelectedOptions] = useState({});
     const [currentPrice, setCurrentPrice] = useState(0);
+    const [quantity, setQuantity] = useState(1);
 
     const productReviews = reviews[product?.id] || [];
     const averageRating = getProductRating(product?.id);
@@ -40,6 +41,13 @@ const ProductDetail = () => {
         setCurrentPrice(base);
     }, [selectedOptions, product]);
 
+    // Vérifier si le produit est disponible (date de disponibilité)
+    const isAvailable = !product?.availableDate || new Date(product.availableDate) <= new Date();
+    
+    // Vérifier si le produit est visible
+    if (product && product.isVisible === false && (!currentUser || currentUser.role !== 'admin')) {
+        return <div className="container" style={{ paddingTop: 'calc(140px + var(--banner-height, 0px))' }}>Produit non disponible</div>;
+    }
 
     if (!product) return <div className="container" style={{ paddingTop: 'calc(140px + var(--banner-height, 0px))' }}>Produit introuvable</div>;
 
@@ -56,8 +64,13 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        // Validation: Required options check? (Assumed all required for now, or just loose)
-        // For 'select' types, check if selected.
+        // Vérifier le stock
+        if (product.stock === 0) {
+            alert('Ce produit est en rupture de stock.');
+            return;
+        }
+
+        // Validation: Required options check
         if (product.options) {
             for (let opt of product.options) {
                 if (opt.type === 'select' && !selectedOptions[opt.name]) {
@@ -69,7 +82,11 @@ const ProductDetail = () => {
 
         // Convert map to array for cart
         const optionsArray = Object.values(selectedOptions);
-        addToCart(product, optionsArray);
+        
+        // Ajouter avec la quantité sélectionnée
+        for (let i = 0; i < quantity; i++) {
+            addToCart(product, optionsArray);
+        }
         navigate('/cart');
     };
 
@@ -134,6 +151,28 @@ const ProductDetail = () => {
                             )}
                         </div>
 
+                        {/* Description du produit */}
+                        {product.description && (
+                            <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <p style={{ color: '#ccc', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>{product.description}</p>
+                            </div>
+                        )}
+
+                        {/* Badge produit digital */}
+                        {product.isDigital && (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(167, 139, 250, 0.1)', borderRadius: '20px', marginBottom: '1.5rem', fontSize: '0.85rem', color: 'var(--color-accent)' }}>
+                                🖥️ Produit digital - Livraison instantanée
+                            </div>
+                        )}
+
+                        {/* Précommande si date future */}
+                        {!isAvailable && product.availableDate && (
+                            <div style={{ padding: '1rem', background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                                <AlertTriangle size={18} color="#fbbf24" style={{ marginRight: '0.5rem' }} />
+                                <span style={{ color: '#fbbf24' }}>Précommande - Disponible le {new Date(product.availableDate).toLocaleDateString('fr-FR')}</span>
+                            </div>
+                        )}
+
                         {/* OPTIONS RENDERER */}
                         {product.options && product.options.map((opt, idx) => (
                             <div key={idx} style={{ marginBottom: '2rem' }}>
@@ -193,17 +232,81 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        <button className="btn btn-primary" style={{ width: '100%', fontSize: '1.2rem' }} onClick={handleAddToCart}>
-                            {Object.values(selectedOptions).some(o => product.options?.find(po => po.name === o.name)?.requiresQuote && o.value)
-                                ? 'Demander un devis'
-                                : 'Ajouter au panier'}
+                        {/* Sélecteur de quantité avec limite */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                            <span style={{ fontSize: '0.9rem', color: '#888' }}>Quantité :</span>
+                            <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #333', borderRadius: '8px' }}>
+                                <button 
+                                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                    style={{ padding: '0.5rem 1rem', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.2rem' }}
+                                >-</button>
+                                <span style={{ padding: '0.5rem 1rem', minWidth: '40px', textAlign: 'center' }}>{quantity}</span>
+                                <button 
+                                    onClick={() => setQuantity(q => product.maxPerOrder ? Math.min(product.maxPerOrder, q + 1) : q + 1)}
+                                    style={{ padding: '0.5rem 1rem', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.2rem' }}
+                                >+</button>
+                            </div>
+                            {product.maxPerOrder && (
+                                <span style={{ fontSize: '0.75rem', color: '#666' }}>Max {product.maxPerOrder} par commande</span>
+                            )}
+                        </div>
+
+                        <button 
+                            className="btn btn-primary" 
+                            style={{ width: '100%', fontSize: '1.2rem' }} 
+                            onClick={handleAddToCart}
+                            disabled={product.stock === 0 || !isAvailable}
+                        >
+                            {product.stock === 0 
+                                ? 'Rupture de stock'
+                                : !isAvailable 
+                                    ? 'Précommander'
+                                    : Object.values(selectedOptions).some(o => product.options?.find(po => po.name === o.name)?.requiresQuote && o.value)
+                                        ? 'Demander un devis'
+                                        : 'Ajouter au panier'}
                         </button>
 
                         {product.tags && (
-                            <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                 {product.tags.map(tag => (
                                     <span key={tag} style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem', background: '#222', borderRadius: '4px' }}>#{tag}</span>
                                 ))}
+                            </div>
+                        )}
+
+                        {/* Produits liés */}
+                        {product.relatedProducts && product.relatedProducts.length > 0 && (
+                            <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #222' }}>
+                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem' }}>Produits similaires</h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+                                    {product.relatedProducts.map(relId => {
+                                        const relProd = products.find(p => p.id === relId);
+                                        if (!relProd || relProd.isVisible === false) return null;
+                                        const isLucide = relProd.image && relProd.image.startsWith('lucide:');
+                                        const RelIcon = isLucide ? LucideIcons[relProd.image.replace('lucide:', '')] : null;
+                                        return (
+                                            <div 
+                                                key={relId} 
+                                                onClick={() => navigate(`/shop/${relId}`)}
+                                                style={{ cursor: 'pointer', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.2s' }}
+                                                onMouseOver={e => e.currentTarget.style.borderColor = 'var(--color-accent)'}
+                                                onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}
+                                            >
+                                                {isLucide && RelIcon ? (
+                                                    <div style={{ width: '100%', aspectRatio: '1', background: 'rgba(167,139,250,0.1)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem' }}>
+                                                        <RelIcon size={40} color="var(--color-accent)" />
+                                                    </div>
+                                                ) : (
+                                                    <img src={relProd.image} alt={relProd.name} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '4px', marginBottom: '0.5rem' }} />
+                                                )}
+                                                <p style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>{relProd.name}</p>
+                                                <p style={{ fontSize: '0.9rem', color: 'var(--color-accent)', fontWeight: 'bold' }}>
+                                                    {(relProd.promoPrice || relProd.price).toFixed(2)}€
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 

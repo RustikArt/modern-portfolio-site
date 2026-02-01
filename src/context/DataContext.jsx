@@ -1238,7 +1238,19 @@ export const DataProvider = ({ children }) => {
                 alert_message: product.alertMessage ?? product.alert_message ?? null,
                 options: product.options || [],
                 description: product.description || null,
-                stock: product.stock ?? null
+                stock: product.stock ?? null,
+                // Nouveaux champs
+                sku: product.sku || null,
+                is_digital: product.isDigital !== false,
+                weight: product.weight || null,
+                dimensions: product.dimensions || null,
+                gallery: product.gallery || [],
+                is_visible: product.isVisible !== false,
+                available_date: product.availableDate || null,
+                max_per_order: product.maxPerOrder || null,
+                related_products: product.relatedProducts || [],
+                seo_title: product.seoTitle || null,
+                seo_description: product.seoDescription || null
             };
 
             const res = await fetch('/api/products', {
@@ -1254,7 +1266,14 @@ export const DataProvider = ({ children }) => {
                     ...p,
                     promoPrice: p.promo_price ?? p.promoPrice ?? null,
                     isFeatured: p.is_featured ?? p.isFeatured ?? false,
-                    alertMessage: p.alert_message ?? p.alertMessage ?? null
+                    alertMessage: p.alert_message ?? p.alertMessage ?? null,
+                    isDigital: p.is_digital !== false,
+                    isVisible: p.is_visible !== false,
+                    availableDate: p.available_date ?? p.availableDate ?? null,
+                    maxPerOrder: p.max_per_order ?? p.maxPerOrder ?? null,
+                    relatedProducts: p.related_products ?? p.relatedProducts ?? [],
+                    seoTitle: p.seo_title ?? p.seoTitle ?? null,
+                    seoDescription: p.seo_description ?? p.seoDescription ?? null
                 }));
                 setProducts(normalizedProducts);
             } else {
@@ -1279,7 +1298,14 @@ export const DataProvider = ({ children }) => {
                     ...p,
                     promoPrice: p.promo_price ?? p.promoPrice ?? null,
                     isFeatured: p.is_featured ?? p.isFeatured ?? false,
-                    alertMessage: p.alert_message ?? p.alertMessage ?? null
+                    alertMessage: p.alert_message ?? p.alertMessage ?? null,
+                    isDigital: p.is_digital !== false,
+                    isVisible: p.is_visible !== false,
+                    availableDate: p.available_date ?? p.availableDate ?? null,
+                    maxPerOrder: p.max_per_order ?? p.maxPerOrder ?? null,
+                    relatedProducts: p.related_products ?? p.relatedProducts ?? [],
+                    seoTitle: p.seo_title ?? p.seoTitle ?? null,
+                    seoDescription: p.seo_description ?? p.seoDescription ?? null
                 }));
                 setProducts(normalizedProducts);
             } else {
@@ -1306,7 +1332,19 @@ export const DataProvider = ({ children }) => {
                 alert_message: updatedProduct.alertMessage ?? updatedProduct.alert_message ?? null,
                 options: updatedProduct.options,
                 description: updatedProduct.description,
-                stock: updatedProduct.stock
+                stock: updatedProduct.stock,
+                // Nouveaux champs
+                sku: updatedProduct.sku || null,
+                is_digital: updatedProduct.isDigital !== false,
+                weight: updatedProduct.weight || null,
+                dimensions: updatedProduct.dimensions || null,
+                gallery: updatedProduct.gallery || [],
+                is_visible: updatedProduct.isVisible !== false,
+                available_date: updatedProduct.availableDate || null,
+                max_per_order: updatedProduct.maxPerOrder || null,
+                related_products: updatedProduct.relatedProducts || [],
+                seo_title: updatedProduct.seoTitle || null,
+                seo_description: updatedProduct.seoDescription || null
             };
 
             const res = await fetch('/api/products', {
@@ -1321,7 +1359,14 @@ export const DataProvider = ({ children }) => {
                     ...p,
                     promoPrice: p.promo_price ?? p.promoPrice ?? null,
                     isFeatured: p.is_featured ?? p.isFeatured ?? false,
-                    alertMessage: p.alert_message ?? p.alertMessage ?? null
+                    alertMessage: p.alert_message ?? p.alertMessage ?? null,
+                    isDigital: p.is_digital !== false,
+                    isVisible: p.is_visible !== false,
+                    availableDate: p.available_date ?? p.availableDate ?? null,
+                    maxPerOrder: p.max_per_order ?? p.maxPerOrder ?? null,
+                    relatedProducts: p.related_products ?? p.relatedProducts ?? [],
+                    seoTitle: p.seo_title ?? p.seoTitle ?? null,
+                    seoDescription: p.seo_description ?? p.seoDescription ?? null
                 }));
                 setProducts(normalizedProducts);
             } else {

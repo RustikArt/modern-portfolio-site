@@ -25,6 +25,9 @@ const Shop = () => {
     const processedProducts = useMemo(() => {
         let result = [...safeProducts];
 
+        // 0. Filter hidden products (isVisible/is_visible)
+        result = result.filter(p => p.isVisible !== false && p.is_visible !== false);
+
         // 1. Filter by Category
         if (filterCategory !== 'Tous') {
             result = result.filter(p => p.category === filterCategory);

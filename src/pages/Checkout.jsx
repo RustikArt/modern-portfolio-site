@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -10,16 +10,31 @@ import {
     ShoppingBag,
     Tag,
     ArrowRight,
-    Loader2
+    Loader2,
+    Monitor
 } from 'lucide-react';
 
 const Checkout = () => {
     const { cart, currentUser, getCartTotal, promoCodes, applyPromoCode, activePromo, clearCart } = useData();
     const navigate = useNavigate();
-    const [step, setStep] = useState(1);
     const [shipping, setShipping] = useState({ address: '', city: '', zip: '', country: '' });
     const [isProcessing, setIsProcessing] = useState(false);
     const hasProcessed = useRef(false);
+
+    // Check if all products are digital (skip shipping step)
+    const allDigital = useMemo(() => {
+        return cart.every(item => item.isDigital === true || item.is_digital === true);
+    }, [cart]);
+
+    // Start at step 2 if all digital, otherwise step 1
+    const [step, setStep] = useState(1);
+
+    // Auto-skip to payment if all digital
+    useEffect(() => {
+        if (allDigital && step === 1 && !hasProcessed.current) {
+            setStep(2);
+        }
+    }, [allDigital, step]);
 
     // Promo State
     const [promoInput, setPromoInput] = useState('');
@@ -156,12 +171,20 @@ const Checkout = () => {
                 <h1 className="page-title">Finalisation de commande</h1>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
-                    <span style={{ color: step >= 1 ? 'var(--color-accent)' : '#555', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Truck size={18} /> 1. Livraison
-                    </span>
-                    <span style={{ color: step >= 2 ? 'var(--color-accent)' : '#555', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <CreditCard size={18} /> 2. Paiement
-                    </span>
+                    {!allDigital ? (
+                        <>
+                            <span style={{ color: step >= 1 ? 'var(--color-accent)' : '#555', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Truck size={18} /> 1. Livraison
+                            </span>
+                            <span style={{ color: step >= 2 ? 'var(--color-accent)' : '#555', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <CreditCard size={18} /> 2. Paiement
+                            </span>
+                        </>
+                    ) : (
+                        <span style={{ color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 auto' }}>
+                            <Monitor size={18} /> Produits digitaux - Livraison instantanée
+                        </span>
+                    )}
                 </div>
 
                 {step === 1 && !showSuccessModal && (
