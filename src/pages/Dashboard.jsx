@@ -463,7 +463,7 @@ const Dashboard = () => {
             tags: tagsArray,
             is_featured: productForm.is_featured || false,
             alertMessage: productForm.alertMessage,
-            stock: productForm.stock ? parseInt(productForm.stock) : null,
+            stock: productForm.stock !== '' ? parseInt(productForm.stock) : 0,
             options: productForm.options || []
         };
         if (productForm.editId) {
@@ -1657,7 +1657,51 @@ const Dashboard = () => {
                                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
                                             <input type="text" placeholder="Nom du produit" value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })} style={inputStyle} required />
                                             <input type="number" placeholder="Prix €" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} style={inputStyle} required />
-                                            <input type="number" placeholder="Stock (optionnel)" value={productForm.stock} onChange={e => setProductForm({ ...productForm, stock: e.target.value })} style={inputStyle} min="0" />
+                                            <input type="number" placeholder="Stock *" value={productForm.stock} onChange={e => setProductForm({ ...productForm, stock: e.target.value })} style={inputStyle} min="0" required />
+                                        </div>
+
+                                        {/* Section Réduction / Promo */}
+                                        <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Réduction / Promo</p>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>Type de réduction</label>
+                                                    <select 
+                                                        value={productForm.discountType} 
+                                                        onChange={e => setProductForm({ ...productForm, discountType: e.target.value, discountValue: e.target.value === 'none' ? '' : productForm.discountValue })}
+                                                        style={inputStyle}
+                                                    >
+                                                        <option value="none">Pas de réduction</option>
+                                                        <option value="percent">Pourcentage (%)</option>
+                                                        <option value="fixed">Montant fixe (€)</option>
+                                                    </select>
+                                                </div>
+                                                {productForm.discountType !== 'none' && (
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: '#555', marginBottom: '0.3rem', display: 'block' }}>
+                                                            Valeur {productForm.discountType === 'percent' ? '(%)' : '(€)'}
+                                                        </label>
+                                                        <input 
+                                                            type="number" 
+                                                            placeholder={productForm.discountType === 'percent' ? 'Ex: 20' : 'Ex: 5'}
+                                                            value={productForm.discountValue} 
+                                                            onChange={e => setProductForm({ ...productForm, discountValue: e.target.value })} 
+                                                            style={inputStyle} 
+                                                            min="0"
+                                                            step="0.01"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {productForm.discountType !== 'none' && productForm.discountValue && productForm.price && (
+                                                <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--color-accent)' }}>
+                                                    Prix promo : {(
+                                                        productForm.discountType === 'percent' 
+                                                            ? (parseFloat(productForm.price) - (parseFloat(productForm.price) * parseFloat(productForm.discountValue) / 100))
+                                                            : (parseFloat(productForm.price) - parseFloat(productForm.discountValue))
+                                                    ).toFixed(2)}€
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px dashed #222' }}>
