@@ -55,7 +55,9 @@ import {
     PenLine,
     DollarSign,
     Eye,
-    EyeOff
+    EyeOff,
+    Circle,
+    CheckCircle2
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
@@ -1723,27 +1725,47 @@ const Dashboard = () => {
                                         {/* Image Type Selector */}
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1.5rem' }}>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Type d'image</p>
-                                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                    <input 
-                                                        type="radio" 
-                                                        name="imageType" 
-                                                        value="url" 
-                                                        checked={productForm.imageType === 'url'} 
-                                                        onChange={() => setProductForm({ ...productForm, imageType: 'url', lucideIcon: '' })}
-                                                    />
+                                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setProductForm({ ...productForm, imageType: 'url', lucideIcon: '' })}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        padding: '0.6rem 1rem',
+                                                        background: productForm.imageType === 'url' ? 'rgba(167, 139, 250, 0.15)' : 'transparent',
+                                                        border: `1px solid ${productForm.imageType === 'url' ? 'var(--color-accent)' : '#333'}`,
+                                                        borderRadius: '8px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.85rem',
+                                                        color: productForm.imageType === 'url' ? 'var(--color-accent)' : '#888',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    {productForm.imageType === 'url' ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                                                     URL d'image
-                                                </label>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                    <input 
-                                                        type="radio" 
-                                                        name="imageType" 
-                                                        value="lucide" 
-                                                        checked={productForm.imageType === 'lucide'} 
-                                                        onChange={() => setProductForm({ ...productForm, imageType: 'lucide', image: '' })}
-                                                    />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setProductForm({ ...productForm, imageType: 'lucide', image: '' })}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        padding: '0.6rem 1rem',
+                                                        background: productForm.imageType === 'lucide' ? 'rgba(167, 139, 250, 0.15)' : 'transparent',
+                                                        border: `1px solid ${productForm.imageType === 'lucide' ? 'var(--color-accent)' : '#333'}`,
+                                                        borderRadius: '8px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.85rem',
+                                                        color: productForm.imageType === 'lucide' ? 'var(--color-accent)' : '#888',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    {productForm.imageType === 'lucide' ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                                                     Icône Lucide
-                                                </label>
+                                                </button>
                                             </div>
                                             
                                             {productForm.imageType === 'url' ? (
@@ -1972,27 +1994,47 @@ const Dashboard = () => {
                                         {/* Image Type Selector for Projects */}
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1.5rem' }}>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Image de couverture</p>
-                                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                    <input 
-                                                        type="radio" 
-                                                        name="projectImageType" 
-                                                        value="url" 
-                                                        checked={projectForm.imageType === 'url'} 
-                                                        onChange={() => setProjectForm({ ...projectForm, imageType: 'url', lucideIcon: '' })}
-                                                    />
+                                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setProjectForm({ ...projectForm, imageType: 'url', lucideIcon: '' })}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        padding: '0.6rem 1rem',
+                                                        background: projectForm.imageType === 'url' ? 'rgba(167, 139, 250, 0.15)' : 'transparent',
+                                                        border: `1px solid ${projectForm.imageType === 'url' ? 'var(--color-accent)' : '#333'}`,
+                                                        borderRadius: '8px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.85rem',
+                                                        color: projectForm.imageType === 'url' ? 'var(--color-accent)' : '#888',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    {projectForm.imageType === 'url' ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                                                     URL d'image
-                                                </label>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                    <input 
-                                                        type="radio" 
-                                                        name="projectImageType" 
-                                                        value="lucide" 
-                                                        checked={projectForm.imageType === 'lucide'} 
-                                                        onChange={() => setProjectForm({ ...projectForm, imageType: 'lucide', image: '' })}
-                                                    />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setProjectForm({ ...projectForm, imageType: 'lucide', image: '' })}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        padding: '0.6rem 1rem',
+                                                        background: projectForm.imageType === 'lucide' ? 'rgba(167, 139, 250, 0.15)' : 'transparent',
+                                                        border: `1px solid ${projectForm.imageType === 'lucide' ? 'var(--color-accent)' : '#333'}`,
+                                                        borderRadius: '8px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.85rem',
+                                                        color: projectForm.imageType === 'lucide' ? 'var(--color-accent)' : '#888',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    {projectForm.imageType === 'lucide' ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                                                     Icône Lucide (HD)
-                                                </label>
+                                                </button>
                                             </div>
                                             
                                             {projectForm.imageType === 'url' ? (
@@ -3905,9 +3947,23 @@ const Dashboard = () => {
                                 )}
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    {Object.keys(reviews).length > 0 ? Object.entries(reviews)
-                                        .filter(([_, prodReviews]) => prodReviews && prodReviews.length > 0)
-                                        .map(([prodId, prodReviews]) => {
+                                    {(() => {
+                                        const reviewsWithContent = Object.entries(reviews)
+                                            .filter(([_, prodReviews]) => prodReviews && prodReviews.length > 0);
+                                        
+                                        if (reviewsWithContent.length === 0) {
+                                            return (
+                                                <div style={{ ...cardStyle, textAlign: 'center', padding: '4rem', background: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                                    <div style={{ width: '80px', height: '80px', margin: '0 auto 1.5rem', background: 'rgba(167, 139, 250, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <Star size={36} style={{ color: 'var(--color-accent)', opacity: 0.6 }} />
+                                                    </div>
+                                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#888' }}>Aucun avis client</h3>
+                                                    <p style={{ color: '#555', fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto' }}>Les avis clients apparaîtront ici lorsqu'ils seront soumis sur vos produits.</p>
+                                                </div>
+                                            );
+                                        }
+                                        
+                                        return reviewsWithContent.map(([prodId, prodReviews]) => {
                                             const product = products.find(p => p.id === parseInt(prodId));
                                             const isLucideIcon = product?.image && product.image.startsWith('lucide:');
                                             const LucideIcon = isLucideIcon ? LucideIcons[product.image.replace('lucide:', '')] : null;
@@ -3973,15 +4029,8 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                             );
-                                        }) : (
-                                        <div style={{ ...cardStyle, textAlign: 'center', padding: '4rem', background: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                                            <div style={{ width: '80px', height: '80px', margin: '0 auto 1.5rem', background: 'rgba(167, 139, 250, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <Star size={36} style={{ color: 'var(--color-accent)', opacity: 0.6 }} />
-                                            </div>
-                                            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#888' }}>Aucun avis client</h3>
-                                            <p style={{ color: '#555', fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto' }}>Les avis clients apparaîtront ici lorsqu'ils seront soumis sur vos produits.</p>
-                                        </div>
-                                    )}
+                                        });
+                                    })()}
                                 </div>
                             </div>
                         )}

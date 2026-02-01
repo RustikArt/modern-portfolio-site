@@ -1518,7 +1518,7 @@ export const DataProvider = ({ children }) => {
         maxUses: p.max_uses ?? p.maxUses,
         minAmount: p.min_amount ?? p.minAmount,
         uses: p.current_uses ?? p.uses ?? 0,
-        isActive: p.is_active ?? p.isActive ?? true
+        isActive: p.is_active === false ? false : (p.isActive === false ? false : true)
     });
 
     const addPromoCode = async (code) => {
