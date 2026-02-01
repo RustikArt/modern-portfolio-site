@@ -189,6 +189,16 @@ const Dashboard = () => {
     
     // Home Editor section save feedback
     const [homeSectionSaved, setHomeSectionSaved] = useState({});
+    
+    // Local Home Editor state (only saved to global on button click)
+    const [localHomeContent, setLocalHomeContent] = useState(null);
+    
+    // Initialize local home content when homeContent loads
+    useEffect(() => {
+        if (homeContent && !localHomeContent) {
+            setLocalHomeContent(JSON.parse(JSON.stringify(homeContent)));
+        }
+    }, [homeContent]);
 
     // Lucide Icon Picker states
     const [iconSearch, setIconSearch] = useState('');
@@ -2510,7 +2520,7 @@ const Dashboard = () => {
                         )}
 
                         {/* --- HOME EDITOR TAB --- */}
-                        {activeTab === 'homeEditor' && homeContent && (
+                        {activeTab === 'homeEditor' && localHomeContent && (
                             <div className="animate-in">
                                 <section style={cardStyle}>
                                     <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Configuration de la Page d'Accueil</h2>
@@ -2521,6 +2531,7 @@ const Dashboard = () => {
                                             <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Section Hero</h3>
                                             <button
                                                 onClick={() => {
+                                                    setHomeContent({ ...homeContent, hero: localHomeContent.hero });
                                                     setHomeSectionSaved(prev => ({ ...prev, hero: true }));
                                                     showToast('Section Hero sauvegardée', 'success');
                                                     setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, hero: false })), 2000);
@@ -2537,13 +2548,13 @@ const Dashboard = () => {
                                         </div>
                                         <div style={{ display: 'grid', gap: '1rem' }}>
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <input type="text" placeholder="Titre ligne 1" value={homeContent.hero.titleLine1} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine1: e.target.value } })} style={inputStyle} />
-                                                <input type="text" placeholder="Titre ligne 2" value={homeContent.hero.titleLine2} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine2: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Titre ligne 1" value={localHomeContent.hero.titleLine1} onChange={(e) => setLocalHomeContent({ ...localHomeContent, hero: { ...localHomeContent.hero, titleLine1: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Titre ligne 2" value={localHomeContent.hero.titleLine2} onChange={(e) => setLocalHomeContent({ ...localHomeContent, hero: { ...localHomeContent.hero, titleLine2: e.target.value } })} style={inputStyle} />
                                             </div>
-                                            <input type="text" placeholder="Sous-titre" value={homeContent.hero.subtitle} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, subtitle: e.target.value } })} style={inputStyle} />
+                                            <input type="text" placeholder="Sous-titre" value={localHomeContent.hero.subtitle} onChange={(e) => setLocalHomeContent({ ...localHomeContent, hero: { ...localHomeContent.hero, subtitle: e.target.value } })} style={inputStyle} />
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <input type="text" placeholder="Texte du bouton" value={homeContent.hero.buttonText} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonText: e.target.value } })} style={inputStyle} />
-                                                <input type="text" placeholder="Lien du bouton" value={homeContent.hero.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, buttonLink: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Texte du bouton" value={localHomeContent.hero.buttonText} onChange={(e) => setLocalHomeContent({ ...localHomeContent, hero: { ...localHomeContent.hero, buttonText: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Lien du bouton" value={localHomeContent.hero.buttonLink} onChange={(e) => setLocalHomeContent({ ...localHomeContent, hero: { ...localHomeContent.hero, buttonLink: e.target.value } })} style={inputStyle} />
                                             </div>
                                         </div>
                                     </div>
@@ -2554,6 +2565,7 @@ const Dashboard = () => {
                                             <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Projets Mis en Avant</h3>
                                             <button
                                                 onClick={() => {
+                                                    setHomeContent({ ...homeContent, featuredProjects: localHomeContent.featuredProjects });
                                                     setHomeSectionSaved(prev => ({ ...prev, projects: true }));
                                                     showToast('Section Projets sauvegardée', 'success');
                                                     setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, projects: false })), 2000);
@@ -2568,10 +2580,10 @@ const Dashboard = () => {
                                                 {homeSectionSaved.projects ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.projects ? 'Sauvegardé' : 'Sauvegarder'}
                                             </button>
                                         </div>
-                                        <input type="text" placeholder="Titre de la section" value={homeContent.featuredProjects.title} onChange={(e) => setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, title: e.target.value } })} style={{ ...inputStyle, marginBottom: '1rem' }} />
+                                        <input type="text" placeholder="Titre de la section" value={localHomeContent.featuredProjects.title} onChange={(e) => setLocalHomeContent({ ...localHomeContent, featuredProjects: { ...localHomeContent.featuredProjects, title: e.target.value } })} style={{ ...inputStyle, marginBottom: '1rem' }} />
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
                                             {projects.map(p => {
-                                                const isChecked = homeContent.featuredProjects.ids.includes(p.id);
+                                                const isChecked = localHomeContent.featuredProjects.ids.includes(p.id);
                                                 return (
                                                     <label 
                                                         key={p.id} 
@@ -2590,10 +2602,10 @@ const Dashboard = () => {
                                                         <div
                                                             onClick={(e) => {
                                                                 e.preventDefault();
-                                                                let newIds = [...homeContent.featuredProjects.ids];
+                                                                let newIds = [...localHomeContent.featuredProjects.ids];
                                                                 if (isChecked) newIds = newIds.filter(id => id !== p.id);
                                                                 else newIds.push(p.id);
-                                                                setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, ids: newIds } });
+                                                                setLocalHomeContent({ ...localHomeContent, featuredProjects: { ...localHomeContent.featuredProjects, ids: newIds } });
                                                             }}
                                                             style={{
                                                                 width: '20px',
@@ -2624,6 +2636,7 @@ const Dashboard = () => {
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                 <button
                                                     onClick={() => {
+                                                        setHomeContent({ ...homeContent, services: localHomeContent.services });
                                                         setHomeSectionSaved(prev => ({ ...prev, services: true }));
                                                         showToast('Section Services sauvegardée', 'success');
                                                         setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, services: false })), 2000);
@@ -2637,35 +2650,35 @@ const Dashboard = () => {
                                                 >
                                                     {homeSectionSaved.services ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.services ? 'Sauvegardé' : 'Sauvegarder'}
                                                 </button>
-                                                <button onClick={() => setHomeContent({ ...homeContent, services: [...homeContent.services, { id: Date.now(), title: 'Nouveau Service', icon: 'Star', description: 'Description' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
+                                                <button onClick={() => setLocalHomeContent({ ...localHomeContent, services: [...localHomeContent.services, { id: Date.now(), title: 'Nouveau Service', icon: 'Star', description: 'Description' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
                                             </div>
                                         </div>
                                         <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                            {homeContent.services.map((service, idx) => (
+                                            {localHomeContent.services.map((service, idx) => (
                                                 <div key={service.id} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
                                                     <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
                                                         <div style={{ flex: 1 }}>
                                                             <label style={{ fontSize: '0.7rem', color: '#666' }}>Icône (nom Lucide)</label>
                                                             <input type="text" value={service.icon} onChange={(e) => {
-                                                                const newServices = [...homeContent.services];
+                                                                const newServices = [...localHomeContent.services];
                                                                 newServices[idx].icon = e.target.value;
-                                                                setHomeContent({ ...homeContent, services: newServices });
+                                                                setLocalHomeContent({ ...localHomeContent, services: newServices });
                                                             }} style={inputStyle} />
                                                         </div>
                                                         <div style={{ flex: 2 }}>
                                                             <label style={{ fontSize: '0.7rem', color: '#666' }}>Titre</label>
                                                             <input type="text" value={service.title} onChange={(e) => {
-                                                                const newServices = [...homeContent.services];
+                                                                const newServices = [...localHomeContent.services];
                                                                 newServices[idx].title = e.target.value;
-                                                                setHomeContent({ ...homeContent, services: newServices });
+                                                                setLocalHomeContent({ ...localHomeContent, services: newServices });
                                                             }} style={inputStyle} />
                                                         </div>
-                                                        <button onClick={() => setHomeContent({ ...homeContent, services: homeContent.services.filter((_, i) => i !== idx) })} style={{ ...btnModern, color: '#ff4d4d', marginTop: 'auto' }}><Trash2 size={14} /></button>
+                                                        <button onClick={() => setLocalHomeContent({ ...localHomeContent, services: localHomeContent.services.filter((_, i) => i !== idx) })} style={{ ...btnModern, color: '#ff4d4d', marginTop: 'auto' }}><Trash2 size={14} /></button>
                                                     </div>
                                                     <input type="text" placeholder="Description" value={service.description} onChange={(e) => {
-                                                        const newServices = [...homeContent.services];
+                                                        const newServices = [...localHomeContent.services];
                                                         newServices[idx].description = e.target.value;
-                                                        setHomeContent({ ...homeContent, services: newServices });
+                                                        setLocalHomeContent({ ...localHomeContent, services: newServices });
                                                     }} style={inputStyle} />
                                                 </div>
                                             ))}
@@ -2678,6 +2691,7 @@ const Dashboard = () => {
                                             <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Appel à l'Action</h3>
                                             <button
                                                 onClick={() => {
+                                                    setHomeContent({ ...homeContent, cta: localHomeContent.cta });
                                                     setHomeSectionSaved(prev => ({ ...prev, cta: true }));
                                                     showToast('Section CTA sauvegardée', 'success');
                                                     setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, cta: false })), 2000);
@@ -2693,11 +2707,11 @@ const Dashboard = () => {
                                             </button>
                                         </div>
                                         <div style={{ display: 'grid', gap: '1rem' }}>
-                                            <input type="text" placeholder="Titre" value={homeContent.cta.title} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, title: e.target.value } })} style={inputStyle} />
-                                            <input type="text" placeholder="Texte" value={homeContent.cta.text} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, text: e.target.value } })} style={inputStyle} />
+                                            <input type="text" placeholder="Titre" value={localHomeContent.cta.title} onChange={(e) => setLocalHomeContent({ ...localHomeContent, cta: { ...localHomeContent.cta, title: e.target.value } })} style={inputStyle} />
+                                            <input type="text" placeholder="Texte" value={localHomeContent.cta.text} onChange={(e) => setLocalHomeContent({ ...localHomeContent, cta: { ...localHomeContent.cta, text: e.target.value } })} style={inputStyle} />
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <input type="text" placeholder="Texte du bouton" value={homeContent.cta.buttonText} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonText: e.target.value } })} style={inputStyle} />
-                                                <input type="text" placeholder="Lien du bouton" value={homeContent.cta.buttonLink} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, buttonLink: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Texte du bouton" value={localHomeContent.cta.buttonText} onChange={(e) => setLocalHomeContent({ ...localHomeContent, cta: { ...localHomeContent.cta, buttonText: e.target.value } })} style={inputStyle} />
+                                                <input type="text" placeholder="Lien du bouton" value={localHomeContent.cta.buttonLink} onChange={(e) => setLocalHomeContent({ ...localHomeContent, cta: { ...localHomeContent.cta, buttonLink: e.target.value } })} style={inputStyle} />
                                             </div>
                                         </div>
                                     </div>
@@ -2709,6 +2723,7 @@ const Dashboard = () => {
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                 <button
                                                     onClick={() => {
+                                                        setHomeContent({ ...homeContent, stats: localHomeContent.stats });
                                                         setHomeSectionSaved(prev => ({ ...prev, stats: true }));
                                                         showToast('Section Statistiques sauvegardée', 'success');
                                                         setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, stats: false })), 2000);
@@ -2722,25 +2737,25 @@ const Dashboard = () => {
                                                 >
                                                     {homeSectionSaved.stats ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.stats ? 'Sauvegardé' : 'Sauvegarder'}
                                                 </button>
-                                                <button onClick={() => setHomeContent({ ...homeContent, stats: [...(homeContent.stats || []), { id: Date.now(), label: 'Nouvelle Stat', value: '100+' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
+                                                <button onClick={() => setLocalHomeContent({ ...localHomeContent, stats: [...(localHomeContent.stats || []), { id: Date.now(), label: 'Nouvelle Stat', value: '100+' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
                                             </div>
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                                            {(homeContent.stats || []).map((stat, idx) => (
+                                            {(localHomeContent.stats || []).map((stat, idx) => (
                                                 <div key={stat.id} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                         <label style={{ fontSize: '0.7rem', color: '#666' }}>Stat #{idx + 1}</label>
-                                                        <button onClick={() => setHomeContent({ ...homeContent, stats: homeContent.stats.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer' }}><Trash2 size={14} /></button>
+                                                        <button onClick={() => setLocalHomeContent({ ...localHomeContent, stats: localHomeContent.stats.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer' }}><Trash2 size={14} /></button>
                                                     </div>
                                                     <input type="text" placeholder="Libellé (ex: Clients Satisfaits)" value={stat.label} onChange={(e) => {
-                                                        const newStats = [...homeContent.stats];
+                                                        const newStats = [...localHomeContent.stats];
                                                         newStats[idx].label = e.target.value;
-                                                        setHomeContent({ ...homeContent, stats: newStats });
+                                                        setLocalHomeContent({ ...localHomeContent, stats: newStats });
                                                     }} style={{ ...inputStyle, marginBottom: '0.5rem' }} />
                                                     <input type="text" placeholder="Valeur (ex: 250+)" value={stat.value} onChange={(e) => {
-                                                        const newStats = [...homeContent.stats];
+                                                        const newStats = [...localHomeContent.stats];
                                                         newStats[idx].value = e.target.value;
-                                                        setHomeContent({ ...homeContent, stats: newStats });
+                                                        setLocalHomeContent({ ...localHomeContent, stats: newStats });
                                                     }} style={inputStyle} />
                                                 </div>
                                             ))}
@@ -2753,6 +2768,7 @@ const Dashboard = () => {
                                             <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Témoignages Sélectionnés</h3>
                                             <button
                                                 onClick={() => {
+                                                    setHomeContent({ ...homeContent, selectedTestimonials: localHomeContent.selectedTestimonials });
                                                     setHomeSectionSaved(prev => ({ ...prev, testimonials: true }));
                                                     showToast('Section Témoignages sauvegardée', 'success');
                                                     setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, testimonials: false })), 2000);
@@ -2785,7 +2801,7 @@ const Dashboard = () => {
                                                         <div style={{ display: 'grid', gap: '0.5rem', marginLeft: '1rem' }}>
                                                             {prodReviews.filter(r => r.comment && r.comment.trim()).map((rev, revIdx) => {
                                                             const revId = `${prodId}-${revIdx}`;
-                                                            const isSelected = (homeContent.selectedTestimonials || []).includes(revId);
+                                                            const isSelected = (localHomeContent.selectedTestimonials || []).includes(revId);
                                                             return (
                                                                 <label 
                                                                     key={revId} 
@@ -2804,10 +2820,10 @@ const Dashboard = () => {
                                                                     <div
                                                                         onClick={(e) => {
                                                                             e.preventDefault();
-                                                                            let newList = [...(homeContent.selectedTestimonials || [])];
+                                                                            let newList = [...(localHomeContent.selectedTestimonials || [])];
                                                                             if (isSelected) newList = newList.filter(id => id !== revId);
                                                                             else newList.push(revId);
-                                                                            setHomeContent({ ...homeContent, selectedTestimonials: newList });
+                                                                            setLocalHomeContent({ ...localHomeContent, selectedTestimonials: newList });
                                                                         }}
                                                                         style={{
                                                                             width: '20px',
