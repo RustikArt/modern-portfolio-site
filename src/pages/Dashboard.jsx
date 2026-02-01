@@ -1145,22 +1145,15 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <div className="chart-container" style={{ overflow: 'visible' }}>
-                                                    <ResponsiveContainer width="100%" height={220}>
-                                                        <RechartsPie>
-                                                            <Legend 
-                                                                layout="vertical"
-                                                                verticalAlign="middle"
-                                                                align="right"
-                                                                wrapperStyle={{ paddingRight: '10px', fontSize: '0.75rem' }}
-                                                                formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
-                                                            />
+                                                <div className="chart-container" style={{ overflow: 'visible', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <ResponsiveContainer width="100%" height={250}>
+                                                        <RechartsPie margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                                                             <Pie
                                                                 data={pieData}
-                                                                cx="35%"
-                                                                cy="50%"
-                                                                innerRadius={40}
-                                                                outerRadius={65}
+                                                                cx="50%"
+                                                                cy="45%"
+                                                                innerRadius={45}
+                                                                outerRadius={70}
                                                                 paddingAngle={3}
                                                                 dataKey="value"
                                                                 label={false}
@@ -1196,6 +1189,13 @@ const Dashboard = () => {
                                                                     }
                                                                     return null;
                                                                 }}
+                                                            />
+                                                            <Legend 
+                                                                layout="horizontal"
+                                                                verticalAlign="bottom"
+                                                                align="center"
+                                                                wrapperStyle={{ paddingTop: '15px', fontSize: '0.75rem' }}
+                                                                formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
                                                             />
                                                         </RechartsPie>
                                                     </ResponsiveContainer>
