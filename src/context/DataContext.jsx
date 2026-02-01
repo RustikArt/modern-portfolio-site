@@ -877,7 +877,14 @@ export const DataProvider = ({ children }) => {
                 if (productsRes && productsRes.ok) {
                     const productsData = await productsRes.json();
                     if (Array.isArray(productsData)) {
-                        setProducts(productsData);
+                        // Normalize products from snake_case to camelCase
+                        const normalizedProducts = productsData.map(p => ({
+                            ...p,
+                            promoPrice: p.promo_price ?? p.promoPrice ?? null,
+                            isFeatured: p.is_featured ?? p.isFeatured ?? false,
+                            alertMessage: p.alert_message ?? p.alertMessage ?? null
+                        }));
+                        setProducts(normalizedProducts);
                     } else {
                         throw new Error('Invalid products data format');
                     }
@@ -1242,7 +1249,14 @@ export const DataProvider = ({ children }) => {
 
             if (res.ok) {
                 const updatedProducts = await res.json();
-                setProducts(updatedProducts);
+                // Normalize products from snake_case to camelCase
+                const normalizedProducts = updatedProducts.map(p => ({
+                    ...p,
+                    promoPrice: p.promo_price ?? p.promoPrice ?? null,
+                    isFeatured: p.is_featured ?? p.isFeatured ?? false,
+                    alertMessage: p.alert_message ?? p.alertMessage ?? null
+                }));
+                setProducts(normalizedProducts);
             } else {
                 const errorText = await res.text();
                 throw new Error(`Add failed: ${errorText}`);
@@ -1260,7 +1274,14 @@ export const DataProvider = ({ children }) => {
             });
             if (res.ok) {
                 const updatedProducts = await res.json();
-                setProducts(updatedProducts);
+                // Normalize products from snake_case to camelCase
+                const normalizedProducts = updatedProducts.map(p => ({
+                    ...p,
+                    promoPrice: p.promo_price ?? p.promoPrice ?? null,
+                    isFeatured: p.is_featured ?? p.isFeatured ?? false,
+                    alertMessage: p.alert_message ?? p.alertMessage ?? null
+                }));
+                setProducts(normalizedProducts);
             } else {
                 const errorText = await res.text();
                 console.error('Failed to delete product, response:', errorText);
@@ -1295,7 +1316,14 @@ export const DataProvider = ({ children }) => {
             });
             if (res.ok) {
                 const updatedProducts = await res.json();
-                setProducts(updatedProducts);
+                // Normalize products from snake_case to camelCase
+                const normalizedProducts = updatedProducts.map(p => ({
+                    ...p,
+                    promoPrice: p.promo_price ?? p.promoPrice ?? null,
+                    isFeatured: p.is_featured ?? p.isFeatured ?? false,
+                    alertMessage: p.alert_message ?? p.alertMessage ?? null
+                }));
+                setProducts(normalizedProducts);
             } else {
                 const errorText = await res.text();
                 console.error('Failed to update product, response:', errorText);

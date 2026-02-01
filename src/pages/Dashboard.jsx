@@ -728,7 +728,7 @@ const Dashboard = () => {
 
                     <div className="dashboard-header-actions">
                         {/* Notification Bell */}
-                        <div style={{ position: 'relative', zIndex: 10000 }} ref={notificationRef}>
+                        <div style={{ position: 'relative', zIndex: 99999 }} ref={notificationRef}>
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
                                 style={{
@@ -767,7 +767,7 @@ const Dashboard = () => {
                                     right: 0,
                                     width: '350px',
                                     maxHeight: '500px',
-                                    zIndex: 9999,
+                                    zIndex: 999999,
                                     padding: '1.5rem',
                                     overflowY: 'auto'
                                 }}>
@@ -1807,10 +1807,18 @@ const Dashboard = () => {
                                                                             border: productForm.lucideIcon === iconName ? '1px solid var(--color-accent)' : '1px solid transparent',
                                                                             borderRadius: '6px',
                                                                             cursor: 'pointer',
-                                                                            transition: 'all 0.15s'
+                                                                            transition: 'all 0.15s, transform 0.2s'
                                                                         }}
-                                                                        onMouseOver={e => { if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
-                                                                        onMouseOut={e => { if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                                                                        onMouseOver={e => { 
+                                                                            if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                                                                            e.currentTarget.style.transform = 'scale(1.15)';
+                                                                            e.currentTarget.style.zIndex = '10';
+                                                                        }}
+                                                                        onMouseOut={e => { 
+                                                                            if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                                                                            e.currentTarget.style.transform = 'scale(1)';
+                                                                            e.currentTarget.style.zIndex = '1';
+                                                                        }}
                                                                     >
                                                                         <IconComp size={18} color={productForm.lucideIcon === iconName ? 'var(--color-accent)' : '#888'} />
                                                                         <span style={{ fontSize: '0.55rem', color: productForm.lucideIcon === iconName ? 'var(--color-accent)' : '#555', textAlign: 'center', lineHeight: 1.1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>{iconName}</span>
@@ -2048,10 +2056,18 @@ const Dashboard = () => {
                                                                             border: projectForm.lucideIcon === iconName ? '1px solid var(--color-accent)' : '1px solid transparent',
                                                                             borderRadius: '6px',
                                                                             cursor: 'pointer',
-                                                                            transition: 'all 0.15s'
+                                                                            transition: 'all 0.15s, transform 0.2s'
                                                                         }}
-                                                                        onMouseOver={e => { if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
-                                                                        onMouseOut={e => { if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                                                                        onMouseOver={e => { 
+                                                                            if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                                                                            e.currentTarget.style.transform = 'scale(1.15)';
+                                                                            e.currentTarget.style.zIndex = '10';
+                                                                        }}
+                                                                        onMouseOut={e => { 
+                                                                            if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                                                                            e.currentTarget.style.transform = 'scale(1)';
+                                                                            e.currentTarget.style.zIndex = '1';
+                                                                        }}
                                                                     >
                                                                         <IconComp size={18} color={projectForm.lucideIcon === iconName ? 'var(--color-accent)' : '#888'} />
                                                                         <span style={{ fontSize: '0.55rem', color: projectForm.lucideIcon === iconName ? 'var(--color-accent)' : '#555', textAlign: 'center', lineHeight: 1.1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>{iconName}</span>

@@ -80,7 +80,10 @@ export default async function handler(req, res) {
  * Handle successful checkout completion
  */
 async function handleCheckoutCompleted(session) {
-    console.log('[Webhook] Processing checkout.session.completed:', session.id);
+    console.log('[Webhook] ====== PROCESSING CHECKOUT ======');
+    console.log('[Webhook] Session ID:', session.id);
+    console.log('[Webhook] Payment Status:', session.payment_status);
+    console.log('[Webhook] Customer Email:', session.customer_details?.email || session.customer_email);
 
     // Extract metadata
     const metadata = session.metadata || {};
@@ -91,68 +94,104 @@ async function handleCheckoutCompleted(session) {
         id: session.id,
         email: customerEmail,
         amount: amountTotal,
-        promo: metadata.promo_code
+        promo: metadata.promo_code,
+        metadata: JSON.stringify(metadata)
     });
 
+    // Validate Supabase connection
+    if (!supabase) {
+        console.error('[Webhook] CRITICAL: Supabase not configured!');
+        console.error('[Webhook] SUPABASE_URL:', SUPABASE_URL ? 'SET' : 'NOT SET');
+        console.error('[Webhook] SUPABASE_KEY:', SUPABASE_KEY ? 'SET' : 'NOT SET');
+        return;
+    }
+
+    console.log('[Webhook] Supabase configured, checking for existing order...');
+
     // Check if order already exists (idempotency)
-    if (supabase) {
-        const { data: existingOrder } = await supabase
-            .from('portfolio_orders')
-            .select('id')
-            .eq('payment_id', session.id)
-            .single();
+    const { data: existingOrder, error: existingError } = await supabase
+        .from('portfolio_orders')
+        .select('id')
+        .eq('payment_id', session.id)
+        .single();
 
-        if (existingOrder) {
-            console.log('[Webhook] Order already exists for session:', session.id);
-            return;
-        }
+    if (existingError && existingError.code !== 'PGRST116') {
+        console.error('[Webhook] Error checking existing order:', existingError);
+    }
 
-        // Get line items from Stripe
-        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-        
-        const items = lineItems.data.map(item => ({
-            name: item.description,
-            quantity: item.quantity,
-            price: item.amount_total / 100 / item.quantity
-        }));
+    if (existingOrder) {
+        console.log('[Webhook] Order already exists for session:', session.id, '- Skipping');
+        return;
+    }
 
-        // Create order in database
-        const customerName = session.customer_details?.name || customerEmail?.split('@')[0] || 'Client';
-        
-        // Validate minimum required data
-        if (!customerEmail || !items.length) {
-            console.error('[Webhook] Invalid order data - missing email or items');
-            return;
-        }
-        
-        const orderData = {
-            customer_name: customerName,
-            email: customerEmail,
-            total: amountTotal,
-            status: 'Payé',
-            items: JSON.stringify(items),
-            date: new Date().toISOString(),
-            payment_id: session.id,
-            shipping: JSON.stringify(session.shipping_details || {}),
-            notes: `Webhook confirmé - Promo: ${metadata.promo_code || 'aucun'}`,
-            checklist: JSON.stringify([
-                { id: 1, label: 'Brief client reçu', completed: false },
-                { id: 2, label: 'Concept design validé', completed: false },
-                { id: 3, label: 'Production / Création', completed: false },
-                { id: 4, label: 'Envoi finalisé', completed: false }
-            ])
-        };
+    console.log('[Webhook] No existing order, fetching line items from Stripe...');
 
-        const { error } = await supabase
-            .from('portfolio_orders')
-            .insert([orderData]);
+    // Get line items from Stripe
+    let lineItems;
+    try {
+        lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+        console.log('[Webhook] Line items retrieved:', lineItems.data.length, 'items');
+    } catch (lineItemsError) {
+        console.error('[Webhook] Failed to fetch line items:', lineItemsError);
+        throw lineItemsError;
+    }
+    
+    const items = lineItems.data.map(item => ({
+        name: item.description,
+        quantity: item.quantity,
+        price: item.amount_total / 100 / item.quantity
+    }));
 
-        if (error) {
-            console.error('[Webhook] Failed to create order:', error);
-            throw error;
-        }
+    console.log('[Webhook] Processed items:', JSON.stringify(items));
 
-        console.log('[Webhook] Order created successfully for session:', session.id);
+    // Create order in database
+    const customerName = session.customer_details?.name || customerEmail?.split('@')[0] || 'Client';
+    
+    // Validate minimum required data
+    if (!customerEmail) {
+        console.error('[Webhook] VALIDATION FAILED: Missing customer email');
+        return;
+    }
+    
+    if (!items.length) {
+        console.error('[Webhook] VALIDATION FAILED: No items in order');
+        return;
+    }
+    
+    const orderData = {
+        customer_name: customerName,
+        email: customerEmail,
+        total: amountTotal,
+        status: 'Payé',
+        items: JSON.stringify(items),
+        date: new Date().toISOString(),
+        payment_id: session.id,
+        shipping: JSON.stringify(session.shipping_details || {}),
+        notes: `Webhook confirmé - Promo: ${metadata.promo_code || 'aucun'}`,
+        checklist: JSON.stringify([
+            { id: 1, label: 'Brief client reçu', completed: false },
+            { id: 2, label: 'Concept design validé', completed: false },
+            { id: 3, label: 'Production / Création', completed: false },
+            { id: 4, label: 'Envoi finalisé', completed: false }
+        ])
+    };
+
+    console.log('[Webhook] Creating order with data:', JSON.stringify(orderData, null, 2));
+
+    const { data: insertedOrder, error } = await supabase
+        .from('portfolio_orders')
+        .insert([orderData])
+        .select();
+
+    if (error) {
+        console.error('[Webhook] FAILED to create order:', error);
+        console.error('[Webhook] Error details:', JSON.stringify(error));
+        throw error;
+    }
+
+    console.log('[Webhook] ✅ Order created successfully!');
+    console.log('[Webhook] Order ID:', insertedOrder?.[0]?.id);
+    console.log('[Webhook] Session ID:', session.id);
 
         // Increment promo code usage if used
         if (metadata.promo_code && metadata.promo_code !== 'none') {
