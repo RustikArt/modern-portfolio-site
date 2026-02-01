@@ -225,19 +225,16 @@ async function handleCheckoutCompleted(session) {
             }
         }
 
-        // Send Discord notification for new order
-        try {
-            await sendDiscordNotification(DiscordNotifications.newOrder({
-                ...orderData,
-                customerName: orderData.customer_name,
-                promoCodeUsed: metadata.promo_code !== 'none' ? metadata.promo_code : null
-            }));
-            console.log('[Webhook] Discord notification sent');
-        } catch (discordErr) {
-            console.warn('[Webhook] Discord notification failed:', discordErr.message);
-        }
-    } else {
-        console.warn('[Webhook] Supabase not configured - order not saved to database');
+    // Send Discord notification for new order
+    try {
+        await sendDiscordNotification(DiscordNotifications.newOrder({
+            ...orderData,
+            customerName: orderData.customer_name,
+            promoCodeUsed: metadata.promo_code !== 'none' ? metadata.promo_code : null
+        }));
+        console.log('[Webhook] Discord notification sent');
+    } catch (discordErr) {
+        console.warn('[Webhook] Discord notification failed:', discordErr.message);
     }
 }
 
