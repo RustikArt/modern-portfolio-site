@@ -728,7 +728,7 @@ const Dashboard = () => {
 
                     <div className="dashboard-header-actions">
                         {/* Notification Bell */}
-                        <div style={{ position: 'relative', zIndex: 9999999 }} ref={notificationRef}>
+                        <div style={{ position: 'relative', zIndex: 50000 }} ref={notificationRef}>
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
                                 style={{
@@ -767,7 +767,7 @@ const Dashboard = () => {
                                     right: 0,
                                     width: '350px',
                                     maxHeight: '500px',
-                                    zIndex: 99999999,
+                                    zIndex: 50001,
                                     padding: '1.5rem',
                                     overflowY: 'auto'
                                 }}>
@@ -1008,21 +1008,21 @@ const Dashboard = () => {
                                             
                                             return (
                                                 <div className="chart-container">
-                                                    <ResponsiveContainer width="100%" height={280}>
+                                                    <ResponsiveContainer width="100%" height={260}>
                                                         <RechartsPie>
                                                             <Legend 
                                                                 layout="horizontal"
                                                                 verticalAlign="top"
                                                                 align="center"
-                                                                wrapperStyle={{ paddingBottom: '10px', fontSize: '0.75rem' }}
+                                                                wrapperStyle={{ paddingBottom: '5px', fontSize: '0.75rem' }}
                                                                 formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
                                                             />
                                                             <Pie
                                                                 data={pieData}
                                                                 cx="50%"
-                                                                cy="50%"
-                                                                innerRadius={50}
-                                                                outerRadius={80}
+                                                                cy="55%"
+                                                                innerRadius={45}
+                                                                outerRadius={75}
                                                                 paddingAngle={3}
                                                                 dataKey="value"
                                                                 label={false}
@@ -1597,12 +1597,24 @@ const Dashboard = () => {
                                                                                         : `⚠️ ATTENTION: Supprimer la commande #${order.id} ?\n\nCette commande a été payée. La suppression est définitive et irréversible.\n\nÊtes-vous absolument sûr ?`;
                                                                                     
                                                                                     if (confirm(confirmMsg)) {
-                                                                                        // For paid orders, require admin password
+                                                                                        // For paid orders, require admin password verification via API
                                                                                         if (!isSimulated) {
-                                                                                            const adminPassword = prompt('Entrez le mot de passe administrateur pour confirmer la suppression:');
+                                                                                            const adminPassword = prompt('Entrez votre mot de passe admin pour confirmer la suppression:');
                                                                                             if (!adminPassword) return;
-                                                                                            if (adminPassword !== import.meta.env.VITE_ADMIN_SECRET && adminPassword !== 'Rustik2024!') {
-                                                                                                showToast('Mot de passe incorrect', 'error');
+                                                                                            
+                                                                                            // Verify password via login API
+                                                                                            try {
+                                                                                                const verifyRes = await fetch('/api/login', {
+                                                                                                    method: 'POST',
+                                                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                                                    body: JSON.stringify({ email: currentUser.email, password: adminPassword })
+                                                                                                });
+                                                                                                if (!verifyRes.ok) {
+                                                                                                    showToast('Mot de passe incorrect', 'error');
+                                                                                                    return;
+                                                                                                }
+                                                                                            } catch (err) {
+                                                                                                showToast('Erreur de vérification', 'error');
                                                                                                 return;
                                                                                             }
                                                                                         }
