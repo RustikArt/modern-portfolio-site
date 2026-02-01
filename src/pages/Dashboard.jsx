@@ -3078,12 +3078,15 @@ const Dashboard = () => {
                                             <h3 style={{ fontSize: '1rem', color: '#ff4d4d', marginBottom: '1rem' }}>Zone de Danger</h3>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.5rem' }}>Action destructrice. La réinitialisation supprimera toutes les commandes et clients non-admin.</p>
                                             <button
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     const pwd = prompt("Entrez le mot de passe de sécurité :");
-                                                    if (secureFullReset(pwd)) {
-                                                        showToast("Réinitialisation terminée", "success");
-                                                    } else {
-                                                        showToast("Mot de passe incorrect", "error");
+                                                    if (pwd) {
+                                                        const result = await secureFullReset(pwd);
+                                                        if (result) {
+                                                            showToast("Réinitialisation terminée", "success");
+                                                        } else {
+                                                            showToast("Mot de passe incorrect", "error");
+                                                        }
                                                     }
                                                 }}
                                                 style={{ ...btnModern, width: '100%', justifyContent: 'center', border: '1px solid #ff4d4d', color: '#ff4d4d', background: 'transparent' }}

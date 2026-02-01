@@ -8,6 +8,17 @@
 
 DO $$
 BEGIN
+    -- Add updated_at column if it doesn't exist (REQUIRED for triggers)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'portfolio_orders' 
+                   AND column_name = 'updated_at') THEN
+        ALTER TABLE public.portfolio_orders ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
+        RAISE NOTICE 'Added column: updated_at';
+    ELSE
+        RAISE NOTICE 'Column updated_at already exists';
+    END IF;
+
     -- Add promo_code_used column if it doesn't exist
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                    WHERE table_schema = 'public' 

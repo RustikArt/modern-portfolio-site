@@ -174,7 +174,24 @@ export default async function handler(req, res) {
             res.status(200).json(allOrders);
         } else if (req.method === 'DELETE') {
             if (!requireAdminAuth(req, res)) return;
-            const { id } = req.body;
+            const { id, deleteAll } = req.body;
+            
+            // Handle delete all orders (for global reset)
+            if (deleteAll === true) {
+                console.log('[api/orders] DELETE - Deleting ALL orders (global reset)');
+                const { error: deleteError } = await supabase
+                    .from('portfolio_orders')
+                    .delete()
+                    .neq('id', 0); // Delete all rows (neq id 0 matches all)
+
+                if (deleteError) {
+                    console.error('[api/orders] DELETE ALL error:', deleteError);
+                    throw deleteError;
+                }
+                return res.status(200).json([]);
+            }
+            
+            // Handle single order delete
             if (!id) return res.status(400).json({ error: 'ID requis.' });
 
             const { error: deleteError } = await supabase

@@ -165,11 +165,7 @@ export default async function handler(req, res) {
 
             res.status(200).json(normalized);
         } else if (req.method === 'DELETE') {
-            const { id } = req.body;
-
-            if (!id) {
-                return res.status(400).json({ error: 'ID requis pour la suppression.' });
-            }
+            const { id, deleteNonAdmins } = req.body;
 
             // Require admin secret for deletes to avoid public deletion
             const ADMIN_API_SECRET = process.env.ADMIN_API_SECRET || '';
@@ -177,6 +173,38 @@ export default async function handler(req, res) {
             if (ADMIN_API_SECRET && providedSecret !== ADMIN_API_SECRET) {
                 console.warn('Attempt to delete user without valid admin secret');
                 return res.status(403).json({ error: 'Forbidden: cannot delete users from public endpoints.' });
+            }
+
+            // Handle delete all non-admin users (for global reset)
+            if (deleteNonAdmins === true) {
+                console.log('[api/users] DELETE - Deleting all non-admin users (global reset)');
+                const { error: deleteError } = await supabase
+                    .from('portfolio_users')
+                    .delete()
+                    .eq('role', 'client'); // Only delete clients, keep admins
+
+                if (deleteError) {
+                    console.error('[api/users] DELETE non-admins error:', deleteError);
+                    throw deleteError;
+                }
+                
+                // Return remaining users (admins)
+                const { data: allUsers, error: fetchError } = await supabase
+                    .from('portfolio_users')
+                    .select('*');
+                if (fetchError) throw fetchError;
+
+                const normalized = (allUsers || []).map(u => ({
+                    ...u,
+                    roleTitle: u.role_title ?? u.roleTitle,
+                    permissions: typeof u.permissions === 'string' ? JSON.parse(u.permissions) : u.permissions
+                }));
+                return res.status(200).json(normalized);
+            }
+
+            // Handle single user delete
+            if (!id) {
+                return res.status(400).json({ error: 'ID requis pour la suppression.' });
             }
 
             const { error: deleteError } = await supabase

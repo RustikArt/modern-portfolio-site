@@ -2009,15 +2009,43 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    const secureFullReset = (password) => {
+    const secureFullReset = async (password) => {
         if (password === 'admin123') {
-            // Selective Wipe
-            setOrders([]);
-            setNotifications([]); // Clear notifications on reset
-            setUsers(users.filter(u => u.role === 'admin')); // Keep only admins
-            // We usually keep products and promoCodes as they are hard to rebuild
-            alert("Données réinitialisées (Commandes et clients supprimés).");
-            return true;
+            try {
+                // Delete orders from database
+                const ordersRes = await fetch('/api/orders', {
+                    method: 'DELETE',
+                    headers: getAdminHeaders(),
+                    body: JSON.stringify({ deleteAll: true })
+                });
+                
+                // Delete non-admin users from database
+                const usersRes = await fetch('/api/users', {
+                    method: 'DELETE',
+                    headers: getAdminHeaders(),
+                    body: JSON.stringify({ deleteNonAdmins: true })
+                });
+                
+                // Update local state
+                setOrders([]);
+                setNotifications([]);
+                setUsers(users.filter(u => u.role === 'admin' || u.role === 'super_admin'));
+                
+                // Clear local storage
+                localStorage.removeItem('portfolio_login_history');
+                setLoginHistory([]);
+                
+                alert("Données réinitialisées (Commandes et clients supprimés).");
+                return true;
+            } catch (error) {
+                console.error('Reset error:', error);
+                alert("Erreur lors de la réinitialisation. Les données locales ont été effacées.");
+                // Still clear local state even if API fails
+                setOrders([]);
+                setNotifications([]);
+                setUsers(users.filter(u => u.role === 'admin' || u.role === 'super_admin'));
+                return true;
+            }
         }
         return false;
     };
