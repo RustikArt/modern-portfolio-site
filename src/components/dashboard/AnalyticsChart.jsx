@@ -169,7 +169,6 @@ const AnalyticsChart = ({ data, title }) => {
                             name="value"
                         />
                     </AreaChart>
-                    </AreaChart>
                 ) : (
                     <div style={{ 
                         color: '#666',
