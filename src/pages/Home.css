@@ -270,6 +270,7 @@
     display: block;
     text-decoration: none;
     color: inherit;
+    group-hover:;
 }
 
 .project-img-wrapper {
