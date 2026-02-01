@@ -1007,22 +1007,22 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <div className="chart-container">
-                                                    <ResponsiveContainer width="100%" height={260}>
+                                                <div className="chart-container" style={{ overflow: 'visible' }}>
+                                                    <ResponsiveContainer width="100%" height={220}>
                                                         <RechartsPie>
                                                             <Legend 
                                                                 layout="horizontal"
                                                                 verticalAlign="top"
                                                                 align="center"
-                                                                wrapperStyle={{ paddingBottom: '5px', fontSize: '0.75rem' }}
+                                                                wrapperStyle={{ paddingBottom: '0px', fontSize: '0.75rem' }}
                                                                 formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
                                                             />
                                                             <Pie
                                                                 data={pieData}
                                                                 cx="50%"
-                                                                cy="55%"
-                                                                innerRadius={45}
-                                                                outerRadius={75}
+                                                                cy="52%"
+                                                                innerRadius={40}
+                                                                outerRadius={65}
                                                                 paddingAngle={3}
                                                                 dataKey="value"
                                                                 label={false}
