@@ -29,6 +29,136 @@ if (SUPABASE_URL && SUPABASE_KEY) {
     console.error('[api/orders] env.NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✓ present' : '✗ MISSING');
 }
 
+// ============================================================
+// CUSTOM ORDERS HANDLERS (type=custom)
+// ============================================================
+
+async function handleCustomOrdersGET(req, res) {
+    const { status, userId } = req.query;
+
+    let query = supabase
+        .from('custom_orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (status) {
+        query = query.eq('status', status);
+    }
+
+    if (userId) {
+        query = query.eq('user_id', userId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return res.status(200).json(data || []);
+}
+
+async function handleCustomOrdersPOST(req, res) {
+    const {
+        userId,
+        userEmail,
+        userName,
+        serviceType,
+        title,
+        description,
+        budget,
+        timeline,
+        references,
+        attachments,
+        contactPreference,
+        additionalNotes
+    } = req.body;
+
+    if (!userId || !userEmail || !serviceType || !title || !description || !budget || !timeline) {
+        return res.status(400).json({ error: 'Champs requis manquants' });
+    }
+
+    const orderData = {
+        user_id: userId,
+        user_email: userEmail,
+        user_name: userName,
+        service_type: serviceType,
+        title: title.trim(),
+        description: description.trim(),
+        budget_range: budget,
+        timeline: timeline,
+        references: references || null,
+        attachments: attachments || [],
+        contact_preference: contactPreference || 'email',
+        additional_notes: additionalNotes || null,
+        status: 'pending',
+        admin_response: null,
+        quoted_price: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+        .from('custom_orders')
+        .insert([orderData])
+        .select()
+        .single();
+
+    if (error) throw error;
+
+    return res.status(201).json(data);
+}
+
+async function handleCustomOrdersPUT(req, res) {
+    if (!requireAdminAuth(req, res)) return;
+
+    const { id, status, adminResponse, quotedPrice } = req.body;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID de commande requis' });
+    }
+
+    const updateData = {
+        updated_at: new Date().toISOString()
+    };
+
+    if (status) updateData.status = status;
+    if (adminResponse !== undefined) updateData.admin_response = adminResponse;
+    if (quotedPrice !== undefined) updateData.quoted_price = quotedPrice;
+
+    const { data, error } = await supabase
+        .from('custom_orders')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) throw error;
+
+    return res.status(200).json(data);
+}
+
+async function handleCustomOrdersDELETE(req, res) {
+    if (!requireAdminAuth(req, res)) return;
+
+    const { id } = req.query;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID de commande requis' });
+    }
+
+    const { error } = await supabase
+        .from('custom_orders')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw error;
+
+    return res.status(200).json({ success: true, message: 'Commande supprimée' });
+}
+
+// ============================================================
+// MAIN HANDLER
+// ============================================================
+
 export default async function handler(req, res) {
     setCorsHeaders(res, req.headers.origin);
     if (handleCorsPreFlight(req, res)) return;
@@ -41,6 +171,22 @@ export default async function handler(req, res) {
         });
     }
 
+    // Route custom orders to their handlers
+    const { type } = req.query;
+    if (type === 'custom') {
+        try {
+            if (req.method === 'GET') return await handleCustomOrdersGET(req, res);
+            if (req.method === 'POST') return await handleCustomOrdersPOST(req, res);
+            if (req.method === 'PUT') return await handleCustomOrdersPUT(req, res);
+            if (req.method === 'DELETE') return await handleCustomOrdersDELETE(req, res);
+            return res.status(405).json({ error: 'Méthode non autorisée' });
+        } catch (error) {
+            console.error('Custom Orders API Error:', error);
+            return handleError(res, error);
+        }
+    }
+
+    // Regular orders handling
     try {
         if (req.method === 'GET') {
             const { data: orders, error } = await supabase

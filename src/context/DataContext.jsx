@@ -1906,7 +1906,7 @@ export const DataProvider = ({ children }) => {
     // Custom Orders Functions
     const submitCustomOrder = async (orderData) => {
         try {
-            const res = await fetch('/api/custom-orders', {
+            const res = await fetch('/api/orders?type=custom', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
@@ -1922,7 +1922,7 @@ export const DataProvider = ({ children }) => {
             // Add notification
             addNotification('custom_order', `Nouvelle demande: ${orderData.title}`);
             
-            return result.data;
+            return result;
         } catch (error) {
             console.error('Submit custom order error:', error);
             throw error;
@@ -1931,14 +1931,14 @@ export const DataProvider = ({ children }) => {
 
     const fetchCustomOrders = async () => {
         try {
-            const res = await fetch('/api/custom-orders', {
+            const res = await fetch('/api/orders?type=custom', {
                 headers: getAdminHeaders()
             });
 
             if (res.ok) {
                 const result = await res.json();
-                setCustomOrders(result.data || []);
-                return result.data;
+                setCustomOrders(result || []);
+                return result;
             }
         } catch (error) {
             console.error('Fetch custom orders error:', error);
@@ -1948,7 +1948,7 @@ export const DataProvider = ({ children }) => {
 
     const updateCustomOrder = async (id, updates) => {
         try {
-            const res = await fetch('/api/custom-orders', {
+            const res = await fetch('/api/orders?type=custom', {
                 method: 'PUT',
                 headers: getAdminHeaders(),
                 body: JSON.stringify({ id, ...updates })
@@ -1956,8 +1956,8 @@ export const DataProvider = ({ children }) => {
 
             if (res.ok) {
                 const result = await res.json();
-                setCustomOrders(prev => prev.map(o => o.id === id ? result.data : o));
-                return result.data;
+                setCustomOrders(prev => prev.map(o => o.id === id ? result : o));
+                return result;
             }
         } catch (error) {
             console.error('Update custom order error:', error);
