@@ -1492,8 +1492,8 @@ export const DataProvider = ({ children }) => {
                 // Add optional fields map
                 expiration_date: code.expirationDate,
                 max_uses: code.maxUses,
-                min_amount: code.minAmount,
-                is_active: true
+                min_amount: code.minAmount
+                // Note: is_active defaults to true in database
             };
 
             const res = await fetch('/api/promo-codes', {

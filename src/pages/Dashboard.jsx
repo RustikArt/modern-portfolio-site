@@ -755,7 +755,7 @@ const Dashboard = () => {
                                     right: 0,
                                     width: '350px',
                                     maxHeight: '500px',
-                                    zIndex: 1000,
+                                    zIndex: 9999,
                                     padding: '1.5rem',
                                     overflowY: 'auto'
                                 }}>
@@ -2865,11 +2865,16 @@ const Dashboard = () => {
 
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '400px', overflowY: 'auto' }}>
                                             {(() => {
+                                                // Get list of existing user emails for filtering
+                                                const existingEmails = new Set((users || []).map(u => u.email?.toLowerCase()));
+                                                
                                                 // Group login history by email (userEmail or attemptEmail for failed)
                                                 const accountsMap = {};
                                                 (loginHistory || []).forEach(entry => {
                                                     const email = entry.userEmail || entry.attemptEmail;
                                                     if (!email) return;
+                                                    // Only show accounts that exist in the system
+                                                    if (!existingEmails.has(email.toLowerCase())) return;
                                                     if (!accountsMap[email]) {
                                                         accountsMap[email] = {
                                                             email,

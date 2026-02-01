@@ -131,6 +131,17 @@ BEGIN
     ELSE
         RAISE NOTICE 'Column current_uses already exists in promo_codes';
     END IF;
+    
+    -- Ensure is_active column exists (for promo enable/disable)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'portfolio_promo_codes' 
+                   AND column_name = 'is_active') THEN
+        ALTER TABLE public.portfolio_promo_codes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+        RAISE NOTICE 'Added column: is_active to promo_codes';
+    ELSE
+        RAISE NOTICE 'Column is_active already exists in promo_codes';
+    END IF;
 END $$;
 
 -- Step 4: Verify the changes
