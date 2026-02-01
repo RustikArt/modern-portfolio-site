@@ -73,7 +73,7 @@ const Dashboard = () => {
         projects, products, orders, users, promoCodes,
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
-        updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode,
+        updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode, updatePromoCode,
         secureFullReset, logout, simulateOrder, deleteOrder,
         announcement, updateAnnouncement, fetchAnnouncementForAdmin,
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
@@ -193,7 +193,7 @@ const Dashboard = () => {
     const [showIconPicker, setShowIconPicker] = useState(false);
     const [iconPickerTarget, setIconPickerTarget] = useState(null); // 'product' or 'project'
     const [bannerIconSearch, setBannerIconSearch] = useState(''); // Separate search for banner icons
-    const [iconZoomLevel, setIconZoomLevel] = useState(1); // 1 = normal, 2 = zoomed
+    const [iconZoomLevel, setIconZoomLevel] = useState(2); // 1 = normal, 2 = zoomed (default zoomed)
 
     // Get all available Lucide icons (filter out non-icon exports)
     const allLucideIcons = useMemo(() => {
@@ -2125,21 +2125,53 @@ const Dashboard = () => {
 
                                 <div style={{ display: 'grid', gap: '1rem' }}>
                                     {promoCodes.map(c => (
-                                        <div key={c.id} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderStyle: 'dashed' }}>
-                                            <div>
+                                        <div key={c.id} style={{ 
+                                            ...cardStyle, 
+                                            display: 'flex', 
+                                            justifyContent: 'space-between', 
+                                            alignItems: 'center', 
+                                            borderStyle: 'dashed',
+                                            opacity: c.isActive === false ? 0.5 : 1,
+                                            background: c.isActive === false ? 'rgba(40,40,40,0.5)' : cardStyle.background
+                                        }}>
+                                            <div style={{ flex: 1 }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                    <strong style={{ fontSize: '1.2rem', color: 'var(--color-accent)' }}>{c.code}</strong>
+                                                    <strong style={{ fontSize: '1.2rem', color: c.isActive === false ? '#666' : 'var(--color-accent)', textDecoration: c.isActive === false ? 'line-through' : 'none' }}>{c.code}</strong>
                                                     <span style={{ color: '#fff', fontWeight: 'bold' }}>-{c.value}{c.type === 'percent' ? '%' : '€'}</span>
+                                                    {c.isActive === false && <span style={{ fontSize: '0.7rem', color: '#ff6b6b', background: 'rgba(255,107,107,0.1)', padding: '2px 8px', borderRadius: '4px' }}>Désactivé</span>}
                                                 </div>
-                                                <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', display: 'flex', gap: '1rem' }}>
-                                                    {c.minAmount && <span>Min: {c.minAmount}€</span>}
+                                                <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                                    {c.minAmount != null && c.minAmount > 0 && <span style={{ color: '#a78bfa' }}>Min: {c.minAmount}€</span>}
                                                     {c.expirationDate && <span>Exp: {new Date(c.expirationDate).toLocaleDateString()}</span>}
-                                                    <span style={{ color: (c.maxUses && (c.uses || 0) >= c.maxUses) ? '#ff4d4d' : '#888' }}>
-                                                        Utilisation: [{c.uses || 0} / {c.maxUses || '∞'}]
+                                                    <span style={{ color: (c.maxUses != null && (c.uses || 0) >= c.maxUses) ? '#ff4d4d' : '#888' }}>
+                                                        Utilisations: [{c.uses || 0} / {c.maxUses != null ? c.maxUses : '∞'}]
                                                     </span>
                                                 </div>
                                             </div>
-                                            <button onClick={() => deletePromoCode(c.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer' }}>Supprimer</button>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <button 
+                                                    onClick={() => updatePromoCode(c.id, { isActive: c.isActive === false ? true : false })}
+                                                    style={{ 
+                                                        background: c.isActive === false ? 'rgba(74, 222, 128, 0.2)' : 'rgba(251, 113, 133, 0.2)', 
+                                                        border: `1px solid ${c.isActive === false ? '#4ade80' : '#fb7185'}`,
+                                                        color: c.isActive === false ? '#4ade80' : '#fb7185',
+                                                        padding: '6px 12px',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.75rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px'
+                                                    }}
+                                                    title={c.isActive === false ? 'Activer' : 'Désactiver'}
+                                                >
+                                                    {c.isActive === false ? <Eye size={14} /> : <EyeOff size={14} />}
+                                                    {c.isActive === false ? 'Activer' : 'Désactiver'}
+                                                </button>
+                                                <button onClick={() => deletePromoCode(c.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }} title="Supprimer">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

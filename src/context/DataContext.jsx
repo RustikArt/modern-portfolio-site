@@ -1472,6 +1472,16 @@ export const DataProvider = ({ children }) => {
         return false;
     };
 
+    // Helper to normalize promo code from API (snake_case to camelCase)
+    const normalizePromo = (p) => ({
+        ...p,
+        expirationDate: p.expiration_date || p.expirationDate,
+        maxUses: p.max_uses ?? p.maxUses,
+        minAmount: p.min_amount ?? p.minAmount,
+        uses: p.current_uses ?? p.uses ?? 0,
+        isActive: p.is_active ?? p.isActive ?? true
+    });
+
     const addPromoCode = async (code) => {
         try {
             // Convert camelCase to snake_case for Supabase compatibility
@@ -1482,7 +1492,8 @@ export const DataProvider = ({ children }) => {
                 // Add optional fields map
                 expiration_date: code.expirationDate,
                 max_uses: code.maxUses,
-                min_amount: code.minAmount
+                min_amount: code.minAmount,
+                is_active: true
             };
 
             const res = await fetch('/api/promo-codes', {
@@ -1492,7 +1503,7 @@ export const DataProvider = ({ children }) => {
             });
             if (res.ok) {
                 const updatedPromoCodes = await res.json();
-                setPromoCodes(updatedPromoCodes);
+                setPromoCodes(updatedPromoCodes.map(normalizePromo));
             } else {
                 const errorText = await res.text();
                 console.error('Failed to add promo code, response:', errorText);
@@ -1512,7 +1523,7 @@ export const DataProvider = ({ children }) => {
             });
             if (res.ok) {
                 const updatedPromoCodes = await res.json();
-                setPromoCodes(updatedPromoCodes);
+                setPromoCodes(updatedPromoCodes.map(normalizePromo));
             } else {
                 const errorText = await res.text();
                 console.error('Failed to delete promo code, response:', errorText);
@@ -1520,6 +1531,36 @@ export const DataProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Failed to delete promo code, error:', error);
+            throw error;
+        }
+    };
+
+    const updatePromoCode = async (id, updates) => {
+        try {
+            // Convert camelCase to snake_case for Supabase
+            const promoData = {
+                id,
+                ...(updates.isActive !== undefined && { is_active: updates.isActive }),
+                ...(updates.maxUses !== undefined && { max_uses: updates.maxUses }),
+                ...(updates.minAmount !== undefined && { min_amount: updates.minAmount }),
+                ...(updates.expirationDate !== undefined && { expiration_date: updates.expirationDate })
+            };
+            const res = await fetch('/api/promo-codes', {
+                method: 'PUT',
+                headers: getAdminHeaders(),
+                body: JSON.stringify(promoData)
+            });
+            if (res.ok) {
+                const updatedPromoCodes = await res.json();
+                setPromoCodes(updatedPromoCodes.map(normalizePromo));
+                return { success: true };
+            } else {
+                const errorText = await res.text();
+                console.error('Failed to update promo code:', errorText);
+                throw new Error(`Update failed: ${errorText}`);
+            }
+        } catch (error) {
+            console.error('Failed to update promo code:', error);
             throw error;
         }
     };
@@ -2291,6 +2332,7 @@ export const DataProvider = ({ children }) => {
                     transparentLogo: updated.transparent_logo || newSettings.transparentLogo || settings.transparentLogo,
                     blackLogo: updated.black_logo || newSettings.blackLogo || settings.blackLogo,
                     socials: updated.socials || newSettings.socials || settings.socials,
+                    favicon: updated.favicon || newSettings.favicon || settings.favicon,
                     version: settings.version
                 };
                 setSettings(newState);
@@ -2368,7 +2410,7 @@ export const DataProvider = ({ children }) => {
             sendOrderConfirmation, simulateOrder, deleteOrder,
 
             // Promo Codes
-            promoCodes, addPromoCode, deletePromoCode, applyPromoCode, activePromo,
+            promoCodes, addPromoCode, deletePromoCode, updatePromoCode, applyPromoCode, activePromo,
 
             // Announcement
             announcement, updateAnnouncement, announcementLoaded, fetchAnnouncementForAdmin,

@@ -1016,6 +1016,17 @@ textarea.input-modern {
     border: 1px solid rgba(167, 139, 250, 0.1);
     border-radius: 16px;
     padding: 1.5rem;
+    overflow: hidden;
+}
+
+/* Ensure legend stays inside container */
+.chart-container .recharts-wrapper {
+    overflow: visible;
+}
+
+.chart-container .recharts-legend-wrapper {
+    position: relative !important;
+    margin-top: 0.5rem;
 }
 
 /* Remove focus outline on chart elements */
