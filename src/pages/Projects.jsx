@@ -9,7 +9,6 @@ import './Projects.css';
 const Projects = () => {
     const { projects } = useData();
     const [filterCategory, setFilterCategory] = useState('Tous');
-    const [filterTech, setFilterTech] = useState('');
 
     // Filter visible projects and sort by order_position
     const visibleProjects = useMemo(() => {
@@ -20,14 +19,6 @@ const Projects = () => {
             filtered = filtered.filter(p => p.category === filterCategory);
         }
         
-        // Filter by technology
-        if (filterTech) {
-            filtered = filtered.filter(p => {
-                const techs = p.technologies || [];
-                return techs.some(t => t.toLowerCase().includes(filterTech.toLowerCase()));
-            });
-        }
-        
         // Sort by order_position (lower = first), then by id descending (newest first)
         return filtered.sort((a, b) => {
             const orderA = a.orderPosition || a.order_position || 999;
@@ -35,23 +26,12 @@ const Projects = () => {
             if (orderA !== orderB) return orderA - orderB;
             return b.id - a.id;
         });
-    }, [projects, filterCategory, filterTech]);
+    }, [projects, filterCategory]);
 
     // Get unique categories
     const categories = useMemo(() => {
         const cats = [...new Set(projects.filter(p => p.isVisible !== false && p.is_visible !== false).map(p => p.category).filter(Boolean))];
         return ['Tous', ...cats];
-    }, [projects]);
-
-    // Get all technologies
-    const allTechnologies = useMemo(() => {
-        const techs = new Set();
-        projects.forEach(p => {
-            if (p.isVisible !== false && p.is_visible !== false) {
-                (p.technologies || []).forEach(t => techs.add(t));
-            }
-        });
-        return [...techs].sort();
     }, [projects]);
 
     // Render Lucide icon or image
@@ -110,28 +90,6 @@ const Projects = () => {
                             </button>
                         ))}
                     </div>
-                    
-                    {/* Tech filter */}
-                    {allTechnologies.length > 0 && (
-                        <select
-                            value={filterTech}
-                            onChange={e => setFilterTech(e.target.value)}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                background: '#111',
-                                color: '#fff',
-                                border: '1px solid #333',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontSize: '0.85rem'
-                            }}
-                        >
-                            <option value="">Toutes technologies</option>
-                            {allTechnologies.map(tech => (
-                                <option key={tech} value={tech}>{tech}</option>
-                            ))}
-                        </select>
-                    )}
                 </div>
 
                 {/* Results count */}
@@ -156,24 +114,6 @@ const Projects = () => {
                                         {project.description.length > 100 ? project.description.slice(0, 100) + '...' : project.description}
                                     </p>
                                 )}
-                                {(project.technologies || []).length > 0 && (
-                                    <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                                        {project.technologies.slice(0, 3).map((tech, idx) => (
-                                            <span key={idx} style={{
-                                                fontSize: '0.7rem',
-                                                background: 'rgba(167, 139, 250, 0.1)',
-                                                color: 'var(--color-accent)',
-                                                padding: '3px 8px',
-                                                borderRadius: '12px'
-                                            }}>
-                                                {tech}
-                                            </span>
-                                        ))}
-                                        {project.technologies.length > 3 && (
-                                            <span style={{ fontSize: '0.7rem', color: '#555' }}>+{project.technologies.length - 3}</span>
-                                        )}
-                                    </div>
-                                )}
                             </div>
                         </Link>
                     ))}
@@ -183,7 +123,7 @@ const Projects = () => {
                     <div style={{ textAlign: 'center', padding: '4rem', color: '#555' }}>
                         <p>Aucun projet ne correspond à vos critères.</p>
                         <button 
-                            onClick={() => { setFilterCategory('Tous'); setFilterTech(''); }}
+                            onClick={() => setFilterCategory('Tous')}
                             style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: 'var(--color-accent)', color: '#000', border: 'none', borderRadius: '20px', cursor: 'pointer' }}
                         >
                             Réinitialiser les filtres

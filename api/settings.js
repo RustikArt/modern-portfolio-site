@@ -37,7 +37,9 @@ export default async function handler(req, res) {
             if (!requireAdminAuth(req, res)) return;
 
             const { 
-                maintenanceMode, 
+                maintenanceMode,
+                maintenanceTitle,
+                maintenanceMessage,
                 grainEffect,
                 showLoadingScreen,
                 showAdminLoading,
@@ -65,6 +67,8 @@ export default async function handler(req, res) {
             
             const settingsData = {
                 maintenance_mode: maintenanceMode !== undefined ? Boolean(maintenanceMode) : Boolean(existingSettings.maintenance_mode),
+                maintenance_title: maintenanceTitle !== undefined ? maintenanceTitle : (existingSettings.maintenance_title || 'Site en Maintenance'),
+                maintenance_message: maintenanceMessage !== undefined ? maintenanceMessage : (existingSettings.maintenance_message || 'Nous effectuons actuellement des améliorations pour vous offrir une meilleure expérience.'),
                 grain_effect: grainEffect !== undefined ? Boolean(grainEffect) : Boolean(existingSettings.grain_effect),
                 show_loading_screen: showLoadingScreen !== undefined ? Boolean(showLoadingScreen) : (existingSettings.show_loading_screen !== false),
                 show_admin_loading: showAdminLoading !== undefined ? Boolean(showAdminLoading) : (existingSettings.show_admin_loading !== false),

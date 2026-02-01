@@ -40,6 +40,7 @@ import {
     UserPlus,
     ShoppingCart,
     RotateCcw,
+    RefreshCw,
     Percent,
     MapPin,
     Check,
@@ -99,7 +100,7 @@ const Dashboard = () => {
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
         updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode, updatePromoCode,
-        secureFullReset, logout, simulateOrder, deleteOrder,
+        secureFullReset, logout, simulateOrder, deleteOrder, refreshOrders,
         announcement, updateAnnouncement, fetchAnnouncementForAdmin,
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
         homeContent, setHomeContent,
@@ -186,6 +187,7 @@ const Dashboard = () => {
     };
 
     // --- FORMS STATES ---
+    const [projectFormSimpleMode, setProjectFormSimpleMode] = useState(true);
     const [projectForm, setProjectForm] = useState({ 
         editId: null, 
         title: '', 
@@ -306,6 +308,8 @@ const Dashboard = () => {
     // --- GENERAL SETTINGS STATES (local before apply) ---
     const [localSiteTitle, setLocalSiteTitle] = useState('');
     const [localMaintenanceMode, setLocalMaintenanceMode] = useState(false);
+    const [localMaintenanceTitle, setLocalMaintenanceTitle] = useState('Site en Maintenance');
+    const [localMaintenanceMessage, setLocalMaintenanceMessage] = useState('Nous effectuons actuellement des améliorations pour vous offrir une meilleure expérience.');
     const [localGrainEffect, setLocalGrainEffect] = useState(false);
     const [localContactEmail, setLocalContactEmail] = useState('');
     const [localSocials, setLocalSocials] = useState({ instagram: '', twitter: '', discord: '' });
@@ -330,6 +334,8 @@ const Dashboard = () => {
         if (settings && !settingsInitialized) {
             setLocalSiteTitle(settings.siteTitle || '');
             setLocalMaintenanceMode(Boolean(settings.maintenanceMode));
+            setLocalMaintenanceTitle(settings.maintenanceTitle || 'Site en Maintenance');
+            setLocalMaintenanceMessage(settings.maintenanceMessage || 'Nous effectuons actuellement des améliorations pour vous offrir une meilleure expérience.');
             setLocalGrainEffect(Boolean(settings.grainEffect));
             setLocalContactEmail(settings.contactEmail || '');
             setLocalSocials(settings.socials || { instagram: '', twitter: '', discord: '' });
@@ -384,7 +390,8 @@ const Dashboard = () => {
         selectedProducts: [],
         status: 'Terminé',
         total: 0,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        promoCode: ''
     });
 
     // --- USER MANAGEMENT STATES ---
@@ -1141,16 +1148,16 @@ const Dashboard = () => {
                                                     <ResponsiveContainer width="100%" height={220}>
                                                         <RechartsPie>
                                                             <Legend 
-                                                                layout="horizontal"
-                                                                verticalAlign="top"
-                                                                align="center"
-                                                                wrapperStyle={{ paddingBottom: '0px', fontSize: '0.75rem' }}
+                                                                layout="vertical"
+                                                                verticalAlign="middle"
+                                                                align="left"
+                                                                wrapperStyle={{ paddingLeft: '10px', fontSize: '0.75rem' }}
                                                                 formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
                                                             />
                                                             <Pie
                                                                 data={pieData}
-                                                                cx="50%"
-                                                                cy="52%"
+                                                                cx="65%"
+                                                                cy="50%"
                                                                 innerRadius={40}
                                                                 outerRadius={65}
                                                                 paddingAngle={3}
@@ -1203,7 +1210,8 @@ const Dashboard = () => {
                                             const catSales = {};
                                             orders.filter(o => o.status === 'Terminé' || isArchived(o)).forEach(order => {
                                                 (order.items || []).forEach(item => {
-                                                    const product = products.find(p => p.id === item.productId);
+                                                    const itemProductId = item.productId || item.product_id;
+                                                    const product = products.find(p => p.id === itemProductId);
                                                     const cat = product?.category || 'Autre';
                                                     catSales[cat] = (catSales[cat] || 0) + (item.price || 0) * (item.quantity || 1);
                                                 });
@@ -1345,13 +1353,29 @@ const Dashboard = () => {
                                 {activeTab === 'orders' && checkPermission('manage_orders') && (
                                     <div className="section-header">
                                         <h2 className="section-title">Gestion des Commandes</h2>
-                                        <button
-                                            onClick={() => setShowSimulateOrderForm(!showSimulateOrderForm)}
-                                            className={`btn-modern ${showSimulateOrderForm ? 'btn-modern--ghost' : 'btn-modern--primary'}`}
-                                        >
-                                            {showSimulateOrderForm ? <X size={16} /> : <Plus size={16} />}
-                                            {showSimulateOrderForm ? 'Annuler' : 'Simuler une Commande'}
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <button
+                                                onClick={async () => {
+                                                    const result = await refreshOrders();
+                                                    if (result.success) {
+                                                        showToast(`${result.count} commandes chargées`, "success");
+                                                    } else {
+                                                        showToast("Erreur de rechargement", "error");
+                                                    }
+                                                }}
+                                                className="btn-modern btn-modern--ghost"
+                                                title="Recharger les commandes"
+                                            >
+                                                <RefreshCw size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => setShowSimulateOrderForm(!showSimulateOrderForm)}
+                                                className={`btn-modern ${showSimulateOrderForm ? 'btn-modern--ghost' : 'btn-modern--primary'}`}
+                                            >
+                                                {showSimulateOrderForm ? <X size={16} /> : <Plus size={16} />}
+                                                {showSimulateOrderForm ? 'Annuler' : 'Simuler une Commande'}
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 
@@ -1472,12 +1496,27 @@ const Dashboard = () => {
                                                     Total calculé: {simulateOrderForm.selectedProducts.reduce((sum, p) => sum + (p.price * p.quantity), 0)}€
                                                 </p>
                                             </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Code Promo (optionnel)</label>
+                                                <select
+                                                    value={simulateOrderForm.promoCode}
+                                                    onChange={(e) => setSimulateOrderForm({ ...simulateOrderForm, promoCode: e.target.value })}
+                                                    style={inputStyle}
+                                                >
+                                                    <option value="">Aucun code promo</option>
+                                                    {promoCodes.filter(p => p.isActive).map(promo => (
+                                                        <option key={promo.id} value={promo.code}>
+                                                            {promo.code} - {promo.discountType === 'percentage' ? `${promo.discountValue}%` : `${promo.discountValue}€`}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
                                         <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
                                             <button
                                                 onClick={() => {
                                                     setShowSimulateOrderForm(false);
-                                                    setSimulateOrderForm({ customerName: '', email: '', selectedProducts: [], status: 'Terminé', total: 0, date: new Date().toISOString().split('T')[0] });
+                                                    setSimulateOrderForm({ customerName: '', email: '', selectedProducts: [], status: 'Terminé', total: 0, date: new Date().toISOString().split('T')[0], promoCode: '' });
                                                 }}
                                                 style={{ ...btnModern, background: 'transparent', border: '1px solid #333' }}
                                             >
@@ -1496,26 +1535,38 @@ const Dashboard = () => {
                                                         quantity: p.quantity,
                                                         selectedOptions: []
                                                     }));
-                                                    const total = simulateOrderForm.total || items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                                                    let subtotal = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                                                    let promoDiscount = 0;
+                                                    if (simulateOrderForm.promoCode) {
+                                                        const promo = promoCodes.find(p => p.code === simulateOrderForm.promoCode);
+                                                        if (promo) {
+                                                            promoDiscount = promo.discountType === 'percentage' 
+                                                                ? subtotal * (promo.discountValue / 100) 
+                                                                : promo.discountValue;
+                                                        }
+                                                    }
+                                                    const total = simulateOrderForm.total || (subtotal - promoDiscount);
                                                     await simulateOrder({
                                                         customerName: simulateOrderForm.customerName,
                                                         email: simulateOrderForm.email || 'simulated@admin.com',
                                                         items,
                                                         total,
                                                         status: simulateOrderForm.status,
-                                                        date: new Date(simulateOrderForm.date).toISOString()
+                                                        date: new Date(simulateOrderForm.date).toISOString(),
+                                                        promoCodeUsed: simulateOrderForm.promoCode || null,
+                                                        promoDiscount
                                                     });
                                                     showToast("Commande simulée créée avec succès", "success");
                                                     setShowSimulateOrderForm(false);
-                                                    setSimulateOrderForm({ customerName: '', email: '', selectedProducts: [], status: 'Terminé', total: 0, date: new Date().toISOString().split('T')[0] });
+                                                    setSimulateOrderForm({ customerName: '', email: '', selectedProducts: [], status: 'Terminé', total: 0, date: new Date().toISOString().split('T')[0], promoCode: '' });
                                                 }}
                                                 style={{ ...btnModern, background: 'var(--color-accent)', color: '#000', fontWeight: 'bold' }}
                                             >
                                                 <Check size={16} /> Créer la commande simulée
                                             </button>
                                         </div>
-                                        <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '1rem', fontStyle: 'italic' }}>
-                                            ⚠️ Les commandes simulées impacteront les statistiques et seront marquées comme "SIMULATED_ADMIN".
+                                        <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '1rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <AlertTriangle size={14} /> Les commandes simulées impacteront les statistiques et seront marquées comme "SIMULATED_ADMIN".
                                         </p>
                                     </div>
                                 )}
@@ -1724,7 +1775,7 @@ const Dashboard = () => {
                                                                                     const isSimulated = order.paymentId === 'SIMULATED_ADMIN' || order.payment_id === 'SIMULATED_ADMIN';
                                                                                     const confirmMsg = isSimulated 
                                                                                         ? 'Supprimer cette commande simulée ? Cette action est irréversible.'
-                                                                                        : `⚠️ ATTENTION: Supprimer la commande #${order.id} ?\n\nCette commande a été payée. La suppression est définitive et irréversible.\n\nÊtes-vous absolument sûr ?`;
+                                                                                        : `ATTENTION: Supprimer la commande #${order.id} ?\n\nCette commande a été payée. La suppression est définitive et irréversible.\n\nÊtes-vous absolument sûr ?`;
                                                                                     
                                                                                     if (confirm(confirmMsg)) {
                                                                                         // For paid orders, require admin password verification via API
@@ -2326,14 +2377,16 @@ const Dashboard = () => {
                                                                             transition: 'all 0.15s, transform 0.2s'
                                                                         }}
                                                                         onMouseOver={e => { 
-                                                                            if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                                                                            e.currentTarget.style.transform = 'scale(1.15)';
-                                                                            e.currentTarget.style.zIndex = '10';
+                                                                            if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
+                                                                            e.currentTarget.style.transform = 'scale(1.35)';
+                                                                            e.currentTarget.style.zIndex = '20';
+                                                                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(167, 139, 250, 0.25)';
                                                                         }}
                                                                         onMouseOut={e => { 
                                                                             if (productForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
                                                                             e.currentTarget.style.transform = 'scale(1)';
                                                                             e.currentTarget.style.zIndex = '1';
+                                                                            e.currentTarget.style.boxShadow = 'none';
                                                                         }}
                                                                     >
                                                                         <IconComp size={18} color={productForm.lucideIcon === iconName ? 'var(--color-accent)' : '#888'} />
@@ -2464,12 +2517,32 @@ const Dashboard = () => {
                         {activeTab === 'projects' && (
                             <div className="animate-in">
                                 <section style={{ ...cardStyle, marginBottom: '3rem' }}>
-                                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <FileCode size={20} /> {projectForm.editId ? 'Update Case Study' : 'New Project'}
-                                    </h2>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                        <h2 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '1rem', margin: 0 }}>
+                                            <FileCode size={20} /> {projectForm.editId ? 'Update Case Study' : 'New Project'}
+                                        </h2>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: projectFormSimpleMode ? 'var(--color-accent)' : '#666' }}>Simple</span>
+                                            <ToggleSwitch 
+                                                checked={!projectFormSimpleMode}
+                                                onChange={(val) => setProjectFormSimpleMode(!val)}
+                                            />
+                                            <span style={{ fontSize: '0.75rem', color: !projectFormSimpleMode ? 'var(--color-accent)' : '#666' }}>Avancé</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Simple Mode Guide */}
+                                    {projectFormSimpleMode && (
+                                        <div style={{ background: 'rgba(167, 139, 250, 0.08)', border: '1px solid rgba(167, 139, 250, 0.2)', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#a78bfa', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <Sparkles size={16} /> Mode simplifié : Remplissez uniquement les champs essentiels. Basculez en mode avancé pour plus d'options.
+                                            </p>
+                                        </div>
+                                    )}
+                                    
                                     <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
-                                            <input type="text" placeholder="Titre du projet" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} required />
+                                            <input type="text" placeholder="Titre du projet *" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} style={inputStyle} required />
                                             <input type="text" placeholder="Category" value={projectForm.category} onChange={e => setProjectForm({ ...projectForm, category: e.target.value })} style={inputStyle} />
                                         </div>
                                         
@@ -2595,14 +2668,16 @@ const Dashboard = () => {
                                                                             transition: 'all 0.15s, transform 0.2s'
                                                                         }}
                                                                         onMouseOver={e => { 
-                                                                            if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                                                                            e.currentTarget.style.transform = 'scale(1.15)';
-                                                                            e.currentTarget.style.zIndex = '10';
+                                                                            if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
+                                                                            e.currentTarget.style.transform = 'scale(1.35)';
+                                                                            e.currentTarget.style.zIndex = '20';
+                                                                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(167, 139, 250, 0.25)';
                                                                         }}
                                                                         onMouseOut={e => { 
                                                                             if (projectForm.lucideIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
                                                                             e.currentTarget.style.transform = 'scale(1)';
                                                                             e.currentTarget.style.zIndex = '1';
+                                                                            e.currentTarget.style.boxShadow = 'none';
                                                                         }}
                                                                     >
                                                                         <IconComp size={18} color={projectForm.lucideIcon === iconName ? 'var(--color-accent)' : '#888'} />
@@ -2632,6 +2707,9 @@ const Dashboard = () => {
                                             />
                                         </div>
 
+                                        {/* Advanced fields - only shown in advanced mode */}
+                                        {!projectFormSimpleMode && (
+                                            <>
                                         {/* Client & Durée */}
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                                             <div>
@@ -2778,6 +2856,8 @@ const Dashboard = () => {
                                                 </div>
                                             )}
                                         </div>
+                                        </>
+                                        )}
 
                                         {/* Options */}
                                         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
@@ -2800,13 +2880,16 @@ const Dashboard = () => {
                                             </div>
                                         </div>
 
-                                        <div style={{ background: '#0a0a0a', padding: '1.5rem', borderRadius: '12px', border: '1px solid #111' }}>
-                                            <h4 style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: '#555', textTransform: 'uppercase' }}>Advanced Block Editor</h4>
-                                            <BlockEditor
-                                                blocks={projectForm.blocks}
-                                                onChange={newBlocks => setProjectForm({ ...projectForm, blocks: newBlocks })}
-                                            />
-                                        </div>
+                                        {/* Block Editor - only in advanced mode */}
+                                        {!projectFormSimpleMode && (
+                                            <div style={{ background: '#0a0a0a', padding: '1.5rem', borderRadius: '12px', border: '1px solid #111' }}>
+                                                <h4 style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: '#555', textTransform: 'uppercase' }}>Advanced Block Editor</h4>
+                                                <BlockEditor
+                                                    blocks={projectForm.blocks}
+                                                    onChange={newBlocks => setProjectForm({ ...projectForm, blocks: newBlocks })}
+                                                />
+                                            </div>
+                                        )}
 
                                         <button type="submit" style={{ ...btnPrimaryModern, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}>
                                             {projectForm.editId ? <><Save size={18} /> Update Project</> : <><Plus size={18} /> Publish Project</>}
@@ -3202,17 +3285,34 @@ const Dashboard = () => {
                                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem' }}>
                                                                 {perms.map(perm => (
                                                                     <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', fontSize: '0.85rem', padding: '0.3rem 0' }}>
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={newAdminForm.permissions.includes(perm.id)}
-                                                                            onChange={(e) => {
-                                                                                const perms = e.target.checked
+                                                                        <div 
+                                                                            onClick={() => {
+                                                                                const checked = !newAdminForm.permissions.includes(perm.id);
+                                                                                const perms = checked
                                                                                     ? [...newAdminForm.permissions, perm.id]
                                                                                     : newAdminForm.permissions.filter(p => p !== perm.id);
                                                                                 setNewAdminForm({ ...newAdminForm, permissions: perms });
                                                                             }}
-                                                                            style={{ accentColor: 'var(--color-accent)' }}
-                                                                        />
+                                                                            style={{ 
+                                                                                width: '18px', 
+                                                                                height: '18px', 
+                                                                                borderRadius: '4px', 
+                                                                                border: newAdminForm.permissions.includes(perm.id) ? '2px solid var(--color-accent)' : '2px solid #444',
+                                                                                background: newAdminForm.permissions.includes(perm.id) ? 'var(--color-accent)' : 'transparent',
+                                                                                display: 'flex', 
+                                                                                alignItems: 'center', 
+                                                                                justifyContent: 'center', 
+                                                                                cursor: 'pointer',
+                                                                                transition: 'all 0.2s ease',
+                                                                                flexShrink: 0
+                                                                            }}
+                                                                        >
+                                                                            {newAdminForm.permissions.includes(perm.id) && (
+                                                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                                                </svg>
+                                                                            )}
+                                                                        </div>
                                                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ccc' }}>
                                                                             <span style={{ color: 'var(--color-accent)', display: 'flex' }}>{renderLucideIcon(perm.icon, { size: 14 })}</span>
                                                                             {perm.label}
@@ -3958,7 +4058,37 @@ const Dashboard = () => {
                                                         className={`toggle-switch ${localMaintenanceMode ? 'active danger' : ''}`}
                                                     ></div>
                                                 </div>
-                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: 0 }}>Si activé, le site public affichera une page de maintenance.</p>
+                                                <p style={{ fontSize: '0.75rem', color: '#666', margin: '0 0 1rem 0' }}>Si activé, le site public affichera une page de maintenance.</p>
+                                                
+                                                {/* Maintenance page customization */}
+                                                {localMaintenanceMode && (
+                                                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                                                        <p style={{ fontSize: '0.75rem', color: 'var(--color-accent)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                            <Settings size={14} /> Personnaliser la page de maintenance
+                                                        </p>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                            <div>
+                                                                <label style={{ fontSize: '0.7rem', color: '#555', marginBottom: '0.25rem', display: 'block' }}>Titre</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={localMaintenanceTitle}
+                                                                    onChange={e => setLocalMaintenanceTitle(e.target.value)}
+                                                                    placeholder="Site en Maintenance"
+                                                                    style={inputStyle}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label style={{ fontSize: '0.7rem', color: '#555', marginBottom: '0.25rem', display: 'block' }}>Message</label>
+                                                                <textarea
+                                                                    value={localMaintenanceMessage}
+                                                                    onChange={e => setLocalMaintenanceMessage(e.target.value)}
+                                                                    placeholder="Nous effectuons des améliorations..."
+                                                                    style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -4130,6 +4260,8 @@ const Dashboard = () => {
                                                     const success = await updateSettings({
                                                         siteTitle: localSiteTitle,
                                                         maintenanceMode: localMaintenanceMode,
+                                                        maintenanceTitle: localMaintenanceTitle,
+                                                        maintenanceMessage: localMaintenanceMessage,
                                                         grainEffect: localGrainEffect,
                                                         contactEmail: localContactEmail,
                                                         socials: localSocials,
@@ -4595,8 +4727,8 @@ const Dashboard = () => {
                                                 <Check size={16} /> Créer l'avis
                                             </button>
                                         </div>
-                                        <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '1rem', fontStyle: 'italic' }}>
-                                            ⚠️ Les avis créés manuellement seront marqués comme vérifiés et identifiés comme avis admin.
+                                        <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '1rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <AlertTriangle size={14} /> Les avis créés manuellement seront marqués comme vérifiés et identifiés comme avis admin.
                                         </p>
                                     </div>
                                 )}

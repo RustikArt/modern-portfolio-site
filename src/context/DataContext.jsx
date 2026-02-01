@@ -992,6 +992,8 @@ export const DataProvider = ({ children }) => {
                     setSettings(prev => {
                         const newSettings = {
                             maintenanceMode: data.maintenance_mode !== undefined ? Boolean(data.maintenance_mode) : prev.maintenanceMode,
+                            maintenanceTitle: data.maintenance_title || prev.maintenanceTitle || 'Site en Maintenance',
+                            maintenanceMessage: data.maintenance_message || prev.maintenanceMessage || 'Nous effectuons actuellement des améliorations pour vous offrir une meilleure expérience.',
                             grainEffect: data.grain_effect !== undefined ? Boolean(data.grain_effect) : prev.grainEffect,
                             showLoadingScreen: data.show_loading_screen !== undefined ? Boolean(data.show_loading_screen) : prev.showLoadingScreen,
                             showAdminLoading: data.show_admin_loading !== undefined ? Boolean(data.show_admin_loading) : prev.showAdminLoading,
@@ -1941,12 +1943,14 @@ export const DataProvider = ({ children }) => {
                     const targetPromo = updatedPromos.find(p => p.code === activePromo.code);
                     if (targetPromo) {
                         try {
-                            fetch('/api/promo-codes', {
+                            await fetch('/api/promo-codes', {
                                 method: 'PUT',
                                 headers: getAdminHeaders(),
                                 body: JSON.stringify({ id: targetPromo.id, current_uses: targetPromo.uses })
-                            }).catch(err => console.error("Sync Promo Error:", err));
-                        } catch (e) { }
+                            });
+                        } catch (e) {
+                            console.error("Sync Promo Error:", e);
+                        }
                     }
                 }
 
@@ -2206,6 +2210,25 @@ export const DataProvider = ({ children }) => {
             setOrders([localOrder, ...orders]);
             addNotification('order', `Commande simulée créée localement (${simulatedOrder.total}€)`);
             return localOrder;
+        }
+    };
+
+    // Refresh orders from API (useful when data seems incomplete)
+    const refreshOrders = async () => {
+        try {
+            const res = await fetch('/api/orders');
+            if (res.ok) {
+                const ordersData = await res.json();
+                if (Array.isArray(ordersData)) {
+                    const normalizedOrders = ordersData.map(normalizeOrder);
+                    setOrders(normalizedOrders);
+                    return { success: true, count: normalizedOrders.length };
+                }
+            }
+            return { success: false, error: 'Failed to fetch orders' };
+        } catch (error) {
+            console.error('[DataContext] Refresh orders error:', error);
+            return { success: false, error: error.message };
         }
     };
 
@@ -2570,7 +2593,7 @@ export const DataProvider = ({ children }) => {
 
             // Orders
             orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes,
-            sendOrderConfirmation, simulateOrder, deleteOrder,
+            sendOrderConfirmation, simulateOrder, deleteOrder, refreshOrders,
 
             // Promo Codes
             promoCodes, addPromoCode, deletePromoCode, updatePromoCode, applyPromoCode, activePromo,

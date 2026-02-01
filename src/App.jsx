@@ -109,10 +109,10 @@ const MaintenancePage = () => {
         </div>
         
         <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--color-accent)' }}>
-          Site en Maintenance
+          {settings?.maintenanceTitle || 'Site en Maintenance'}
         </h1>
         <p style={{ color: '#888', marginBottom: '2rem', lineHeight: '1.6' }}>
-          Nous effectuons actuellement des améliorations pour vous offrir une meilleure expérience.
+          {settings?.maintenanceMessage || 'Nous effectuons actuellement des améliorations pour vous offrir une meilleure expérience.'}
           <br />Nous serons bientôt de retour !
         </p>
 

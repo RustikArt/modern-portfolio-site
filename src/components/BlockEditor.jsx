@@ -255,8 +255,29 @@ const BlockInput = ({ block, onChange }) => {
             return (
                 <div>
                     {(block.content.items || []).map((item, i) => (
-                        <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                            <input type="checkbox" checked={item.done} onChange={e => updateItem(i, 'done', e.target.checked)} />
+                        <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                            <div 
+                                onClick={() => updateItem(i, 'done', !item.done)} 
+                                style={{ 
+                                    width: '18px', 
+                                    height: '18px', 
+                                    borderRadius: '4px', 
+                                    border: item.done ? '2px solid var(--color-accent)' : '2px solid #444',
+                                    background: item.done ? 'var(--color-accent)' : 'transparent',
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    flexShrink: 0
+                                }}
+                            >
+                                {item.done && (
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                )}
+                            </div>
                             <input type="text" value={item.text} onChange={e => updateItem(i, 'text', e.target.value)} style={inputStyle} placeholder="Tâche..." />
                             <button type="button" onClick={() => removeItem(i)} style={{ color: 'red', background: 'none', border: 'none' }}>x</button>
                         </div>

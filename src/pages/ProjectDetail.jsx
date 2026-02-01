@@ -4,7 +4,7 @@ import BlockRenderer from '../components/BlockRenderer';
 import Breadcrumbs from '../components/Breadcrumbs';
 import DOMPurify from 'dompurify';
 import * as LucideIcons from 'lucide-react';
-import { ExternalLink, Github, Calendar, Clock, User, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, Github, Calendar, Clock, User, Quote, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 
 const ProjectDetail = () => {
@@ -40,7 +40,6 @@ const ProjectDetail = () => {
     };
 
     const completedDate = formatDate(project.dateCompleted || project.date_completed);
-    const technologies = project.technologies || [];
     const externalLink = project.externalLink || project.external_link;
     const githubLink = project.githubLink || project.github_link;
     const testimonial = project.testimonial;
@@ -53,8 +52,8 @@ const ProjectDetail = () => {
                 
                 {/* Admin notice */}
                 {!isVisible && isAdmin && (
-                    <div style={{ background: 'rgba(255, 193, 7, 0.1)', border: '1px solid rgba(255, 193, 7, 0.3)', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', color: '#ffc107' }}>
-                        ⚠️ Ce projet est masqué. Seuls les admins peuvent le voir.
+                    <div style={{ background: 'rgba(255, 193, 7, 0.1)', border: '1px solid rgba(255, 193, 7, 0.3)', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', color: '#ffc107', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <AlertTriangle size={16} /> Ce projet est masqué. Seuls les admins peuvent le voir.
                     </div>
                 )}
 
@@ -82,25 +81,6 @@ const ProjectDetail = () => {
                         </span>
                     )}
                 </div>
-
-                {/* Technologies */}
-                {technologies.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
-                        {technologies.map((tech, idx) => (
-                            <span key={idx} style={{
-                                background: 'rgba(167, 139, 250, 0.1)',
-                                color: 'var(--color-accent)',
-                                padding: '6px 14px',
-                                borderRadius: '20px',
-                                fontSize: '0.8rem',
-                                fontWeight: 500,
-                                border: '1px solid rgba(167, 139, 250, 0.2)'
-                            }}>
-                                {tech}
-                            </span>
-                        ))}
-                    </div>
-                )}
 
                 {/* Action buttons */}
                 {(externalLink || githubLink) && (
