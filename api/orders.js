@@ -73,6 +73,7 @@ export default async function handler(req, res) {
                 shipping: typeof body.shipping === 'string' ? body.shipping : JSON.stringify(body.shipping),
                 newsletter: !!body.newsletter,
                 discount: body.discount || 0,
+                promo_discount: body.promoDiscount || body.promo_discount || 0,
                 notes: body.notes || null,
                 checklist: body.checklist ? (typeof body.checklist === 'string' ? body.checklist : JSON.stringify(body.checklist)) : null,
                 archived: body.archived || false,
