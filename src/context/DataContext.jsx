@@ -905,9 +905,10 @@ export const DataProvider = ({ children }) => {
                     const normalizedPromos = promoData.map(p => ({
                         ...p,
                         expirationDate: p.expiration_date || p.expirationDate,
-                        maxUses: p.max_uses || p.maxUses,
-                        minAmount: p.min_amount || p.minAmount,
-                        uses: p.current_uses ?? p.uses ?? 0
+                        maxUses: p.max_uses ?? p.maxUses,
+                        minAmount: p.min_amount ?? p.minAmount,
+                        uses: p.current_uses ?? p.uses ?? 0,
+                        isActive: p.is_active !== undefined ? p.is_active : (p.isActive !== undefined ? p.isActive : true)
                     }));
                     setPromoCodes(normalizedPromos);
                 } else {

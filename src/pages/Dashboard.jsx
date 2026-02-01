@@ -188,6 +188,7 @@ const Dashboard = () => {
 
     // --- FORMS STATES ---
     const [projectFormSimpleMode, setProjectFormSimpleMode] = useState(true);
+    const [productFormSimpleMode, setProductFormSimpleMode] = useState(true);
     const [projectForm, setProjectForm] = useState({ 
         editId: null, 
         title: '', 
@@ -1150,13 +1151,13 @@ const Dashboard = () => {
                                                             <Legend 
                                                                 layout="vertical"
                                                                 verticalAlign="middle"
-                                                                align="left"
-                                                                wrapperStyle={{ paddingLeft: '10px', fontSize: '0.75rem' }}
+                                                                align="right"
+                                                                wrapperStyle={{ paddingRight: '10px', fontSize: '0.75rem' }}
                                                                 formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
                                                             />
                                                             <Pie
                                                                 data={pieData}
-                                                                cx="65%"
+                                                                cx="35%"
                                                                 cy="50%"
                                                                 innerRadius={40}
                                                                 outerRadius={65}
@@ -1556,6 +1557,8 @@ const Dashboard = () => {
                                                         promoCodeUsed: simulateOrderForm.promoCode || null,
                                                         promoDiscount
                                                     });
+                                                    // Refresh orders to ensure immediate visibility
+                                                    await refreshOrders();
                                                     showToast("Commande simulée créée avec succès", "success");
                                                     setShowSimulateOrderForm(false);
                                                     setSimulateOrderForm({ customerName: '', email: '', selectedProducts: [], status: 'Terminé', total: 0, date: new Date().toISOString().split('T')[0], promoCode: '' });
@@ -1831,7 +1834,29 @@ const Dashboard = () => {
                         {activeTab === 'products' && (
                             <div className="animate-in">
                                 <section style={{ ...cardStyle, marginBottom: '3rem' }}>
-                                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{productForm.editId ? 'Modifier le produit' : 'Ajouter un produit'}</h2>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                        <h2 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '1rem', margin: 0 }}>
+                                            <Package size={20} /> {productForm.editId ? 'Modifier le produit' : 'Ajouter un produit'}
+                                        </h2>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: productFormSimpleMode ? 'var(--color-accent)' : '#666' }}>Simple</span>
+                                            <ToggleSwitch 
+                                                checked={!productFormSimpleMode}
+                                                onChange={(val) => setProductFormSimpleMode(!val)}
+                                            />
+                                            <span style={{ fontSize: '0.75rem', color: !productFormSimpleMode ? 'var(--color-accent)' : '#666' }}>Avancé</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Simple Mode Guide */}
+                                    {productFormSimpleMode && (
+                                        <div style={{ background: 'rgba(167, 139, 250, 0.08)', border: '1px solid rgba(167, 139, 250, 0.2)', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
+                                            <p style={{ fontSize: '0.8rem', color: '#a78bfa', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <Sparkles size={16} /> Mode simplifié : Remplissez uniquement les champs essentiels. Basculez en mode avancé pour plus d'options (SEO, produits liés, galerie...).
+                                            </p>
+                                        </div>
+                                    )}
+                                    
                                     <form onSubmit={handleProductSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
                                             <input type="text" placeholder="Nom du produit" value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })} style={inputStyle} required />
@@ -1883,6 +1908,8 @@ const Dashboard = () => {
                                             )}
                                         </div>
 
+                                        {/* Options section - Advanced mode only */}
+                                        {!productFormSimpleMode && (
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px dashed #222' }}>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Options du produit</p>
 
@@ -1978,6 +2005,7 @@ const Dashboard = () => {
                                                 + Ajouter cette option
                                             </button>
                                         </div>
+                                        )}
 
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                             <input type="text" placeholder="Category" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} style={inputStyle} />
@@ -2091,7 +2119,8 @@ const Dashboard = () => {
                                             )}
                                         </div>
 
-                                        {/* Section Paramètres avancés */}
+                                        {/* Section Paramètres avancés - Advanced mode only */}
+                                        {!productFormSimpleMode && (
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>Paramètres avancés</p>
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
@@ -2144,8 +2173,10 @@ const Dashboard = () => {
                                                 </label>
                                             </div>
                                         </div>
+                                        )}
 
-                                        {/* Section Galerie */}
+                                        {/* Section Galerie - Advanced mode only */}
+                                        {!productFormSimpleMode && (
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>📷 Galerie d'images</p>
                                             <div>
@@ -2185,8 +2216,10 @@ const Dashboard = () => {
                                                 </div>
                                             )}
                                         </div>
+                                        )}
 
-                                        {/* Section SEO */}
+                                        {/* Section SEO - Advanced mode only */}
+                                        {!productFormSimpleMode && (
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>🔍 SEO (Référencement)</p>
                                             <div style={{ display: 'grid', gap: '1rem' }}>
@@ -2219,8 +2252,10 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
                                         </div>
+                                        )}
 
-                                        {/* Section Produits liés */}
+                                        {/* Section Produits liés - Advanced mode only */}
+                                        {!productFormSimpleMode && (
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1rem' }}>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', textTransform: 'uppercase' }}>🔗 Produits liés (Cross-selling)</p>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -2254,6 +2289,7 @@ const Dashboard = () => {
                                                 ))}
                                             </select>
                                         </div>
+                                        )}
                                         
                                         {/* Image Type Selector */}
                                         <div style={{ ...cardStyle, background: '#0a0a0a', border: '1px solid #222', padding: '1.5rem' }}>
