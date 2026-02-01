@@ -1777,7 +1777,7 @@ export const DataProvider = ({ children }) => {
         try {
             const res = await fetch('/api/users', {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAdminHeaders(),
                 body: JSON.stringify({ id: userId })
             });
 
