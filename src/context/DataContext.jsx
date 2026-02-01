@@ -899,7 +899,8 @@ export const DataProvider = ({ children }) => {
                         ...p,
                         expirationDate: p.expiration_date || p.expirationDate,
                         maxUses: p.max_uses || p.maxUses,
-                        minAmount: p.min_amount || p.minAmount
+                        minAmount: p.min_amount || p.minAmount,
+                        uses: p.current_uses ?? p.uses ?? 0
                     }));
                     setPromoCodes(normalizedPromos);
                 } else {
@@ -1361,17 +1362,33 @@ export const DataProvider = ({ children }) => {
     };
 
     const login = async (email, password) => {
+        const attemptEmail = email.trim().toLowerCase();
         try {
             const res = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.trim().toLowerCase(), password: password.trim() })
+                body: JSON.stringify({ email: attemptEmail, password: password.trim() })
             });
 
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 const msg = err.error || err.message || 'Identifiants ou mot de passe incorrects.';
                 try { addNotification('account', `Échec connexion : ${msg}`); } catch (e) { console.warn('addNotification unavailable', e); }
+                
+                // Record failed login attempt
+                const failedEntry = {
+                    attemptEmail: attemptEmail,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    success: false,
+                    failureReason: msg
+                };
+                setLoginHistory(prev => {
+                    const updated = [failedEntry, ...prev].slice(0, 100);
+                    localStorage.setItem('portfolio_login_history', JSON.stringify(updated));
+                    return updated;
+                });
+                
                 return { success: false, message: msg };
             }
 
@@ -1388,14 +1405,15 @@ export const DataProvider = ({ children }) => {
 
             setCurrentUser(user);
 
-            // Record login history
+            // Record successful login
             const loginEntry = {
                 userId: user.id,
                 userEmail: user.email,
                 userName: user.name,
                 timestamp: new Date().toISOString(),
                 userAgent: navigator.userAgent,
-                isAdmin: user.role === 'admin' || user.role === 'super_admin'
+                isAdmin: user.role === 'admin' || user.role === 'super_admin',
+                success: true
             };
             setLoginHistory(prev => {
                 const updated = [loginEntry, ...prev].slice(0, 100); // Keep last 100 entries
@@ -1714,14 +1732,14 @@ export const DataProvider = ({ children }) => {
                     );
                     setPromoCodes(updatedPromos);
 
-                    // Sync to DB
+                    // Sync to DB - use current_uses which is the database column name
                     const targetPromo = updatedPromos.find(p => p.code === activePromo.code);
                     if (targetPromo) {
                         try {
                             fetch('/api/promo-codes', {
                                 method: 'PUT',
                                 headers: getAdminHeaders(),
-                                body: JSON.stringify({ id: targetPromo.id, uses: targetPromo.uses })
+                                body: JSON.stringify({ id: targetPromo.id, current_uses: targetPromo.uses })
                             }).catch(err => console.error("Sync Promo Error:", err));
                         } catch (e) { }
                     }
@@ -2212,7 +2230,8 @@ export const DataProvider = ({ children }) => {
                     navbarPadding: newSettings.navbarPadding !== undefined ? newSettings.navbarPadding : settings.navbarPadding,
                     transparentLogo: newSettings.transparentLogo !== undefined ? newSettings.transparentLogo : settings.transparentLogo,
                     blackLogo: newSettings.blackLogo !== undefined ? newSettings.blackLogo : settings.blackLogo,
-                    socials: newSettings.socials || settings.socials
+                    socials: newSettings.socials || settings.socials,
+                    favicon: newSettings.favicon !== undefined ? newSettings.favicon : settings.favicon
                 };
                 
                 const res = await fetch('/api/settings', {

@@ -852,7 +852,7 @@ textarea.input-modern {
     border-radius: 16px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     overflow: hidden;
-    z-index: 100;
+    z-index: 9999;
 }
 
 .notification-header {
@@ -1170,9 +1170,6 @@ textarea.input-modern {
 }
 
 .kpi-card--actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
     border-color: rgba(251, 191, 36, 0.2);
 }
 
@@ -1200,6 +1197,11 @@ textarea.input-modern {
 .kpi-card--tertiary .kpi-card__icon {
     background: rgba(251, 113, 133, 0.1);
     color: #fb7185;
+}
+
+.kpi-card--actions .kpi-card__icon {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
 }
 
 .kpi-card__content {

@@ -89,6 +89,7 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('overview'); // Default to overview
     const [tabInitialized, setTabInitialized] = useState(false);
     const [expandedOrders, setExpandedOrders] = useState({});
+    const [localOrderNotes, setLocalOrderNotes] = useState({}); // Local state for order notes editing
     const navigate = useNavigate();
     const notificationRef = React.useRef(null);
 
@@ -179,9 +180,13 @@ const Dashboard = () => {
 
     // Login History Filter
     const [loginHistoryFilter, setLoginHistoryFilter] = useState('all');
+    const [selectedLoginAccount, setSelectedLoginAccount] = useState(null); // Track selected account for login history
 
     // Notepad save state
     const [noteSaved, setNoteSaved] = useState(false);
+    
+    // Home Editor section save feedback
+    const [homeSectionSaved, setHomeSectionSaved] = useState({});
 
     // Lucide Icon Picker states
     const [iconSearch, setIconSearch] = useState('');
@@ -943,9 +948,7 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                         <div className="kpi-card kpi-card--actions">
-                                            <div className="kpi-card__icon" style={{ background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24' }}>
-                                                <Zap size={24} />
-                                            </div>
+                                            <div className="kpi-card__icon"><Zap size={24} /></div>
                                             <div className="kpi-card__content">
                                                 <div className="kpi-card__label">Accès Rapide</div>
                                                 <div className="quick-actions">
@@ -1521,12 +1524,42 @@ const Dashboard = () => {
                                                                             </div>
                                                                         )}
 
-                                                                        <textarea
-                                                                            value={order.notes || ''}
-                                                                            onChange={(e) => updateOrderNotes(order.id, e.target.value)}
-                                                                            placeholder="Notes sur la commande..."
-                                                                            style={{ width: '100%', background: '#080808', border: '1px solid #222', borderRadius: '12px', padding: '1rem', color: 'white', fontSize: '0.85rem', minHeight: '100px' }}
-                                                                        />
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                                            <textarea
+                                                                                value={localOrderNotes[order.id] !== undefined ? localOrderNotes[order.id] : (order.notes || '')}
+                                                                                onChange={(e) => setLocalOrderNotes(prev => ({ ...prev, [order.id]: e.target.value }))}
+                                                                                placeholder="Notes sur la commande..."
+                                                                                style={{ width: '100%', background: '#080808', border: '1px solid #222', borderRadius: '12px', padding: '1rem', color: 'white', fontSize: '0.85rem', minHeight: '100px' }}
+                                                                            />
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    const notesToSave = localOrderNotes[order.id] !== undefined ? localOrderNotes[order.id] : (order.notes || '');
+                                                                                    updateOrderNotes(order.id, notesToSave);
+                                                                                    setLocalOrderNotes(prev => {
+                                                                                        const { [order.id]: _, ...rest } = prev;
+                                                                                        return rest;
+                                                                                    });
+                                                                                    showToast('Notes sauvegardées', 'success');
+                                                                                }}
+                                                                                disabled={localOrderNotes[order.id] === undefined || localOrderNotes[order.id] === (order.notes || '')}
+                                                                                style={{
+                                                                                    ...btnModern,
+                                                                                    alignSelf: 'flex-end',
+                                                                                    background: localOrderNotes[order.id] !== undefined && localOrderNotes[order.id] !== (order.notes || '') 
+                                                                                        ? 'rgba(167, 139, 250, 0.2)' 
+                                                                                        : 'rgba(255,255,255,0.02)',
+                                                                                    borderColor: localOrderNotes[order.id] !== undefined && localOrderNotes[order.id] !== (order.notes || '') 
+                                                                                        ? 'var(--color-accent)' 
+                                                                                        : 'rgba(255,255,255,0.05)',
+                                                                                    color: localOrderNotes[order.id] !== undefined && localOrderNotes[order.id] !== (order.notes || '') 
+                                                                                        ? 'var(--color-accent)' 
+                                                                                        : '#666',
+                                                                                    opacity: localOrderNotes[order.id] === undefined || localOrderNotes[order.id] === (order.notes || '') ? 0.5 : 1
+                                                                                }}
+                                                                            >
+                                                                                <Save size={14} /> Sauvegarder Notes
+                                                                            </button>
+                                                                        </div>
 
                                                                         {/* Delete button for simulated/admin orders */}
                                                                         {(order.paymentId === 'SIMULATED_ADMIN' || order.payment_id === 'SIMULATED_ADMIN') && (
@@ -2166,20 +2199,52 @@ const Dashboard = () => {
 
                                                 <div>
                                                     <h3 style={{ color: 'var(--color-accent)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}><TrendingUp size={20} /> Activité & Commandes</h3>
-                                                    <div style={{ background: '#080808', padding: '1.5rem', borderRadius: '12px' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid #222', paddingBottom: '1rem' }}>
-                                                            <span style={{ color: '#888' }}>Total Dépensé</span>
-                                                            <strong style={{ fontSize: '1.2rem', color: '#fff' }}>
-                                                                {orders.filter(o => o.email === selectedMember.email || o.userId === selectedMember.id || o.user_id === selectedMember.id).reduce((acc, o) => acc + parseFloat(o.total || 0), 0).toFixed(2)}€
-                                                            </strong>
-                                                        </div>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                            <span style={{ color: '#888' }}>Nombre de commandes</span>
-                                                            <strong style={{ fontSize: '1.2rem', color: '#fff' }}>
-                                                                {orders.filter(o => o.email === selectedMember.email || o.userId === selectedMember.id || o.user_id === selectedMember.id).length}
-                                                            </strong>
-                                                        </div>
-                                                    </div>
+                                                    {(() => {
+                                                        const memberOrders = orders.filter(o => o.email === selectedMember.email || o.userId === selectedMember.id || o.user_id === selectedMember.id);
+                                                        const totalSpent = memberOrders.reduce((acc, o) => acc + parseFloat(o.total || 0), 0);
+                                                        const ordersWithPromo = memberOrders.filter(o => o.promoCodeUsed || o.promo_code_used);
+                                                        const promoDiscount = ordersWithPromo.reduce((acc, o) => acc + parseFloat(o.promoDiscount || o.promo_discount || 0), 0);
+                                                        const totalWithoutPromo = totalSpent + promoDiscount;
+                                                        const usedCoupons = [...new Set(ordersWithPromo.map(o => o.promoCodeUsed || o.promo_code_used))].filter(Boolean);
+                                                        
+                                                        return (
+                                                            <div style={{ background: '#080808', padding: '1.5rem', borderRadius: '12px' }}>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #222' }}>
+                                                                    <span style={{ color: '#888' }}>Total Dépensé (avec promos)</span>
+                                                                    <strong style={{ fontSize: '1.2rem', color: '#fff' }}>{totalSpent.toFixed(2)}€</strong>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #222' }}>
+                                                                    <span style={{ color: '#888' }}>Total sans réductions</span>
+                                                                    <strong style={{ fontSize: '1rem', color: '#666' }}>{totalWithoutPromo.toFixed(2)}€</strong>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #222' }}>
+                                                                    <span style={{ color: '#888' }}>Économies réalisées</span>
+                                                                    <strong style={{ fontSize: '1rem', color: '#4ade80' }}>-{promoDiscount.toFixed(2)}€</strong>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #222' }}>
+                                                                    <span style={{ color: '#888' }}>Nombre de commandes</span>
+                                                                    <strong style={{ fontSize: '1rem', color: '#fff' }}>{memberOrders.length}</strong>
+                                                                </div>
+                                                                {usedCoupons.length > 0 && (
+                                                                    <div style={{ marginTop: '0.5rem' }}>
+                                                                        <span style={{ color: '#888', fontSize: '0.8rem' }}>Coupons utilisés:</span>
+                                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                                            {usedCoupons.map((code, i) => (
+                                                                                <span key={i} style={{ 
+                                                                                    background: 'rgba(167, 139, 250, 0.15)', 
+                                                                                    color: 'var(--color-accent)', 
+                                                                                    padding: '2px 8px', 
+                                                                                    borderRadius: '4px', 
+                                                                                    fontSize: '0.75rem',
+                                                                                    fontWeight: 'bold'
+                                                                                }}>{code}</span>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })()}
 
                                                     <h4 style={{ marginTop: '2rem', marginBottom: '1rem', fontSize: '0.9rem', color: '#666' }}>Dernières Commandes</h4>
                                                     <div style={{ display: 'grid', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto' }}>
@@ -2351,7 +2416,24 @@ const Dashboard = () => {
 
                                     {/* HERO SECTION */}
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Section Hero</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Section Hero</h3>
+                                            <button
+                                                onClick={() => {
+                                                    setHomeSectionSaved(prev => ({ ...prev, hero: true }));
+                                                    showToast('Section Hero sauvegardée', 'success');
+                                                    setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, hero: false })), 2000);
+                                                }}
+                                                style={{
+                                                    ...btnModern,
+                                                    background: homeSectionSaved.hero ? 'rgba(74, 222, 128, 0.2)' : 'rgba(167, 139, 250, 0.1)',
+                                                    borderColor: homeSectionSaved.hero ? '#4ade80' : 'var(--color-accent)',
+                                                    color: homeSectionSaved.hero ? '#4ade80' : 'var(--color-accent)'
+                                                }}
+                                            >
+                                                {homeSectionSaved.hero ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.hero ? 'Sauvegardé' : 'Sauvegarder'}
+                                            </button>
+                                        </div>
                                         <div style={{ display: 'grid', gap: '1rem' }}>
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                                 <input type="text" placeholder="Titre ligne 1" value={homeContent.hero.titleLine1} onChange={(e) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, titleLine1: e.target.value } })} style={inputStyle} />
@@ -2367,7 +2449,24 @@ const Dashboard = () => {
 
                                     {/* FEATURED PROJECTS */}
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Projets Mis en Avant</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Projets Mis en Avant</h3>
+                                            <button
+                                                onClick={() => {
+                                                    setHomeSectionSaved(prev => ({ ...prev, projects: true }));
+                                                    showToast('Section Projets sauvegardée', 'success');
+                                                    setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, projects: false })), 2000);
+                                                }}
+                                                style={{
+                                                    ...btnModern,
+                                                    background: homeSectionSaved.projects ? 'rgba(74, 222, 128, 0.2)' : 'rgba(167, 139, 250, 0.1)',
+                                                    borderColor: homeSectionSaved.projects ? '#4ade80' : 'var(--color-accent)',
+                                                    color: homeSectionSaved.projects ? '#4ade80' : 'var(--color-accent)'
+                                                }}
+                                            >
+                                                {homeSectionSaved.projects ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.projects ? 'Sauvegardé' : 'Sauvegarder'}
+                                            </button>
+                                        </div>
                                         <input type="text" placeholder="Titre de la section" value={homeContent.featuredProjects.title} onChange={(e) => setHomeContent({ ...homeContent, featuredProjects: { ...homeContent.featuredProjects, title: e.target.value } })} style={{ ...inputStyle, marginBottom: '1rem' }} />
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
                                             {projects.map(p => {
@@ -2421,7 +2520,24 @@ const Dashboard = () => {
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                             <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Services</h3>
-                                            <button onClick={() => setHomeContent({ ...homeContent, services: [...homeContent.services, { id: Date.now(), title: 'Nouveau Service', icon: 'Star', description: 'Description' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={() => {
+                                                        setHomeSectionSaved(prev => ({ ...prev, services: true }));
+                                                        showToast('Section Services sauvegardée', 'success');
+                                                        setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, services: false })), 2000);
+                                                    }}
+                                                    style={{
+                                                        ...btnModern,
+                                                        background: homeSectionSaved.services ? 'rgba(74, 222, 128, 0.2)' : 'rgba(167, 139, 250, 0.1)',
+                                                        borderColor: homeSectionSaved.services ? '#4ade80' : 'var(--color-accent)',
+                                                        color: homeSectionSaved.services ? '#4ade80' : 'var(--color-accent)'
+                                                    }}
+                                                >
+                                                    {homeSectionSaved.services ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.services ? 'Sauvegardé' : 'Sauvegarder'}
+                                                </button>
+                                                <button onClick={() => setHomeContent({ ...homeContent, services: [...homeContent.services, { id: Date.now(), title: 'Nouveau Service', icon: 'Star', description: 'Description' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
+                                            </div>
                                         </div>
                                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                                             {homeContent.services.map((service, idx) => (
@@ -2457,7 +2573,24 @@ const Dashboard = () => {
 
                                     {/* CTA */}
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Appel à l'Action</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Appel à l'Action</h3>
+                                            <button
+                                                onClick={() => {
+                                                    setHomeSectionSaved(prev => ({ ...prev, cta: true }));
+                                                    showToast('Section CTA sauvegardée', 'success');
+                                                    setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, cta: false })), 2000);
+                                                }}
+                                                style={{
+                                                    ...btnModern,
+                                                    background: homeSectionSaved.cta ? 'rgba(74, 222, 128, 0.2)' : 'rgba(167, 139, 250, 0.1)',
+                                                    borderColor: homeSectionSaved.cta ? '#4ade80' : 'var(--color-accent)',
+                                                    color: homeSectionSaved.cta ? '#4ade80' : 'var(--color-accent)'
+                                                }}
+                                            >
+                                                {homeSectionSaved.cta ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.cta ? 'Sauvegardé' : 'Sauvegarder'}
+                                            </button>
+                                        </div>
                                         <div style={{ display: 'grid', gap: '1rem' }}>
                                             <input type="text" placeholder="Titre" value={homeContent.cta.title} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, title: e.target.value } })} style={inputStyle} />
                                             <input type="text" placeholder="Texte" value={homeContent.cta.text} onChange={(e) => setHomeContent({ ...homeContent, cta: { ...homeContent.cta, text: e.target.value } })} style={inputStyle} />
@@ -2472,7 +2605,24 @@ const Dashboard = () => {
                                     <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '2rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                             <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Statistiques (Section du bas)</h3>
-                                            <button onClick={() => setHomeContent({ ...homeContent, stats: [...(homeContent.stats || []), { id: Date.now(), label: 'Nouvelle Stat', value: '100+' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={() => {
+                                                        setHomeSectionSaved(prev => ({ ...prev, stats: true }));
+                                                        showToast('Section Statistiques sauvegardée', 'success');
+                                                        setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, stats: false })), 2000);
+                                                    }}
+                                                    style={{
+                                                        ...btnModern,
+                                                        background: homeSectionSaved.stats ? 'rgba(74, 222, 128, 0.2)' : 'rgba(167, 139, 250, 0.1)',
+                                                        borderColor: homeSectionSaved.stats ? '#4ade80' : 'var(--color-accent)',
+                                                        color: homeSectionSaved.stats ? '#4ade80' : 'var(--color-accent)'
+                                                    }}
+                                                >
+                                                    {homeSectionSaved.stats ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.stats ? 'Sauvegardé' : 'Sauvegarder'}
+                                                </button>
+                                                <button onClick={() => setHomeContent({ ...homeContent, stats: [...(homeContent.stats || []), { id: Date.now(), label: 'Nouvelle Stat', value: '100+' }] })} style={btnModern}><Plus size={14} /> Ajouter</button>
+                                            </div>
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                                             {(homeContent.stats || []).map((stat, idx) => (
@@ -2498,7 +2648,24 @@ const Dashboard = () => {
 
                                     {/* TESTIMONIALS SECTION */}
                                     <div>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--color-accent)' }}>Témoignages Sélectionnés</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>Témoignages Sélectionnés</h3>
+                                            <button
+                                                onClick={() => {
+                                                    setHomeSectionSaved(prev => ({ ...prev, testimonials: true }));
+                                                    showToast('Section Témoignages sauvegardée', 'success');
+                                                    setTimeout(() => setHomeSectionSaved(prev => ({ ...prev, testimonials: false })), 2000);
+                                                }}
+                                                style={{
+                                                    ...btnModern,
+                                                    background: homeSectionSaved.testimonials ? 'rgba(74, 222, 128, 0.2)' : 'rgba(167, 139, 250, 0.1)',
+                                                    borderColor: homeSectionSaved.testimonials ? '#4ade80' : 'var(--color-accent)',
+                                                    color: homeSectionSaved.testimonials ? '#4ade80' : 'var(--color-accent)'
+                                                }}
+                                            >
+                                                {homeSectionSaved.testimonials ? <Check size={14} /> : <Save size={14} />} {homeSectionSaved.testimonials ? 'Sauvegardé' : 'Sauvegarder'}
+                                            </button>
+                                        </div>
                                         <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>Sélectionnez les avis qui apparaîtront sur la page d'accueil (Mis en avant).</p>
                                         <div style={{ display: 'grid', gap: '0.8rem', maxHeight: '300px', overflowY: 'auto', border: '1px solid #333', padding: '1rem', borderRadius: '8px' }}>
                                             {(() => {
@@ -2579,90 +2746,255 @@ const Dashboard = () => {
                             <div className="animate-in">
                                 <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Sécurité & Accès</h2>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
-                                    {/* Login History */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
+                                    {/* Accounts List with Login Attempts */}
                                     <div style={cardStyle}>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--color-accent)' }}>
-                                                    <Shield size={24} />
-                                                </div>
-                                                <div>
-                                                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Historique de Connexion</h3>
-                                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>Dernières connexions au système</p>
-                                                </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                                            <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--color-accent)' }}>
+                                                <Users size={24} />
                                             </div>
-                                            <select
-                                                value={loginHistoryFilter || 'all'}
-                                                onChange={e => setLoginHistoryFilter(e.target.value)}
-                                                style={{ 
-                                                    background: 'rgba(255,255,255,0.05)', 
-                                                    border: '1px solid rgba(255,255,255,0.1)', 
-                                                    borderRadius: '8px', 
-                                                    padding: '0.5rem 1rem', 
-                                                    color: '#eee', 
-                                                    fontSize: '0.8rem',
-                                                    cursor: 'pointer'
+                                            <div>
+                                                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Comptes avec Connexions</h3>
+                                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>Cliquez pour voir l'historique</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                                            <button
+                                                onClick={() => setLoginHistoryFilter('all')}
+                                                style={{
+                                                    ...btnModern,
+                                                    flex: 1,
+                                                    justifyContent: 'center',
+                                                    background: loginHistoryFilter === 'all' ? 'rgba(167, 139, 250, 0.2)' : 'rgba(255,255,255,0.02)',
+                                                    borderColor: loginHistoryFilter === 'all' ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)',
+                                                    fontSize: '0.75rem'
                                                 }}
                                             >
-                                                <option value="all">Tous les comptes</option>
-                                                <option value="admin">Admins seulement</option>
-                                                <option value="clients">Clients seulement</option>
-                                            </select>
+                                                Tous
+                                            </button>
+                                            <button
+                                                onClick={() => setLoginHistoryFilter('admin')}
+                                                style={{
+                                                    ...btnModern,
+                                                    flex: 1,
+                                                    justifyContent: 'center',
+                                                    background: loginHistoryFilter === 'admin' ? 'rgba(167, 139, 250, 0.2)' : 'rgba(255,255,255,0.02)',
+                                                    borderColor: loginHistoryFilter === 'admin' ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)',
+                                                    fontSize: '0.75rem'
+                                                }}
+                                            >
+                                                Admins
+                                            </button>
+                                            <button
+                                                onClick={() => setLoginHistoryFilter('clients')}
+                                                style={{
+                                                    ...btnModern,
+                                                    flex: 1,
+                                                    justifyContent: 'center',
+                                                    background: loginHistoryFilter === 'clients' ? 'rgba(167, 139, 250, 0.2)' : 'rgba(255,255,255,0.02)',
+                                                    borderColor: loginHistoryFilter === 'clients' ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)',
+                                                    fontSize: '0.75rem'
+                                                }}
+                                            >
+                                                Clients
+                                            </button>
                                         </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
-                                            {loginHistory && loginHistory.length > 0 ? 
-                                                loginHistory
-                                                    .filter(entry => {
-                                                        if (loginHistoryFilter === 'admin') return entry.isAdmin;
-                                                        if (loginHistoryFilter === 'clients') return !entry.isAdmin;
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '400px', overflowY: 'auto' }}>
+                                            {(() => {
+                                                // Group login history by email (userEmail or attemptEmail for failed)
+                                                const accountsMap = {};
+                                                (loginHistory || []).forEach(entry => {
+                                                    const email = entry.userEmail || entry.attemptEmail;
+                                                    if (!email) return;
+                                                    if (!accountsMap[email]) {
+                                                        accountsMap[email] = {
+                                                            email,
+                                                            name: entry.userName || email.split('@')[0],
+                                                            isAdmin: entry.isAdmin,
+                                                            attempts: [],
+                                                            successCount: 0,
+                                                            failCount: 0
+                                                        };
+                                                    }
+                                                    accountsMap[email].attempts.push(entry);
+                                                    if (entry.success === false) accountsMap[email].failCount++;
+                                                    else accountsMap[email].successCount++;
+                                                    // Update isAdmin if we have more recent info
+                                                    if (entry.isAdmin !== undefined) accountsMap[email].isAdmin = entry.isAdmin;
+                                                });
+                                                
+                                                const accounts = Object.values(accountsMap)
+                                                    .filter(acc => {
+                                                        if (loginHistoryFilter === 'admin') return acc.isAdmin;
+                                                        if (loginHistoryFilter === 'clients') return !acc.isAdmin;
                                                         return true;
                                                     })
+                                                    .sort((a, b) => {
+                                                        const aLatest = a.attempts[0]?.timestamp || '';
+                                                        const bLatest = b.attempts[0]?.timestamp || '';
+                                                        return bLatest.localeCompare(aLatest);
+                                                    });
+                                                
+                                                if (accounts.length === 0) {
+                                                    return <p style={{ textAlign: 'center', color: '#666', padding: '1rem' }}>Aucun compte avec connexion.</p>;
+                                                }
+                                                
+                                                return accounts.map(acc => (
+                                                    <div
+                                                        key={acc.email}
+                                                        onClick={() => setSelectedLoginAccount(selectedLoginAccount === acc.email ? null : acc.email)}
+                                                        style={{
+                                                            padding: '0.8rem',
+                                                            background: selectedLoginAccount === acc.email ? 'rgba(167, 139, 250, 0.15)' : 'rgba(255,255,255,0.02)',
+                                                            borderRadius: '8px',
+                                                            border: selectedLoginAccount === acc.email ? '1px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.05)',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                            <div>
+                                                                <div style={{ fontSize: '0.85rem', color: '#eee', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                    {acc.name}
+                                                                    {acc.isAdmin && (
+                                                                        <span style={{ fontSize: '0.55rem', background: 'var(--color-accent)', color: '#000', padding: '1px 5px', borderRadius: '4px', fontWeight: 'bold' }}>ADMIN</span>
+                                                                    )}
+                                                                </div>
+                                                                <div style={{ fontSize: '0.7rem', color: '#666' }}>{acc.email}</div>
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                                                <span style={{ fontSize: '0.7rem', color: '#4ade80' }}>✓{acc.successCount}</span>
+                                                                {acc.failCount > 0 && (
+                                                                    <span style={{ fontSize: '0.7rem', color: '#ff4d4d' }}>✗{acc.failCount}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ));
+                                            })()}
+                                        </div>
+                                    </div>
+
+                                    {/* Login History for Selected Account */}
+                                    <div style={cardStyle}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                                            <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--color-accent)' }}>
+                                                <Shield size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>
+                                                    {selectedLoginAccount ? `Historique: ${selectedLoginAccount.split('@')[0]}` : 'Historique de Connexion'}
+                                                </h3>
+                                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>
+                                                    {selectedLoginAccount ? 'Tentatives de connexion du compte' : 'Sélectionnez un compte à gauche'}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '400px', overflowY: 'auto' }}>
+                                            {selectedLoginAccount ? (
+                                                (loginHistory || [])
+                                                    .filter(entry => (entry.userEmail || entry.attemptEmail) === selectedLoginAccount)
+                                                    .slice(0, 20)
+                                                    .map((entry, idx) => (
+                                                        <div key={idx} style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            padding: '0.8rem',
+                                                            background: entry.success === false ? 'rgba(255, 77, 77, 0.05)' : 'rgba(74, 222, 128, 0.05)',
+                                                            borderRadius: '8px',
+                                                            border: entry.success === false ? '1px solid rgba(255, 77, 77, 0.2)' : '1px solid rgba(74, 222, 128, 0.2)'
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                                <div style={{
+                                                                    width: '28px',
+                                                                    height: '28px',
+                                                                    borderRadius: '50%',
+                                                                    background: entry.success === false ? 'rgba(255, 77, 77, 0.2)' : 'rgba(74, 222, 128, 0.2)',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    color: entry.success === false ? '#ff4d4d' : '#4ade80'
+                                                                }}>
+                                                                    {entry.success === false ? <X size={14} /> : <Check size={14} />}
+                                                                </div>
+                                                                <div>
+                                                                    <div style={{ fontSize: '0.8rem', color: entry.success === false ? '#ff4d4d' : '#4ade80', fontWeight: 'bold' }}>
+                                                                        {entry.success === false ? 'Échec' : 'Succès'}
+                                                                    </div>
+                                                                    {entry.failureReason && (
+                                                                        <div style={{ fontSize: '0.65rem', color: '#888' }}>{entry.failureReason}</div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ textAlign: 'right' }}>
+                                                                <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
+                                                                    {new Date(entry.timestamp).toLocaleDateString('fr-FR')}
+                                                                </div>
+                                                                <div style={{ fontSize: '0.65rem', color: '#666' }}>
+                                                                    {new Date(entry.timestamp).toLocaleTimeString('fr-FR')}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                            ) : (
+                                                (loginHistory || [])
                                                     .slice(0, 15)
                                                     .map((entry, idx) => (
-                                                <div key={idx} style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                    padding: '1rem',
-                                                    background: 'rgba(255,255,255,0.02)',
-                                                    borderRadius: '12px',
-                                                    border: '1px solid rgba(255,255,255,0.05)'
-                                                }}>
-                                                    <div>
-                                                        <div style={{ fontSize: '0.9rem', color: '#eee', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                            {entry.userName || entry.userEmail}
-                                                            {entry.isAdmin && (
-                                                                <span style={{ 
-                                                                    fontSize: '0.6rem', 
-                                                                    background: 'var(--color-accent)', 
-                                                                    color: '#000', 
-                                                                    padding: '2px 6px', 
-                                                                    borderRadius: '4px',
-                                                                    fontWeight: 'bold'
-                                                                }}>ADMIN</span>
-                                                            )}
+                                                        <div key={idx} style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            padding: '0.8rem',
+                                                            background: entry.success === false ? 'rgba(255, 77, 77, 0.05)' : 'rgba(255,255,255,0.02)',
+                                                            borderRadius: '8px',
+                                                            border: entry.success === false ? '1px solid rgba(255, 77, 77, 0.2)' : '1px solid rgba(255,255,255,0.05)'
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                                <div style={{
+                                                                    width: '28px',
+                                                                    height: '28px',
+                                                                    borderRadius: '50%',
+                                                                    background: entry.success === false ? 'rgba(255, 77, 77, 0.2)' : 'rgba(74, 222, 128, 0.2)',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    color: entry.success === false ? '#ff4d4d' : '#4ade80'
+                                                                }}>
+                                                                    {entry.success === false ? <X size={14} /> : <Check size={14} />}
+                                                                </div>
+                                                                <div>
+                                                                    <div style={{ fontSize: '0.85rem', color: '#eee', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                        {entry.userName || entry.attemptEmail || entry.userEmail}
+                                                                        {entry.isAdmin && (
+                                                                            <span style={{ fontSize: '0.55rem', background: 'var(--color-accent)', color: '#000', padding: '1px 5px', borderRadius: '4px', fontWeight: 'bold' }}>ADMIN</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <div style={{ fontSize: '0.65rem', color: '#666' }}>{entry.userEmail || entry.attemptEmail}</div>
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ textAlign: 'right' }}>
+                                                                <div style={{ fontSize: '0.75rem', color: entry.success === false ? '#ff4d4d' : 'var(--color-accent)' }}>
+                                                                    {new Date(entry.timestamp).toLocaleDateString('fr-FR')}
+                                                                </div>
+                                                                <div style={{ fontSize: '0.65rem', color: '#666' }}>
+                                                                    {new Date(entry.timestamp).toLocaleTimeString('fr-FR')}
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div style={{ fontSize: '0.7rem', color: '#666' }}>{entry.userEmail}</div>
-                                                    </div>
-                                                    <div style={{ textAlign: 'right' }}>
-                                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-accent)' }}>
-                                                            {new Date(entry.timestamp).toLocaleDateString('fr-FR')}
-                                                        </div>
-                                                        <div style={{ fontSize: '0.65rem', color: '#666' }}>
-                                                            {new Date(entry.timestamp).toLocaleTimeString('fr-FR')}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )) : (
+                                                    ))
+                                            )}
+                                            {(!loginHistory || loginHistory.length === 0) && !selectedLoginAccount && (
                                                 <p style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>Aucun historique disponible.</p>
                                             )}
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Role Management (Super Admin Only) */}
-                                    <div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginTop: '2rem' }}>
                                         {checkPermission('all') ? (
                                             <div style={cardStyle}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
@@ -2729,7 +3061,6 @@ const Dashboard = () => {
                                                 Réinitialisation Globale
                                             </button>
                                         </div>
-                                    </div>
                                 </div>
                             </div>
                         )}
@@ -2989,21 +3320,36 @@ const Dashboard = () => {
                                                 />
                                             </div>
 
-                                            <div>
-                                                <label htmlFor="announcementLink" style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hyperlien (optionnel)</label>
-                                                <input
-                                                    type="text"
-                                                    id="announcementLink"
-                                                    value={announcementLink}
-                                                    onChange={(e) => setAnnouncementLink(e.target.value)}
-                                                    style={inputStyle}
-                                                    placeholder="https://..."
-                                                />
-                                            </div>
-
-                                            {/* Nouvelles options de personnalisation */}
                                             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
                                                 <div>
+                                                    <label htmlFor="announcementLink" style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Hyperlien (optionnel)</label>
+                                                    <input
+                                                        type="text"
+                                                        id="announcementLink"
+                                                        value={announcementLink}
+                                                        onChange={(e) => setAnnouncementLink(e.target.value)}
+                                                        style={inputStyle}
+                                                        placeholder="https://..."
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Épaisseur</label>
+                                                    <select
+                                                        value={announcementHeight}
+                                                        onChange={(e) => setAnnouncementHeight(e.target.value)}
+                                                        style={inputStyle}
+                                                    >
+                                                        <option value="40px" style={{ background: '#1a1a1a', color: '#eee' }}>Fine (40px)</option>
+                                                        <option value="48px" style={{ background: '#1a1a1a', color: '#eee' }}>Normale (48px)</option>
+                                                        <option value="56px" style={{ background: '#1a1a1a', color: '#eee' }}>Standard (56px)</option>
+                                                        <option value="64px" style={{ background: '#1a1a1a', color: '#eee' }}>Large (64px)</option>
+                                                        <option value="72px" style={{ background: '#1a1a1a', color: '#eee' }}>Très large (72px)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {/* Icon picker - full width */}
+                                            <div>
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Icône (à gauche)</label>
                                                     
                                                     {/* Preview selected icon */}
@@ -3113,20 +3459,6 @@ const Dashboard = () => {
                                                             </div>
                                                         )}
                                                     </div>
-                                                </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Épaisseur</label>
-                                                    <select
-                                                        value={announcementHeight}
-                                                        onChange={(e) => setAnnouncementHeight(e.target.value)}
-                                                        style={inputStyle}
-                                                    >
-                                                        <option value="40px">Fine (40px)</option>
-                                                        <option value="48px">Normale (48px)</option>
-                                                        <option value="56px">Standard (56px)</option>
-                                                        <option value="64px">Large (64px)</option>
-                                                        <option value="72px">Très large (72px)</option>
-                                                    </select>
                                                 </div>
                                             </div>
 
