@@ -1723,14 +1723,8 @@ export const DataProvider = ({ children }) => {
             if (res.ok) {
                 const updatedOrders = await res.json();
                 // Normalize response
-                const normalizedOrders = updatedOrders.map(o => ({
-                    ...o,
-                    customerName: o.customer_name || o.customerName,
-                    userId: o.user_id || o.userId,
-                    paymentId: o.payment_id || o.paymentId
-                }));
-                setOrders(normalizedOrders);
-                const createdOrder = updatedOrders[0];
+                setOrders(updatedOrders.map(normalizeOrder));
+                const createdOrder = normalizeOrder(updatedOrders[0]);
 
                 // Increment Promo Usage if applicable
                 if (activePromo) {
@@ -1861,6 +1855,20 @@ export const DataProvider = ({ children }) => {
         }
     };
 
+    // Helper to normalize order data from API (parse JSON strings)
+    const normalizeOrder = (o) => ({
+        ...o,
+        customerName: o.customer_name || o.customerName,
+        userId: o.user_id || o.userId,
+        paymentId: o.payment_id || o.paymentId,
+        completionDate: o.completion_date || o.completionDate,
+        promoCodeUsed: o.promo_code_used || o.promoCodeUsed,
+        promoDiscount: o.promo_discount || o.promoDiscount,
+        items: typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []),
+        checklist: typeof o.checklist === 'string' ? JSON.parse(o.checklist) : (o.checklist || []),
+        shipping: typeof o.shipping === 'string' ? JSON.parse(o.shipping) : (o.shipping || {})
+    });
+
     const syncOrder = async (orderId, updatedFields) => {
         try {
             const order = orders.find(o => o.id === orderId);
@@ -1875,7 +1883,7 @@ export const DataProvider = ({ children }) => {
 
             if (res.ok) {
                 const refreshedOrders = await res.json();
-                setOrders(refreshedOrders);
+                setOrders(refreshedOrders.map(normalizeOrder));
             } else {
                 // local fallback if API fails
                 setOrders(orders.map(o => o.id === orderId ? updatedOrder : o));
@@ -1914,13 +1922,7 @@ export const DataProvider = ({ children }) => {
 
             if (res.ok) {
                 const refreshedOrders = await res.json();
-                const normalizedOrders = refreshedOrders.map(o => ({
-                    ...o,
-                    customerName: o.customer_name || o.customerName,
-                    userId: o.user_id || o.userId,
-                    paymentId: o.payment_id || o.paymentId
-                }));
-                setOrders(normalizedOrders);
+                setOrders(refreshedOrders.map(normalizeOrder));
                 return true;
             } else {
                 // Local fallback
@@ -1982,15 +1984,9 @@ export const DataProvider = ({ children }) => {
 
             if (res.ok) {
                 const updatedOrders = await res.json();
-                const normalizedOrders = updatedOrders.map(o => ({
-                    ...o,
-                    customerName: o.customer_name || o.customerName,
-                    userId: o.user_id || o.userId,
-                    paymentId: o.payment_id || o.paymentId
-                }));
-                setOrders(normalizedOrders);
+                setOrders(updatedOrders.map(normalizeOrder));
                 addNotification('order', `Commande simulée créée (${simulatedOrder.total}€)`);
-                return normalizedOrders[0];
+                return updatedOrders[0];
             } else {
                 const errorData = await res.json().catch(() => ({}));
                 console.error('[DataContext] API error response:', errorData);
