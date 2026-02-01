@@ -5,7 +5,7 @@ import { WEBSITE_VERSION } from '../version';
 import Breadcrumbs from '../components/Breadcrumbs';
 import StarRating from '../components/StarRating';
 import ProductReviews from '../components/ProductReviews';
-import { Heart } from 'lucide-react';
+import { Heart, AlertTriangle } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 const ProductDetail = () => {
@@ -177,8 +177,8 @@ const ProductDetail = () => {
                                             onChange={(e) => handleOptionChange(opt.name, 'text', e.target.value, 0)}
                                         />
                                         {opt.requiresQuote && (
-                                            <p style={{ color: 'var(--color-accent)', fontSize: '0.8rem', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                                                ⚠️ Cette option nécessite un devis manuel après commande.
+                                            <p style={{ color: 'var(--color-accent)', fontSize: '0.8rem', marginTop: '0.5rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <AlertTriangle size={14} /> Cette option nécessite un devis manuel après commande.
                                             </p>
                                         )}
                                     </>
@@ -188,7 +188,7 @@ const ProductDetail = () => {
 
                         {product.alertMessage && (
                             <div style={{ padding: '1rem', background: 'rgba(255,204,0,0.1)', border: '1px solid rgba(255,204,0,0.3)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <span>⚠️</span>
+                                <AlertTriangle size={20} color="#fbbf24" />
                                 <span style={{ color: '#eee', fontSize: '0.9rem' }}>{product.alertMessage}</span>
                             </div>
                         )}
