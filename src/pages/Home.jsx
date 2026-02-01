@@ -1,290 +1,197 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { ArrowRight, Palette, Code, Briefcase, TrendingUp, Star, Quote } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { ArrowRight, Code, ShoppingBag, Star, Layout, Smartphone, Zap } from 'lucide-react';
 import './Home.css';
 import { WEBSITE_VERSION } from '../version';
 
-const iconMap = {
-    Palette: Palette,
-    Code: Code,
-    Briefcase: Briefcase,
-    TrendingUp: TrendingUp,
-    Star: Star,
-    Quote: Quote
-};
-
-const DynamicIcon = ({ name, size = 24, className }) => {
-    const Icon = iconMap[name] || Star;
-    return <Icon size={size} className={className} />;
-};
-
 const Home = () => {
     const { homeContent, projects } = useData();
+    const observerRef = useRef(null);
 
     useEffect(() => {
         const observerOptions = {
-            threshold: 0.15,
-            rootMargin: '0px 0px -50px 0px' // Slight delay for more natural feel
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
         };
 
-        const observer = new IntersectionObserver((entries) => {
+        const callback = (entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                } else {
-                    // Always remove 'active' when not intersecting to allow replay
-                    entry.target.classList.remove('active');
+                    entry.target.classList.add('visible');
                 }
             });
-        }, observerOptions);
+        };
 
-        const elements = document.querySelectorAll('.reveal, .zoom-in, .stagger-reveal, .blur-reveal');
+        const observer = new IntersectionObserver(callback, observerOptions);
+        observerRef.current = observer;
+
+        const elements = document.querySelectorAll('.animate-on-scroll');
         elements.forEach(el => observer.observe(el));
 
         return () => observer.disconnect();
-    }, [homeContent]);
+    }, []);
 
-    // Fallback if context not ready
     if (!homeContent) return null;
 
-    const { hero, featuredProjects, services, testimonials, stats, cta } = homeContent;
-
-    // Get actual project objects for featured section
-    const featuredList = projects.filter(p => featuredProjects.ids.includes(p.id));
-
-    // Get selected testimonials from reviews
-    const { reviews, products: allProducts } = useData();
-    let displayTestimonials = testimonials; // Fallback to default mock ones
-
-    if (homeContent.selectedTestimonials && homeContent.selectedTestimonials.length > 0) {
-        const selected = [];
-        homeContent.selectedTestimonials.forEach(idStr => {
-            const [prodId, revIdx] = idStr.split('-');
-            const prodReviews = reviews[prodId];
-            if (prodReviews && prodReviews[revIdx]) {
-                const rev = prodReviews[revIdx];
-                const prod = allProducts.find(p => p.id === parseInt(prodId));
-                selected.push({
-                    id: idStr,
-                    name: rev.user,
-                    role: prod ? prod.name : 'Client',
-                    quote: rev.comment,
-                    image: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' // Default avatar
-                });
-            }
-        });
-        if (selected.length > 0) displayTestimonials = selected;
-    }
-
-    // Default to at least 4 reviews (using testimonials from homeContent if none selected)
-    // If we have fewer than 4 selected, we might want to fill with defaults or just display those.
-    // The user said "4 avis par défault sont mis seulement si aucun avis n'ai choisi".
-    if (!homeContent.selectedTestimonials || homeContent.selectedTestimonials.length === 0) {
-        // We ensure we at least have the mock ones, and maybe duplicate to reach 4 if needed
-        const mockDefaults = [
-            { id: 'd1', name: "Sophie Martin", role: "CEO, TechFlow", quote: "Une équipe incroyable qui a su transformer notre vision en réalité.", image: "https://placehold.co/100x100/333/FFF?text=SM" },
-            { id: 'd2', name: "Thomas Dubois", role: "Directeur Artistique", quote: "Créativité et professionnalisme au rendez-vous. Je recommande !", image: "https://placehold.co/100x100/333/FFF?text=TD" },
-            { id: 'd3', name: "Julie Leroux", role: "Product Manager", quote: "Un résultat qui dépasse nos attentes. Un plaisir de collaborer.", image: "https://placehold.co/100x100/333/FFF?text=JL" },
-            { id: 'd4', name: "Marc Antoine", role: "Entrepreneur", quote: "Réactivité et talent. Le duo parfait pour mon projet.", image: "https://placehold.co/100x100/333/FFF?text=MA" }
-        ];
-        displayTestimonials = mockDefaults;
-    }
-
-    // For marquee, duplicate the array to ensure smooth looping
-    const marqueeList = [...displayTestimonials, ...displayTestimonials, ...displayTestimonials];
-
-    const displayStats = homeContent.stats && homeContent.stats.length > 0 ? homeContent.stats : stats;
-
-    const handleMouseMove = (e) => {
-        const { clientX, clientY } = e;
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-
-        const rotateX = ((centerY - clientY) / centerY) * 5;
-        const rotateY = ((clientX - centerX) / centerX) * 5;
-
-        const wrapper = document.querySelector('.hero-content-wrapper');
-        if (wrapper) wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    };
-
-    const handleCardMouseMove = (e) => {
-        const card = e.currentTarget;
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((y - centerY) / centerY) * -10;
-        const rotateY = ((x - centerX) / centerX) * 10;
-
-        card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
-        card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-    };
-
-    const handleCardMouseLeave = (e) => {
-        e.currentTarget.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
-    };
+    const { hero, featuredProjects } = homeContent;
+    
+    // Select top 3 projects for the showcase
+    const displayProjects = projects
+        .filter(p => featuredProjects.ids.includes(p.id))
+        .slice(0, 3);
 
     return (
-        <div className="page-home">
-            {/* HERO SECTION */}
-            <section className="hero" onMouseMove={handleMouseMove} onMouseLeave={() => {
-                const wrapper = document.querySelector('.hero-content-wrapper');
-                if (wrapper) wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
-            }}>
-                <div className="floating-bg one"></div>
-                <div className="floating-bg two"></div>
-                <div className="floating-bg three"></div>
-
-                <div className="container hero-content-wrapper">
-                    <h1 className="hero-title reveal">
-                        <span className="block-reveal">{hero.titleLine1}</span>
-                        <br />
-                        <span className="block-reveal">{hero.titleLine2}</span>
+        <div className="home-container">
+            {/* HERO SECTION - Simple, Centralized, Impactful */}
+            <section className="hero-section">
+                <div className="hero-content animate-on-scroll fade-up">
+                    <div className="hero-badge">
+                        <span>L'excellence digitale</span>
+                    </div>
+                    <h1 className="hero-title">
+                        {hero.titleLine1} <span className="text-accent">{hero.titleLine2}</span>
                     </h1>
-                    <p className="hero-subtitle reveal reveal-delay-1">{hero.subtitle}</p>
-                    <div className="reveal reveal-delay-2">
-                        <Link to={hero.buttonLink} className="btn btn-primary">{hero.buttonText}</Link>
+                    <p className="hero-subtitle">
+                        {hero.subtitle}
+                    </p>
+                    <div className="hero-actions">
+                        <Link to="/contact" className="btn btn-primary btn-lg">
+                            Démarrer un projet
+                        </Link>
+                        <Link to="/shop" className="btn btn-secondary btn-lg">
+                            Visiter la boutique
+                        </Link>
+                    </div>
+                </div>
+                
+                {/* Abstract Background Element */}
+                <div className="hero-background-elements">
+                    <div className="gradient-orb orb-1"></div>
+                    <div className="gradient-orb orb-2"></div>
+                </div>
+            </section>
+
+            {/* GUIDANCE SECTION - Where do you want to go? */}
+            <section className="guidance-section section-padding">
+                <div className="container">
+                    <div className="section-header text-center animate-on-scroll fade-up">
+                        <h2>Comment pouvons-nous vous aider ?</h2>
+                        <p className="section-subtitle">Une approche sur mesure pour chaque besoin.</p>
+                    </div>
+
+                    <div className="guidance-grid">
+                        {/* SERVICE PATH */}
+                        <Link to="/services" className="guidance-card animate-on-scroll fade-up delay-1">
+                            <div className="guidance-icon">
+                                <Code size={40} />
+                            </div>
+                            <h3>Développement Sur Mesure</h3>
+                            <p>Sites web, applications et solutions digitales conçus spécifiquement pour votre entreprise.</p>
+                            <span className="link-text">En savoir plus <ArrowRight size={16} /></span>
+                        </Link>
+
+                        {/* SHOP PATH */}
+                        <Link to="/shop" className="guidance-card animate-on-scroll fade-up delay-2">
+                            <div className="guidance-icon">
+                                <ShoppingBag size={40} />
+                            </div>
+                            <h3>Boutique & Ressources</h3>
+                            <p>Templates, plugins et assets digitaux premium prêts à l'emploi pour vos projets.</p>
+                            <span className="link-text">Explorer le catalogue <ArrowRight size={16} /></span>
+                        </Link>
                     </div>
                 </div>
             </section>
 
-            {/* SERVICES SECTION */}
-            <section className="services-section">
+            {/* FEATURES / PROCESS - Clean Icons */}
+            <section className="features-section section-padding bg-subtle">
                 <div className="container">
-                    <div className="services-grid stagger-reveal">
-                        {services.map((service) => (
-                            <div
-                                key={service.id}
-                                className="service-card reveal"
-                                onMouseMove={handleCardMouseMove}
-                                onMouseLeave={handleCardMouseLeave}
+                    <div className="features-grid">
+                        <div className="feature-item animate-on-scroll fade-up">
+                            <Layout size={32} className="feature-icon" />
+                            <h4>Design Moderne</h4>
+                            <p>Une esthétique épurée qui met en valeur votre contenu.</p>
+                        </div>
+                        <div className="feature-item animate-on-scroll fade-up delay-1">
+                            <Smartphone size={32} className="feature-icon" />
+                            <h4>100% Responsive</h4>
+                            <p>Une expérience fluide sur mobile, tablette et desktop.</p>
+                        </div>
+                        <div className="feature-item animate-on-scroll fade-up delay-2">
+                            <Zap size={32} className="feature-icon" />
+                            <h4>Performance</h4>
+                            <p>Optimisation maximale pour un chargement instantané.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SELECTED WORK - Spacious Showcase */}
+            <section className="work-section section-padding">
+                <div className="container">
+                    <div className="section-header-row animate-on-scroll fade-up">
+                        <div>
+                            <h2>Réalisations</h2>
+                            <p className="section-subtitle">Nos derniers projets marquants.</p>
+                        </div>
+                        <Link to="/projects" className="btn-link">
+                            Tout voir <ArrowRight size={18} />
+                        </Link>
+                    </div>
+
+                    <div className="projects-showcase">
+                        {displayProjects.map((project, idx) => (
+                            <Link 
+                                to={`/projects/${project.id}`} 
+                                key={project.id} 
+                                className={`project-showcase-card animate-on-scroll fade-up delay-${idx}`}
                             >
-                                <div className="service-icon">
-                                    <DynamicIcon name={service.icon} size={32} />
-                                </div>
-                                <h3>{service.title}</h3>
-                                <p>{service.description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* FEATURED PROJECTS */}
-            <section className="featured-section reveal">
-                <div className="container">
-                    <div className="section-header">
-                        <h2>{featuredProjects.title}</h2>
-                        <Link to="/projects" className="btn-link">Voir tout <ArrowRight size={16} /></Link>
-                    </div>
-
-                    <div className="featured-grid blur-reveal">
-                        {featuredList.length > 0 ? (
-                            featuredList.map((project, index) => {
-                                const isLucideIcon = project.image && project.image.startsWith('lucide:');
-                                const iconName = isLucideIcon ? project.image.replace('lucide:', '').split('?')[0] : null;
-                                const IconComponent = iconName ? LucideIcons[iconName] : null;
-                                
-                                return (
-                                <Link
-                                    to={`/projects/${project.id}`}
-                                    key={project.id}
-                                    className={`project-card reveal project-card-${index + 1}`}
-                                    onMouseMove={handleCardMouseMove}
-                                    onMouseLeave={handleCardMouseLeave}
-                                >
-                                    <div className="project-image-container">
-                                        <div className="project-number">0{index + 1}</div>
-                                        <div className="project-image">
-                                            {isLucideIcon && IconComponent ? (
-                                                <div style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    background: 'linear-gradient(135deg, var(--color-bg-dark) 0%, var(--color-bg) 100%)'
-                                                }}>
-                                                    <IconComponent size={120} color="var(--color-accent)" strokeWidth={1.5} />
-                                                </div>
-                                            ) : (
-                                                <img
-                                                    src={`${project.image}?v=${WEBSITE_VERSION}`}
-                                                    alt={project.title}
-                                                    loading="eager"
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="project-content">
-                                        <span className="project-category">{project.category}</span>
-                                        <h3 className="project-title">{project.title}</h3>
-                                        <div className="project-view-more">
-                                            <span>Découvrir le projet</span>
-                                            <ArrowRight size={16} />
-                                        </div>
-                                    </div>
-                                </Link>
-                            );
-                            })
-                        ) : (
-                            <div className="no-projects reveal">
-                                <p>Aucun projet mis en avant pour le moment.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </section>
-
-            {/* TESTIMONIALS */}
-            <section className="testimonials-section">
-                <div className="testimonials-wrapper">
-                    <div className="testimonials-track">
-                        {marqueeList.map((t, idx) => (
-                            <div key={`${t.id}-${idx}`} className="testimonial-card">
-                                <Quote size={40} className="quote-icon" />
-                                <p className="testimonial-text">"{t.quote}"</p>
-                                <div className="testimonial-author">
-                                    <div className="author-avatar">
-                                        <img src={t.image} alt={t.name} />
-                                    </div>
-                                    <div>
-                                        <h4>{t.name}</h4>
-                                        <span>{t.role}</span>
+                                <div className="project-img-wrapper">
+                                    <img 
+                                        src={`${project.image}?v=${WEBSITE_VERSION}`} 
+                                        alt={project.title} 
+                                        loading="lazy"
+                                    />
+                                    <div className="project-overlay">
+                                        <span className="btn-circle"><ArrowRight size={24} /></span>
                                     </div>
                                 </div>
-                            </div>
+                                <div className="project-info">
+                                    <span className="project-cat">{project.category}</span>
+                                    <h3>{project.title}</h3>
+                                </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* STATS */}
-            <section className="stats-section">
+            {/* SOCIAL PROOF - Minimal */}
+            <section className="reviews-section section-padding text-center">
                 <div className="container">
-                    <div className="stats-grid">
-                        {displayStats.map(s => (
-                            <div key={s.id} className="stat-item">
-                                <span className="stat-value">{s.value}</span>
-                                <span className="stat-label">{s.label}</span>
-                            </div>
-                        ))}
+                    <div className="review-highlight animate-on-scroll zoom-in">
+                        <div className="stars">
+                            {[1,2,3,4,5].map(i => <Star key={i} size={20} fill="currentColor" />)}
+                        </div>
+                        <blockquote>
+                            "Une expertise technique rare alliée à une sensibilité artistique. 
+                            Le résultat a dépassé toutes nos attentes."
+                        </blockquote>
+                        <cite>— Julien M., CEO TechStart</cite>
                     </div>
                 </div>
             </section>
 
-            {/* CTA SECTION */}
-            <section className="cta-section reveal">
-                <div className="container">
-                    <div className="cta-content zoom-in reveal-delay-1">
-                        <h2>{cta.title}</h2>
-                        <p>{cta.text}</p>
-                        <Link to={cta.buttonLink} className="btn btn-primary">{cta.buttonText}</Link>
+            {/* FINAL CTA */}
+            <section className="final-cta-section section-padding">
+                <div className="container animate-on-scroll fade-up">
+                    <div className="cta-box">
+                        <h2>Prêt à concrétiser votre vision ?</h2>
+                        <p>Discutons de votre projet et créons quelque chose d'unique.</p>
+                        <Link to="/contact" className="btn btn-primary btn-lg">
+                            Nous contacter
+                        </Link>
                     </div>
                 </div>
             </section>
