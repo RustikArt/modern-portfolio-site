@@ -1438,6 +1438,12 @@ export const DataProvider = ({ children }) => {
 
     // Promo Codes
     const applyPromoCode = (code) => {
+        // If empty code, just clear the promo without showing error (used for clearing after payment)
+        if (!code || code.trim() === '') {
+            setActivePromo(null);
+            return false;
+        }
+        
         const promo = promoCodes.find(p => p.code === code);
         if (promo) {
             // 1. Check Expiration
@@ -1445,8 +1451,9 @@ export const DataProvider = ({ children }) => {
                 alert("Ce code promo a expiré.");
                 return false;
             }
-            // 2. Check Usage Limits
-            if (promo.maxUses && promo.uses >= promo.maxUses) {
+            // 2. Check Usage Limits (check both 'uses' and 'current_uses')
+            const currentUses = promo.current_uses || promo.uses || 0;
+            if (promo.maxUses && currentUses >= promo.maxUses) {
                 alert("Ce code promo a atteint sa limite d'utilisation.");
                 return false;
             }

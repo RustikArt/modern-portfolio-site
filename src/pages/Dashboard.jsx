@@ -193,6 +193,7 @@ const Dashboard = () => {
     const [showIconPicker, setShowIconPicker] = useState(false);
     const [iconPickerTarget, setIconPickerTarget] = useState(null); // 'product' or 'project'
     const [bannerIconSearch, setBannerIconSearch] = useState(''); // Separate search for banner icons
+    const [iconZoomLevel, setIconZoomLevel] = useState(1); // 1 = normal, 2 = zoomed
 
     // Get all available Lucide icons (filter out non-icon exports)
     const allLucideIcons = useMemo(() => {
@@ -586,9 +587,12 @@ const Dashboard = () => {
     const getChartData = () => {
         // Group by Month - track both actual revenue and revenue without discounts
         const data = {};
+        const monthOrder = {}; // Track order for sorting
+        
         orders.forEach(order => {
             const date = new Date(order.date);
             const month = date.toLocaleString('default', { month: 'short' });
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`; // For proper sorting
             
             // Actual revenue (with discounts applied)
             const actualRevenue = parseFloat(order.total || 0);
@@ -613,15 +617,24 @@ const Dashboard = () => {
             
             if (!data[month]) {
                 data[month] = { value: 0, originalValue: 0 };
+                monthOrder[month] = monthKey;
+            }
+            // Keep the most recent date for each month name
+            if (monthKey > monthOrder[month]) {
+                monthOrder[month] = monthKey;
             }
             data[month].value += actualRevenue;
             data[month].originalValue += originalTotal;
         });
-        return Object.keys(data).map(key => ({ 
-            name: key, 
-            value: Math.round(data[key].value * 100) / 100, 
-            originalValue: Math.round(data[key].originalValue * 100) / 100 
-        }));
+        
+        // Sort by date (oldest to newest - left to right)
+        return Object.keys(data)
+            .sort((a, b) => monthOrder[a].localeCompare(monthOrder[b]))
+            .map(key => ({ 
+                name: key, 
+                value: Math.round(data[key].value * 100) / 100, 
+                originalValue: Math.round(data[key].originalValue * 100) / 100 
+            }));
     };
 
     const chartData = getChartData().length > 0 ? getChartData() : [{ name: 'Jan', value: 0, originalValue: 0 }, { name: 'Feb', value: 0, originalValue: 0 }];
@@ -983,17 +996,17 @@ const Dashboard = () => {
                                             
                                             return (
                                                 <div className="chart-container">
-                                                    <ResponsiveContainer width="100%" height={220}>
+                                                    <ResponsiveContainer width="100%" height={250}>
                                                         <RechartsPie>
                                                             <Pie
                                                                 data={pieData}
                                                                 cx="50%"
-                                                                cy="50%"
-                                                                innerRadius={50}
-                                                                outerRadius={80}
+                                                                cy="45%"
+                                                                innerRadius={45}
+                                                                outerRadius={70}
                                                                 paddingAngle={3}
                                                                 dataKey="value"
-                                                                label={({ name, value }) => `${name}: ${value}`}
+                                                                label={false}
                                                                 labelLine={false}
                                                                 stroke="none"
                                                                 style={{ outline: 'none' }}
@@ -1027,17 +1040,18 @@ const Dashboard = () => {
                                                                     return null;
                                                                 }}
                                                             />
+                                                            <Legend 
+                                                                layout="horizontal"
+                                                                verticalAlign="bottom"
+                                                                align="center"
+                                                                wrapperStyle={{ paddingTop: '15px', fontSize: '0.7rem' }}
+                                                                formatter={(value) => <span style={{ color: '#94a3b8' }}>{value}</span>}
+                                                            />
                                                         </RechartsPie>
                                                     </ResponsiveContainer>
                                                 </div>
                                             );
                                         })()}
-                                        <div className="chart-legend">
-                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#fb7185' }}></span> Réception</span>
-                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#fbbf24' }}></span> En cours</span>
-                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#a78bfa' }}></span> Terminé</span>
-                                            <span className="legend-item"><span className="legend-dot" style={{ background: '#64748b' }}></span> En attente</span>
-                                        </div>
                                     </div>
 
                                     {/* Category Sales Bar Chart */}
@@ -2168,30 +2182,25 @@ const Dashboard = () => {
                                                             <label style={{ fontSize: '0.75rem', color: '#666', display: 'block' }}>Email</label>
                                                             <div style={{ fontSize: '1rem' }}>{selectedMember.email}</div>
                                                         </div>
-                                                        <div style={{ background: '#080808', padding: '1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                            <div>
-                                                                <label style={{ fontSize: '0.75rem', color: '#666', display: 'block' }}>Mot de passe</label>
-                                                                <div style={{ fontSize: '1rem', fontFamily: 'monospace' }}>
-                                                                    {showMemberPassword ? (selectedMember.password || '••••••••') : '••••••••'}
-                                                                </div>
+                                                        <div style={{ background: '#080808', padding: '1rem', borderRadius: '8px' }}>
+                                                            <label style={{ fontSize: '0.75rem', color: '#666', display: 'block' }}>Mot de passe</label>
+                                                            <div style={{ fontSize: '0.9rem', fontFamily: 'monospace', color: '#666' }}>
+                                                                ••••••••
                                                             </div>
-                                                            <button onClick={() => setShowMemberPassword(!showMemberPassword)} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer' }}>
-                                                                {showMemberPassword ? 'Masquer' : 'Voir'}
-                                                            </button>
+                                                            <div style={{ fontSize: '0.65rem', color: '#444', marginTop: '0.25rem' }}>
+                                                                (Chiffré - Non visible pour des raisons de sécurité)
+                                                            </div>
                                                         </div>
                                                         <div style={{ background: '#080808', padding: '1rem', borderRadius: '8px' }}>
                                                             <label style={{ fontSize: '0.75rem', color: '#666', display: 'block' }}>Rôle</label>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
                                                                 <span style={{
-                                                                    background: selectedMember.role === 'admin' ? 'var(--color-accent)' : '#222',
-                                                                    color: selectedMember.role === 'admin' ? '#000' : '#fff',
+                                                                    background: selectedMember.role === 'admin' || selectedMember.role === 'super_admin' ? 'var(--color-accent)' : '#222',
+                                                                    color: selectedMember.role === 'admin' || selectedMember.role === 'super_admin' ? '#000' : '#fff',
                                                                     padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold'
                                                                 }}>
                                                                     {selectedMember.role || 'client'}
                                                                 </span>
-                                                                {selectedMember.permissions && selectedMember.permissions.length > 0 &&
-                                                                    <span style={{ fontSize: '0.8rem', color: '#666' }}>({selectedMember.permissions.join(', ')})</span>
-                                                                }
                                                             </div>
                                                         </div>
                                                     </div>
@@ -2203,9 +2212,28 @@ const Dashboard = () => {
                                                         const memberOrders = orders.filter(o => o.email === selectedMember.email || o.userId === selectedMember.id || o.user_id === selectedMember.id);
                                                         const totalSpent = memberOrders.reduce((acc, o) => acc + parseFloat(o.total || 0), 0);
                                                         const ordersWithPromo = memberOrders.filter(o => o.promoCodeUsed || o.promo_code_used);
-                                                        const promoDiscount = ordersWithPromo.reduce((acc, o) => acc + parseFloat(o.promoDiscount || o.promo_discount || 0), 0);
-                                                        const totalWithoutPromo = totalSpent + promoDiscount;
-                                                        const usedCoupons = [...new Set(ordersWithPromo.map(o => o.promoCodeUsed || o.promo_code_used))].filter(Boolean);
+                                                        
+                                                        // Calculate total without reductions correctly from items
+                                                        let totalOriginal = 0;
+                                                        memberOrders.forEach(o => {
+                                                            if (o.items) {
+                                                                const items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items;
+                                                                const itemsTotal = items.reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.quantity || 1)), 0);
+                                                                totalOriginal += itemsTotal;
+                                                            } else {
+                                                                totalOriginal += parseFloat(o.total || 0);
+                                                            }
+                                                        });
+                                                        const promoDiscount = totalOriginal - totalSpent;
+                                                        
+                                                        // Count coupon usage per code
+                                                        const couponUsageCount = {};
+                                                        ordersWithPromo.forEach(o => {
+                                                            const code = o.promoCodeUsed || o.promo_code_used;
+                                                            if (code) {
+                                                                couponUsageCount[code] = (couponUsageCount[code] || 0) + 1;
+                                                            }
+                                                        });
                                                         
                                                         return (
                                                             <div style={{ background: '#080808', padding: '1.5rem', borderRadius: '12px' }}>
@@ -2215,21 +2243,23 @@ const Dashboard = () => {
                                                                 </div>
                                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #222' }}>
                                                                     <span style={{ color: '#888' }}>Total sans réductions</span>
-                                                                    <strong style={{ fontSize: '1rem', color: '#666' }}>{totalWithoutPromo.toFixed(2)}€</strong>
+                                                                    <strong style={{ fontSize: '1rem', color: '#666' }}>{totalOriginal.toFixed(2)}€</strong>
                                                                 </div>
-                                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #222' }}>
-                                                                    <span style={{ color: '#888' }}>Économies réalisées</span>
-                                                                    <strong style={{ fontSize: '1rem', color: '#4ade80' }}>-{promoDiscount.toFixed(2)}€</strong>
-                                                                </div>
+                                                                {promoDiscount > 0 && (
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #222' }}>
+                                                                        <span style={{ color: '#888' }}>Économies réalisées</span>
+                                                                        <strong style={{ fontSize: '1rem', color: '#4ade80' }}>-{promoDiscount.toFixed(2)}€</strong>
+                                                                    </div>
+                                                                )}
                                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #222' }}>
                                                                     <span style={{ color: '#888' }}>Nombre de commandes</span>
                                                                     <strong style={{ fontSize: '1rem', color: '#fff' }}>{memberOrders.length}</strong>
                                                                 </div>
-                                                                {usedCoupons.length > 0 && (
+                                                                {Object.keys(couponUsageCount).length > 0 && (
                                                                     <div style={{ marginTop: '0.5rem' }}>
                                                                         <span style={{ color: '#888', fontSize: '0.8rem' }}>Coupons utilisés:</span>
                                                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                                            {usedCoupons.map((code, i) => (
+                                                                            {Object.entries(couponUsageCount).map(([code, count], i) => (
                                                                                 <span key={i} style={{ 
                                                                                     background: 'rgba(167, 139, 250, 0.15)', 
                                                                                     color: 'var(--color-accent)', 
@@ -2237,7 +2267,7 @@ const Dashboard = () => {
                                                                                     borderRadius: '4px', 
                                                                                     fontSize: '0.75rem',
                                                                                     fontWeight: 'bold'
-                                                                                }}>{code}</span>
+                                                                                }}>{code} <span style={{ color: '#888', fontWeight: 'normal' }}>x{count}</span></span>
                                                                             ))}
                                                                         </div>
                                                                     </div>
@@ -2885,7 +2915,7 @@ const Dashboard = () => {
                                             </div>
                                             <div>
                                                 <h3 style={{ margin: 0, fontSize: '1.1rem' }}>
-                                                    {selectedLoginAccount ? `Historique: ${selectedLoginAccount.split('@')[0]}` : 'Historique de Connexion'}
+                                                    {selectedLoginAccount ? `Historique: ${selectedLoginAccount}` : 'Historique de Connexion'}
                                                 </h3>
                                                 <p style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>
                                                     {selectedLoginAccount ? 'Tentatives de connexion du compte' : 'Sélectionnez un compte à gauche'}
@@ -3389,16 +3419,50 @@ const Dashboard = () => {
                                                         background: '#111', 
                                                         border: '1px solid #222', 
                                                         borderRadius: '6px', 
-                                                        maxHeight: '200px', 
+                                                        maxHeight: iconZoomLevel === 2 ? '300px' : '200px', 
                                                         overflowY: 'auto',
                                                         padding: '0.4rem'
                                                     }}>
-                                                        <div style={{ padding: '0.2rem 0.4rem', marginBottom: '0.4rem', borderBottom: '1px solid #222' }}>
+                                                        <div style={{ padding: '0.2rem 0.4rem', marginBottom: '0.4rem', borderBottom: '1px solid #222', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                             <span style={{ fontSize: '0.65rem', color: '#555' }}>
                                                                 {filteredBannerIcons.length} icônes {bannerIconSearch ? `pour "${bannerIconSearch}"` : ''} • {allLucideIcons.length} total
                                                             </span>
+                                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setIconZoomLevel(1)}
+                                                                    style={{
+                                                                        padding: '2px 6px',
+                                                                        background: iconZoomLevel === 1 ? 'rgba(167, 139, 250, 0.2)' : 'transparent',
+                                                                        border: iconZoomLevel === 1 ? '1px solid var(--color-accent)' : '1px solid #333',
+                                                                        borderRadius: '4px',
+                                                                        color: iconZoomLevel === 1 ? 'var(--color-accent)' : '#666',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: '0.6rem'
+                                                                    }}
+                                                                    title="Vue normale"
+                                                                >
+                                                                    −
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setIconZoomLevel(2)}
+                                                                    style={{
+                                                                        padding: '2px 6px',
+                                                                        background: iconZoomLevel === 2 ? 'rgba(167, 139, 250, 0.2)' : 'transparent',
+                                                                        border: iconZoomLevel === 2 ? '1px solid var(--color-accent)' : '1px solid #333',
+                                                                        borderRadius: '4px',
+                                                                        color: iconZoomLevel === 2 ? 'var(--color-accent)' : '#666',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: '0.6rem'
+                                                                    }}
+                                                                    title="Vue agrandie"
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '4px' }}>
+                                                        <div style={{ display: 'grid', gridTemplateColumns: iconZoomLevel === 2 ? 'repeat(auto-fill, minmax(90px, 1fr))' : 'repeat(auto-fill, minmax(60px, 1fr))', gap: iconZoomLevel === 2 ? '6px' : '4px' }}>
                                                             {/* None option */}
                                                             <button
                                                                 type="button"
@@ -3407,8 +3471,8 @@ const Dashboard = () => {
                                                                     display: 'flex',
                                                                     flexDirection: 'column',
                                                                     alignItems: 'center',
-                                                                    gap: '2px',
-                                                                    padding: '4px 2px',
+                                                                    gap: iconZoomLevel === 2 ? '4px' : '2px',
+                                                                    padding: iconZoomLevel === 2 ? '8px 4px' : '4px 2px',
                                                                     background: announcementIcon === 'none' ? 'rgba(167, 139, 250, 0.25)' : 'rgba(255,255,255,0.02)',
                                                                     border: announcementIcon === 'none' ? '1px solid var(--color-accent)' : '1px solid transparent',
                                                                     borderRadius: '5px',
@@ -3418,8 +3482,8 @@ const Dashboard = () => {
                                                                 onMouseOver={e => { if (announcementIcon !== 'none') e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
                                                                 onMouseOut={e => { if (announcementIcon !== 'none') e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
                                                             >
-                                                                <Ban size={14} color={announcementIcon === 'none' ? 'var(--color-accent)' : '#666'} />
-                                                                <span style={{ fontSize: '0.5rem', color: announcementIcon === 'none' ? 'var(--color-accent)' : '#555' }}>Aucune</span>
+                                                                <Ban size={iconZoomLevel === 2 ? 22 : 14} color={announcementIcon === 'none' ? 'var(--color-accent)' : '#666'} />
+                                                                <span style={{ fontSize: iconZoomLevel === 2 ? '0.65rem' : '0.5rem', color: announcementIcon === 'none' ? 'var(--color-accent)' : '#555' }}>Aucune</span>
                                                             </button>
                                                             {filteredBannerIcons.map(iconName => {
                                                                 const IconComp = LucideIcons[iconName];
@@ -3436,8 +3500,8 @@ const Dashboard = () => {
                                                                             display: 'flex',
                                                                             flexDirection: 'column',
                                                                             alignItems: 'center',
-                                                                            gap: '2px',
-                                                                            padding: '4px 2px',
+                                                                            gap: iconZoomLevel === 2 ? '4px' : '2px',
+                                                                            padding: iconZoomLevel === 2 ? '8px 4px' : '4px 2px',
                                                                             background: announcementIcon === iconName ? 'rgba(167, 139, 250, 0.25)' : 'rgba(255,255,255,0.02)',
                                                                             border: announcementIcon === iconName ? '1px solid var(--color-accent)' : '1px solid transparent',
                                                                             borderRadius: '5px',
@@ -3447,8 +3511,8 @@ const Dashboard = () => {
                                                                         onMouseOver={e => { if (announcementIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
                                                                         onMouseOut={e => { if (announcementIcon !== iconName) e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
                                                                     >
-                                                                        <IconComp size={14} color={announcementIcon === iconName ? 'var(--color-accent)' : '#888'} />
-                                                                        <span style={{ fontSize: '0.45rem', color: announcementIcon === iconName ? 'var(--color-accent)' : '#555', textAlign: 'center', lineHeight: 1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>{iconName}</span>
+                                                                        <IconComp size={iconZoomLevel === 2 ? 22 : 14} color={announcementIcon === iconName ? 'var(--color-accent)' : '#888'} />
+                                                                        <span style={{ fontSize: iconZoomLevel === 2 ? '0.6rem' : '0.45rem', color: announcementIcon === iconName ? 'var(--color-accent)' : '#555', textAlign: 'center', lineHeight: 1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>{iconName}</span>
                                                                     </button>
                                                                 );
                                                             })}

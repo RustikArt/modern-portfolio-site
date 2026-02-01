@@ -1227,12 +1227,26 @@ textarea.input-modern {
 
 .quick-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
 }
 
 .quick-actions .btn-modern {
     flex: 1;
     justify-content: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    color: #fbbf24;
+    transition: all 0.2s ease;
+}
+
+.quick-actions .btn-modern:hover {
+    background: rgba(251, 191, 36, 0.2);
+    border-color: rgba(251, 191, 36, 0.4);
+    transform: translateY(-1px);
 }
 
 /* Charts */

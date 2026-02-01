@@ -115,8 +115,9 @@ export default async function handler(req, res) {
             const { id, ...updatedOrder } = req.body;
             if (!id) return res.status(400).json({ error: 'ID requis.' });
 
+            console.log('[api/orders] PUT - Updating order:', id, 'with data:', JSON.stringify(updatedOrder, null, 2));
 
-            // Filter and map fields for update
+            // Filter and map fields for update - only include fields that have values
             const cleanedUpdate = {};
             if (updatedOrder.customerName || updatedOrder.customer_name)
                 cleanedUpdate.customer_name = updatedOrder.customerName || updatedOrder.customer_name;
@@ -137,16 +138,31 @@ export default async function handler(req, res) {
                 cleanedUpdate.completion_date = updatedOrder.completionDate || updatedOrder.completion_date;
             }
             // Promo code used
-            if (updatedOrder.promoCodeUsed || updatedOrder.promo_code_used) {
-                cleanedUpdate.promo_code_used = updatedOrder.promoCodeUsed || updatedOrder.promo_code_used;
+            if (updatedOrder.promoCodeUsed !== undefined || updatedOrder.promo_code_used !== undefined) {
+                cleanedUpdate.promo_code_used = updatedOrder.promoCodeUsed || updatedOrder.promo_code_used || null;
             }
+            // Promo discount amount
+            if (updatedOrder.promoDiscount !== undefined || updatedOrder.promo_discount !== undefined) {
+                cleanedUpdate.promo_discount = parseFloat(updatedOrder.promoDiscount || updatedOrder.promo_discount || 0);
+            }
+
+            console.log('[api/orders] PUT - Cleaned update object:', JSON.stringify(cleanedUpdate, null, 2));
 
             const { error: updateError } = await supabase
                 .from('portfolio_orders')
                 .update(cleanedUpdate)
                 .eq('id', id);
 
-            if (updateError) throw updateError;
+            if (updateError) {
+                console.error('[api/orders] PUT - Update error:', JSON.stringify(updateError, null, 2));
+                return res.status(500).json({
+                    error: 'Échec de la mise à jour de la commande.',
+                    message: updateError.message,
+                    code: updateError.code,
+                    details: updateError.details,
+                    hint: updateError.hint
+                });
+            }
 
             const { data: allOrders, error: fetchError } = await supabase
                 .from('portfolio_orders')
