@@ -142,6 +142,17 @@ BEGIN
     ELSE
         RAISE NOTICE 'Column is_active already exists in promo_codes';
     END IF;
+    
+    -- Ensure updated_at column exists (required by trigger)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'portfolio_promo_codes' 
+                   AND column_name = 'updated_at') THEN
+        ALTER TABLE public.portfolio_promo_codes ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
+        RAISE NOTICE 'Added column: updated_at to promo_codes';
+    ELSE
+        RAISE NOTICE 'Column updated_at already exists in promo_codes';
+    END IF;
 END $$;
 
 -- Step 4: Verify the changes
