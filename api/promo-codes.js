@@ -58,9 +58,47 @@ export default async function handler(req, res) {
             handleError(res, error, 500);
         }
     } else if (req.method === 'PUT') {
-        if (!requireAdminAuth(req, res)) return;
         try {
-            const { id, ...updatedPromoCode } = req.body;
+            const { id, code, incrementUse, ...updatedPromoCode } = req.body;
+            
+            // Cas spécial: incrémenter l'utilisation du code promo (pas besoin d'auth admin)
+            if (incrementUse && code) {
+                console.log('[api/promo-codes] Incrementing use for code:', code);
+                
+                // Récupérer le code promo actuel
+                const { data: promoData, error: fetchError } = await supabase
+                    .from('portfolio_promo_codes')
+                    .select('id, uses, current_uses')
+                    .eq('code', code.toUpperCase())
+                    .single();
+                
+                if (fetchError || !promoData) {
+                    console.error('[api/promo-codes] Code not found:', code);
+                    return res.status(404).json({ error: 'Code promo non trouvé' });
+                }
+                
+                // Incrémenter le compteur
+                const currentUses = promoData.current_uses || promoData.uses || 0;
+                const { error: updateError } = await supabase
+                    .from('portfolio_promo_codes')
+                    .update({ 
+                        uses: currentUses + 1,
+                        current_uses: currentUses + 1 
+                    })
+                    .eq('id', promoData.id);
+                
+                if (updateError) {
+                    console.error('[api/promo-codes] Failed to increment:', updateError);
+                    throw updateError;
+                }
+                
+                console.log('[api/promo-codes] Successfully incremented use for:', code);
+                return res.status(200).json({ success: true, newUses: currentUses + 1 });
+            }
+            
+            // Cas normal: mise à jour admin
+            if (!requireAdminAuth(req, res)) return;
+            
             const numId = Number(id);
             const { data, error } = await supabase
                 .from('portfolio_promo_codes')

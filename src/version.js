@@ -1,4 +1,4 @@
-export const WEBSITE_VERSION = "Version 7.2";
+export const WEBSITE_VERSION = "Version 7.3";
 export const VERSION_DETAILS = `Corrections et améliorations:
 • Graphique statuts commandes: légende intégrée correctement
 • Graphique revenus mensuels: chronologie corrigée (ancien→récent)

@@ -1129,7 +1129,7 @@ const Dashboard = () => {
                                     
                                     <div className="charts-grid">
                                     {/* Order Status Pie Chart */}
-                                    <div className="dashboard-card">
+                                    <div className="dashboard-card chart-card-narrow">
                                         <h3 className="card-title">Statuts des Commandes</h3>
                                         {(() => {
                                             const statusCounts = { 'Réception': 0, 'En cours': 0, 'Terminé': 0, 'En attente': 0 };
@@ -1145,9 +1145,9 @@ const Dashboard = () => {
                                             }
                                             
                                             return (
-                                                <div className="chart-container" style={{ overflow: 'visible', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <ResponsiveContainer width="100%" height={250}>
-                                                        <RechartsPie margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                                                <div className="chart-container">
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <RechartsPie margin={{ top: 10, right: 10, bottom: 40, left: 10 }}>
                                                             <Pie
                                                                 data={pieData}
                                                                 cx="50%"

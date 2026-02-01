@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const Checkout = () => {
-    const { cart, currentUser, getCartTotal, promoCodes, applyPromoCode, activePromo, clearCart } = useData();
+    const { cart, currentUser, getCartTotal, promoCodes, applyPromoCode, activePromo, clearCart, addOrder } = useData();
     const navigate = useNavigate();
     const [shipping, setShipping] = useState({ address: '', city: '', zip: '', country: '' });
     const [isProcessing, setIsProcessing] = useState(false);
@@ -44,17 +44,82 @@ const Checkout = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     // Handle Success Return from Stripe (Early in component to catch params)
-    // NOTE: La création de commande est gérée par le webhook Stripe (stripe-webhook.js)
-    // Ici on affiche seulement la confirmation et on nettoie le panier
+    // Création de commande côté client comme fallback (le webhook Stripe peut aussi la créer)
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         if (query.get('success') && !hasProcessed.current) {
             hasProcessed.current = true;
 
+            // Récupérer les données de commande stockées avant le paiement
+            const pendingOrderData = sessionStorage.getItem('pending_order');
+            
+            if (pendingOrderData) {
+                const orderData = JSON.parse(pendingOrderData);
+                
+                // Créer la commande via l'API
+                const createOrder = async () => {
+                    try {
+                        const response = await fetch('/api/orders', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                customerName: orderData.customerName,
+                                email: orderData.email,
+                                total: orderData.total,
+                                status: 'Payé',
+                                items: orderData.items,
+                                date: new Date().toISOString(),
+                                userId: orderData.userId,
+                                shipping: orderData.shipping,
+                                promoCodeUsed: orderData.promoCode || null,
+                                promoDiscount: orderData.promoDiscount || 0,
+                                notes: 'Commande créée via redirection success',
+                                checklist: [
+                                    { id: 1, label: 'Brief client reçu', completed: false },
+                                    { id: 2, label: 'Concept design validé', completed: false },
+                                    { id: 3, label: 'Production / Création', completed: false },
+                                    { id: 4, label: 'Envoi finalisé', completed: false }
+                                ]
+                            })
+                        });
+
+                        if (response.ok) {
+                            console.log('[Checkout] Commande créée avec succès');
+                            
+                            // Incrémenter l'utilisation du code promo si utilisé
+                            if (orderData.promoCode) {
+                                try {
+                                    await fetch('/api/promo-codes', {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            code: orderData.promoCode,
+                                            incrementUse: true
+                                        })
+                                    });
+                                    console.log('[Checkout] Code promo marqué comme utilisé');
+                                } catch (promoErr) {
+                                    console.warn('[Checkout] Erreur mise à jour promo:', promoErr);
+                                }
+                            }
+                        } else {
+                            console.warn('[Checkout] Erreur création commande (peut-être déjà créée par webhook)');
+                        }
+                    } catch (err) {
+                        console.warn('[Checkout] Erreur création commande:', err);
+                    }
+                };
+
+                createOrder();
+                
+                // Nettoyer les données temporaires
+                sessionStorage.removeItem('pending_order');
+            }
+
             // Mark as success internal state
             setShowSuccessModal(true);
 
-            // Clear cart after successful payment (order is created by webhook)
+            // Clear cart after successful payment
             clearCart();
 
             // Clear promo code
@@ -122,6 +187,36 @@ const Checkout = () => {
 
         setIsProcessing(true);
         try {
+            // Calculer le total avec promo
+            let promoDiscount = 0;
+            const subtotal = getCartTotal();
+            if (activePromo) {
+                if (activePromo.type === 'percent') {
+                    promoDiscount = subtotal * (activePromo.value / 100);
+                } else if (activePromo.type === 'fixed') {
+                    promoDiscount = activePromo.value;
+                }
+            }
+            const finalTotal = Math.max(0, subtotal - promoDiscount);
+
+            // Stocker les données de commande AVANT de rediriger vers Stripe
+            const pendingOrder = {
+                customerName: currentUser.name || currentUser.email.split('@')[0],
+                email: currentUser.email,
+                total: parseFloat(finalTotal.toFixed(2)),
+                items: cart.map(item => ({
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    options: item.selectedOptions || null
+                })),
+                userId: currentUser.id,
+                shipping: allDigital ? null : shipping,
+                promoCode: activePromo?.code || null,
+                promoDiscount: promoDiscount
+            };
+            sessionStorage.setItem('pending_order', JSON.stringify(pendingOrder));
+
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -154,6 +249,8 @@ const Checkout = () => {
 
         } catch (err) {
             console.error("Stripe Error:", err);
+            // En cas d'erreur, nettoyer les données temporaires
+            sessionStorage.removeItem('pending_order');
             alert(`Une erreur est survenue lors du paiement : ${err.message}. Veuillez vérifier vos informations.`);
         } finally {
             setIsProcessing(false);

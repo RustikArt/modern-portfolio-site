@@ -1265,8 +1265,8 @@ textarea.input-modern {
 /* Charts */
 .charts-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+    grid-template-columns: minmax(250px, 1fr) minmax(300px, 2fr);
+    gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
@@ -1281,6 +1281,15 @@ textarea.input-modern {
     height: 220px;
     min-height: 220px;
     position: relative;
+}
+
+.chart-card-narrow {
+    max-width: 320px;
+}
+
+.chart-card-narrow .chart-container {
+    height: 280px;
+    min-height: 280px;
 }
 
 .chart-container--tall {
