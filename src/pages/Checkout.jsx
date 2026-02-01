@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 const Checkout = () => {
-    const { cart, currentUser, placeOrder, getCartTotal, promoCodes, applyPromoCode, activePromo } = useData();
+    const { cart, currentUser, getCartTotal, promoCodes, applyPromoCode, activePromo, clearCart } = useData();
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [shipping, setShipping] = useState({ address: '', city: '', zip: '', country: '' });
@@ -27,44 +27,31 @@ const Checkout = () => {
 
     // Success Popup State
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [lastCreatedOrder, setLastCreatedOrder] = useState(null);
 
     // Handle Success Return from Stripe (Early in component to catch params)
+    // NOTE: La création de commande est gérée par le webhook Stripe (stripe-webhook.js)
+    // Ici on affiche seulement la confirmation et on nettoie le panier
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         if (query.get('success') && !hasProcessed.current) {
             hasProcessed.current = true;
 
-            // Retrieve shipping details from storage
-            const savedShipping = localStorage.getItem('last_shipping');
-            const finalShipping = savedShipping ? JSON.parse(savedShipping) : shipping;
-
-            // Calculate final discounted total using activePromo (persisted in Context)
-            let finalTotal = getCartTotal();
-            if (activePromo) {
-                if (activePromo.type === 'percent') {
-                    finalTotal -= finalTotal * (activePromo.value / 100);
-                } else if (activePromo.type === 'fixed') {
-                    finalTotal -= activePromo.value;
-                }
-            }
-            finalTotal = Math.max(0, finalTotal).toFixed(2);
-
             // Mark as success internal state
             setShowSuccessModal(true);
 
-            // Create order with DISCOUNTED total
-            const order = placeOrder(finalShipping, { id: 'STRIPE_SUCCESS', status: 'COMPLETED' }, finalTotal);
-            setLastCreatedOrder(order);
+            // Clear cart after successful payment (order is created by webhook)
+            clearCart();
 
-            // Clean up
+            // Clear promo code
+            if (activePromo) {
+                applyPromoCode('');
+            }
+
+            // Clean up URL and local storage
             window.history.replaceState({}, '', '/checkout');
             localStorage.removeItem('last_shipping');
-            // No need to clear promo manually, keep it for reference or clear if single use
-            // If single use, we should decrement usage here? Logic is in placeOrder or addUsage?
-            // For now, let's leave it.
         }
-    }, [getCartTotal, placeOrder, shipping]);
+    }, [clearCart, applyPromoCode, activePromo]);
 
     if (cart.length === 0 && !showSuccessModal && !hasProcessed.current) {
         return (
@@ -308,10 +295,9 @@ const Checkout = () => {
 
                         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', textAlign: 'left', marginBottom: '3rem' }}>
                             <div style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '1.5px' }}>Confirmation</div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                                <span>Montant réglé</span>
-                                <span style={{ color: 'var(--color-accent)' }}>{calculateTotal()}€</span>
-                            </div>
+                            <p style={{ color: '#888', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                                Un email de confirmation vous a été envoyé. Vous pouvez suivre votre commande depuis votre espace client.
+                            </p>
                         </div>
 
                         <button onClick={handleCloseModal} className="btn btn-primary" style={{ width: '100%', borderRadius: '40px', padding: '1.2rem', fontWeight: 'bold', fontSize: '1rem' }}>

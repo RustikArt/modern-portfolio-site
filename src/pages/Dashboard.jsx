@@ -177,6 +177,12 @@ const Dashboard = () => {
     // Product Filters
     const [productFilter, setProductFilter] = useState({ category: 'all', promoOnly: false, search: '' });
 
+    // Login History Filter
+    const [loginHistoryFilter, setLoginHistoryFilter] = useState('all');
+
+    // Notepad save state
+    const [noteSaved, setNoteSaved] = useState(false);
+
     // Lucide Icon Picker states
     const [iconSearch, setIconSearch] = useState('');
     const [showIconPicker, setShowIconPicker] = useState(false);
@@ -573,17 +579,47 @@ const Dashboard = () => {
 
     // --- CHART DATA PREP ---
     const getChartData = () => {
-        // Group by Month (simple version)
+        // Group by Month - track both actual revenue and revenue without discounts
         const data = {};
         orders.forEach(order => {
             const date = new Date(order.date);
             const month = date.toLocaleString('default', { month: 'short' });
-            data[month] = (data[month] || 0) + parseFloat(order.total || 0);
+            
+            // Actual revenue (with discounts applied)
+            const actualRevenue = parseFloat(order.total || 0);
+            
+            // Compute original total without discount
+            let originalTotal = actualRevenue;
+            if (order.promoCodeUsed || order.promo_code_used) {
+                // If there's discount info stored
+                const discountAmount = parseFloat(order.discountAmount || order.discount_amount || 0);
+                if (discountAmount > 0) {
+                    originalTotal = actualRevenue + discountAmount;
+                }
+            }
+            // Also check items for calculating original price
+            if (order.items) {
+                const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+                const itemsTotal = items.reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.quantity || 1)), 0);
+                if (itemsTotal > actualRevenue) {
+                    originalTotal = itemsTotal;
+                }
+            }
+            
+            if (!data[month]) {
+                data[month] = { value: 0, originalValue: 0 };
+            }
+            data[month].value += actualRevenue;
+            data[month].originalValue += originalTotal;
         });
-        return Object.keys(data).map(key => ({ name: key, value: data[key] }));
+        return Object.keys(data).map(key => ({ 
+            name: key, 
+            value: Math.round(data[key].value * 100) / 100, 
+            originalValue: Math.round(data[key].originalValue * 100) / 100 
+        }));
     };
 
-    const chartData = getChartData().length > 0 ? getChartData() : [{ name: 'Jan', value: 0 }, { name: 'Feb', value: 0 }];
+    const chartData = getChartData().length > 0 ? getChartData() : [{ name: 'Jan', value: 0, originalValue: 0 }, { name: 'Feb', value: 0, originalValue: 0 }];
 
     // --- ACTIVITY LOGS (MOCK FROM NOTIFICATIONS FOR NOW) ---
     // In a real app, this would be a separate 'logs' table
@@ -907,10 +943,15 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                         <div className="kpi-card kpi-card--actions">
-                                            <div className="kpi-card__label">Accès Rapide</div>
-                                            <div className="quick-actions">
-                                                <button onClick={() => setActiveTab('products')} className="btn-modern btn-modern--sm"><Plus size={16} /> Produit</button>
-                                                <button onClick={() => setActiveTab('projects')} className="btn-modern btn-modern--sm"><FileCode size={16} /> Projet</button>
+                                            <div className="kpi-card__icon" style={{ background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24' }}>
+                                                <Zap size={24} />
+                                            </div>
+                                            <div className="kpi-card__content">
+                                                <div className="kpi-card__label">Accès Rapide</div>
+                                                <div className="quick-actions">
+                                                    <button onClick={() => setActiveTab('products')} className="btn-modern btn-modern--sm"><Plus size={16} /> Produit</button>
+                                                    <button onClick={() => setActiveTab('projects')} className="btn-modern btn-modern--sm"><FileCode size={16} /> Projet</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1068,13 +1109,39 @@ const Dashboard = () => {
                                         <div className="dashboard-card">
                                             <div className="card-header">
                                                 <h3 className="card-title">Bloc-notes Admin</h3>
-                                                <Save size={16} className="card-icon" />
+                                                <button
+                                                    onClick={() => {
+                                                        const textarea = document.getElementById('admin-notepad');
+                                                        if (textarea) {
+                                                            localStorage.setItem('admin_notes', textarea.value);
+                                                            setNoteSaved(true);
+                                                            setTimeout(() => setNoteSaved(false), 2000);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        padding: '0.5rem 1rem',
+                                                        background: noteSaved ? 'rgba(34, 197, 94, 0.2)' : 'rgba(167, 139, 250, 0.15)',
+                                                        border: noteSaved ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(167, 139, 250, 0.25)',
+                                                        borderRadius: '8px',
+                                                        color: noteSaved ? '#22c55e' : 'var(--color-accent)',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: '500',
+                                                        transition: 'all 0.2s ease'
+                                                    }}
+                                                >
+                                                    {noteSaved ? <Check size={14} /> : <Save size={14} />}
+                                                    {noteSaved ? 'Enregistré !' : 'Enregistrer'}
+                                                </button>
                                             </div>
                                             <textarea
+                                                id="admin-notepad"
                                                 className="input-modern input-modern--textarea"
                                                 placeholder="Notes rapides, idées, tâches à faire..."
                                                 defaultValue={localStorage.getItem('admin_notes') || ''}
-                                                onChange={(e) => localStorage.setItem('admin_notes', e.target.value)}
                                             />
                                         </div>
 
@@ -1393,6 +1460,44 @@ const Dashboard = () => {
                                                                                     )}
                                                                                 </div>
                                                                             ))}
+                                                                            
+                                                                            {/* Promo code info section */}
+                                                                            {(order.promoCodeUsed || order.promo_code_used || order.discount > 0) && (
+                                                                                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(167, 139, 250, 0.2)' }}>
+                                                                                    <div 
+                                                                                        style={{ 
+                                                                                            display: 'flex', 
+                                                                                            alignItems: 'center', 
+                                                                                            justifyContent: 'space-between',
+                                                                                            padding: '0.8rem',
+                                                                                            background: 'rgba(167, 139, 250, 0.08)',
+                                                                                            borderRadius: '8px',
+                                                                                            border: '1px solid rgba(167, 139, 250, 0.15)'
+                                                                                        }}
+                                                                                    >
+                                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                                            <Ticket size={16} style={{ color: 'var(--color-accent)' }} />
+                                                                                            <span style={{ fontSize: '0.85rem', color: '#ccc' }}>Code promo utilisé:</span>
+                                                                                            <span style={{ 
+                                                                                                background: 'var(--color-accent)', 
+                                                                                                color: '#000', 
+                                                                                                padding: '2px 8px', 
+                                                                                                borderRadius: '4px', 
+                                                                                                fontSize: '0.75rem', 
+                                                                                                fontWeight: 'bold',
+                                                                                                fontFamily: 'monospace'
+                                                                                            }}>
+                                                                                                {order.promoCodeUsed || order.promo_code_used || 'DISCOUNT'}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        {order.discount > 0 && (
+                                                                                            <span style={{ color: '#4caf50', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                                                                                -{order.discount}€
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
                                                                         </div>
 
                                                                         {order.checklist && (
@@ -2065,24 +2170,24 @@ const Dashboard = () => {
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid #222', paddingBottom: '1rem' }}>
                                                             <span style={{ color: '#888' }}>Total Dépensé</span>
                                                             <strong style={{ fontSize: '1.2rem', color: '#fff' }}>
-                                                                {orders.filter(o => o.user === selectedMember.name).reduce((acc, o) => acc + o.total, 0).toFixed(2)}€
+                                                                {orders.filter(o => o.email === selectedMember.email || o.userId === selectedMember.id || o.user_id === selectedMember.id).reduce((acc, o) => acc + parseFloat(o.total || 0), 0).toFixed(2)}€
                                                             </strong>
                                                         </div>
                                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                                             <span style={{ color: '#888' }}>Nombre de commandes</span>
                                                             <strong style={{ fontSize: '1.2rem', color: '#fff' }}>
-                                                                {orders.filter(o => o.user === selectedMember.name).length}
+                                                                {orders.filter(o => o.email === selectedMember.email || o.userId === selectedMember.id || o.user_id === selectedMember.id).length}
                                                             </strong>
                                                         </div>
                                                     </div>
 
                                                     <h4 style={{ marginTop: '2rem', marginBottom: '1rem', fontSize: '0.9rem', color: '#666' }}>Dernières Commandes</h4>
                                                     <div style={{ display: 'grid', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto' }}>
-                                                        {orders.filter(o => o.user === selectedMember.name).length > 0 ? (
-                                                            orders.filter(o => o.user === selectedMember.name).map(o => (
+                                                        {orders.filter(o => o.email === selectedMember.email || o.userId === selectedMember.id || o.user_id === selectedMember.id).length > 0 ? (
+                                                            orders.filter(o => o.email === selectedMember.email || o.userId === selectedMember.id || o.user_id === selectedMember.id).slice(0, 10).map(o => (
                                                                 <div key={o.id} style={{ padding: '0.8rem', background: '#111', border: '1px solid #222', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                                                    <span>#{o.id}</span>
-                                                                    <span>{o.date}</span>
+                                                                    <span>#{String(o.id).slice(-6)}</span>
+                                                                    <span>{new Date(o.date).toLocaleDateString('fr-FR')}</span>
                                                                     <span style={{ color: 'var(--color-accent)' }}>{o.total}€</span>
                                                                 </div>
                                                             ))
@@ -2131,7 +2236,7 @@ const Dashboard = () => {
                                                             </span>
                                                         </td>
                                                         <td style={{ padding: '1rem', color: '#fff', fontSize: '0.9rem' }}>
-                                                            {orders.filter(o => o.user === u.name).reduce((acc, o) => acc + o.total, 0)}€
+                                                            {orders.filter(o => o.email === u.email || o.userId === u.id || o.user_id === u.id).reduce((acc, o) => acc + parseFloat(o.total || 0), 0).toFixed(2)}€
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -2477,18 +2582,45 @@ const Dashboard = () => {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
                                     {/* Login History */}
                                     <div style={cardStyle}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                                            <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--color-accent)' }}>
-                                                <Shield size={24} />
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--color-accent)' }}>
+                                                    <Shield size={24} />
+                                                </div>
+                                                <div>
+                                                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Historique de Connexion</h3>
+                                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>Dernières connexions au système</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Historique de Connexion</h3>
-                                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>Dernières tentatives d'accès à votre compte</p>
-                                            </div>
+                                            <select
+                                                value={loginHistoryFilter || 'all'}
+                                                onChange={e => setLoginHistoryFilter(e.target.value)}
+                                                style={{ 
+                                                    background: 'rgba(255,255,255,0.05)', 
+                                                    border: '1px solid rgba(255,255,255,0.1)', 
+                                                    borderRadius: '8px', 
+                                                    padding: '0.5rem 1rem', 
+                                                    color: '#eee', 
+                                                    fontSize: '0.8rem',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <option value="all">Tous les comptes</option>
+                                                <option value="admin">Admins seulement</option>
+                                                <option value="clients">Clients seulement</option>
+                                            </select>
                                         </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            {loginHistory && loginHistory.length > 0 ? loginHistory.slice(0, 8).map((entry, idx) => (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
+                                            {loginHistory && loginHistory.length > 0 ? 
+                                                loginHistory
+                                                    .filter(entry => {
+                                                        if (loginHistoryFilter === 'admin') return entry.isAdmin;
+                                                        if (loginHistoryFilter === 'clients') return !entry.isAdmin;
+                                                        return true;
+                                                    })
+                                                    .slice(0, 15)
+                                                    .map((entry, idx) => (
                                                 <div key={idx} style={{
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
@@ -2499,16 +2631,32 @@ const Dashboard = () => {
                                                     border: '1px solid rgba(255,255,255,0.05)'
                                                 }}>
                                                     <div>
-                                                        <div style={{ fontSize: '0.9rem', color: '#eee' }}>{entry.device} • {entry.browser}</div>
-                                                        <div style={{ fontSize: '0.7rem', color: '#444' }}>{entry.ip}</div>
+                                                        <div style={{ fontSize: '0.9rem', color: '#eee', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                            {entry.userName || entry.userEmail}
+                                                            {entry.isAdmin && (
+                                                                <span style={{ 
+                                                                    fontSize: '0.6rem', 
+                                                                    background: 'var(--color-accent)', 
+                                                                    color: '#000', 
+                                                                    padding: '2px 6px', 
+                                                                    borderRadius: '4px',
+                                                                    fontWeight: 'bold'
+                                                                }}>ADMIN</span>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.7rem', color: '#666' }}>{entry.userEmail}</div>
                                                     </div>
                                                     <div style={{ textAlign: 'right' }}>
-                                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-accent)' }}>{new Date(entry.date).toLocaleDateString()}</div>
-                                                        <div style={{ fontSize: '0.65rem', color: '#444' }}>{new Date(entry.date).toLocaleTimeString()}</div>
+                                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-accent)' }}>
+                                                            {new Date(entry.timestamp).toLocaleDateString('fr-FR')}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.65rem', color: '#666' }}>
+                                                            {new Date(entry.timestamp).toLocaleTimeString('fr-FR')}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )) : (
-                                                <p style={{ textAlign: 'center', color: '#444', padding: '2rem' }}>Aucun historique disponible.</p>
+                                                <p style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>Aucun historique disponible.</p>
                                             )}
                                         </div>
                                     </div>
@@ -2854,7 +3002,7 @@ const Dashboard = () => {
                                             </div>
 
                                             {/* Nouvelles options de personnalisation */}
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
                                                 <div>
                                                     <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>Icône (à gauche)</label>
                                                     
@@ -2895,7 +3043,7 @@ const Dashboard = () => {
                                                         background: '#111', 
                                                         border: '1px solid #222', 
                                                         borderRadius: '6px', 
-                                                        maxHeight: '140px', 
+                                                        maxHeight: '200px', 
                                                         overflowY: 'auto',
                                                         padding: '0.4rem'
                                                     }}>
@@ -2904,7 +3052,7 @@ const Dashboard = () => {
                                                                 {filteredBannerIcons.length} icônes {bannerIconSearch ? `pour "${bannerIconSearch}"` : ''} • {allLucideIcons.length} total
                                                             </span>
                                                         </div>
-                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(50px, 1fr))', gap: '3px' }}>
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '4px' }}>
                                                             {/* None option */}
                                                             <button
                                                                 type="button"

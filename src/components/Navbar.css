@@ -255,7 +255,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--color-accent, #a78bfa) 0%, #22d3ee 100%);
+    background: var(--color-accent, #a78bfa);
     color: var(--color-bg, #030303);
     font-size: 0.65rem;
     font-weight: 700;

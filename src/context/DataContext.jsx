@@ -1387,6 +1387,22 @@ export const DataProvider = ({ children }) => {
             });
 
             setCurrentUser(user);
+
+            // Record login history
+            const loginEntry = {
+                userId: user.id,
+                userEmail: user.email,
+                userName: user.name,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                isAdmin: user.role === 'admin' || user.role === 'super_admin'
+            };
+            setLoginHistory(prev => {
+                const updated = [loginEntry, ...prev].slice(0, 100); // Keep last 100 entries
+                localStorage.setItem('portfolio_login_history', JSON.stringify(updated));
+                return updated;
+            });
+
             return { success: true, isAdmin: user.role === 'admin' };
         } catch (e) {
             console.error('Login error:', e);
@@ -2135,9 +2151,13 @@ export const DataProvider = ({ children }) => {
     const hasPurchasedProduct = (productId) => {
         if (!currentUser) return false;
         // Check if any order of the current user contains this product
+        // Orders can have email, userId, or customerName matching
         return orders.some(order =>
-            (order.userEmail === currentUser.email || (order.billingDetails && order.billingDetails.email === currentUser.email)) &&
-            order.items.some(item => item.id === productId)
+            (order.email === currentUser.email || 
+             order.userId === currentUser.id ||
+             order.user_id === currentUser.id ||
+             (order.billingDetails && order.billingDetails.email === currentUser.email)) &&
+            order.items.some(item => item.productId === productId || item.id === productId)
         );
     };
 
@@ -2329,13 +2349,16 @@ export const DataProvider = ({ children }) => {
                 position: 'fixed',
                 bottom: '20px',
                 right: '20px',
-                zIndex: 9999,
+                zIndex: 99999,
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'flex-end'
+                alignItems: 'flex-end',
+                pointerEvents: 'none'
             }}>
                 {toasts.map(t => (
-                    <Toast key={t.id} {...t} onClose={removeToast} />
+                    <div key={t.id} style={{ pointerEvents: 'auto' }}>
+                        <Toast {...t} onClose={removeToast} />
+                    </div>
                 ))}
             </div>
         </DataContext.Provider>

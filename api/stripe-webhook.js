@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { sendDiscordNotification, DiscordNotifications } from '../lib/discord.js';
 
 // Configuration Stripe
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
@@ -144,6 +145,50 @@ async function handleCheckoutCompleted(session) {
         }
 
         console.log('[Webhook] Order created successfully for session:', session.id);
+
+        // Increment promo code usage if used
+        if (metadata.promo_code && metadata.promo_code !== 'none') {
+            try {
+                // First get current uses count
+                const { data: promoData, error: promoFetchError } = await supabase
+                    .from('portfolio_promo_codes')
+                    .select('id, uses, current_uses')
+                    .eq('code', metadata.promo_code.toUpperCase())
+                    .single();
+
+                if (promoData && !promoFetchError) {
+                    // Increment the uses counter (support both 'uses' and 'current_uses' columns)
+                    const currentUses = promoData.current_uses || promoData.uses || 0;
+                    const { error: promoUpdateError } = await supabase
+                        .from('portfolio_promo_codes')
+                        .update({ 
+                            uses: currentUses + 1,
+                            current_uses: currentUses + 1 
+                        })
+                        .eq('id', promoData.id);
+
+                    if (promoUpdateError) {
+                        console.error('[Webhook] Failed to increment promo usage:', promoUpdateError);
+                    } else {
+                        console.log('[Webhook] Promo code usage incremented:', metadata.promo_code);
+                    }
+                }
+            } catch (promoErr) {
+                console.error('[Webhook] Error updating promo code usage:', promoErr);
+            }
+        }
+
+        // Send Discord notification for new order
+        try {
+            await sendDiscordNotification(DiscordNotifications.newOrder({
+                ...orderData,
+                customerName: orderData.customer_name,
+                promoCodeUsed: metadata.promo_code !== 'none' ? metadata.promo_code : null
+            }));
+            console.log('[Webhook] Discord notification sent');
+        } catch (discordErr) {
+            console.warn('[Webhook] Discord notification failed:', discordErr.message);
+        }
     } else {
         console.warn('[Webhook] Supabase not configured - order not saved to database');
     }

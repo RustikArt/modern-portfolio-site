@@ -1171,9 +1171,13 @@ textarea.input-modern {
 
 .kpi-card--actions {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    align-items: center;
     gap: 1rem;
+    border-color: rgba(251, 191, 36, 0.2);
+}
+
+.kpi-card--actions::before {
+    background: #fbbf24;
 }
 
 .kpi-card__icon {

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const AnalyticsChart = ({ data, title }) => {
-    // data expected format: [{ name: 'Jan', value: 400 }, ...]
+    // data expected format: [{ name: 'Jan', value: 400, originalValue: 450 }, ...]
+    // value = actual revenue (with discounts)
+    // originalValue = original revenue (without discounts)
     const containerRef = useRef(null);
     const [dimensions, setDimensions] = useState({ width: 400, height: 250 });
 
@@ -73,46 +75,90 @@ const AnalyticsChart = ({ data, title }) => {
                     >
                         <defs>
                             <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#a78bfa" stopOpacity={0.8} />
+                                <stop offset="5%" stopColor="#a78bfa" stopOpacity={0.6} />
                                 <stop offset="95%" stopColor="#a78bfa" stopOpacity={0} />
                             </linearGradient>
+                            <linearGradient id="colorOriginal" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
+                            </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
                         <XAxis
                             dataKey="name"
-                            stroke="#666"
-                            fontSize={12}
+                            stroke="#555"
+                            fontSize={11}
                             tickLine={false}
-                            axisLine={false}
+                            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
                         />
                         <YAxis
-                            stroke="#666"
-                            fontSize={12}
+                            stroke="#555"
+                            fontSize={11}
                             tickLine={false}
                             axisLine={false}
                             tickFormatter={(value) => `${value}€`}
                         />
                         <Tooltip
-                            cursor={{ stroke: '#a78bfa', strokeWidth: 1, strokeDasharray: '3 3' }}
+                            cursor={{ stroke: 'rgba(167, 139, 250, 0.3)', strokeWidth: 1 }}
                             isAnimationActive={false}
                             content={({ active, payload, label }) => {
                                 if (active && payload && payload.length) {
+                                    const actualValue = payload.find(p => p.dataKey === 'value')?.value || 0;
+                                    const originalValue = payload.find(p => p.dataKey === 'originalValue')?.value || actualValue;
+                                    const discount = originalValue - actualValue;
                                     return (
                                         <div style={{
-                                            background: 'rgba(10, 10, 15, 0.9)',
-                                            border: '1px solid rgba(167, 139, 250, 0.3)',
-                                            borderRadius: '6px',
-                                            padding: '6px 10px',
-                                            fontSize: '0.75rem'
+                                            background: 'rgba(10, 10, 15, 0.95)',
+                                            border: '1px solid rgba(167, 139, 250, 0.2)',
+                                            borderRadius: '8px',
+                                            padding: '10px 14px',
+                                            fontSize: '0.75rem',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
                                         }}>
-                                            <span style={{ color: '#a78bfa', fontWeight: 500 }}>{label}</span>
-                                            <span style={{ color: '#94a3b8', marginLeft: '6px' }}>{payload[0].value} €</span>
+                                            <div style={{ color: '#888', marginBottom: '6px', fontWeight: 500 }}>{label}</div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '4px' }}>
+                                                <span style={{ color: '#a78bfa' }}>Revenus</span>
+                                                <span style={{ color: '#f0f0f0', fontWeight: 600 }}>{actualValue.toFixed(2)} €</span>
+                                            </div>
+                                            {originalValue > actualValue && (
+                                                <>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '4px' }}>
+                                                        <span style={{ color: '#60a5fa' }}>Sans réduction</span>
+                                                        <span style={{ color: '#94a3b8' }}>{originalValue.toFixed(2)} €</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '4px', marginTop: '4px' }}>
+                                                        <span style={{ color: '#f87171' }}>Réductions</span>
+                                                        <span style={{ color: '#f87171' }}>-{discount.toFixed(2)} €</span>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     );
                                 }
                                 return null;
-                                }}
+                            }}
                         />
+                        <Legend 
+                            verticalAlign="top" 
+                            height={36}
+                            formatter={(value) => {
+                                if (value === 'value') return <span style={{ color: '#a78bfa', fontSize: '0.7rem' }}>Revenus réels</span>;
+                                if (value === 'originalValue') return <span style={{ color: '#60a5fa', fontSize: '0.7rem' }}>Sans réduction</span>;
+                                return value;
+                            }}
+                        />
+                        {/* Original value area (background - without discount) */}
+                        <Area
+                            type="monotone"
+                            dataKey="originalValue"
+                            stroke="#60a5fa"
+                            fillOpacity={1}
+                            fill="url(#colorOriginal)"
+                            strokeWidth={1.5}
+                            strokeDasharray="4 2"
+                            name="originalValue"
+                        />
+                        {/* Actual value area (foreground - with discount) */}
                         <Area
                             type="monotone"
                             dataKey="value"
@@ -120,7 +166,9 @@ const AnalyticsChart = ({ data, title }) => {
                             fillOpacity={1}
                             fill="url(#colorValue)"
                             strokeWidth={2}
+                            name="value"
                         />
+                    </AreaChart>
                     </AreaChart>
                 ) : (
                     <div style={{ 
