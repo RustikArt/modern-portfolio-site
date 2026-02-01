@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Monitor, Clock } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WEBSITE_VERSION } from '../version';
@@ -20,6 +20,13 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
     const reviewCount = getProductReviews(product.id).length;
 
     const isGrid = viewMode === 'grid';
+    
+    // Check if product is digital
+    const isDigital = product.isDigital === true || product.is_digital === true;
+    
+    // Check if product is preorder (available date in the future)
+    const availableDate = product.availableDate || product.available_date;
+    const isPreorder = availableDate && new Date(availableDate) > new Date();
     
     // Check if image is a Lucide icon
     const isLucideIcon = product.image && product.image.startsWith('lucide:');
@@ -69,6 +76,28 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             >
                 <Heart size={18} fill={isWishlisted ? "var(--color-accent)" : "none"} color="var(--color-accent)" />
             </button>
+
+            {/* Badges Digital / Précommande */}
+            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {isDigital && (
+                    <span style={{
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        background: 'rgba(59, 130, 246, 0.9)', color: 'white',
+                        padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600'
+                    }}>
+                        <Monitor size={12} /> Digital
+                    </span>
+                )}
+                {isPreorder && (
+                    <span style={{
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        background: 'rgba(245, 158, 11, 0.9)', color: 'white',
+                        padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600'
+                    }}>
+                        <Clock size={12} /> Précommande
+                    </span>
+                )}
+            </div>
 
             <Link to={`/shop/${product.id}`} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0 }}>
                 <div className="product-image" style={{

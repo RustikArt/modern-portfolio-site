@@ -217,7 +217,7 @@
     background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%);
     border: 1px solid rgba(255, 255, 255, 0.04);
     border-radius: var(--radius-xl, 24px);
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
     transform-style: preserve-3d;
 }
@@ -229,7 +229,7 @@
     background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
                 rgba(167, 139, 250, 0.08), transparent 40%);
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.2s ease;
     pointer-events: none;
 }
 
@@ -254,7 +254,7 @@
     background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(167, 139, 250, 0.05) 100%);
     border-radius: var(--radius-lg, 16px);
     color: var(--color-accent, #a78bfa);
-    transition: all 0.4s ease;
+    transition: all 0.2s ease;
 }
 
 .service-card:hover .service-icon {

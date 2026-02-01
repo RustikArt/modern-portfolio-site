@@ -61,6 +61,65 @@ BEGIN
     END IF;
 END $$;
 
+-- Ajouter les nouveaux champs produits (V2.1)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'sku') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN sku VARCHAR(100);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'is_digital') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN is_digital BOOLEAN DEFAULT TRUE;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'weight') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN weight DECIMAL(10,2);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'dimensions') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN dimensions VARCHAR(100);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'gallery') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN gallery JSONB DEFAULT '[]'::jsonb;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'is_visible') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN is_visible BOOLEAN DEFAULT TRUE;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'available_date') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN available_date TIMESTAMPTZ;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'max_per_order') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN max_per_order INTEGER;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'related_products') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN related_products JSONB DEFAULT '[]'::jsonb;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'seo_title') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN seo_title VARCHAR(200);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'portfolio_products' AND column_name = 'seo_description') THEN
+        ALTER TABLE public.portfolio_products ADD COLUMN seo_description TEXT;
+    END IF;
+END $$;
+
 -- Index pour filtrage par catégorie
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.portfolio_products(category);
 CREATE INDEX IF NOT EXISTS idx_products_featured ON public.portfolio_products(is_featured);
