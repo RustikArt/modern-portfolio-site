@@ -46,6 +46,8 @@
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(167, 139, 250, 0.1);
     flex-shrink: 0;
+    position: relative;
+    z-index: 99999;
 }
 
 .dashboard-brand h1 {
@@ -852,7 +854,7 @@ textarea.input-modern {
     border-radius: 16px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     overflow: hidden;
-    z-index: 9999;
+    z-index: 9999999;
 }
 
 .notification-header {

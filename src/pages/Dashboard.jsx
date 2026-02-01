@@ -728,7 +728,7 @@ const Dashboard = () => {
 
                     <div className="dashboard-header-actions">
                         {/* Notification Bell */}
-                        <div style={{ position: 'relative', zIndex: 99999 }} ref={notificationRef}>
+                        <div style={{ position: 'relative', zIndex: 9999999 }} ref={notificationRef}>
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
                                 style={{
@@ -767,7 +767,7 @@ const Dashboard = () => {
                                     right: 0,
                                     width: '350px',
                                     maxHeight: '500px',
-                                    zIndex: 999999,
+                                    zIndex: 99999999,
                                     padding: '1.5rem',
                                     overflowY: 'auto'
                                 }}>
