@@ -461,7 +461,7 @@ CREATE TABLE IF NOT EXISTS public.custom_orders (
     description TEXT NOT NULL,
     budget_range VARCHAR(50) NOT NULL,
     timeline VARCHAR(50) NOT NULL,
-    references TEXT,
+    "references" TEXT,
     attachments JSONB DEFAULT '[]'::jsonb,
     contact_preference VARCHAR(20) DEFAULT 'email',
     additional_notes TEXT,
