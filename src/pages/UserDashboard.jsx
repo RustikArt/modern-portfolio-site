@@ -18,12 +18,13 @@ import {
     Eye,
     EyeOff,
     Lock,
-    Star
+    Star,
+    Info
 } from 'lucide-react';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
-    const { currentUser, orders, logout, sendOrderConfirmation, showToast } = useData();
+    const { currentUser, orders, logout, sendOrderConfirmation, showToast, settings } = useData();
     const navigate = useNavigate();
     const [oldPwd, setOldPwd] = useState('');
     const [newPwd, setNewPwd] = useState('');
@@ -212,6 +213,19 @@ const UserDashboard = () => {
                                                                 </div>
                                                             ))}
                                                         </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Instructions personnalisées pour cette commande */}
+                                                {(order.instructions || settings?.statusInstructions) && (
+                                                    <div className="order-instruction">
+                                                        <div className="instruction-header">
+                                                            <Info size={16} />
+                                                            <span>Information sur votre commande</span>
+                                                        </div>
+                                                        <p className="instruction-text">
+                                                            {order.instructions || settings?.statusInstructions?.[order.status === 'Payé' ? 'Réception' : order.status] || 'Votre commande est en cours de traitement.'}
+                                                        </p>
                                                     </div>
                                                 )}
 

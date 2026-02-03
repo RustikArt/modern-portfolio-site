@@ -50,7 +50,8 @@ export default async function handler(req, res) {
                 socials,
                 transparentLogo,
                 blackLogo,
-                favicon
+                favicon,
+                statusInstructions
             } = req.body;
 
             const { data: existing, error: fetchError } = await supabase
@@ -80,6 +81,12 @@ export default async function handler(req, res) {
                 transparent_logo: transparentLogo !== undefined ? transparentLogo : (existingSettings.transparent_logo || 'PurpleLogoTransparent.png'),
                 black_logo: blackLogo !== undefined ? blackLogo : (existingSettings.black_logo || 'PurpleLogo.png'),
                 favicon: favicon !== undefined ? favicon : (existingSettings.favicon || 'PurpleLogov2.png'),
+                status_instructions: statusInstructions || existingSettings.status_instructions || {
+                    'Réception': 'Votre commande a bien été reçue et le paiement confirmé. Nous allons prendre contact avec vous sous 24-48h pour discuter des détails.',
+                    'En cours': 'Votre projet est en cours de réalisation. Vous recevrez des mises à jour régulières sur l\'avancement.',
+                    'Terminé': 'Votre commande est terminée ! Les fichiers/livrables ont été envoyés. Merci de votre confiance.',
+                    'En attente': 'Nous avons besoin d\'informations complémentaires pour continuer. Veuillez consulter vos emails ou nous contacter.'
+                },
                 updated_at: new Date().toISOString()
             };
 

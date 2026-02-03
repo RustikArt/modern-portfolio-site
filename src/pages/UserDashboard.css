@@ -311,6 +311,32 @@
     font-size: 0.75rem;
 }
 
+/* Order Instruction */
+.order-instruction {
+    background: rgba(167, 139, 250, 0.06);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    border-radius: 12px;
+    padding: var(--spacing-lg, 1.5rem);
+    margin-bottom: var(--spacing-xl, 2rem);
+}
+
+.instruction-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 0.75rem);
+    color: var(--color-accent, #a78bfa);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm, 0.75rem);
+}
+
+.instruction-text {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #b0b0b0);
+    line-height: 1.6;
+    margin: 0;
+}
+
 /* Order Footer */
 .order-footer {
     display: flex;

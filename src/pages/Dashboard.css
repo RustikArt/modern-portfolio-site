@@ -1019,6 +1019,8 @@ textarea.input-modern {
     border-radius: 16px;
     padding: 1.5rem;
     overflow: hidden;
+    min-width: 200px;
+    min-height: 200px;
 }
 
 /* Ensure legend stays inside container */

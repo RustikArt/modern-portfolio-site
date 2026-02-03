@@ -821,6 +821,12 @@ export const DataProvider = ({ children }) => {
                 discord: 'https://discord.gg/uaKYcrfyN6',
                 linkedin: ''
             },
+            statusInstructions: {
+                'Réception': 'Votre commande a bien été reçue et le paiement confirmé. Nous allons prendre contact avec vous sous 24-48h pour discuter des détails.',
+                'En cours': 'Votre projet est en cours de réalisation. Vous recevrez des mises à jour régulières sur l\'avancement.',
+                'Terminé': 'Votre commande est terminée ! Les fichiers/livrables ont été envoyés. Merci de votre confiance.',
+                'En attente': 'Nous avons besoin d\'informations complémentaires pour continuer. Veuillez consulter vos emails ou nous contacter.'
+            },
             version: 1.1
         };
         // Load from localStorage as fallback while waiting for Supabase
@@ -1006,6 +1012,7 @@ export const DataProvider = ({ children }) => {
                             blackLogo: data.black_logo || prev.blackLogo,
                             favicon: data.favicon || prev.favicon,
                             socials: data.socials || prev.socials,
+                            statusInstructions: data.status_instructions || prev.statusInstructions,
                             version: prev.version
                         };
                         // Clear and update localStorage immediately to sync
@@ -1888,6 +1895,8 @@ export const DataProvider = ({ children }) => {
 
     const clearCart = () => {
         setCart([]);
+        // Supprimer immédiatement du localStorage (ne pas attendre useEffect)
+        localStorage.removeItem('portfolio_cart');
         
         // Sync to Supabase if user is authenticated
         if (currentUser && supabase) {
@@ -2135,6 +2144,10 @@ export const DataProvider = ({ children }) => {
 
     const updateOrderNotes = (orderId, notes) => {
         syncOrder(orderId, { notes });
+    };
+
+    const updateOrderInstructions = (orderId, instructions) => {
+        syncOrder(orderId, { instructions });
     };
 
     // Delete an order (Admin feature - for simulated/admin orders)
@@ -2610,7 +2623,7 @@ export const DataProvider = ({ children }) => {
             cart, addToCart, removeFromCart, updateCartQuantity, clearCart, getCartTotal,
 
             // Orders
-            orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes,
+            orders, placeOrder, updateOrderStatus, toggleChecklistItem, updateOrderNotes, updateOrderInstructions,
             sendOrderConfirmation, simulateOrder, deleteOrder, refreshOrders,
 
             // Promo Codes

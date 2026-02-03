@@ -58,7 +58,8 @@ import {
     Eye,
     EyeOff,
     Circle,
-    CheckCircle2
+    CheckCircle2,
+    MessageSquare
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
@@ -99,7 +100,7 @@ const Dashboard = () => {
         projects, products, orders, users, promoCodes,
         addProject, deleteProject, updateProject,
         addProduct, updateProduct, deleteProduct,
-        updateOrderStatus, toggleChecklistItem, updateOrderNotes, addPromoCode, deletePromoCode, updatePromoCode,
+        updateOrderStatus, toggleChecklistItem, updateOrderNotes, updateOrderInstructions, addPromoCode, deletePromoCode, updatePromoCode,
         secureFullReset, logout, simulateOrder, deleteOrder, refreshOrders,
         announcement, updateAnnouncement, fetchAnnouncementForAdmin,
         notifications, markNotificationAsRead, deleteNotification, markAllNotificationsAsRead,
@@ -318,6 +319,12 @@ const Dashboard = () => {
     const [localTransparentLogo, setLocalTransparentLogo] = useState('PurpleLogoTransparent.png');
     const [localBlackLogo, setLocalBlackLogo] = useState('PurpleLogo.png');
     const [localFavicon, setLocalFavicon] = useState('PurpleLogov2.png');
+    const [localStatusInstructions, setLocalStatusInstructions] = useState({
+        'Réception': 'Votre commande a bien été reçue et le paiement confirmé. Nous allons prendre contact avec vous sous 24-48h pour discuter des détails.',
+        'En cours': 'Votre projet est en cours de réalisation. Vous recevrez des mises à jour régulières sur l\'avancement.',
+        'Terminé': 'Votre commande est terminée ! Les fichiers/livrables ont été envoyés. Merci de votre confiance.',
+        'En attente': 'Nous avons besoin d\'informations complémentaires pour continuer. Veuillez consulter vos emails ou nous contacter.'
+    });
     const [settingsInitialized, setSettingsInitialized] = useState(false);
 
     // Auto-detect logos from /public/Logos/ folder at build time
@@ -344,6 +351,12 @@ const Dashboard = () => {
             setLocalTransparentLogo(settings.transparentLogo || 'PurpleLogoTransparent.png');
             setLocalBlackLogo(settings.blackLogo || 'PurpleLogo.png');
             setLocalFavicon(settings.favicon || 'PurpleLogov2.png');
+            setLocalStatusInstructions(settings.statusInstructions || {
+                'Réception': 'Votre commande a bien été reçue et le paiement confirmé. Nous allons prendre contact avec vous sous 24-48h pour discuter des détails.',
+                'En cours': 'Votre projet est en cours de réalisation. Vous recevrez des mises à jour régulières sur l\'avancement.',
+                'Terminé': 'Votre commande est terminée ! Les fichiers/livrables ont été envoyés. Merci de votre confiance.',
+                'En attente': 'Nous avons besoin d\'informations complémentaires pour continuer. Veuillez consulter vos emails ou nous contacter.'
+            });
             setSettingsInitialized(true);
         }
     }, [settings, settingsInitialized]);
@@ -1159,13 +1172,13 @@ const Dashboard = () => {
                                             return (
                                                 <div className="chart-container">
                                                     <ResponsiveContainer width="100%" height="100%">
-                                                        <RechartsPie margin={{ top: 5, right: 10, bottom: 35, left: 10 }}>
+                                                        <RechartsPie margin={{ top: 0, right: 10, bottom: 30, left: 10 }}>
                                                             <Pie
                                                                 data={pieData}
                                                                 cx="50%"
-                                                                cy="42%"
-                                                                innerRadius={55}
-                                                                outerRadius={85}
+                                                                cy="48%"
+                                                                innerRadius={50}
+                                                                outerRadius={75}
                                                                 paddingAngle={3}
                                                                 dataKey="value"
                                                                 label={false}
@@ -1676,6 +1689,49 @@ const Dashboard = () => {
                                                                                     <option value="En attente">En attente (Problème)</option>
                                                                                 </select>
                                                                             </div>
+                                                                        </div>
+
+                                                                        {/* Instructions personnalisées pour cette commande */}
+                                                                        <div style={{ 
+                                                                            background: 'rgba(167, 139, 250, 0.06)',
+                                                                            border: '1px solid rgba(167, 139, 250, 0.15)',
+                                                                            borderRadius: '12px',
+                                                                            padding: '1rem',
+                                                                            marginBottom: '1.5rem'
+                                                                        }}>
+                                                                            <div style={{ 
+                                                                                display: 'flex', 
+                                                                                alignItems: 'center', 
+                                                                                gap: '0.5rem', 
+                                                                                marginBottom: '0.75rem',
+                                                                                color: 'var(--color-accent)',
+                                                                                fontSize: '0.8rem',
+                                                                                fontWeight: 'bold'
+                                                                            }}>
+                                                                                <MessageSquare size={14} />
+                                                                                Instructions client
+                                                                            </div>
+                                                                            <textarea
+                                                                                value={order.instructions || settings?.statusInstructions?.[order.status === 'Payé' ? 'Réception' : order.status] || ''}
+                                                                                onChange={(e) => updateOrderInstructions(order.id, e.target.value)}
+                                                                                placeholder="Instructions/consignes pour le client concernant sa commande..."
+                                                                                style={{
+                                                                                    width: '100%',
+                                                                                    minHeight: '70px',
+                                                                                    padding: '0.75rem',
+                                                                                    background: 'rgba(0,0,0,0.3)',
+                                                                                    border: '1px solid rgba(167, 139, 250, 0.2)',
+                                                                                    borderRadius: '8px',
+                                                                                    color: '#ccc',
+                                                                                    fontSize: '0.85rem',
+                                                                                    lineHeight: '1.5',
+                                                                                    resize: 'vertical',
+                                                                                    fontFamily: 'inherit'
+                                                                                }}
+                                                                            />
+                                                                            <p style={{ fontSize: '0.7rem', color: '#555', marginTop: '0.5rem', marginBottom: 0 }}>
+                                                                                Ce message sera affiché au client dans son espace commandes.
+                                                                            </p>
                                                                         </div>
 
                                                                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '12px', marginBottom: '2rem' }}>
@@ -4313,6 +4369,40 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
 
+                                            <h4 style={{ fontSize: '0.9rem', color: '#888', marginTop: '1.5rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <FileText size={16} /> Consignes par Statut de Commande
+                                            </h4>
+                                            <p style={{ fontSize: '0.75rem', color: '#555', marginBottom: '1rem' }}>
+                                                Ces messages s'affichent automatiquement aux clients selon le statut de leur commande.
+                                            </p>
+
+                                            {['Réception', 'En cours', 'Terminé', 'En attente'].map(status => (
+                                                <div key={status} style={{ marginBottom: '1rem' }}>
+                                                    <label style={{ 
+                                                        fontSize: '0.8rem', 
+                                                        color: status === 'Réception' ? '#fb7185' : status === 'En cours' ? '#fbbf24' : status === 'Terminé' ? '#4ade80' : '#ff8c00',
+                                                        display: 'flex', 
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        marginBottom: '0.5rem' 
+                                                    }}>
+                                                        <span style={{ 
+                                                            width: '8px', 
+                                                            height: '8px', 
+                                                            borderRadius: '50%', 
+                                                            background: status === 'Réception' ? '#fb7185' : status === 'En cours' ? '#fbbf24' : status === 'Terminé' ? '#4ade80' : '#ff8c00'
+                                                        }}></span>
+                                                        {status}
+                                                    </label>
+                                                    <textarea
+                                                        value={localStatusInstructions[status] || ''}
+                                                        onChange={(e) => setLocalStatusInstructions(prev => ({ ...prev, [status]: e.target.value }))}
+                                                        style={{ ...inputStyle, minHeight: '60px', resize: 'vertical', fontSize: '0.8rem' }}
+                                                        placeholder={`Consignes pour le statut "${status}"...`}
+                                                    />
+                                                </div>
+                                            ))}
+
                                             {/* APPLY BUTTON */}
                                             <button
                                                 onClick={async () => {
@@ -4327,7 +4417,8 @@ const Dashboard = () => {
                                                         navbarPadding: localNavbarPadding,
                                                         transparentLogo: localTransparentLogo,
                                                         blackLogo: localBlackLogo,
-                                                        favicon: localFavicon
+                                                        favicon: localFavicon,
+                                                        statusInstructions: localStatusInstructions
                                                     });
                                                     if (success) {
                                                         showToast("Configuration générale mise à jour !", "success");

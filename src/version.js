@@ -1,10 +1,8 @@
-export const WEBSITE_VERSION = "Version 7.5";
+export const WEBSITE_VERSION = "Version 7.6";
 export const VERSION_DETAILS = `Corrections et améliorations:
-• Pie Chart Statuts: cercle agrandi (innerRadius 55, outerRadius 85)
-• Ventes par Catégorie: marge top réduite, catégories inconnues ignorées
-• Courbe Sans Promo: calcul originalValue corrigé (items total vs discount)
-• Système Coupons: audit complet - validation max_uses côté serveur
-• API Promo: vérifications is_active, expiration, max_uses à l'incrémentation
-• DataContext: refetchPromoCodes pour synchroniser après utilisation
-• Checkout: appel refetch après incrémentation code promo
-• Validation code promo: case-insensitive, comparaison maxUses robuste`;
+• Instructions par commande: champ éditable dans chaque commande (onglet Orders)
+• Dashboard: icône MessageSquare + textarea pour instructions personnalisées
+• UserDashboard: affiche les instructions personnalisées (ou défaut si non définies)
+• Pie Chart: repositionné plus bas (cy=48%, rayons réduits 50/75)
+• Panier: clearCart supprime immédiatement localStorage
+• SQL: UPDATE_7_6.sql pour ajouter colonne instructions aux commandes`;
