@@ -749,19 +749,19 @@ const Dashboard = () => {
             
             // Compute original total without discount
             let originalTotal = actualRevenue;
-            if (order.promoCodeUsed || order.promo_code_used) {
-                // If there's discount info stored
-                const discountAmount = parseFloat(order.discountAmount || order.discount_amount || 0);
-                if (discountAmount > 0) {
-                    originalTotal = actualRevenue + discountAmount;
-                }
+            
+            // Check for discount amount stored in order
+            const discountAmount = parseFloat(order.promoDiscount || order.promo_discount || order.discountAmount || order.discount_amount || order.discount || 0);
+            if (discountAmount > 0) {
+                originalTotal = actualRevenue + discountAmount;
             }
+            
             // Also check items for calculating original price
             if (order.items) {
                 const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
                 const itemsTotal = items.reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.quantity || 1)), 0);
                 if (itemsTotal > actualRevenue) {
-                    originalTotal = itemsTotal;
+                    originalTotal = Math.max(originalTotal, itemsTotal);
                 }
             }
             
@@ -1209,12 +1209,18 @@ const Dashboard = () => {
                                         <h3 className="card-title">Ventes par Catégorie</h3>
                                         {(() => {
                                             const catSales = {};
-                                            orders.filter(o => o.status === 'Terminé' || isArchived(o)).forEach(order => {
-                                                (order.items || []).forEach(item => {
-                                                    const itemProductId = item.productId || item.product_id;
-                                                    const product = products.find(p => p.id === itemProductId);
-                                                    const cat = product?.category || 'Autre';
-                                                    catSales[cat] = (catSales[cat] || 0) + (item.price || 0) * (item.quantity || 1);
+                                            orders.filter(o => o.status === 'Terminé' || o.status === 'Payé' || o.status === 'Réception' || isArchived(o)).forEach(order => {
+                                                const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+                                                items.forEach(item => {
+                                                    // Essayer de trouver le produit par ID ou par nom
+                                                    const itemProductId = item.productId || item.product_id || item.id;
+                                                    let product = itemProductId ? products.find(p => p.id === itemProductId) : null;
+                                                    // Si pas trouvé par ID, chercher par nom
+                                                    if (!product && item.name) {
+                                                        product = products.find(p => p.name === item.name);
+                                                    }
+                                                    const cat = product?.category || item.category || 'Autre';
+                                                    catSales[cat] = (catSales[cat] || 0) + (parseFloat(item.price) || 0) * (item.quantity || 1);
                                                 });
                                             });
                                             const barData = Object.entries(catSales).map(([name, total]) => ({ name, total: Math.round(total) })).sort((a, b) => b.total - a.total).slice(0, 5);
@@ -1259,13 +1265,15 @@ const Dashboard = () => {
                                             );
                                         })()}
                                     </div>
+                                    </div>
 
-                                    {/* Revenue Analytics Chart */}
+                                    {/* Revenue Analytics Chart - Full Width */}
+                                    <div className="charts-grid-full">
                                     <AnalyticsChart
                                         data={chartData}
                                         title="Revenus Mensuels (€)"
                                     />
-                                </div>
+                                    </div>
                                 </div>
 
                                 {/* ========== SECTION 3: SUIVI GÉNÉRAL ========== */}
@@ -2052,7 +2060,7 @@ const Dashboard = () => {
                                                     }}
                                                 >
                                                     {productForm.isDigital ? <CheckCircle2 size={16} /> : <Circle size={16} />}
-                                                    🖥️ Produit Digital
+                                                    <LucideIcons.Monitor size={16} /> Produit Digital
                                                 </button>
                                                 <button
                                                     type="button"
@@ -2072,7 +2080,7 @@ const Dashboard = () => {
                                                     }}
                                                 >
                                                     {!productForm.isDigital ? <CheckCircle2 size={16} /> : <Circle size={16} />}
-                                                    📦 Produit Physique
+                                                    <LucideIcons.Package size={16} /> Produit Physique
                                                 </button>
                                             </div>
                                             {!productForm.isDigital && (

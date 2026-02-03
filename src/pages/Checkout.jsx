@@ -51,7 +51,7 @@ const Checkout = () => {
             hasProcessed.current = true;
 
             // Récupérer les données de commande stockées avant le paiement
-            const pendingOrderData = sessionStorage.getItem('pending_order');
+            const pendingOrderData = localStorage.getItem('pending_order');
             
             if (pendingOrderData) {
                 const orderData = JSON.parse(pendingOrderData);
@@ -113,7 +113,7 @@ const Checkout = () => {
                 createOrder();
                 
                 // Nettoyer les données temporaires
-                sessionStorage.removeItem('pending_order');
+                localStorage.removeItem('pending_order');
             }
 
             // Mark as success internal state
@@ -215,7 +215,7 @@ const Checkout = () => {
                 promoCode: activePromo?.code || null,
                 promoDiscount: promoDiscount
             };
-            sessionStorage.setItem('pending_order', JSON.stringify(pendingOrder));
+            localStorage.setItem('pending_order', JSON.stringify(pendingOrder));
 
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
@@ -250,7 +250,7 @@ const Checkout = () => {
         } catch (err) {
             console.error("Stripe Error:", err);
             // En cas d'erreur, nettoyer les données temporaires
-            sessionStorage.removeItem('pending_order');
+            localStorage.removeItem('pending_order');
             alert(`Une erreur est survenue lors du paiement : ${err.message}. Veuillez vérifier vos informations.`);
         } finally {
             setIsProcessing(false);
