@@ -744,25 +744,37 @@ const Dashboard = () => {
             const month = date.toLocaleString('default', { month: 'short' });
             const monthKey = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`; // For proper sorting
             
-            // Actual revenue (with discounts applied)
+            // Actual revenue (with discounts applied) - this is what was actually paid
             const actualRevenue = parseFloat(order.total || 0);
             
-            // Compute original total without discount
-            let originalTotal = actualRevenue;
-            
-            // Check for discount amount stored in order
+            // Calculate original total (without discount)
+            // First, check if there's a stored discount amount
             const discountAmount = parseFloat(order.promoDiscount || order.promo_discount || order.discountAmount || order.discount_amount || order.discount || 0);
-            if (discountAmount > 0) {
-                originalTotal = actualRevenue + discountAmount;
-            }
             
-            // Also check items for calculating original price
+            // Calculate original total from items
+            let itemsTotal = 0;
             if (order.items) {
                 const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
-                const itemsTotal = items.reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.quantity || 1)), 0);
-                if (itemsTotal > actualRevenue) {
-                    originalTotal = Math.max(originalTotal, itemsTotal);
-                }
+                itemsTotal = items.reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.quantity || 1)), 0);
+            }
+            
+            // The original value is either:
+            // 1. actualRevenue + discountAmount (if discount was recorded)
+            // 2. itemsTotal (sum of all item prices * quantities)
+            // 3. actualRevenue (fallback - no discount applied)
+            let originalTotal;
+            if (discountAmount > 0) {
+                // If we know the discount amount, add it back
+                originalTotal = actualRevenue + discountAmount;
+            } else if (itemsTotal > actualRevenue + 0.01) {
+                // If items total is higher than actual (accounting for rounding), use items
+                originalTotal = itemsTotal;
+            } else if (itemsTotal > 0) {
+                // Use items total as reference
+                originalTotal = itemsTotal;
+            } else {
+                // Fallback: no discount info available
+                originalTotal = actualRevenue;
             }
             
             if (!data[month]) {
@@ -1147,13 +1159,13 @@ const Dashboard = () => {
                                             return (
                                                 <div className="chart-container">
                                                     <ResponsiveContainer width="100%" height="100%">
-                                                        <RechartsPie margin={{ top: 10, right: 10, bottom: 40, left: 10 }}>
+                                                        <RechartsPie margin={{ top: 5, right: 10, bottom: 35, left: 10 }}>
                                                             <Pie
                                                                 data={pieData}
                                                                 cx="50%"
-                                                                cy="45%"
-                                                                innerRadius={45}
-                                                                outerRadius={70}
+                                                                cy="42%"
+                                                                innerRadius={55}
+                                                                outerRadius={85}
                                                                 paddingAngle={3}
                                                                 dataKey="value"
                                                                 label={false}
@@ -1219,8 +1231,11 @@ const Dashboard = () => {
                                                     if (!product && item.name) {
                                                         product = products.find(p => p.name === item.name);
                                                     }
-                                                    const cat = product?.category || item.category || 'Autre';
-                                                    catSales[cat] = (catSales[cat] || 0) + (parseFloat(item.price) || 0) * (item.quantity || 1);
+                                                    // Utiliser la catégorie du produit, sinon celle de l'item, ignorer si pas de catégorie connue
+                                                    const cat = product?.category || item.category;
+                                                    if (cat && cat !== 'undefined') {
+                                                        catSales[cat] = (catSales[cat] || 0) + (parseFloat(item.price) || 0) * (item.quantity || 1);
+                                                    }
                                                 });
                                             });
                                             const barData = Object.entries(catSales).map(([name, total]) => ({ name, total: Math.round(total) })).sort((a, b) => b.total - a.total).slice(0, 5);
@@ -1231,8 +1246,8 @@ const Dashboard = () => {
                                             
                                             return (
                                                 <div className="chart-container chart-container--tall">
-                                                    <ResponsiveContainer width="100%" height={250}>
-                                                        <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+                                                    <ResponsiveContainer width="100%" height={230}>
+                                                        <BarChart data={barData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                                                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(167,139,250,0.1)" />
                                                             <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />
                                                             <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 11 }} />

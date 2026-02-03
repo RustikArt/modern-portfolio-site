@@ -1,9 +1,10 @@
-export const WEBSITE_VERSION = "Version 7.4";
+export const WEBSITE_VERSION = "Version 7.5";
 export const VERSION_DETAILS = `Corrections et améliorations:
-• Système de paiement: création commande via localStorage (fallback webhook)
-• Graphique Revenus Mensuels: pleine largeur, courbe sans réduction visible
-• Graphiques: écart Statuts/Ventes ajusté (grille 1fr 1.5fr)
-• Ventes par Catégorie: stats corrigées (recherche par nom si ID manquant)
-• Produits: emojis remplacés par icônes Lucide (Monitor/Package)
-• Code promo: incrémentation utilisation après paiement réussi
-• Checkout: localStorage pour persistence données commande`;
+• Pie Chart Statuts: cercle agrandi (innerRadius 55, outerRadius 85)
+• Ventes par Catégorie: marge top réduite, catégories inconnues ignorées
+• Courbe Sans Promo: calcul originalValue corrigé (items total vs discount)
+• Système Coupons: audit complet - validation max_uses côté serveur
+• API Promo: vérifications is_active, expiration, max_uses à l'incrémentation
+• DataContext: refetchPromoCodes pour synchroniser après utilisation
+• Checkout: appel refetch après incrémentation code promo
+• Validation code promo: case-insensitive, comparaison maxUses robuste`;

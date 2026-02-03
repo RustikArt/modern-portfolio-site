@@ -1605,10 +1605,13 @@ export const DataProvider = ({ children }) => {
             return false;
         }
         
-        const promo = promoCodes.find(p => p.code === code);
+        // Recherche case-insensitive
+        const normalizedCode = code.toUpperCase().trim();
+        const promo = promoCodes.find(p => p.code?.toUpperCase() === normalizedCode);
+        
         if (promo) {
             // 0. Check if promo is active
-            if (promo.isActive === false || promo.is_active === false) {
+            if (promo.isActive === false) {
                 alert("Ce code promo est désactivé.");
                 return false;
             }
@@ -1617,9 +1620,10 @@ export const DataProvider = ({ children }) => {
                 alert("Ce code promo a expiré.");
                 return false;
             }
-            // 2. Check Usage Limits (check both 'uses' and 'current_uses')
-            const currentUses = promo.current_uses || promo.uses || 0;
-            if (promo.maxUses && currentUses >= promo.maxUses) {
+            // 2. Check Usage Limits - uses est normalisé depuis current_uses ou uses
+            const currentUses = promo.uses || 0;
+            const maxUses = promo.maxUses;
+            if (maxUses !== null && maxUses !== undefined && currentUses >= maxUses) {
                 alert("Ce code promo a atteint sa limite d'utilisation.");
                 return false;
             }
@@ -1647,6 +1651,19 @@ export const DataProvider = ({ children }) => {
         uses: p.current_uses ?? p.uses ?? 0,
         isActive: p.is_active !== undefined ? p.is_active : (p.isActive !== undefined ? p.isActive : true)
     });
+
+    // Refetch promo codes (to sync after usage increment)
+    const refetchPromoCodes = async () => {
+        try {
+            const res = await fetch('/api/promo-codes');
+            if (res.ok) {
+                const promoData = await res.json();
+                setPromoCodes(promoData.map(normalizePromo));
+            }
+        } catch (error) {
+            console.error('Failed to refetch promo codes:', error);
+        }
+    };
 
     const addPromoCode = async (code) => {
         try {
@@ -2597,7 +2614,7 @@ export const DataProvider = ({ children }) => {
             sendOrderConfirmation, simulateOrder, deleteOrder, refreshOrders,
 
             // Promo Codes
-            promoCodes, addPromoCode, deletePromoCode, updatePromoCode, applyPromoCode, activePromo,
+            promoCodes, addPromoCode, deletePromoCode, updatePromoCode, applyPromoCode, activePromo, refetchPromoCodes,
 
             // Announcement
             announcement, updateAnnouncement, announcementLoaded, fetchAnnouncementForAdmin,

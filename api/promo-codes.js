@@ -68,7 +68,7 @@ export default async function handler(req, res) {
                 // Récupérer le code promo actuel
                 const { data: promoData, error: fetchError } = await supabase
                     .from('portfolio_promo_codes')
-                    .select('id, uses, current_uses')
+                    .select('id, current_uses, max_uses, is_active, expiration_date')
                     .eq('code', code.toUpperCase())
                     .single();
                 
@@ -77,12 +77,29 @@ export default async function handler(req, res) {
                     return res.status(404).json({ error: 'Code promo non trouvé' });
                 }
                 
-                // Incrémenter le compteur
-                const currentUses = promoData.current_uses || promoData.uses || 0;
+                // Vérifier si le code est actif
+                if (promoData.is_active === false) {
+                    console.error('[api/promo-codes] Code is inactive:', code);
+                    return res.status(400).json({ error: 'Code promo désactivé' });
+                }
+                
+                // Vérifier l'expiration
+                if (promoData.expiration_date && new Date(promoData.expiration_date) < new Date()) {
+                    console.error('[api/promo-codes] Code expired:', code);
+                    return res.status(400).json({ error: 'Code promo expiré' });
+                }
+                
+                // Vérifier la limite d'utilisation
+                const currentUses = promoData.current_uses || 0;
+                if (promoData.max_uses !== null && currentUses >= promoData.max_uses) {
+                    console.error('[api/promo-codes] Code usage limit reached:', code);
+                    return res.status(400).json({ error: 'Limite d\'utilisation atteinte' });
+                }
+                
+                // Incrémenter le compteur (uniquement current_uses)
                 const { error: updateError } = await supabase
                     .from('portfolio_promo_codes')
                     .update({ 
-                        uses: currentUses + 1,
                         current_uses: currentUses + 1 
                     })
                     .eq('id', promoData.id);
@@ -92,7 +109,7 @@ export default async function handler(req, res) {
                     throw updateError;
                 }
                 
-                console.log('[api/promo-codes] Successfully incremented use for:', code);
+                console.log('[api/promo-codes] Successfully incremented use for:', code, '- New count:', currentUses + 1);
                 return res.status(200).json({ success: true, newUses: currentUses + 1 });
             }
             

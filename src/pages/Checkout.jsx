@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const Checkout = () => {
-    const { cart, currentUser, getCartTotal, promoCodes, applyPromoCode, activePromo, clearCart, addOrder } = useData();
+    const { cart, currentUser, getCartTotal, promoCodes, applyPromoCode, activePromo, clearCart, addOrder, refetchPromoCodes } = useData();
     const navigate = useNavigate();
     const [shipping, setShipping] = useState({ address: '', city: '', zip: '', country: '' });
     const [isProcessing, setIsProcessing] = useState(false);
@@ -89,7 +89,7 @@ const Checkout = () => {
                             // Incrémenter l'utilisation du code promo si utilisé
                             if (orderData.promoCode) {
                                 try {
-                                    await fetch('/api/promo-codes', {
+                                    const promoRes = await fetch('/api/promo-codes', {
                                         method: 'PUT',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
@@ -97,7 +97,16 @@ const Checkout = () => {
                                             incrementUse: true
                                         })
                                     });
-                                    console.log('[Checkout] Code promo marqué comme utilisé');
+                                    if (promoRes.ok) {
+                                        console.log('[Checkout] Code promo marqué comme utilisé');
+                                        // Rafraîchir la liste des codes promo pour synchroniser les compteurs
+                                        if (refetchPromoCodes) {
+                                            await refetchPromoCodes();
+                                        }
+                                    } else {
+                                        const errorData = await promoRes.json();
+                                        console.warn('[Checkout] Erreur incrémentation promo:', errorData.error);
+                                    }
                                 } catch (promoErr) {
                                     console.warn('[Checkout] Erreur mise à jour promo:', promoErr);
                                 }
@@ -131,7 +140,7 @@ const Checkout = () => {
             window.history.replaceState({}, '', '/checkout');
             localStorage.removeItem('last_shipping');
         }
-    }, [clearCart, applyPromoCode, activePromo]);
+    }, [clearCart, applyPromoCode, activePromo, refetchPromoCodes]);
 
     if (cart.length === 0 && !showSuccessModal && !hasProcessed.current) {
         return (
